@@ -11,7 +11,7 @@
 
 #include "TTSymbol.h"
 
-extern TTMODULAR_EXPORT TTSymbol	kTTSym_aSymbolToCache;
+extern TTSCORE_EXPORT TTSymbol	kTTSym_aSymbolToCache;
 
 #endif // __TT_SCORE_SYMBOL_CACHE_H__
 

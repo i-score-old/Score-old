@@ -12,4 +12,4 @@
 #include "TTScoreSymbolCache.h"
 
 // object classe name
-TTMODULAR_EXPORT TTSymbol       kTTSym_aSymbolToCache                      (("aSymbolToCache"));
+TTSCORE_EXPORT TTSymbol       kTTSym_aSymbolToCache                      (("aSymbolToCache"));

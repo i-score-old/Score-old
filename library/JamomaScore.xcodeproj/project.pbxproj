@@ -7,91 +7,94 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		46F505581666923100CFC3A2 /* TTScore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TTScore.h; sourceTree = "<group>"; };
-		46F505591666923100CFC3A2 /* TTScoreSymbolCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TTScoreSymbolCache.h; sourceTree = "<group>"; };
-		46F5055C1666923900CFC3A2 /* TTScore.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TTScore.cpp; sourceTree = "<group>"; };
-		46F5055D1666923900CFC3A2 /* TTScoreSymbolCache.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TTScoreSymbolCache.cpp; sourceTree = "<group>"; };
+		46F5057A166699BE00CFC3A2 /* TTScore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TTScore.h; path = includes/TTScore.h; sourceTree = SOURCE_ROOT; };
+		46F5057B166699BE00CFC3A2 /* TTScoreSymbolCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TTScoreSymbolCache.h; path = includes/TTScoreSymbolCache.h; sourceTree = SOURCE_ROOT; };
+		46F5059016669CFC00CFC3A2 /* TTScore.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TTScore.cpp; path = source/TTScore.cpp; sourceTree = SOURCE_ROOT; };
+		46F5059116669CFC00CFC3A2 /* TTScoreSymbolCache.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TTScoreSymbolCache.cpp; path = source/TTScoreSymbolCache.cpp; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
-		46F50547166690B500CFC3A2 = {
+		46F5055F166698EB00CFC3A2 = {
 			isa = PBXGroup;
 			children = (
-				46F505571666923100CFC3A2 /* includes */,
-				46F5055B1666923900CFC3A2 /* sources */,
-				46F5055E1666924900CFC3A2 /* PeerObject */,
+				46F5056F1666991700CFC3A2 /* includes */,
+				46F505731666991700CFC3A2 /* source */,
+				46F505721666991700CFC3A2 /* PeerObject */,
 			);
 			sourceTree = "<group>";
 		};
-		46F505571666923100CFC3A2 /* includes */ = {
+		46F5056F1666991700CFC3A2 /* includes */ = {
 			isa = PBXGroup;
 			children = (
-				46F505581666923100CFC3A2 /* TTScore.h */,
-				46F505591666923100CFC3A2 /* TTScoreSymbolCache.h */,
+				46F5057A166699BE00CFC3A2 /* TTScore.h */,
+				46F5057B166699BE00CFC3A2 /* TTScoreSymbolCache.h */,
 			);
-			path = includes;
+			name = includes;
+			path = ../includes;
 			sourceTree = "<group>";
 		};
-		46F5055B1666923900CFC3A2 /* sources */ = {
+		46F505721666991700CFC3A2 /* PeerObject */ = {
 			isa = PBXGroup;
 			children = (
-				46F5055C1666923900CFC3A2 /* TTScore.cpp */,
-				46F5055D1666923900CFC3A2 /* TTScoreSymbolCache.cpp */,
 			);
-			path = sources;
-			sourceTree = SOURCE_ROOT;
+			name = PeerObject;
+			path = ../PeerObject;
+			sourceTree = "<group>";
 		};
-		46F5055E1666924900CFC3A2 /* PeerObject */ = {
+		46F505731666991700CFC3A2 /* source */ = {
 			isa = PBXGroup;
 			children = (
+				46F5059016669CFC00CFC3A2 /* TTScore.cpp */,
+				46F5059116669CFC00CFC3A2 /* TTScoreSymbolCache.cpp */,
 			);
-			path = PeerObject;
+			name = source;
+			path = ../sources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXLegacyTarget section */
-		46F5054E166690B500CFC3A2 /* Score */ = {
+		46F50566166698EB00CFC3A2 /* JamomaScore */ = {
 			isa = PBXLegacyTarget;
 			buildArgumentsString = "$(ACTION) $(Configuration)";
-			buildConfigurationList = 46F50551166690B500CFC3A2 /* Build configuration list for PBXLegacyTarget "Score" */;
+			buildConfigurationList = 46F50569166698EB00CFC3A2 /* Build configuration list for PBXLegacyTarget "JamomaScore" */;
 			buildPhases = (
 			);
 			buildToolPath = /usr/bin/make;
 			buildWorkingDirectory = "";
 			dependencies = (
 			);
-			name = Score;
+			name = JamomaScore;
 			passBuildSettingsInEnvironment = 1;
-			productName = Score;
+			productName = JamomaScore;
 		};
 /* End PBXLegacyTarget section */
 
 /* Begin PBXProject section */
-		46F50549166690B500CFC3A2 /* Project object */ = {
+		46F50561166698EB00CFC3A2 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0450;
 				ORGANIZATIONNAME = OSSIA;
 			};
-			buildConfigurationList = 46F5054C166690B500CFC3A2 /* Build configuration list for PBXProject "Score" */;
+			buildConfigurationList = 46F50564166698EB00CFC3A2 /* Build configuration list for PBXProject "JamomaScore" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 			);
-			mainGroup = 46F50547166690B500CFC3A2;
+			mainGroup = 46F5055F166698EB00CFC3A2;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				46F5054E166690B500CFC3A2 /* Score */,
+				46F50566166698EB00CFC3A2 /* JamomaScore */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin XCBuildConfiguration section */
-		46F5054F166690B500CFC3A2 /* Debug */ = {
+		46F50567166698EB00CFC3A2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -120,7 +123,7 @@
 			};
 			name = Debug;
 		};
-		46F50550166690B500CFC3A2 /* Release */ = {
+		46F50568166698EB00CFC3A2 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -142,9 +145,14 @@
 			};
 			name = Release;
 		};
-		46F50552166690B500CFC3A2 /* Debug */ = {
+		46F5056A166698EB00CFC3A2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					"$(ARCHS_STANDARD_32_BIT)",
+					"$(ARCHS_STANDARD_64_BIT)",
+				);
+				COMBINE_HIDPI_IMAGES = YES;
 				DEBUGGING_SYMBOLS = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -154,9 +162,14 @@
 			};
 			name = Debug;
 		};
-		46F50553166690B500CFC3A2 /* Release */ = {
+		46F5056B166698EB00CFC3A2 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					"$(ARCHS_STANDARD_32_BIT)",
+					"$(ARCHS_STANDARD_64_BIT)",
+				);
+				COMBINE_HIDPI_IMAGES = YES;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -166,25 +179,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		46F5054C166690B500CFC3A2 /* Build configuration list for PBXProject "Score" */ = {
+		46F50564166698EB00CFC3A2 /* Build configuration list for PBXProject "JamomaScore" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				46F5054F166690B500CFC3A2 /* Debug */,
-				46F50550166690B500CFC3A2 /* Release */,
+				46F50567166698EB00CFC3A2 /* Debug */,
+				46F50568166698EB00CFC3A2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		46F50551166690B500CFC3A2 /* Build configuration list for PBXLegacyTarget "Score" */ = {
+		46F50569166698EB00CFC3A2 /* Build configuration list for PBXLegacyTarget "JamomaScore" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				46F50552166690B500CFC3A2 /* Debug */,
-				46F50553166690B500CFC3A2 /* Release */,
+				46F5056A166698EB00CFC3A2 /* Debug */,
+				46F5056B166698EB00CFC3A2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 46F50549166690B500CFC3A2 /* Project object */;
+	rootObject = 46F50561166698EB00CFC3A2 /* Project object */;
 }
