@@ -9,8 +9,6 @@ The Score framework attempted to share the work done in the libIscore library by
 
 The Score framework is based on the Jamoma Foundation which allows to setup a Peer Object Model mechanism in order to embedded easily the features inside many programmation environments (such as Max) or inside specific application dealing with logical and temporal constraints. It also provides a tree structure to manage the namespace of an application in order to organize and access its services.
 
-It is also based on the Jamoma Modular framework which provides many features to deal with MVC modeling.
-
 
 Installing
 - Users : the Core framework is not embedded inside any application for instant.
