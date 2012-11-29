@@ -7,8 +7,8 @@ glibdir = Dir.pwd
 
 projectNameParts = glibdir.split('/')
 projectName = projectNameParts.last;
-projectName.gsub!(/Jamoma/, "")
+projectName.gsub!(/Documents/, "")
 ENV['JAMOMAPROJECT'] = projectName
 
-Dir.chdir "#{glibdir}/../Shared"
+Dir.chdir "#{glibdir}/support"
 load "build.rb"
