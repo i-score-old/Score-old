@@ -7,7 +7,6 @@ glibdir = Dir.pwd
 
 projectNameParts = glibdir.split('/')
 projectName = projectNameParts.last;
-projectName.gsub!(/Documents/, "")
 ENV['JAMOMAPROJECT'] = projectName
 
 Dir.chdir "#{glibdir}/support"
