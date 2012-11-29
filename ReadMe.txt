@@ -11,8 +11,19 @@ The Score framework is based on the Jamoma Foundation which allows to setup a Pe
 
 
 Installing
-- Users : the Core framework is not embedded inside any application for instant.
-- Developers : ...
+
+- Users : the Score framework is not embedded inside any application for instant.
+
+- Developers :
+	
+	- if the Score repository is placed inside the Jamoma/Core folder of the Jamoma repository :
+		
+		make sure the whole Jamoma project is up-to-date and build it.
+		then, in the Terminal, run the build script : ./build.rb dev clean
+
+	- if the Score repository is not placed inside the Jamoma/Core folder of the Jamoma repository :
+
+		in the Terminal, run the build script : ./buildWithSupport.rb dev clean
 
 
 Documentation / API
@@ -30,5 +41,5 @@ See the issue tracker at ...
 More Information
 About the OSSIA project at …
 About libIscore library at https://github.com/raphaelmarczak/libIscore
-About the Jamoma project at www.jamoma.org
+About the Jamoma project at www.jamoma.org or on github at https://github.com/organizations/jamoma
 
