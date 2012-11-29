@@ -8,7 +8,8 @@ sources:
 includes:
   - includes
   - PeerObject
-  - ../../Foundation/library/includes
+  # to build without having the whole jamoma repository
+  - ../support/jamoma/includes
   - /usr/include/libxml2
 
 libraries:

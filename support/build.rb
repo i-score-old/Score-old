@@ -155,7 +155,7 @@ puts "  "
 
 
 @log_root = "./logs-#{@projectName}"
-@svn_root = "../#{@projectName}"
+@svn_root = ".."
 @fail_array = Array.new
 @zerolink = false
 
