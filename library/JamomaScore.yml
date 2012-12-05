@@ -1,19 +1,96 @@
-
+defines:
+  
 sources:
+    
+  - ECOMachine/ChangeTempo.cpp
+  - ECOMachine/ControlPointInformations.cpp
+  - ECOMachine/ECOMachine.cpp
+  - ECOMachine/TriggerPointInformations.cpp
+  
+  - ECOMachine/PetriNet/Arc.cpp
+  - ECOMachine/PetriNet/PriorityTransitionAction.cpp
+  - ECOMachine/PetriNet/ExtendedInt.cpp
+  - ECOMachine/PetriNet/ThreadSafeList.cpp
+  - ECOMachine/PetriNet/PetriNet.cpp
+  - ECOMachine/PetriNet/Token.cpp
+  - ECOMachine/PetriNet/PetriNetItem.cpp
+  - ECOMachine/PetriNet/Transition.cpp
+  - ECOMachine/PetriNet/PetriNetNode.cpp
+  - ECOMachine/PetriNet/TransitionAction.cpp
+  - ECOMachine/PetriNet/Place.cpp
+  - ECOMachine/PetriNet/TransitionBitArray.cpp
+  
+  - ECOMachine/Process/MultiTypeCurve.cpp
+  - ECOMachine/Process/SendNetworkMessageProcess.cpp
+  - ECOMachine/Process/NetworkMessageCurves.cpp
+  - ECOMachine/Process/StringParser.cpp
+  - ECOMachine/Process/Process.cpp
+  - ECOMachine/Process/StringTypeFunctions.cpp
+  
+  - Editor/Editor.cpp
+  
+  - Editor/CSP/AllenRelation.cpp
+  - Editor/CSP/ConstrainedBox.cpp
+  - Editor/CSP/AntPostRelation.cpp
+  - Editor/CSP/ConstrainedTemporalEntity.cpp
+  - Editor/CSP/BinaryRelation.cpp
+  - Editor/CSP/ControlPoint.cpp
+  - Editor/CSP/BinaryTemporalRelation.cpp
+  - Editor/CSP/IntervalRelation.cpp
+  - Editor/CSP/CSP.cpp
+  - Editor/CSP/TriggerPoint.cpp
+  - Editor/CSP/CSPConstrainedVariable.cpp
+  - Editor/CSP/XMLConversion.cpp
+  - Editor/CSP/CSPLinearConstraint.cpp
+  
+  - Editor/gecode-solver/customSpace.cpp
+  - Editor/gecode-solver/linearConstraint.cpp
+  - Editor/gecode-solver/solver.cpp
+  - Editor/gecode-solver/integerVariable.cpp
+  - Editor/gecode-solver/searchEngine.cpp
+  - Editor/gecode-solver/solver_wrap.cpp
+  
+  - PeerObject/TTEngine.cpp
+  
+  - source/EnginesPrivate.cpp
   - source/TTScore.cpp
   - source/TTScoreSymbolCache.cpp
-  #- PeerObject/TTPeerObject.cpp
-
   
+  - StoryLine/StoryLine.cpp
+
 includes:
+  - ECOMachine
+  - ECOMachine/PetriNet
+  - ECOMachine/Process
+  - Editor
+  - Editor/CSP
+  - Editor/gecode-solver
   - includes
   - PeerObject
+  - StoryLine
+  
   # to build without having the whole jamoma repository
   - ../support/jamoma/includes
+  
+  # to include the former DeviceManager library
+  - ../support/virage/includes
+  
+  # to include gecode solver library
+  - /Library/Frameworks/gecode.framework
+  
+  # to use xml file format
   - /usr/include/libxml2
 
 libraries:
   - FOUNDATION
+  
+  # to link with the former DeviceManager library
+  - ../support/virage/lib/libDeviceManager.a
+  
+  # to include gecode solver library
+  - /Library/Frameworks/gecode.framework/Versions/32/gecode
+  
+  # to link with the xml library
   - mac /usr/lib/libxml2.dylib
   - win ../../Foundation/library/libxml2/win32/lib/libxml2_a.lib
   - win ../../Foundation/library/libxml2/win32/lib/libxml2.lib
@@ -21,6 +98,5 @@ libraries:
 frameworks:
   - Carbon
 
-# This project is not available for most architectures
-
-arch: "i386"
+# This project is not available for most architectures (cause of the Gecode 64-bit only dependency)
+arch: "x86_64"

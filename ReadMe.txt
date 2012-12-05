@@ -12,18 +12,20 @@ The Score framework is based on the Jamoma Foundation which allows to setup a Pe
 
 Installing
 
+- Download the Gecode framework : http://www.gecode.org/download/Gecode-3.7.2.dmg
+
 - Users : the Score framework is not embedded inside any application for instant.
 
 - Developers :
 	
 	- if the Score repository is placed inside the Jamoma/Core folder of the Jamoma repository :
 		
-		make sure the whole Jamoma project is up-to-date and build it.
-		then, in the Terminal, run the build script : ./build.rb dev clean
+		- make sure the whole Jamoma project is up-to-date and build it.
+		- then, in the Terminal, run the build script : ./build.rb dev clean gcc47
 
 	- if the Score repository is not placed inside the Jamoma/Core folder of the Jamoma repository :
 
-		in the Terminal, run the build script : ./buildWithSupport.rb dev clean
+		- in the Terminal, run the build script : ./buildWithSupport.rb dev clean gcc47
 
 
 Documentation / API

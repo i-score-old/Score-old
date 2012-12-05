@@ -33,12 +33,15 @@
 #endif
 
 #include <math.h>
+#include <unistd.h>
 
 #include "TTFoundationAPI.h"
 
 #include "TTScoreSymbolCache.h"
 
-//#include "TTPeerObject.h"
+#include "CSPTypes.hpp"
+
+#include "TTEngine.h"
 
 // Macros
 
