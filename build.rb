@@ -44,6 +44,10 @@ if  win32?
     `cp /usr/local/jamoma/lib/JamomaFoundation.dylib "#{glibdir}"/support/jamoma/lib`
     `cp /usr/local/jamoma/lib/JamomaModular.dylib "#{glibdir}"/support/jamoma/lib`
     
+    # Copy Score headers to include them into other application
+    # (except the includes fiolder because it is done by the support/build.rb script)
+    `cp "#{glibdir}"/library/PeerObject/*.h /usr/local/jamoma/includes`
+    
 end
 
 puts "done"
