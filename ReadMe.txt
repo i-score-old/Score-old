@@ -14,12 +14,12 @@ Installing
 
 1 : First of all you need to download the Gecode framework : http://www.gecode.org/download/Gecode-3.7.2.dmg
 
-2 : Then, in the Terminal, run the build script : ./buildWithSupport.rb dev clean gcc47
+2 : Then, in the Terminal, run the build script : ./buildWithSupport.rb dev clean
 
 2 bis : if the Score repository is placed inside the Jamoma/Core folder of the Jamoma repository :
 		
 	- make sure the whole Jamoma project is up-to-date and build it.
-	- then, in the Terminal, run the build script : ./build.rb dev clean gcc47
+	- then, in the Terminal, run the build script : ./build.rb dev clean
 
 
 Documentation / API
