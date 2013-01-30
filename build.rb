@@ -31,8 +31,6 @@ if  win32?
     `cp "#{glibdir}"/../Foundation/library/includes/* "#{glibdir}"/support/jamoma/includes`
     
     # Modular includes
-    `cp "#{glibdir}"/../../Modules/Modular/library/FunctionLib/FunctionLib.h "#{glibdir}"/support/jamoma/includes`
-    
     `cp "#{glibdir}"/../../Modules/Modular/library/includes/TTModular.h "#{glibdir}"/support/jamoma/includes`
     `cp "#{glibdir}"/../../Modules/Modular/library/includes/TTModularSymbolCache.h "#{glibdir}"/support/jamoma/includes`
     

@@ -35,8 +35,8 @@ TT_SCORE_CONSTRUCTOR
     TTUInt32 maxSceneWidth;
     TTString plugginsLocation;
     
-    arguments.get(0, maxSceneWidth);
-    arguments.get(1, plugginsLocation);
+    maxSceneWidth = arguments[0];
+    plugginsLocation = TTString(arguments[1]);
     
     initializeObjects(maxSceneWidth, plugginsLocation.c_str());
 }

@@ -48,7 +48,7 @@ enum EnginesMessageManagement { UNKNOWN_MESSAGE, TRIGGER_MESSAGE, ENGINES_PLAY, 
  * This class is the only class the user have to instance and manipulate.
  * It contains all functions for edition and execution.
  */
-class TTSCORE_EXPORT TTEngine : public TTDataObject
+class TTSCORE_EXPORT TTEngine : public TTDataObjectBase
 {
 	TTCLASS_SETUP(TTEngine)
     
