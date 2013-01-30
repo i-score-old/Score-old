@@ -20,7 +20,7 @@
 #define __TT_MATRIX_H__
 
 #include "TTFoundation.h"
-#include "TTDataObject.h"
+#include "TTDataObjectBase.h"
 #include "TTLimits.h" 
 
 typedef TTByte* TTBytePtr;	///< Data is a pointer to some bytes.
@@ -55,7 +55,7 @@ typedef TTInt16 TTElementID;
 
 	Each compound value stored in the matrix is known as a component. The number of elements in each component is variable, enabling the storage of things like complex numbers or RGBA colors. However, this element count for each component and their datatype is uniform across the entire matrix.
 */
-class TTFOUNDATION_EXPORT TTMatrix : public TTDataObject {
+class TTFOUNDATION_EXPORT TTMatrix : public TTDataObjectBase {
 	TTCLASS_SETUP(TTMatrix)
 
 protected:	
@@ -250,7 +250,7 @@ public:
 	@return		TTErr				always returns kTTErrNone 
 	*/
 	TTErr fill(const TTValue& anInputValue, TTValue &anOutputValue);
-	
+
 	
 	/** Internal macro used to locate the byte within mData where a specific component begins. 
 		This macro is used by both get and set routines to ensure that the formula for access is consistent. Allows our interface to be consistent in its lookup method and represents a specific application of the <a href="http://en.wikipedia.org/wiki/Don't_repeat_yourself">DRY principle</a>.
@@ -323,10 +323,10 @@ public:
 	 	This method can be used to force row values to fall within the defined limits of the TTMatrix.
 
 		@param[in,out]	i			row in matrix of desired component
-		@param[in]		handler		function used to transform out of bounds values, outOfBoundsClip is default if undefined
+		@param[in]		handler		function used to transform out of bounds values, outOfBoundsWrap is default if undefined
 		@return			TTBoolean	true if values changed, false if they remained constant
 	*/	
-	TTBoolean makeRowIDInBounds(TTRowID& i, TTMatrixOutOfBoundsHandler handler = outOfBoundsClip) const
+	TTBoolean makeRowIDInBounds(TTRowID& i, TTMatrixOutOfBoundsHandler handler = outOfBoundsWrap) const
 	{
 		TTRowID i_input = i;
 		i = (*handler)(i_input, TTRowID(0), mRowCount);
@@ -337,10 +337,10 @@ public:
 	 	This method can be used to force column values to fall within the defined limits of the TTMatrix.
 
 		@param[in,out]	j			column in matrix of desired component
-		@param[in]		handler		function used to transform out of bounds values, outOfBoundsClip is default if undefined
+		@param[in]		handler		function used to transform out of bounds values, outOfBoundsWrap is default if undefined
 		@return			TTBoolean	true if values changed, false if they remained constant
 	*/
-	TTBoolean makeColumnIDInBounds(TTColumnID& j, TTMatrixOutOfBoundsHandler handler = outOfBoundsClip) const
+	TTBoolean makeColumnIDInBounds(TTColumnID& j, TTMatrixOutOfBoundsHandler handler = outOfBoundsWrap) const
 	{
 		TTColumnID j_input = j;
         j = (*handler)(j_input, TTColumnID(0), mColumnCount);
@@ -351,10 +351,10 @@ public:
 	 	This method can be used to force element values to fall within the defined limits of the TTMatrix.
 
 		@param[in,out]	e			element within desired component
-		@param[in]		handler		function used to transform out of bounds values, outOfBoundsClip is default if undefined
+		@param[in]		handler		function used to transform out of bounds values, outOfBoundsWrap is default if undefined
 		@return			TTBoolean	true if values changed, false if they remained constant
 	*/
-	TTBoolean makeElementIDInBounds(TTElementID& e, TTMatrixOutOfBoundsHandler handler = outOfBoundsClip) const
+	TTBoolean makeElementIDInBounds(TTElementID& e, TTMatrixOutOfBoundsHandler handler = outOfBoundsWrap) const
 	{
 		TTColumnID e_input = e;
         e = (*handler)(e_input, TTElementID(0), mElementCount);
@@ -366,12 +366,12 @@ public:
 
 		@param[in,out]	i			row in matrix of desired component
 		@param[in,out]	j			column in matrix of desired component
-		@param[in]		handler		function used to transform out of bounds values, outOfBoundsClip is default if undefined
+		@param[in]		handler		function used to transform out of bounds values, outOfBoundsWrap is default if undefined
 		@return			TTBoolean	true if values changed, false if they remained constant
 		
 		@seealso makeRowIDInBounds, makeColumnIDInBounds
 	*/
-	TTBoolean makeInBounds(TTRowID& i, TTColumnID& j, TTMatrixOutOfBoundsHandler handler = outOfBoundsClip) const
+	TTBoolean makeInBounds(TTRowID& i, TTColumnID& j, TTMatrixOutOfBoundsHandler handler = outOfBoundsWrap) const
 	{
 		TTUInt8 changes = 0; // keep track of how many changes are made
 		changes += makeRowIDInBounds(i, handler);
@@ -385,12 +385,12 @@ public:
 		@param[in,out]	i			row in matrix of desired component
 		@param[in,out]	j			column in matrix of desired component
 		@param[in,out]	e			element within desired component
-		@param[in]		handler		function used to transform out of bounds values, outOfBoundsClip is default if undefined
+		@param[in]		handler		function used to transform out of bounds values, outOfBoundsWrap is default if undefined
 		@return			TTBoolean	true if values changed, false if they remained constant
 		
 		@seealso makeRowIDInBounds, makeColumnIDInBounds, makeElementIDInBounds
 	*/
-	TTBoolean makeInBounds(TTRowID& i, TTColumnID& j, TTElementID& e, TTMatrixOutOfBoundsHandler handler = outOfBoundsClip) const
+	TTBoolean makeInBounds(TTRowID& i, TTColumnID& j, TTElementID& e, TTMatrixOutOfBoundsHandler handler = outOfBoundsWrap) const
 	{
 		TTUInt8 changes = 0; // keep track of how many changes are made
 		changes += makeRowIDInBounds(i, handler);

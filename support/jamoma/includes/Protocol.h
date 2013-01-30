@@ -12,7 +12,7 @@
 #include "TTFoundationAPI.h"
 
 #define PROTOCOL_CONSTRUCTOR \
-TTObjectPtr thisTTClass :: instantiate (TTSymbol& name, TTValue& arguments) {return new thisTTClass (arguments);} \
+TTObjectBasePtr thisTTClass :: instantiate (TTSymbol& name, TTValue& arguments) {return new thisTTClass (arguments);} \
 \
 extern "C" void thisTTClass :: registerClass () {TTClassRegister( TTSymbol(thisTTClassName), thisTTClassTags, thisTTClass :: instantiate );} \
 \
@@ -36,10 +36,10 @@ registerAttribute(TTSymbol("ParameterNames"), kTypeLocalValue, NULL, (TTGetterMe
 /**	Protocol is the base class for all protocol protocol.
  It still has knowledge and support for ...
  */
-class Protocol : public TTObject {
+class Protocol : public TTObjectBase {
 	
 protected:																																	
-	TTObjectPtr					mApplicationManager;				///< the application manager of the Modular framework.					
+	TTObjectBasePtr				mApplicationManager;				///< the application manager of the Modular framework.					
 																	///< protocol programmers should not have to deal with this member.
 	
 	TTCallbackPtr				mActivityInCallback;				///< a callback to trace raw incoming messages.
@@ -116,15 +116,15 @@ public:
 	 *
  	 * \param to					: the application where to discover
 	 * \param address				: the address to discover
-	 * \param returnedChildrenNames : all names of nodes below the address
-	 * \param returnedChildrenTypes : all types of nodes below the address (default is none which means no type)
-	 * \param returnedAttributes	: all attributes the node at the address
+     * \param returnedType          : the type of the node at the address (default is none which means no type)
+	 * \param returnedChildren      : all names of nodes below the address
+	 * \param returnedAttributes	: all attributes of the node at the address
 	 * \return errorcode			: kTTErrNone means the answer has been received, kTTErrValueNotFound means something is bad in the request
 	 else it returns kTTErrGeneric if no answer or timeout
 	 */
-	virtual TTErr SendDiscoverRequest(TTSymbol to, TTAddress address, 
-									  TTValue& returnedChildrenNames,
-									  TTValue& returnedChildrenTypes,
+	virtual TTErr SendDiscoverRequest(TTSymbol to, TTAddress address,
+                                      TTSymbol& returnedType,
+									  TTValue& returnedChildren,
 									  TTValue& returnedAttributes)=0;
 	
 	/*!
@@ -174,13 +174,13 @@ public:
 	 *
 	 * \param to					: the application where to send answer
 	 * \param address				: the address where comes from the description
-	 * \param returnedChildrenNames : all names of nodes below the address
-	 * \param returnedChildrenTypes : all types of nodes below the address(default is none which means no type)
+     * \param returnedType          : the type of the node at the address (default is none which means no type)
+	 * \param returnedChildren      : all names of nodes below the address
 	 * \param returnedAttributes	: all attributes the node at the address
 	 */
 	virtual TTErr SendDiscoverAnswer(TTSymbol to, TTAddress address,
-									 TTValue& returnedChildrenNames,
-									 TTValue& returnedChildrenTypes,
+                                     TTSymbol& returnedType,
+									 TTValue& returnedChildren,
 									 TTValue& returnedAttributes,
 									 TTErr err=kTTErrNone)=0;
 	
@@ -363,7 +363,7 @@ TTSymbol TT_EXTENSION_EXPORT ProtocolGetLocalApplicationName(TTPtr aProtocol);
 class TT_EXTENSION_EXPORT ProtocolLib {
 public:
 	/** Instantiate a protocol by name */
-	static TTErr createProtocol(const TTSymbol protocolName, ProtocolPtr *returnedProtocol, TTObjectPtr manager, TTCallbackPtr activityInCallback, TTCallbackPtr activityOutCallback);
+	static TTErr createProtocol(const TTSymbol protocolName, ProtocolPtr *returnedProtocol, TTObjectBasePtr manager, TTCallbackPtr activityInCallback, TTCallbackPtr activityOutCallback);
 	
 	/**	Return a list of all available protocols. */
 	static void getProtocolNames(TTValue& protocolNames);

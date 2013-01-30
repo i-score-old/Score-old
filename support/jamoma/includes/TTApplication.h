@@ -1,5 +1,5 @@
 /* 
- * TTObject to handle application data structure
+ * TTObjectBase to handle application data structure
  * like a TTNodeDirectory and a hash tables of names
  *
  * Copyright © 2010, Théo de la Hogue
@@ -32,6 +32,9 @@ typedef Protocol* ProtocolPtr;
 class TTMirror;
 typedef TTMirror* TTMirrorPtr;
 
+class TTXmlHandler;
+typedef TTXmlHandler* TTXmlHandlerPtr;
+
 // Macro to have a direct acces to a directory
 #define	getDirectoryFrom(anAddress) TTApplicationGetDirectory(anAddress)
 
@@ -55,7 +58,7 @@ typedef TTMirror* TTMirrorPtr;
 		TTApplicationConvertAppNameToTTName(appName) \
 		
 
-class TTMODULAR_EXPORT TTApplication : public TTDataObject
+class TTMODULAR_EXPORT TTApplication : public TTDataObjectBase
 {
 	TTCLASS_SETUP(TTApplication)
 	
@@ -68,8 +71,6 @@ private:
 	TTSymbol					mName;				///< ATTRIBUTE : the name of the application
 	TTSymbol					mVersion;			///< ATTRIBUTE : the version of the application
 	TTSymbol					mAuthor;			///< ATTRIBUTE : the author of the application
-	
-	TTSymbol					mNamespaceFile;		///< ATTRIBUTE : the namespace file to load (default : <empty>). Usefull to save a config...
 	
 	TTBoolean					mActivity;			///< ATTRIBUTE : enable the activity mechanism
 	TTValue						mActivityIn;		///< ATTRIBUTE : a local value to allow observation of incoming protocol messages
@@ -97,7 +98,13 @@ private:
 	/** */
 	TTErr setActivityOut(const TTValue& value);
 
-	
+    /** Build the directory of an application (for distant application only) */
+	TTErr DirectoryBuild();
+    TTErr buildNode(ProtocolPtr aProtocol, TTAddress anAddress);
+    
+    /** Observe the directory of an application (for distant application only) */
+	TTErr DirectoryObserve(const TTValue& inputValue, TTValue& outputValue);
+    
 	/** Add Directory observer */
 	TTErr AddDirectoryListener(const TTValue& inputValue, TTValue& outputValue);
 	
@@ -129,15 +136,19 @@ private:
 	/** Convert AppName into TTName */
 	TTErr ConvertToTTName(const TTValue& inputValue, TTValue& outputValue);
 	
-	
 	/** needed to be handled by a TTXmlHandler 
-		read/write protocol parameters */
+		read/write the TTNodeDirectory */
 	TTErr WriteAsXml(const TTValue& inputValue, TTValue& outputValue);
 	TTErr ReadFromXml(const TTValue& inputValue, TTValue& outputValue);
+    
+    void writeNodeAsXml(TTXmlHandlerPtr aXmlHandler, TTNodePtr aNode);
+    void readNodeFromXml(TTXmlHandlerPtr aXmlHandler);
 	
 	/** needed to be handled by a TTOpmlHandler 
 		read a directory description */
 	TTErr ReadFromOpml(const TTValue& inputValue, TTValue& outputValue);
+    
+    TTMirrorPtr appendMirror(ProtocolPtr aProtocol, TTAddress anAddress, TTSymbol objectName);
 	
 	friend TTNodeDirectoryPtr TTMODULAR_EXPORT TTApplicationGetDirectory(TTAddress anAddress);
 	friend TTSymbol TTMODULAR_EXPORT TTApplicationConvertAppNameToTTName(TTSymbol anAppName);

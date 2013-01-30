@@ -17,10 +17,7 @@
  
  */
 
-class TTOpmlHandler;
-typedef TTOpmlHandler* TTOpmlHandlerPtr;
-
-class TTMODULAR_EXPORT TTExplorer : public TTDataObject
+class TTMODULAR_EXPORT TTExplorer : public TTDataObjectBase
 {
 	TTCLASS_SETUP(TTExplorer)
 	
@@ -67,7 +64,7 @@ private:
 	TTErr SelectNone();
 	
 	/** Return selection back to the owner of this explorer */
-	TTErr SelectRefresh();
+	TTErr SelectionRefresh();
 	
 	/** Create a filter, add it to the bank and append it to the list
 		< filterName filterKey1 filterValue1 filterKey2 filterValue2 ... >
@@ -128,15 +125,6 @@ private:
 	
 	/** */
 	TTErr returnSelectionBack();
-
-	/**  needed to be handled by a TTXmlHandler */
-	TTErr WriteAsOpml(const TTValue& inputValue, TTValue& outputValue);
-	void writeNode(TTOpmlHandlerPtr anOpmlHandler, TTNodePtr aNode);
-	
-	/* TODO :
-	 TTErr WriteAsText(const TTValue& value);			// pass an text buffer ?
-	 TTErr ReadFromText(const TTValue& value);			// pass an text buffer ?
-	 */
 	
 	friend TTErr TTMODULAR_EXPORT TTExplorerDirectoryCallback(TTPtr baton, TTValue& data);
 	friend TTErr TTMODULAR_EXPORT TTExplorerApplicationManagerCallback(TTPtr baton, TTValue& data);

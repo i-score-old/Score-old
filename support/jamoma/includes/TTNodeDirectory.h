@@ -13,7 +13,7 @@
  #pragma warning(disable:4083) //warning C4083: expected 'newline'; found identifier 's'
 #endif // WIN_VERSION
 
-#include "TTObject.h"
+#include "TTObjectBase.h"
 #include "TTSymbol.h"
 #include "TTValue.h"
 #include "TTHash.h"
@@ -51,8 +51,7 @@ typedef TTCallback* TTCallbackPtr;
 	
 */
 
-class TTFOUNDATION_EXPORT TTNodeDirectory : public TTBase
-{
+class TTFOUNDATION_EXPORT TTNodeDirectory {
 	
 private:
 
@@ -104,7 +103,7 @@ public:
 	/** Given an address with alias, return an address with no alias if exists
 	 @param	anAddress				The address with an alias inside to replace.
 	 @return						An error code if there is no alias. */
-	TTErr			replaceAlias(TTAddress anAddress);
+	TTErr			replaceAlias(TTAddress& anAddress);
 	
 	/**	Find TTNodes by address
 	 @param	anAddress				The address you wish to find, possibly including wildcards and instance names/numbers.
@@ -148,7 +147,7 @@ public:
 	 @param	returnedTTNode			A pointer to the TTNode at the given address 
 	 @param	nodeCreated				A boolean : true if a TTNode have been created, else false
 	 @return						An error code. */
-	TTErr			TTNodeCreate(TTAddress anAddress, TTObjectPtr newObject, void *aContext, TTNodePtr *returnedTTNode, TTBoolean *nodeCreated);
+	TTErr			TTNodeCreate(TTAddress anAddress, TTObjectBasePtr newObject, void *aContext, TTNodePtr *returnedTTNode, TTBoolean *nodeCreated);
 	
 	/**	Remove a TTNodefrom the directory.
 	 @param	anAddress				The address for which you wish to remove the TTNode.

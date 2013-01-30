@@ -22,7 +22,7 @@
 		@param	name	The TTSymbol name of the attribute.
 		@param	type	The type of the value.
  */
-#define addMirrorAttribute(name, type)		TTObject::registerAttribute(name, type, NULL, (TTGetterMethod)& TTMirror::getMirrorAttribute, (TTSetterMethod)& TTMirror::setMirrorAttribute )
+#define addMirrorAttribute(name, type)		TTObjectBase::registerAttribute(name, type, NULL, (TTGetterMethod)& TTMirror::getMirrorAttribute, (TTSetterMethod)& TTMirror::setMirrorAttribute )
 
 /** TODO : how to have TTGetterMethod and TTSetterMethod for Mirror attribute Property ?
  
@@ -39,7 +39,7 @@
 		@param	name	The name of the message.
 		@param	flag	The flag of the message.
  */
-#define addMirrorMessage(name, flag)		TTObject::registerMessage(name, (TTMethod)& TTMirror::sendMirrorMessage , flag)
+#define addMirrorMessage(name, flag)		TTObjectBase::registerMessage(name, (TTMethod)& TTMirror::sendMirrorMessage , flag)
 
 /** TODO : how to have TTGetterMethod and TTSetterMethod for Mirror message Property ?
 	
@@ -52,13 +52,14 @@
 //#define addMessageProperty(name, propertyName, initialValue)		registerMessageProperty(name, TTSymbol(#propertyName), initialValue, (TTGetterMethod)& TTMessage::get##propertyName , (TTSetterMethod)& TTMessage::set##propertyName )
 
 
-class TTMODULAR_EXPORT TTMirror : public TTDataObject
+class TTMODULAR_EXPORT TTMirror : public TTDataObjectBase
 {
 	TTCLASS_SETUP(TTMirror)
 	
 private:
 	
 	TTSymbol					mType;							///< ATTRIBUTE : the type of the object binded by the mirror
+    TTBoolean                   mIsListening;                   ///< to not forget to disable listening when the Mirror will be destroyed
 	
 	TTCallbackPtr				mGetAttributeCallback;			///< a way to get the attribute value
 	TTCallbackPtr				mSetAttributeCallback;			///< a way to set the attribute value

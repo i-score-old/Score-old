@@ -12,7 +12,7 @@
 #include "TTBase.h"
 #include "TTThread.h"
 #include "TTList.h"
-#include "TTObject.h"
+#include "TTObjectBase.h"
 
 
 #if OLD
@@ -132,7 +132,7 @@ public:
 	It looks like this is true for *both* read (perform) and insert (write), which means that the heap usage is not
 	kept isolated as argued to be the most important factor in the NBB paper.
  */
-class TTFOUNDATION_EXPORT TTQueue : public TTBase {
+class TTFOUNDATION_EXPORT TTQueue {
 private:
 	// Counters used to ensure that the producer (calling insert()) and the consumer (calling read())
 	// are always accessing different slots in the circular buffer

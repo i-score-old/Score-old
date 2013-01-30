@@ -21,7 +21,7 @@ TODO LIST :
  
  -> setDataspace					have one unit only
  -> clip :							make a clipwrap and a clipfold method into TTValue...		(see in TTData::clipValue method)
- -> handleProperty :				used TTObject message mecanism...							(see in TTData::Command method)
+ -> handleProperty :				used TTObjectBase message mecanism...							(see in TTData::Command method)
  -> rampDataNames :					relative to handleProperty									(see in TTData::setRampFunction)
  -> dump :							TODO
  */				
@@ -31,7 +31,7 @@ class RampUnit;
 typedef RampUnit*	RampUnitPtr;
 #endif
 
-class TTMODULAR_EXPORT TTData : public TTDataObject
+class TTMODULAR_EXPORT TTData : public TTDataObjectBase
 {
 	TTCLASS_SETUP(TTData)
 	
@@ -46,7 +46,7 @@ private:
 	TTInt32			mPriority;					///< ATTRIBUTE: does this data have a priority over other datas ?
 	TTSymbol		mDescription;				///< ATTRIBUTE: text to describe the role of this data
 	TTBoolean		mRepetitionsAllow;			///< ATTRIBUTE: is the same value can be update twice ?
-	TTBoolean		mEnable;					///< ATTRIBUTE: this used for return only to stop sending values
+	TTBoolean		mActive;					///< ATTRIBUTE: this used by return only to stop sending values
 	TTBoolean		mInitialized;				///< ATTRIBUTE: is the Value attribute has been initialized ?
 	
 	TTValue			mRangeBounds;				///< ATTRIBUTE: 
@@ -64,7 +64,7 @@ private:
 	
 	TTSymbol		mDataspace;					///< ATTRIBUTE: The dataspace that this data uses (default is 'none')
 	TTSymbol		mDataspaceUnit;				///< ATTRIBUTE: The unit within the dataspace.
-	TTObjectPtr		mDataspaceConverter;		///< Performs conversions from input unit to the data unit
+	TTObjectBasePtr		mDataspaceConverter;		///< Performs conversions from input unit to the data unit
 	
 	TTSymbol		mService;					///< how the data flows into our environnement :
 												///<	as parameter : the data is in full access mode
@@ -78,6 +78,7 @@ private:
 
 #ifndef TTDATA_NO_RAMPLIB
 	RampUnitPtr		mRamper;					///< Rampunit object to perform ramping of input values
+    TTUInt32        mExternalRampTime;          ///< This is a temporary solution to have audio rate ramping outside the TTData
 #endif
 
 	/** Reset value to default value */
@@ -129,8 +130,8 @@ private:
 	/**	Setter for mRepetitionsAllow attribute. */
 	TTErr	setRepetitionsAllow(const TTValue& value);
 	
-	/**	Setter for mEnable attribute. */
-	TTErr	setEnable(const TTValue& value);
+	/**	Setter for mActive attribute. */
+	TTErr	setActive(const TTValue& value);
 	
 	/**	Setter for mRangeBounds attribute. */
 	TTErr	setRangeBounds(const TTValue& value);
@@ -154,6 +155,12 @@ private:
 	
 	/**	Setter for mDataspaceUnit attribute. */
 	TTErr	setDataspaceUnit(const TTValue& value);
+    
+    /**	Setter for mDescription attribute. */
+	TTErr	setDescription(const TTValue& value);
+    
+    /**	Setter for mPriority attribute. */
+	TTErr	setPriority(const TTValue& value);
 	
 	/**  needed to be handled by a TTTextHandler */
 	TTErr WriteAsText(const TTValue& inputValue, TTValue& outputValue);

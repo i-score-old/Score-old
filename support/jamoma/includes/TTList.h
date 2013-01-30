@@ -14,15 +14,15 @@
 #include "TTMutex.h"
 #include <list>
 
-class TTObject;
-typedef TTObject* TTObjectPtr;
+class TTObjectBase;
+typedef TTObjectBase* TTObjectBasePtr;
 typedef std::list<TTValue>				TTLinkedList;
 typedef std::list<TTValue>::iterator	TTListIter;
 
 /****************************************************************************************************/
 // Class Specification
 
-class TTFOUNDATION_EXPORT TTList : TTBase {
+class TTFOUNDATION_EXPORT TTList {
 private:
 	TTBoolean	mThreadProtection;	///< Use thread safety mechanisms.  Only disable this if you are certain that you will be calling from a single thread.
 	TTMutexPtr	mMutex;
@@ -136,10 +136,10 @@ public:
 	
 
 	/**	Traverse the entire list, sending each item of the list to a specified function.	*/
-	TTErr iterate(const TTObjectPtr target, const TTFunctionWithBatonAndValue callback);
+	TTErr iterate(const TTObjectBasePtr target, const TTFunctionWithBatonAndValue callback);
 
 	/**	Traverse the entire list, sending each item of the list to a specified object with the specified message.	*/
-	TTErr iterate(const TTObjectPtr target, const TTSymbol& messageName);
+	TTErr iterate(const TTObjectBasePtr target, const TTSymbol& messageName);
 	
 	/**	Traverse the entire list, and if the item in the list is an object, then send it the specified message.		*/
 	TTErr iterateObjectsSendingMessage(const TTSymbol& messageName);

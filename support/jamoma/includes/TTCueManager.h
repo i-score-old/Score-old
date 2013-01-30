@@ -25,7 +25,7 @@ typedef TTXmlHandler* TTXmlHandlerPtr;
 // a namespace is a TTList
 typedef	TTList* NamespacePtr;
 
-class TTMODULAR_EXPORT TTCueManager : public TTDataObject
+class TTMODULAR_EXPORT TTCueManager : public TTDataObjectBase
 {
 	TTCLASS_SETUP(TTCueManager)
 	
@@ -38,7 +38,7 @@ private:
 	TTHashPtr			mCues;							///< ATTRIBUTE : a hash table containing <name, TTCuePtr>
 	
 	TTCuePtr			mCurrentCue;					///< the current cue
-	TTAddressItemPtr mDefaultNamespace;				///< an internal default namespace
+	TTAddressItemPtr    mDefaultNamespace;				///< an internal default namespace
 	
 	TTCallbackPtr		mReturnLineCallback;			///< Callback to return back cue lines to the owner of this cuemanager
 	

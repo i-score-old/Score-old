@@ -18,6 +18,29 @@
 
 // Platform Sniffing
 // Ideally the platform would already be set with a -D option to gcc...
+
+#if defined( __APPLE__ )
+// TARGET_OS_IPHONE is defined on the mac as 0, so use if, not ifdef below
+	#include "TargetConditionals.h"
+
+	#if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
+		#ifndef TT_PLATFORM_IOS
+			#define TT_PLATFORM_IOS
+		#endif
+	#else // TARGET_OS_MAC
+		#ifndef TT_PLATFORM_MAC
+			#define TT_PLATFORM_MAC
+		#endif
+	#endif
+// win64 must come before win32
+#elif defined ( _WIN64 )
+	#define TT_PLATFORM_WIN
+#elif _WIN32
+	#define TT_PLATFORM_WIN
+#elif __linux
+	#define TT_PLATFORM_LINUX
+#endif
+
 #ifndef TT_PLATFORM_LINUX
 	#ifndef TT_PLATFORM_IOS
 		#ifndef TT_PLATFORM_WIN
@@ -213,7 +236,7 @@ typedef void (*TTFunctionMatch)(const TTValue& valueToCheck, TTPtr baton, TTBool
  TTBlue Data Types
  Enumeration of data types used through out TTBlue, including the TTValue class and declaring the types of
  TTAttribute objects.																			*/
-enum TTDataType{
+enum TTDataType {
 	kTypeNone = 0,
 	kTypeFloat32,
 	kTypeFloat64,
@@ -227,6 +250,7 @@ enum TTDataType{
 	kTypeUInt64,
 	kTypeBoolean,
 	kTypeSymbol,
+	kTypeAddress,
 	kTypeObject,
 	kTypePointer,
 	kTypeString,
@@ -334,125 +358,116 @@ public:
 	#pragma intrinsic (_InterlockedCompareExchange)
 #endif
 
-/**	The required base-class from which all TTBlue objects must inherit.
- 	This object is the primary base-class for all TTBlue objects, including TTObject.
- 	It does not define any real functionality.
-	Instead it provides a way to group and work polymorphically with any class in TTBlue,
-	including both TTValue and TTObject.													*/
-class TTFOUNDATION_EXPORT TTBase {
-public:
-	TTBase();			///< Constructor.
-	virtual ~TTBase();	///< Destructor.
 	
-	
-	void TTAtomicIncrement(TTAtomicInt& value)
-	{
+static void TTAtomicIncrement(TTAtomicInt& value)
+{
 #ifdef TT_PLATFORM_MAC
-		OSAtomicIncrement32(&value);
+	OSAtomicIncrement32(&value);
 #elif defined (TT_PLATFORM_WIN)
-		_InterlockedIncrement((volatile long*)&value);
+	_InterlockedIncrement((volatile long*)&value);
 #else // what should we do for thread safety on Linux and iOS?
-		value++;
+	value++;
 #endif
-	}
-	
-	void TTAtomicIncrement(TTAtomicUInt& value)
-	{
-#ifdef TT_PLATFORM_MAC
-		OSAtomicIncrement32((int32_t*)&value);
-#elif defined (TT_PLATFORM_WIN)
-		_InterlockedIncrement((volatile long*)&value);
-#else // what should we do for thread safety on Linux and iOS?
-		value++;
-#endif
-	}
-	
-	void TTAtomicDecrement(TTAtomicInt& value)
-	{
-#ifdef TT_PLATFORM_MAC
-		OSAtomicDecrement32(&value);
-#elif defined (TT_PLATFORM_WIN)
-		_InterlockedDecrement((volatile long*)&value);
-#else // what should we do for thread safety on Linux and iOS?
-		value--;
-#endif
-	}
+}
 
-	void TTAtomicDecrement(TTAtomicUInt& value)
-	{
+
+inline void TTAtomicIncrement(TTAtomicUInt& value)
+{
 #ifdef TT_PLATFORM_MAC
-		OSAtomicDecrement32((int32_t*)&value);
+	OSAtomicIncrement32((int32_t*)&value);
 #elif defined (TT_PLATFORM_WIN)
-		_InterlockedDecrement((volatile long*)&value);
+	_InterlockedIncrement((volatile long*)&value);
 #else // what should we do for thread safety on Linux and iOS?
-		value--;
+	value++;
 #endif
-	}
-	
-	
-	void TTAtomicIncrementWithBarrier(TTAtomicUInt& value)
-	{
+}
+
+
+inline void TTAtomicDecrement(TTAtomicInt& value)
+{
 #ifdef TT_PLATFORM_MAC
-		OSAtomicIncrement32Barrier((int32_t*)&value);
+	OSAtomicDecrement32(&value);
 #elif defined (TT_PLATFORM_WIN)
-		_InterlockedIncrement((volatile long*)&value); // on windows there is always a barrier
+	_InterlockedDecrement((volatile long*)&value);
 #else // what should we do for thread safety on Linux and iOS?
-		value++;
+	value--;
 #endif
-	}
-	
-	void TTAtomicDecrementWithBarrier(TTAtomicUInt& value)
-	{
+}
+
+
+inline void TTAtomicDecrement(TTAtomicUInt& value)
+{
 #ifdef TT_PLATFORM_MAC
-		OSAtomicDecrement32Barrier((int32_t*)&value);
+	OSAtomicDecrement32((int32_t*)&value);
 #elif defined (TT_PLATFORM_WIN)
-		_InterlockedDecrement((volatile long*)&value); // on windows there is always a barrier
+	_InterlockedDecrement((volatile long*)&value);
 #else // what should we do for thread safety on Linux and iOS?
-		value++;
+	value--;
 #endif
-	}
+}
+
 	
-	
-	void TTAtomicAssign(TTAtomicInt& value, const TTAtomicInt& newValue, const TTAtomicInt& oldValue)
-	{
+inline void TTAtomicIncrementWithBarrier(TTAtomicUInt& value)
+{
 #ifdef TT_PLATFORM_MAC
-		OSAtomicCompareAndSwap32(oldValue, newValue, &value);
+	OSAtomicIncrement32Barrier((int32_t*)&value);
 #elif defined (TT_PLATFORM_WIN)
-		_InterlockedCompareExchange((volatile long*)&value, (long) newValue, (long) oldValue);
+	_InterlockedIncrement((volatile long*)&value); // on windows there is always a barrier
 #else // what should we do for thread safety on Linux and iOS?
-		value = newValue;
+	value++;
 #endif
-	}
+}
+
+
+inline void TTAtomicDecrementWithBarrier(TTAtomicUInt& value)
+{
+#ifdef TT_PLATFORM_MAC
+	OSAtomicDecrement32Barrier((int32_t*)&value);
+#elif defined (TT_PLATFORM_WIN)
+	_InterlockedDecrement((volatile long*)&value); // on windows there is always a barrier
+#else // what should we do for thread safety on Linux and iOS?
+	value++;
+#endif
+}
+
 	
+inline void TTAtomicAssign(TTAtomicInt& value, const TTAtomicInt& newValue, const TTAtomicInt& oldValue)
+{
+#ifdef TT_PLATFORM_MAC
+	OSAtomicCompareAndSwap32(oldValue, newValue, &value);
+#elif defined (TT_PLATFORM_WIN)
+	_InterlockedCompareExchange((volatile long*)&value, (long) newValue, (long) oldValue);
+#else // what should we do for thread safety on Linux and iOS?
+	value = newValue;
+#endif
+}
+
 	
 	/**	Return the current system time in milliseconds.
 		Although it is a global kind of function, we include it as a method of TTBase
 		so that it can be defined in the header file and then inlined in other libraries.	*/
-	TTFloat64 TTGetTimeInMilliseconds()
-	{
-		// On the Mac, CLOCKS_PER_SEC is 1000000, so we optimize
+inline TTFloat64 TTGetTimeInMilliseconds()
+{
+	// On the Mac, CLOCKS_PER_SEC is 1000000, so we optimize
 #if	CLOCKS_PER_SEC == 1000000
-		return clock() / 1000.0;	
+	return clock() / 1000.0;	
 #else
-		return (clock() * 1000.0) / CLOCKS_PER_SEC;
+	return (clock() * 1000.0) / CLOCKS_PER_SEC;
 #endif
-	}
-	
+}
+
 	
 	/**	Return the current system time in microseconds.	*/
-	TTFloat64 TTGetTimeInMicroseconds()
-	{
-		// On the Mac, CLOCKS_PER_SEC is 1000000, so we optimize
+inline TTFloat64 TTGetTimeInMicroseconds()
+{
+	// On the Mac, CLOCKS_PER_SEC is 1000000, so we optimize
 #if	CLOCKS_PER_SEC == 1000000
-		return clock();	
+	return clock();	
 #else
-		return (clock() * 1000000.0) / CLOCKS_PER_SEC;
+	return (clock() * 1000000.0) / CLOCKS_PER_SEC;
 #endif
-	}
+}
 	
-	
-};
-
 
 /**	Produces a random-valued 64-bit floating-point number in the range [0.0, 1.0]	*/
 TTFOUNDATION_EXPORT TTFloat64 TTRandom64();
