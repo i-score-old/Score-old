@@ -17,7 +17,29 @@ Dir.chdir "#{glibdir}"
 
 if  win32?
     
-else
+elsif mac?
+    
+    unless File.exist?("/usr/local/include")
+        puts
+        puts "Need Password to create an directories directory into /usr/local/include"
+        puts "==================================================="
+        puts
+        `sudo mkdir -p /usr/local/include`
+        `sudo chgrp admin /usr/local/include`
+        `sudo chmod g+w /usr/local/include`
+    end
+    unless File.exist?("/usr/local/include/DeviceManager")
+    	`sudo mkdir -p /usr/local/include/DeviceManager`
+    	`sudo chgrp admin /usr/local/include/DeviceManager`
+    	`sudo chmod g+w /usr/local/include/DeviceManager`
+    	puts
+    end
+    unless File.exist?("/usr/local/include/IScore")
+    	`sudo mkdir -p /usr/local/include/IScore`
+    	`sudo chgrp admin /usr/local/include/IScore`
+    	`sudo chmod g+w /usr/local/include/IScore`
+    	puts
+    end
     
     # Copy support/jamoma folder into /usr/local/jamoma folder
     `cp "#{glibdir}"/support/jamoma/extensions/* /usr/local/jamoma/extensions`
