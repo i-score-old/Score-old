@@ -21,7 +21,6 @@ project.xcworkspace
 *.suo
 *.user
 *.tm_build_errors
-*.a
 *.lib
 
 # Git conflict files
