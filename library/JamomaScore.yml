@@ -88,7 +88,7 @@ libraries:
   - ../support/virage/lib/libDeviceManager.a
   
   # to include gecode solver library
-  - /Library/Frameworks/gecode.framework/Versions/32/gecode
+  - /Library/Frameworks/gecode.framework/gecode
   
   # to link with the xml library
   - mac /usr/lib/libxml2.dylib
