@@ -46,12 +46,16 @@ elsif mac?
     # Foundation and Modular extensions
     `cp /usr/local/jamoma/extensions/AnalysisLib.ttdylib "#{glibdir}"/support/jamoma/extensions`
     `cp /usr/local/jamoma/extensions/DataspaceLib.ttdylib "#{glibdir}"/support/jamoma/extensions`
+    `cp /usr/local/jamoma/extensions/FunctionLib.ttdylib "#{glibdir}"/support/jamoma/extensions`
+    `cp /usr/local/jamoma/extensions/NetworkLib.ttdylib "#{glibdir}"/support/jamoma/extensions`
     `cp /usr/local/jamoma/extensions/Minuit.ttdylib "#{glibdir}"/support/jamoma/extensions`
     `cp /usr/local/jamoma/extensions/OSC.ttdylib "#{glibdir}"/support/jamoma/extensions`
-    `cp /usr/local/jamoma/extensions/NetworkLib.ttdylib "#{glibdir}"/support/jamoma/extensions`
     
     # Foundation includes
     `cp "#{glibdir}"/../Foundation/library/includes/* "#{glibdir}"/support/jamoma/includes`
+    
+    # DSP includes
+    `cp "#{glibdir}"/../DSP/library/includes/* "#{glibdir}"/support/jamoma/includes`
     
     # Modular includes
     `cp "#{glibdir}"/../../Modules/Modular/library/includes/TTModular.h "#{glibdir}"/support/jamoma/includes`
@@ -64,6 +68,7 @@ elsif mac?
     
     # Foundation and Modular lib
     `cp /usr/local/jamoma/lib/JamomaFoundation.dylib "#{glibdir}"/support/jamoma/lib`
+    `cp /usr/local/jamoma/lib/JamomaDSP.dylib "#{glibdir}"/support/jamoma/lib`
     `cp /usr/local/jamoma/lib/JamomaModular.dylib "#{glibdir}"/support/jamoma/lib`
     
     # Copy Score headers to include them into other application
