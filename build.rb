@@ -17,7 +17,7 @@ puts "post-build..."
 Dir.chdir "#{glibdir}"
 
 # Copy Foundation and Modular headers and dylib into the support/jamoma folder to allows to build without all the Jamoma repository
-if  win32?
+if  win?
     
 elsif mac?
     
@@ -47,6 +47,7 @@ elsif mac?
     `cp /usr/local/jamoma/extensions/AnalysisLib.ttdylib "#{glibdir}"/support/jamoma/extensions`
     `cp /usr/local/jamoma/extensions/DataspaceLib.ttdylib "#{glibdir}"/support/jamoma/extensions`
     `cp /usr/local/jamoma/extensions/Minuit.ttdylib "#{glibdir}"/support/jamoma/extensions`
+    `cp /usr/local/jamoma/extensions/OSC.ttdylib "#{glibdir}"/support/jamoma/extensions`
     `cp /usr/local/jamoma/extensions/NetworkLib.ttdylib "#{glibdir}"/support/jamoma/extensions`
     
     # Foundation includes
@@ -59,13 +60,14 @@ elsif mac?
     `cp "#{glibdir}"/../../Modules/Modular/library/PeerObject/*.h "#{glibdir}"/support/jamoma/includes`
     
     `cp "#{glibdir}"/../../Modules/Modular/library/ProtocolLib/Protocol.h "#{glibdir}"/support/jamoma/includes`
+    `cp "#{glibdir}"/../../Modules/Modular/library/SchedulerLib/Scheduler.h "#{glibdir}"/support/jamoma/includes`
     
     # Foundation and Modular lib
     `cp /usr/local/jamoma/lib/JamomaFoundation.dylib "#{glibdir}"/support/jamoma/lib`
     `cp /usr/local/jamoma/lib/JamomaModular.dylib "#{glibdir}"/support/jamoma/lib`
     
     # Copy Score headers to include them into other application
-    # (except the includes fiolder because it is done by the support/build.rb script)
+    # (except the includes folder because it is done by the support/build.rb script)
     `cp "#{glibdir}"/library/PeerObject/*.h /usr/local/jamoma/includes`
     
 end

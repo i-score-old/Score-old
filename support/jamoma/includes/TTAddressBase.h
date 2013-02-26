@@ -81,7 +81,7 @@ extern TTFOUNDATION_EXPORT TTRegex* ttRegexForInstance;		///< The global regex t
  
  */
 
-class TTFOUNDATION_EXPORT TTAddressBase : public TTSymbolBase
+class TTAddressBase : public TTSymbolBase
 {
 private:
 	
@@ -97,6 +97,8 @@ private:
 	TTAddressType				type;					///< is the address relative or absolute
 	
 	TTBoolean					parsed;					///< is the address has been parsed ?
+    
+    TTAddressBase*				normalized;				///< the normalized address (without directory and attribute part
 	
 public:
 	

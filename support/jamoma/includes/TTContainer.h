@@ -29,14 +29,14 @@ private:
 	TTBoolean			mInitialized;					///< ATTRIBUTE : is it initialized ?
 	TTAddress           mAddress;						///< ATTRIBUTE : the address of the container in the directory
 	TTAddress           mAlias;							///< ATTRIBUTE : an alias address to retrieve the container using another address
-	TTValue				mActivityIn;					///< ATTRIBUTE : a local value to allow observation of incoming data
-	TTValue				mActivityOut;					///< ATTRIBUTE : a local value to allow observation of outputing data
-	
+	TTValue				mActivity;                      ///< ATTRIBUTE : a local value to allow observation of outputing data
 	TTCallbackPtr		mReturnAddressCallback;			///< a way to return back address to the owner of this container
 	TTCallbackPtr		mReturnValueCallback;			///< a way to return back value to the owner of this container
 	TTHashPtr			mObjectsObserversCache;			///< a hash table containing all <relativeAddress : Objects, ValueObserver, InitializedObserver> for quick access
 	TTCallbackPtr		mObserver;						///< a life cycle observer
-	TTBoolean			mIsSending;						///< a flag to lock the object in case of infinite loop 
+	TTBoolean			mIsSending;						///< a flag to lock the object in case of infinite loop
+    
+    TTAttributePtr      activityAttribute;              ///< cache activity attribute for observer notification
 	
 	/** */
 	TTErr Send(TTValue& AddressAndValue, TTValue& outputValue);
@@ -55,12 +55,6 @@ private:
 	
 	/** */
 	TTErr setAlias(const TTValue& value);
-	
-	/** */
-	TTErr setActivityIn(const TTValue& value);
-	
-	/** */
-	TTErr setActivityOut(const TTValue& value);
 	
 	/**	Setter for mTag attribute. */
 	TTErr setTag(const TTValue& value);
@@ -88,7 +82,6 @@ private:
 	
 	friend TTErr TTMODULAR_EXPORT TTContainerDirectoryCallback(TTPtr baton, TTValue& data);
 	friend TTErr TTMODULAR_EXPORT TTContainerValueAttributeCallback(TTPtr baton, TTValue& data);
-	friend TTErr TTMODULAR_EXPORT TTContainerCommandMessageCallback(TTPtr baton, TTValue& data);
 };
 
 typedef TTContainer* TTContainerPtr;
@@ -110,12 +103,6 @@ TTErr TTMODULAR_EXPORT TTContainerValueAttributeCallback(TTPtr baton, TTValue& d
  @param	data						..
  @return							an error code */
 TTErr TTMODULAR_EXPORT TTContainerInitializedAttributeCallback(TTPtr baton, TTValue& data);
-
-/**	
- @param	baton						..
- @param	data						..
- @return							an error code */
-TTErr TTMODULAR_EXPORT TTContainerCommandMessageCallback(TTPtr baton, TTValue& data);
 
 /**	
  @param	baton						..
