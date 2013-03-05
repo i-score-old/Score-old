@@ -50,13 +50,15 @@ sources:
   - Editor/gecode-solver/searchEngine.cpp
   - Editor/gecode-solver/solver_wrap.cpp
   
-  - PeerObject/TTEngine.cpp
-  
+  - StoryLine/StoryLine.cpp
+
   - source/EnginesPrivate.cpp
   - source/TTScore.cpp
   - source/TTScoreSymbolCache.cpp
+
   
-  - StoryLine/StoryLine.cpp
+  - PeerObject/TTEngine.cpp
+  - PeerObject/TTTimeBox.cpp
 
 includes:
   - ECOMachine
@@ -66,8 +68,9 @@ includes:
   - Editor/CSP
   - Editor/gecode-solver
   - includes
-  - PeerObject
   - StoryLine
+
+  - PeerObject
   
   # to build without having the whole jamoma repository
   - ../support/jamoma/includes
@@ -83,6 +86,8 @@ includes:
 
 libraries:
   - FOUNDATION
+  - DSP
+  - MODULAR
   
   # to link with the former DeviceManager library
   - ../support/virage/lib/libDeviceManager.a

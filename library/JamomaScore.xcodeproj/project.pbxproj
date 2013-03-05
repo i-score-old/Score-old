@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		461029BB16E63956005FD7F7 /* TTTimeBox.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TTTimeBox.cpp; path = PeerObject/TTTimeBox.cpp; sourceTree = SOURCE_ROOT; };
+		461029BC16E63956005FD7F7 /* TTTimeBox.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TTTimeBox.h; path = PeerObject/TTTimeBox.h; sourceTree = SOURCE_ROOT; };
 		46EE0B0A166B71C500163087 /* TTEngine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TTEngine.cpp; path = PeerObject/TTEngine.cpp; sourceTree = SOURCE_ROOT; };
 		46EE0B0B166B71C500163087 /* TTEngine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TTEngine.h; path = PeerObject/TTEngine.h; sourceTree = SOURCE_ROOT; };
 		46EE0B12166B7AA300163087 /* ChangeTempo.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ChangeTempo.cpp; sourceTree = "<group>"; };
@@ -297,6 +299,8 @@
 			children = (
 				46EE0B0B166B71C500163087 /* TTEngine.h */,
 				46EE0B0A166B71C500163087 /* TTEngine.cpp */,
+				461029BC16E63956005FD7F7 /* TTTimeBox.h */,
+				461029BB16E63956005FD7F7 /* TTTimeBox.cpp */,
 			);
 			name = PeerObject;
 			path = ../PeerObject;

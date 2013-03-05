@@ -36,12 +36,14 @@
 #include <unistd.h>
 
 #include "TTFoundationAPI.h"
+#include "TTModular.h"
 
 #include "TTScoreSymbolCache.h"
 
 #include "CSPTypes.hpp"
 
 #include "TTEngine.h"
+#include "TTTimeBox.h"
 
 // Macros
 

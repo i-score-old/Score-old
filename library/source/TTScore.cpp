@@ -25,6 +25,7 @@ void TTScoreInit()
 		
 		// register classes -- both internal and external
 		TTEngine::registerClass();
+        TTTimeBox::registerClass();
 		
 
 #ifdef TT_DEBUG
