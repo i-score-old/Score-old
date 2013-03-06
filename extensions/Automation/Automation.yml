@@ -1,0 +1,22 @@
+#defines:
+#  - TIME_PROCESS_DEBUG
+
+sources:
+  - ../../library/TimeProcessLib/TimeProcess.cpp		
+  - source/Automation.cpp
+  
+includes:
+  - "."
+  - "includes"
+  - "../../library/TimeProcessLib"
+  - "../../../Foundation/library/includes"
+  - "../../../DSP/library/includes"
+  - "../../../../Modules/Modular/library/includes"
+  - "../../../../Modules/Modular/library/PeerObject"
+  - "../../../../Modules/Modular/library/ProtocolLib"
+  - "../../../../Modules/Modular/library/SchedulerLib"
+
+libraries:
+  - FOUNDATION
+  - DSP
+  - MODULAR
