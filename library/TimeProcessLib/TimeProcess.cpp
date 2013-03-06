@@ -1,51 +1,58 @@
 /*
- * A TimeBox Object
+ * A Time Process interface
  * Copyright © 2013, Théo de la Hogue
  *
  * License: This code is licensed under the terms of the "New BSD License"
  * http://creativecommons.org/licenses/BSD/
  */
 
-#include "TTTimeBox.h"
+#include "TimeProcess.h"
 
-#define thisTTClass			TTTimeBox
-#define thisTTClassName		"TimeBox"
-#define thisTTClassTags		"time, box"
+#define thisTTClass		TimeProcess
 
-TT_SCORE_CONSTRUCTOR,
+/****************************************************************************************************/
+
+TimeProcess::TimeProcess(TTValue& arguments) :
+TTObjectBase(arguments),
 mActive(YES),
+mRunning(NO),
 mStart(0),
 mEnd(0),
-mStartCue(NULL),
-mEndCue(NULL),
 mStartReceiver(NULL),
 mEndReceiver(NULL),
 mStartCallback(NULL),
 mEndCallback(NULL),
-mNamespace(NULL),
+mProgressionCallback(NULL),
+mProgressionBaton(NULL),
 mScheduler(NULL)
 {
-	TT_ASSERT("Correct number of args to create TTTimeBox", arguments.size() == 2);
+    TT_ASSERT("Correct number of args to create TimeProcess", arguments.size() == 4);
     
     if (arguments.size() >= 1)
 		mStartCallback = TTCallbackPtr((TTObjectBasePtr)arguments[0]);
 	
 	if (arguments.size() >= 2)
 		mEndCallback = TTCallbackPtr((TTObjectBasePtr)arguments[1]);
-	
+    
+    if (arguments.size() >= 3)
+        mProgressionCallback = TimeProcessProgressionCallback((TTPtr)arguments[2]);
+    
+    if (arguments.size() >= 4)
+        mProgressionBaton = arguments[3];
+
     addAttribute(Active, kTypeBoolean);
     
 	addAttributeWithSetter(Start, kTypeUInt32);
     addAttributeWithSetter(End, kTypeUInt32);
     
-    addAttribute(StartCue, kTypeObject);
-    addAttribute(EndCue, kTypeObject);
-    
     addAttribute(StartReceiver, kTypeObject);
-    addAttribute(EndReceiver, kTypeObject);
+    addAttributeProperty(StartReceiver, hidden, YES);
     
-    addAttribute(Namespace, kTypePointer);
+    addAttribute(EndReceiver, kTypeObject);
+    addAttributeProperty(EndReceiver, hidden, YES);
+    
     addAttribute(Scheduler, kTypeObject);
+    addAttributeProperty(Scheduler, hidden, YES);
 	
 	// needed to be handled by a TTXmlHandler
 	addMessageWithArguments(WriteAsXml);
@@ -63,30 +70,26 @@ mScheduler(NULL)
     TTValue args;
     TTErr   err;
 	
-    // prepare callback argument to be notifed of the progression (we have to store this as a pointer)
-    args.append((TTPtr)&TTTimeBoxSchedulerCallback);
-    args.append((TTPtr)this);
+    // Prepare callback argument to be notified of :
+    //      - a contrained change of the start date (is it needed ?)
+    //      - a contrained change of the end date (is it needed ?)
+    //      - the progression
+    
+    //args.append((TTPtr)&TimeProcessChangeStartCallback);
+    //args.append((TTPtr)&TimeProcessChangeEndCallback);
+    args.append((TTPtr)&TimeProcessSchedulerCallback);
+    args.append((TTPtr)this);   // we have to store this as a pointer
     
     err = TTObjectBaseInstantiate(TTSymbol("EcoMachine"), TTObjectBaseHandle(&mScheduler), args);
     
 	if (err) {
         mScheduler = NULL;
-		logError("TTTimeBox failed to load the EcoMachine Scheduler");
+		logError("TimeProcess failed to load the EcoMachine Scheduler");
     }
 }
 
-TTTimeBox::~TTTimeBox()
-{
-    if (mStartCue) {
-        TTObjectBaseRelease(TTObjectBaseHandle(&mStartCue));
-        mStartCue = NULL;
-    }
-    
-    if (mEndCue) {
-        TTObjectBaseRelease(TTObjectBaseHandle(&mEndCue));
-        mEndCue = NULL;
-    }
-    
+TimeProcess::~TimeProcess()
+{    
     if (mStartReceiver) {
         TTObjectBaseRelease(TTObjectBaseHandle(&mStartReceiver));
         mStartReceiver = NULL;
@@ -97,18 +100,41 @@ TTTimeBox::~TTTimeBox()
         mEndReceiver = NULL;
     }
     
-    if (mNamespace) {
-        delete mNamespace;
-        mNamespace = NULL;
-    }
-    
     if (mScheduler) {
         TTObjectBaseRelease(TTObjectBaseHandle(&mScheduler));
         mScheduler = NULL;
     }
 }
 
-TTErr TTTimeBox::setStart(const TTValue& value)
+TTErr TimeProcess::getParameterNames(TTValue& value)
+{
+	TTValue		attributeNames;
+	TTSymbol	attributeName;
+	
+	// filter all default attributes (Name, Version, Author, ...)
+	this->getAttributeNames(attributeNames);
+	
+	value.clear();
+	for (TTUInt8 i = 0; i < attributeNames.size(); i++) {
+		attributeName = attributeNames[0];
+		
+		if (attributeName == TTSymbol("name")           ||
+			attributeName == TTSymbol("version")        ||
+			attributeName == TTSymbol("author")         ||
+            attributeName == TTSymbol("active")         ||
+            attributeName == TTSymbol("running")        ||
+            attributeName == TTSymbol("progression")    ||
+            attributeName == TTSymbol("start")          ||
+            attributeName == TTSymbol("end"))
+			continue;
+		
+		value.append(attributeName);
+	}
+	
+	return kTTErrNone;
+}
+
+TTErr TimeProcess::setStart(const TTValue& value)
 {
     TTValue retunedValue;
     TTErr   err;
@@ -122,7 +148,7 @@ TTErr TTTimeBox::setStart(const TTValue& value)
     return err;
 }
 
-TTErr TTTimeBox::setEnd(const TTValue& value)
+TTErr TimeProcess::setEnd(const TTValue& value)
 {
     TTValue retunedValue;
     TTErr   err;
@@ -136,7 +162,7 @@ TTErr TTTimeBox::setEnd(const TTValue& value)
     return err;
 }
 
-TTErr TTTimeBox::TriggerStartAdd(const TTValue& inputValue, TTValue& outputValue)
+TTErr TimeProcess::TriggerStartAdd(const TTValue& inputValue, TTValue& outputValue)
 {
     TTValue			args;
     TTAddress       triggerAddress;
@@ -156,12 +182,12 @@ TTErr TTTimeBox::TriggerStartAdd(const TTValue& inputValue, TTValue& outputValue
         // we don't need the address back
         args.append(NULL);
         
-        // but we need the value back to test it (using the TTTimeBoxStartReceiverCallback function)
+        // but we need the value back to test it (using the TimeProcessStartReceiverCallback function)
         returnValueCallback = NULL;
         TTObjectBaseInstantiate(TTSymbol("callback"), &returnValueCallback, kTTValNONE);
         returnValueBaton = new TTValue(TTObjectBasePtr(this));
         returnValueCallback->setAttributeValue(kTTSym_baton, TTPtr(returnValueBaton));
-        returnValueCallback->setAttributeValue(kTTSym_function, TTPtr(&TTTimeBoxStartReceiverCallback));
+        returnValueCallback->setAttributeValue(kTTSym_function, TTPtr(&TimeProcessStartReceiverCallback));
         args.append(returnValueCallback);
         
         mStartReceiver = NULL;
@@ -173,6 +199,7 @@ TTErr TTTimeBox::TriggerStartAdd(const TTValue& inputValue, TTValue& outputValue
             mStartReceiver->setAttributeValue(kTTSym_address, triggerAddress);
             
             // TODO : tell to scheduler there is a trigger point here (?)
+            // (it means append a trigger point to the storyline)
             
         }
     }
@@ -180,7 +207,7 @@ TTErr TTTimeBox::TriggerStartAdd(const TTValue& inputValue, TTValue& outputValue
 	return err;
 }
 
-TTErr TTTimeBox::TriggerStartRemove()
+TTErr TimeProcess::TriggerStartRemove()
 {
     if (mStartReceiver) {
         
@@ -188,12 +215,13 @@ TTErr TTTimeBox::TriggerStartRemove()
         mStartReceiver = NULL;
         
         // TODO : tell to scheduler there is no more trigger point here (?)
+        // (it means remove a trigger point to the storyline)
     }
     
     return kTTErrNone;
 }
 
-TTErr TTTimeBox::TriggerEndAdd(const TTValue& inputValue, TTValue& outputValue)
+TTErr TimeProcess::TriggerEndAdd(const TTValue& inputValue, TTValue& outputValue)
 {
     TTValue			args;
     TTAddress       triggerAddress;
@@ -213,12 +241,12 @@ TTErr TTTimeBox::TriggerEndAdd(const TTValue& inputValue, TTValue& outputValue)
         // we don't need the address back
         args.append(NULL);
         
-        // but we need the value back to test it (using the TTTimeBoxStartReceiverCallback function)
+        // but we need the value back to test it (using the TimeProcessStartReceiverCallback function)
         returnValueCallback = NULL;
         TTObjectBaseInstantiate(TTSymbol("callback"), &returnValueCallback, kTTValNONE);
         returnValueBaton = new TTValue(TTObjectBasePtr(this));
         returnValueCallback->setAttributeValue(kTTSym_baton, TTPtr(returnValueBaton));
-        returnValueCallback->setAttributeValue(kTTSym_function, TTPtr(&TTTimeBoxEndReceiverCallback));
+        returnValueCallback->setAttributeValue(kTTSym_function, TTPtr(&TimeProcessEndReceiverCallback));
         args.append(returnValueCallback);
         
         mEndReceiver = NULL;
@@ -230,14 +258,14 @@ TTErr TTTimeBox::TriggerEndAdd(const TTValue& inputValue, TTValue& outputValue)
             mEndReceiver->setAttributeValue(kTTSym_address, triggerAddress);
             
             // TODO : tell to scheduler there is a trigger point here (?)
-            
+            // (it means append a trigger point to the storyline)
         }
     }
 	
 	return err;
 }
 
-TTErr TTTimeBox::TriggerEndRemove()
+TTErr TimeProcess::TriggerEndRemove()
 {
     // remove former receiver
     if (mEndReceiver) {
@@ -246,52 +274,53 @@ TTErr TTTimeBox::TriggerEndRemove()
         mEndReceiver = NULL;
         
         // TODO : tell to scheduler there is no more trigger point here (?)
+        // (it means remove a trigger point to the storyline)
     }
     
     return kTTErrNone;
 }
 
-TTErr TTTimeBox::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
+TTErr TimeProcess::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 {
 	TTXmlHandlerPtr	aXmlHandler = NULL;
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
 	
-	// TODO : write the time box attributes, the cue start and end content, start and end receiver, ...
+	// TODO : write the time process attributes, the cue start and end content, start and end receiver, ...
 	
 	return kTTErrGeneric;
 }
 
-TTErr TTTimeBox::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
+TTErr TimeProcess::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 {
 	TTXmlHandlerPtr	aXmlHandler = NULL;
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
 	
-	// TODO : parse the time box attributes, the cue start and end content, start and end receiver, ...
+	// TODO : parse the time process attributes, the cue start and end content, start and end receiver, ...
 	
 	return kTTErrGeneric;
 }
 
-TTErr TTTimeBox::WriteAsText(const TTValue& inputValue, TTValue& outputValue)
+TTErr TimeProcess::WriteAsText(const TTValue& inputValue, TTValue& outputValue)
 {
 	TTTextHandlerPtr	aTextHandler;
 	
 	aTextHandler = TTTextHandlerPtr((TTObjectBasePtr)inputValue[0]);
 	
-	// TODO : write the time box attributes, the cue start and end content, start and end receiver, ...
+	// TODO : write the time process attributes, the cue start and end content, start and end receiver, ...
 	
 	return kTTErrGeneric;
 }
 
-TTErr TTTimeBox::ReadFromText(const TTValue& inputValue, TTValue& outputValue)
+TTErr TimeProcess::ReadFromText(const TTValue& inputValue, TTValue& outputValue)
 {
 	TTTextHandlerPtr aTextHandler;
 	TTValue	v;
 	
 	aTextHandler = TTTextHandlerPtr((TTObjectBasePtr)inputValue[0]);
 	
-    // TODO : parse the time box attributes, the cue start and end content, start and end receiver, ...
+    // TODO : parse the time process attributes, the cue start and end content, start and end receiver, ...
 	
 	return kTTErrGeneric;
 }
@@ -301,73 +330,87 @@ TTErr TTTimeBox::ReadFromText(const TTValue& inputValue, TTValue& outputValue)
 #pragma mark Some Methods
 #endif
 
-TTErr TTTimeBoxStartReceiverCallback(TTPtr baton, TTValue& data)
+TTErr TimeProcessStartReceiverCallback(TTPtr baton, TTValue& data)
 {
-    TTTimeBoxPtr    aTimeBox;
+    TimeProcessPtr  aTimeProcess;
 	TTValuePtr      b;
 	
-	// unpack baton (a TTMapper)
+	// unpack baton (a TimeProcess)
 	b = (TTValuePtr)baton;
-	aTimeBox = TTTimeBoxPtr((TTObjectBasePtr)(*b)[0]);
+	aTimeProcess = TimeProcessPtr((TTObjectBasePtr)(*b)[0]);
 	
-    // if the time box active, launch the scheduler
-	if (aTimeBox->mActive) {
+    // if the time process active, launch the scheduler
+	if (aTimeProcess->mActive) {
         
         // TODO : add a conditionnal expression depending on the received data
         // like if (data > 3.)
         if (YES)
-            return aTimeBox->mScheduler->sendMessage(TTSymbol("Go"), aTimeBox->mEnd - aTimeBox->mStart, kTTValNONE);
+            return aTimeProcess->mScheduler->sendMessage(TTSymbol("Go"), aTimeProcess->mEnd - aTimeProcess->mStart, kTTValNONE);
     }
     
     return kTTErrGeneric;
 }
 
-TTErr TTTimeBoxEndReceiverCallback(TTPtr baton, TTValue& data)
+TTErr TimeProcessEndReceiverCallback(TTPtr baton, TTValue& data)
 {
-    TTTimeBoxPtr    aTimeBox;
+    TimeProcessPtr  aTimeProcess;
 	TTValuePtr      b;
 	
 	// unpack baton (a TTMapper)
 	b = (TTValuePtr)baton;
-	aTimeBox = TTTimeBoxPtr((TTObjectBasePtr)(*b)[0]);
+	aTimeProcess = TimeProcessPtr((TTObjectBasePtr)(*b)[0]);
 	
-    // if the time box active, stop the scheduler
-	if (aTimeBox->mActive) {
+    // if the time process active, stop the scheduler
+	if (aTimeProcess->mActive) {
         
         // TODO : add a conditionnal expression depending on the data
         // like if (data > 3.)
         if (YES)
-            return aTimeBox->mScheduler->sendMessage(TTSymbol("Stop"));
+            return aTimeProcess->mScheduler->sendMessage(TTSymbol("Stop"));
     }
     
     return kTTErrGeneric;
 }
 
-void TTTimeBoxSchedulerCallback(TTPtr object, TTFloat64 progression)
+void TimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression)
 {
-	TTTimeBoxPtr	aTimeBox = (TTTimeBoxPtr)object;
+	TimeProcessPtr	aTimeProcess = (TimeProcessPtr)object;
+    
+    aTimeProcess->mProgression = progression;
     
     // Case 0 :
-    // notify the time box owner that the time box starts
+    // notify the time process owner that the time process starts
     // then recall the start state
     if (progression == 0.) {
         
-        aTimeBox->mStartCallback->notify(TTObjectBasePtr(aTimeBox), kTTValNONE);
-        aTimeBox->mStartCue->sendMessage(TTSymbol("Recall"), kTTValNONE, kTTValNONE);
+        // close start receiver listening
+        aTimeProcess->mStartReceiver->setAttributeValue(kTTSym_active, NO);
+        
+        // notify owner that the start appends
+        aTimeProcess->mStartCallback->notify(TTObjectBasePtr(aTimeProcess), kTTValNONE);
+        
+        // use the specific start process method of the time process
+        aTimeProcess->ProcessStart();
         return;
     }
     
     // Case 1 :
     // recall the start state
-    // then notify the time box owner that the time box ends
+    // then notify the time process owner that the time process ends
     else if (progression == 1.) {
         
-        aTimeBox->mEndCue->sendMessage(TTSymbol("Recall"), kTTValNONE, kTTValNONE);
-        aTimeBox->mEndCallback->notify(TTObjectBasePtr(aTimeBox), kTTValNONE);
+        // close end receiver listening
+        aTimeProcess->mEndReceiver->setAttributeValue(kTTSym_active, NO);
+        
+        // use the specific process end method of the time process
+        aTimeProcess->ProcessEnd();
+        
+        // notify owner that the end appends
+        aTimeProcess->mEndCallback->notify(TTObjectBasePtr(aTimeProcess), kTTValNONE);
         return;
     }
 
     // Case ]0 :: 1[ :
-    // process the interpolation between the start state and the end state
-    TTCueInterpolate(TTCuePtr(aTimeBox->mStartCue), TTCuePtr(aTimeBox->mEndCue), progression);
+    // use the specific process method
+    aTimeProcess->Process();
 }

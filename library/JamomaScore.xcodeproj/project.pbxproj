@@ -7,10 +7,10 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		461029BB16E63956005FD7F7 /* TTTimeBox.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TTTimeBox.cpp; path = PeerObject/TTTimeBox.cpp; sourceTree = SOURCE_ROOT; };
-		461029BC16E63956005FD7F7 /* TTTimeBox.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TTTimeBox.h; path = PeerObject/TTTimeBox.h; sourceTree = SOURCE_ROOT; };
-		46EE0B0A166B71C500163087 /* TTEngine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TTEngine.cpp; path = PeerObject/TTEngine.cpp; sourceTree = SOURCE_ROOT; };
-		46EE0B0B166B71C500163087 /* TTEngine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TTEngine.h; path = PeerObject/TTEngine.h; sourceTree = SOURCE_ROOT; };
+		46B79E1516E789100052A04E /* TimeProcess.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TimeProcess.cpp; sourceTree = "<group>"; };
+		46B79E1616E789100052A04E /* TimeProcess.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TimeProcess.h; sourceTree = "<group>"; };
+		46B79E1716E79D350052A04E /* TTEngine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TTEngine.h; path = includes/TTEngine.h; sourceTree = SOURCE_ROOT; };
+		46B79E1816E79D420052A04E /* TTEngine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TTEngine.cpp; path = source/TTEngine.cpp; sourceTree = SOURCE_ROOT; };
 		46EE0B12166B7AA300163087 /* ChangeTempo.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ChangeTempo.cpp; sourceTree = "<group>"; };
 		46EE0B13166B7AA300163087 /* ChangeTempo.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ChangeTempo.hpp; sourceTree = "<group>"; };
 		46EE0B14166B7AA300163087 /* ControlPointInformations.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ControlPointInformations.cpp; sourceTree = "<group>"; };
@@ -119,6 +119,15 @@
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		46B79E1416E789100052A04E /* TimeProcessLib */ = {
+			isa = PBXGroup;
+			children = (
+				46B79E1616E789100052A04E /* TimeProcess.h */,
+				46B79E1516E789100052A04E /* TimeProcess.cpp */,
+			);
+			path = TimeProcessLib;
+			sourceTree = "<group>";
+		};
 		46EE0B11166B7AA300163087 /* ECOMachine */ = {
 			isa = PBXGroup;
 			children = (
@@ -275,7 +284,7 @@
 			children = (
 				46F5056F1666991700CFC3A2 /* includes */,
 				46F505731666991700CFC3A2 /* source */,
-				46F505721666991700CFC3A2 /* PeerObject */,
+				46B79E1416E789100052A04E /* TimeProcessLib */,
 				46EE0B11166B7AA300163087 /* ECOMachine */,
 				46EE0B46166B7AAD00163087 /* Editor */,
 				46EE0B77166B7AC100163087 /* StoryLine */,
@@ -289,21 +298,10 @@
 				46EE0B7C166B7AE300163087 /* EnginesPrivate.hpp */,
 				46F5057A166699BE00CFC3A2 /* TTScore.h */,
 				46F5057B166699BE00CFC3A2 /* TTScoreSymbolCache.h */,
+				46B79E1716E79D350052A04E /* TTEngine.h */,
 			);
 			name = includes;
 			path = ../includes;
-			sourceTree = "<group>";
-		};
-		46F505721666991700CFC3A2 /* PeerObject */ = {
-			isa = PBXGroup;
-			children = (
-				46EE0B0B166B71C500163087 /* TTEngine.h */,
-				46EE0B0A166B71C500163087 /* TTEngine.cpp */,
-				461029BC16E63956005FD7F7 /* TTTimeBox.h */,
-				461029BB16E63956005FD7F7 /* TTTimeBox.cpp */,
-			);
-			name = PeerObject;
-			path = ../PeerObject;
 			sourceTree = "<group>";
 		};
 		46F505731666991700CFC3A2 /* source */ = {
@@ -312,6 +310,7 @@
 				46EE0B7E166B7AF300163087 /* EnginesPrivate.cpp */,
 				46F5059016669CFC00CFC3A2 /* TTScore.cpp */,
 				46F5059116669CFC00CFC3A2 /* TTScoreSymbolCache.cpp */,
+				46B79E1816E79D420052A04E /* TTEngine.cpp */,
 			);
 			name = source;
 			path = ../sources;

@@ -174,20 +174,28 @@ void PetriNet::makeOneStep()
 		}
 	}
 
+    // among all sensitized transitions
 	for (unsigned int i = 0 ; i < m_sensitizedTransitions.size() ; ++i) {
+        
 		Transition* sensitizedTransitionToTestTheEvent;
 		sensitizedTransitionToTestTheEvent = m_sensitizedTransitions[i];
 
+        // if all the going arc are not active
 		if (!sensitizedTransitionToTestTheEvent->areAllInGoingArcsActive()) {
 
+            //remove the sensitized transition
 			m_sensitizedTransitions.erase(m_sensitizedTransitions.begin() + i);
 			--i;
 
+            // ?
 			if (m_waitedTriggerPointMessageAction != NULL) {
 				m_waitedTriggerPointMessageAction(m_waitedTriggerPointMessageArgument, false, sensitizedTransitionToTestTheEvent);
 			}
 
-		} else if (isAnEvent(sensitizedTransitionToTestTheEvent->getEvent()) || m_mustCrossAllTransitionWithoutWaitingEvent){
+		}
+        
+        // cf triggerpoint : else check if the transition event is part of the recent incomming events (or if all transition have to pass)
+        else if (isAnEvent(sensitizedTransitionToTestTheEvent->getEvent()) || m_mustCrossAllTransitionWithoutWaitingEvent){
 
 			if (sensitizedTransitionToTestTheEvent->isStatic()) {
 				sensitizedTransitionToTestTheEvent->crossTransition(true, getCurrentTimeInMs() - sensitizedTransitionToTestTheEvent->getStartDate().getValue());

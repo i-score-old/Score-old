@@ -133,30 +133,43 @@ ECOMachine::~ECOMachine()
 	delete m_petriNet;
 }
 
+// cf triggerpoint : get a unique petri message key
 std::string ECOMachine::addNetworkMessage(std::string netMessage)
 {
 	map<string, string>::iterator iter = m_fromNetworkMessagesToPetriMessages.find(netMessage);
-
+    
+    // if the network message is not registered,
+    // create a new and unique "EVENT_NAMEm_lastEventNumber" petri message key
 	if(iter == m_fromNetworkMessagesToPetriMessages.end()) {
 		ostringstream oss;
 	    oss << EVENT_NAME;
 	    oss << m_lastEventNumber;
-
+        
+        // register petri message key at the network message address in the map
 		m_fromNetworkMessagesToPetriMessages[netMessage] = oss.str();
 		++m_lastEventNumber;
-
 	}
+    
+    // return an unique petri message key
 	return m_fromNetworkMessagesToPetriMessages[netMessage];
 }
 
 bool ECOMachine::receiveNetworkMessage(std::string netMessage)
 {
 	map<string, string>::iterator iter = m_fromNetworkMessagesToPetriMessages.find(netMessage);
-
+    
+    // if the received network message is not registered
 	if(iter == m_fromNetworkMessagesToPetriMessages.end()) {
 		return false;
-	} else {
+	}
+    
+    // if the received network message is registered
+    else {
+        
+        // if the petri net is running
 		if (getPetriNet()->getUpdateFactor() != 0) {
+            
+            // append an event to process using the petri message key
 			m_petriNet->putAnEvent(m_fromNetworkMessagesToPetriMessages[netMessage]);
 		}
 		return true;
@@ -511,7 +524,9 @@ PetriNet* ECOMachine::compilePetriNet(StoryLine storyLineToCompile,
 					if (mergeIterator != mergeTransitions.end()) {
 						currentTransition = mergeIterator->second;
 					}
-
+                    
+                    // cf triggerpoint : register a trigger point as an event inside the petri net event (addNetworkMessage)
+                    // and then register the petri net event key inside the transition (setEvent)
 					currentTransition->setEvent(addNetworkMessage(currentTriggerPoint->getTriggerMessage()));
 
 					currentTransition->setMustWaitThePetriNetToEnd(false);

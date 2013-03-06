@@ -53,12 +53,12 @@ sources:
   - StoryLine/StoryLine.cpp
 
   - source/EnginesPrivate.cpp
+  - source/TTEngine.cpp
+
   - source/TTScore.cpp
   - source/TTScoreSymbolCache.cpp
-
   
-  - PeerObject/TTEngine.cpp
-  - PeerObject/TTTimeBox.cpp
+  - TimeProcessLib/TimeProcess.cpp
 
 includes:
   - ECOMachine
@@ -70,7 +70,7 @@ includes:
   - includes
   - StoryLine
 
-  - PeerObject
+  - TimeProcessLib
   
   # to build without having the whole jamoma repository
   - ../support/jamoma/includes
