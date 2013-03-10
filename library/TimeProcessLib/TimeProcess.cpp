@@ -18,6 +18,7 @@ mActive(YES),
 mRunning(NO),
 mStart(0),
 mEnd(0),
+mProgression(0.),
 mStartReceiver(NULL),
 mEndReceiver(NULL),
 mStartCallback(NULL),
@@ -40,10 +41,16 @@ mScheduler(NULL)
     if (arguments.size() >= 4)
         mProgressionBaton = arguments[3];
 
-    addAttribute(Active, kTypeBoolean);
+    addAttributeWithSetter(Active, kTypeBoolean);
+    
+    addAttribute(Running, kTypeBoolean);
+    addAttributeProperty(Running, readOnly, YES);
     
 	addAttributeWithSetter(Start, kTypeUInt32);
     addAttributeWithSetter(End, kTypeUInt32);
+    
+    addAttribute(Progression, kTypeUInt32);
+    addAttributeProperty(Progression, readOnly, YES);
     
     addAttribute(StartReceiver, kTypeObject);
     addAttributeProperty(StartReceiver, hidden, YES);
@@ -86,6 +93,13 @@ mScheduler(NULL)
         mScheduler = NULL;
 		logError("TimeProcess failed to load the EcoMachine Scheduler");
     }
+    
+    // cache some attributes for high speed notification feedbacks
+    this->findAttribute(TTSymbol("active"), &activeAttribute);
+    this->findAttribute(TTSymbol("running"), &runningAttribute);
+    this->findAttribute(TTSymbol("start"), &startAttribute);
+    this->findAttribute(TTSymbol("end"), &endAttribute);
+    this->findAttribute(TTSymbol("progression"), &progressionAttribute);
 }
 
 TimeProcess::~TimeProcess()
@@ -134,6 +148,17 @@ TTErr TimeProcess::getParameterNames(TTValue& value)
 	return kTTErrNone;
 }
 
+TTErr TimeProcess::setActive(const TTValue& value)
+{
+    // set the internal active value
+    mActive = value[0];
+        
+    // notify each attribute observers (like a parent scenario for example)
+    activeAttribute->sendNotification(kTTSym_notify, mActive);             // we use kTTSym_notify because we know that observers are TTCallback
+    
+    return kTTErrNone;
+}
+
 TTErr TimeProcess::setStart(const TTValue& value)
 {
     TTValue retunedValue;
@@ -142,8 +167,14 @@ TTErr TimeProcess::setStart(const TTValue& value)
     // Try to change the scheduler start date and get the effective start date back
     err = mScheduler->sendMessage(TTSymbol("changeStart"), value, retunedValue);
     
-    if (!err)
+    if (!err) {
+        
+        // set the internal start value
         mStart = retunedValue[0];
+        
+        // notify each attribute observers (like a parent scenario for example)
+        startAttribute->sendNotification(kTTSym_notify, mStart);             // we use kTTSym_notify because we know that observers are TTCallback
+    }
     
     return err;
 }
@@ -156,8 +187,14 @@ TTErr TimeProcess::setEnd(const TTValue& value)
     // Try to change the scheduler end date and get the effective end date back
     err = mScheduler->sendMessage(TTSymbol("changeEnd"), value, retunedValue);
     
-    if (!err)
+    if (!err) {
+        
+        // set the internal end value
         mEnd = retunedValue[0];
+        
+        // notify each attribute observers (like a parent scenario for example)
+        endAttribute->sendNotification(kTTSym_notify, mEnd);             // we use kTTSym_notify because we know that observers are TTCallback
+    }
     
     return err;
 }
@@ -335,7 +372,7 @@ TTErr TimeProcessStartReceiverCallback(TTPtr baton, TTValue& data)
     TimeProcessPtr  aTimeProcess;
 	TTValuePtr      b;
 	
-	// unpack baton (a TimeProcess)
+	// unpack baton (a time process)
 	b = (TTValuePtr)baton;
 	aTimeProcess = TimeProcessPtr((TTObjectBasePtr)(*b)[0]);
 	
@@ -356,7 +393,7 @@ TTErr TimeProcessEndReceiverCallback(TTPtr baton, TTValue& data)
     TimeProcessPtr  aTimeProcess;
 	TTValuePtr      b;
 	
-	// unpack baton (a TTMapper)
+	// unpack baton (a time process)
 	b = (TTValuePtr)baton;
 	aTimeProcess = TimeProcessPtr((TTObjectBasePtr)(*b)[0]);
 	
@@ -376,7 +413,11 @@ void TimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression)
 {
 	TimeProcessPtr	aTimeProcess = (TimeProcessPtr)object;
     
+    // set internal progression value
     aTimeProcess->mProgression = progression;
+    
+    // notify each attribute observers (like a parent scenario for example)
+    aTimeProcess->progressionAttribute->sendNotification(kTTSym_notify,  aTimeProcess->mProgression);     // we use kTTSym_notify because we know that observers are TTCallback
     
     // Case 0 :
     // notify the time process owner that the time process starts
@@ -389,8 +430,15 @@ void TimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression)
         // notify owner that the start appends
         aTimeProcess->mStartCallback->notify(TTObjectBasePtr(aTimeProcess), kTTValNONE);
         
+        // set internal running state
+        aTimeProcess->mRunning = YES;
+        
+        // notify each attribute observers (like a parent scenario for example)
+        aTimeProcess->runningAttribute->sendNotification(kTTSym_notify, aTimeProcess->mRunning);          // we use kTTSym_notify because we know that observers are TTCallback
+        
         // use the specific start process method of the time process
         aTimeProcess->ProcessStart();
+        
         return;
     }
     
@@ -407,6 +455,13 @@ void TimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression)
         
         // notify owner that the end appends
         aTimeProcess->mEndCallback->notify(TTObjectBasePtr(aTimeProcess), kTTValNONE);
+        
+        // set internal running state
+        aTimeProcess->mRunning = YES;
+        
+        // notify each attribute observers (like a parent scenario for example)
+        aTimeProcess->runningAttribute->sendNotification(kTTSym_notify, aTimeProcess->mRunning);          // we use kTTSym_notify because we know that observers are TTCallback
+        
         return;
     }
 

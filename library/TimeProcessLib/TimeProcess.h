@@ -44,10 +44,11 @@ public:
 protected:
     TTBoolean                       mActive;                        ///< ATTRIBUTE : is the time process active ?
     TTBoolean                       mRunning;                       ///< ATTRIBUTE : is the time process running ?
-    TTFloat64                       mProgression;                   ///< ATTRIBUTE : the progression of the time process [0. :: 1.]
     
     TTUInt32                        mStart;                         ///< ATTRIBUTE : the start date of the time process
     TTUInt32                        mEnd;                           ///< ATTRIBUTE : the end date of the time process
+    
+    TTFloat64                       mProgression;                   ///< ATTRIBUTE : the progression of the time process [0. :: 1.]
     
     TTObjectBasePtr                 mStartReceiver;                 ///< ATTRIBUTE : an internal receiver to launch the time process execution
     TTObjectBasePtr                 mEndReceiver;                   ///< ATTRIBUTE : an internal receiver to stop the time process execution
@@ -60,6 +61,14 @@ protected:
     
     TTObjectBasePtr                 mScheduler;                     ///< ATTRIBUTE : the scheduler object which handles the time process execution
     
+private:
+    
+    TTAttributePtr                  activeAttribute;                ///< cache active attribute for observer notification
+    TTAttributePtr                  runningAttribute;               ///< cache running attribute for observer notification
+    TTAttributePtr                  startAttribute;                 ///< cache start attribute for observer notification
+    TTAttributePtr                  endAttribute;                   ///< cache end attribute for observer notification
+    TTAttributePtr                  progressionAttribute;           ///< cache progression attribute for observer notification
+    
 public:
 	//** Constructor.	*/
 	TimeProcess(TTValue& arguments);
@@ -71,9 +80,6 @@ public:
      @param	value           the returned parameter names
      @return                kTTErrNone */
 	virtual TTErr getParameterNames(TTValue& value) = 0;
-    
-    /** Get the progression [0. :: 1.] */
-	virtual TTErr getProgression(TTValue& value) = 0;
     
     /** Specific process method on start
      @return                an error code returned by the process end method */
@@ -88,6 +94,11 @@ public:
     virtual TTErr Process() = 0;
 
 private :
+    
+    /** Set the time process active or not
+     @param	value           a boolean
+     @return                kTTErrNone */
+    TTErr	setActive(const TTValue& value);
     
     /** Set the start date of the time process
      @param	value           a date
