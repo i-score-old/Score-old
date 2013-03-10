@@ -14,13 +14,14 @@
 
 TimeProcess::TimeProcess(TTValue& arguments) :
 TTObjectBase(arguments),
+mScenario(NULL),
 mActive(YES),
 mRunning(NO),
 mStart(0),
 mEnd(0),
 mProgression(0.),
-mStartReceiver(NULL),
-mEndReceiver(NULL),
+mStartTrigger(NULL),
+mEndTrigger(NULL),
 mStartCallback(NULL),
 mEndCallback(NULL),
 mProgressionCallback(NULL),
@@ -40,6 +41,9 @@ mScheduler(NULL)
     
     if (arguments.size() >= 4)
         mProgressionBaton = arguments[3];
+    
+    addAttribute(Scenario, kTypeObject);
+    addAttributeProperty(Scenario, hidden, YES);
 
     addAttributeWithSetter(Active, kTypeBoolean);
     
@@ -52,14 +56,23 @@ mScheduler(NULL)
     addAttribute(Progression, kTypeUInt32);
     addAttributeProperty(Progression, readOnly, YES);
     
-    addAttribute(StartReceiver, kTypeObject);
-    addAttributeProperty(StartReceiver, hidden, YES);
+    addAttribute(StartTrigger, kTypeObject);
+    addAttributeProperty(StartTrigger, readOnly, YES);
+    addAttributeProperty(StartTrigger, hidden, YES);
     
-    addAttribute(EndReceiver, kTypeObject);
-    addAttributeProperty(EndReceiver, hidden, YES);
+    addAttribute(EndTrigger, kTypeObject);
+    addAttributeProperty(EndTrigger, readOnly, YES);
+    addAttributeProperty(EndTrigger, hidden, YES);
     
     addAttribute(Scheduler, kTypeObject);
+    addAttributeProperty(Scheduler, readOnly, YES);
     addAttributeProperty(Scheduler, hidden, YES);
+    
+    addMessageWithArguments(StartTriggerAdd);
+    addMessageWithArguments(StartTriggerRemove);
+    
+    addMessageWithArguments(EndTriggerAdd);
+    addMessageWithArguments(EndTriggerRemove);
 	
 	// needed to be handled by a TTXmlHandler
 	addMessageWithArguments(WriteAsXml);
@@ -100,18 +113,20 @@ mScheduler(NULL)
     this->findAttribute(TTSymbol("start"), &startAttribute);
     this->findAttribute(TTSymbol("end"), &endAttribute);
     this->findAttribute(TTSymbol("progression"), &progressionAttribute);
+    this->findAttribute(TTSymbol("startTrigger"), &startTriggerAttribute);
+    this->findAttribute(TTSymbol("endTrigger"), &endTriggerAttribute);
 }
 
 TimeProcess::~TimeProcess()
 {    
-    if (mStartReceiver) {
-        TTObjectBaseRelease(TTObjectBaseHandle(&mStartReceiver));
-        mStartReceiver = NULL;
+    if (mStartTrigger) {
+        TTObjectBaseRelease(TTObjectBaseHandle(&mStartTrigger));
+        mStartTrigger = NULL;
     }
     
-    if (mEndReceiver) {
-        TTObjectBaseRelease(TTObjectBaseHandle(&mEndReceiver));
-        mEndReceiver = NULL;
+    if (mEndTrigger) {
+        TTObjectBaseRelease(TTObjectBaseHandle(&mEndTrigger));
+        mEndTrigger = NULL;
     }
     
     if (mScheduler) {
@@ -161,82 +176,138 @@ TTErr TimeProcess::setActive(const TTValue& value)
 
 TTErr TimeProcess::setStart(const TTValue& value)
 {
-    TTValue retunedValue;
-    TTErr   err;
+    TTValue     v, returnedValue;
+    TTUInt32    newStart;
+    TTErr       err = kTTErrNone;
     
-    // Try to change the scheduler start date and get the effective start date back
-    err = mScheduler->sendMessage(TTSymbol("changeStart"), value, retunedValue);
-    
-    if (!err) {
+    if (value.size() == 1) {
         
-        // set the internal start value
-        mStart = retunedValue[0];
-        
-        // notify each attribute observers (like a parent scenario for example)
-        startAttribute->sendNotification(kTTSym_notify, mStart);             // we use kTTSym_notify because we know that observers are TTCallback
+        if (value[0].type() == kTypeUInt32) {
+            
+            newStart = value[0];
+            
+            // if the time process is managed by a scenario
+            if (mScenario) {
+                
+                v = TTValue((TTObjectBasePtr)this);
+                v.append(newStart);
+                
+                // try to change start date inside the scenario and get the effective start date back
+                err = mScenario->sendMessage(TTSymbol("TimeProcessStartChange"), v, returnedValue);
+                
+                if (!err)
+                    newStart = returnedValue[0];
+                else
+                    return err;
+            }
+            
+            // set the internal start value
+            mStart = newStart;
+            
+            // notify each attribute observers
+            startAttribute->sendNotification(kTTSym_notify, mStart);             // we use kTTSym_notify because we know that observers are TTCallback
+            
+            return err;
+        }
     }
     
-    return err;
+    return kTTErrGeneric;
 }
 
 TTErr TimeProcess::setEnd(const TTValue& value)
 {
-    TTValue retunedValue;
-    TTErr   err;
+    TTValue     v, returnedValue;
+    TTUInt32    newEnd;
+    TTErr       err = kTTErrNone;
     
-    // Try to change the scheduler end date and get the effective end date back
-    err = mScheduler->sendMessage(TTSymbol("changeEnd"), value, retunedValue);
-    
-    if (!err) {
+    if (value.size() == 1) {
         
-        // set the internal end value
-        mEnd = retunedValue[0];
-        
-        // notify each attribute observers (like a parent scenario for example)
-        endAttribute->sendNotification(kTTSym_notify, mEnd);             // we use kTTSym_notify because we know that observers are TTCallback
+        if (value[0].type() == kTypeUInt32) {
+            
+            newEnd = value[0];
+            
+            // if the time process is managed by a scenario
+            if (mScenario) {
+                
+                v = TTValue((TTObjectBasePtr)this);
+                v.append(newEnd);
+                
+                // try to change end date inside the scenario and get the effective end date back
+                err = mScenario->sendMessage(TTSymbol("TimeProcessEndChange"), v, returnedValue);
+                
+                if (!err)
+                    newEnd = returnedValue[0];
+                else
+                    return err;
+            }
+            
+            // set the internal start value
+            mEnd = newEnd;
+            
+            // notify each attribute observers
+            endAttribute->sendNotification(kTTSym_notify, mEnd);             // we use kTTSym_notify because we know that observers are TTCallback
+            
+            return err;
+        }
     }
     
-    return err;
+    return kTTErrGeneric;
 }
 
-TTErr TimeProcess::TriggerStartAdd(const TTValue& inputValue, TTValue& outputValue)
+TTErr TimeProcess::StartTriggerAdd(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTValue			args;
+    TTValue			v, args;
     TTAddress       triggerAddress;
 	TTObjectBasePtr	returnValueCallback;
 	TTValuePtr		returnValueBaton;
     TTErr           err;
     
+    // can't add trigger on relation
+    if (this->getName() == TTSymbol("Relation"))
+        return kTTErrGeneric;
+    
     if (inputValue.size() == 1) {
         
         triggerAddress = inputValue[0];
         
-        // Remove former receiver
-        TriggerStartRemove();
+        // Remove former trigger
+        StartTriggerRemove();
+        
+        // if the time process is managed by a scenario
+        if (mScenario) {
+            
+            v = TTValue((TTObjectBasePtr)this);
+            
+            // Try to add a start trigger inside the scenario
+            err = mScenario->sendMessage(TTSymbol("TimeProcessStartTriggerAdd"), v, kTTValNONE);
+            
+            if (err)
+                return err;
+        }
         
         // Prepare arguments for TTReceiver creation
         
         // we don't need the address back
         args.append(NULL);
         
-        // but we need the value back to test it (using the TimeProcessStartReceiverCallback function)
+        // but we need the value back to test it (using the TimeProcessStartTriggerCallback function)
         returnValueCallback = NULL;
         TTObjectBaseInstantiate(TTSymbol("callback"), &returnValueCallback, kTTValNONE);
         returnValueBaton = new TTValue(TTObjectBasePtr(this));
         returnValueCallback->setAttributeValue(kTTSym_baton, TTPtr(returnValueBaton));
-        returnValueCallback->setAttributeValue(kTTSym_function, TTPtr(&TimeProcessStartReceiverCallback));
+        returnValueCallback->setAttributeValue(kTTSym_function, TTPtr(&TimeProcessStartTriggerCallback));
         args.append(returnValueCallback);
         
-        mStartReceiver = NULL;
-        err = TTObjectBaseInstantiate(kTTSym_Receiver, TTObjectBaseHandle(&mStartReceiver), args);
+        mStartTrigger = NULL;
+        err = TTObjectBaseInstantiate(kTTSym_Receiver, TTObjectBaseHandle(&mStartTrigger), args);
         
         if (!err) {
             
-            // Make the receiver binds on the given address
-            mStartReceiver->setAttributeValue(kTTSym_address, triggerAddress);
+            // make the receiver binds on the given address
+            mStartTrigger->setAttributeValue(kTTSym_address, triggerAddress);
             
-            // TODO : tell to scheduler there is a trigger point here (?)
-            // (it means append a trigger point to the storyline)
+            // notify each attribute observers
+            startTriggerAttribute->sendNotification(kTTSym_notify, mStartTrigger);             // we use kTTSym_notify because we know that observers are TTCallback
             
         }
     }
@@ -244,74 +315,120 @@ TTErr TimeProcess::TriggerStartAdd(const TTValue& inputValue, TTValue& outputVal
 	return err;
 }
 
-TTErr TimeProcess::TriggerStartRemove()
+TTErr TimeProcess::StartTriggerRemove()
 {
-    if (mStartReceiver) {
+    TTValue v;
+    TTErr   err;
+    
+    if (mStartTrigger) {
         
-        TTObjectBaseRelease(TTObjectBaseHandle(&mStartReceiver));
-        mStartReceiver = NULL;
+        // if the time process is managed by a scenario
+        if (mScenario) {
+            
+            v = TTValue((TTObjectBasePtr)this);
+            
+            // Try to add a start trigger inside the scenario
+            err = mScenario->sendMessage(TTSymbol("TimeProcessStartTriggerRemove"), v, kTTValNONE);
+            
+            if (err)
+                return err;
+        }
         
-        // TODO : tell to scheduler there is no more trigger point here (?)
-        // (it means remove a trigger point to the storyline)
+        TTObjectBaseRelease(TTObjectBaseHandle(&mStartTrigger));
+        mStartTrigger = NULL;
+        
+        // notify each attribute observers
+        startTriggerAttribute->sendNotification(kTTSym_notify, mStartTrigger);             // we use kTTSym_notify because we know that observers are TTCallback
     }
     
     return kTTErrNone;
 }
 
-TTErr TimeProcess::TriggerEndAdd(const TTValue& inputValue, TTValue& outputValue)
+TTErr TimeProcess::EndTriggerAdd(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTValue			args;
+    TTValue			v, args;
     TTAddress       triggerAddress;
 	TTObjectBasePtr	returnValueCallback;
 	TTValuePtr		returnValueBaton;
     TTErr           err;
     
+    // can't add trigger on relation
+    if (this->getName() == TTSymbol("Relation"))
+        return kTTErrGeneric;
+    
     if (inputValue.size() == 1) {
         
         triggerAddress = inputValue[0];
         
-        // Remove former receiver
-        TriggerEndRemove();
+        // Remove former trigger
+        EndTriggerRemove();
+        
+        // if the time process is managed by a scenario
+        if (mScenario) {
+            
+            v = TTValue((TTObjectBasePtr)this);
+            
+            // Try to add a start trigger inside the scenario
+            err = mScenario->sendMessage(TTSymbol("TimeProcessEndTriggerAdd"), v, kTTValNONE);
+            
+            if (err)
+                return err;
+        }
         
         // Prepare arguments for TTReceiver creation
         
         // we don't need the address back
         args.append(NULL);
         
-        // but we need the value back to test it (using the TimeProcessStartReceiverCallback function)
+        // but we need the value back to test it (using the TimeProcessStartTriggerCallback function)
         returnValueCallback = NULL;
         TTObjectBaseInstantiate(TTSymbol("callback"), &returnValueCallback, kTTValNONE);
         returnValueBaton = new TTValue(TTObjectBasePtr(this));
         returnValueCallback->setAttributeValue(kTTSym_baton, TTPtr(returnValueBaton));
-        returnValueCallback->setAttributeValue(kTTSym_function, TTPtr(&TimeProcessEndReceiverCallback));
+        returnValueCallback->setAttributeValue(kTTSym_function, TTPtr(&TimeProcessEndTriggerCallback));
         args.append(returnValueCallback);
         
-        mEndReceiver = NULL;
-        err = TTObjectBaseInstantiate(kTTSym_Receiver, TTObjectBaseHandle(&mEndReceiver), args);
+        mEndTrigger = NULL;
+        err = TTObjectBaseInstantiate(kTTSym_Receiver, TTObjectBaseHandle(&mEndTrigger), args);
         
         if (!err) {
             
-            // Make the receiver binds on the given address
-            mEndReceiver->setAttributeValue(kTTSym_address, triggerAddress);
+            // make the receiver binds on the given address
+            mEndTrigger->setAttributeValue(kTTSym_address, triggerAddress);
             
-            // TODO : tell to scheduler there is a trigger point here (?)
-            // (it means append a trigger point to the storyline)
+            // notify each attribute observers
+            endTriggerAttribute->sendNotification(kTTSym_notify, mEndTrigger);             // we use kTTSym_notify because we know that observers are TTCallback
         }
     }
 	
 	return err;
 }
 
-TTErr TimeProcess::TriggerEndRemove()
+TTErr TimeProcess::EndTriggerRemove()
 {
-    // remove former receiver
-    if (mEndReceiver) {
+    TTValue v;
+    TTErr   err;
+    
+    // remove former trigger
+    if (mEndTrigger) {
         
-        TTObjectBaseRelease(TTObjectBaseHandle(&mEndReceiver));
-        mEndReceiver = NULL;
+        // if the time process is managed by a scenario
+        if (mScenario) {
+            
+            v = TTValue((TTObjectBasePtr)this);
+            
+            // Try to add a start trigger inside the scenario
+            err = mScenario->sendMessage(TTSymbol("TimeProcessEndTriggerRemove"), v, kTTValNONE);
+            
+            if (err)
+                return err;
+        }
         
-        // TODO : tell to scheduler there is no more trigger point here (?)
-        // (it means remove a trigger point to the storyline)
+        TTObjectBaseRelease(TTObjectBaseHandle(&mEndTrigger));
+        mEndTrigger = NULL;
+        
+        // notify each attribute observers
+        endTriggerAttribute->sendNotification(kTTSym_notify, mEndTrigger);             // we use kTTSym_notify because we know that observers are TTCallback
     }
     
     return kTTErrNone;
@@ -323,7 +440,7 @@ TTErr TimeProcess::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
 	
-	// TODO : write the time process attributes, the cue start and end content, start and end receiver, ...
+	// TODO : write the time process attributes, the cue start and end content, start and end trigger, ...
 	
 	return kTTErrGeneric;
 }
@@ -334,7 +451,7 @@ TTErr TimeProcess::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
 	
-	// TODO : parse the time process attributes, the cue start and end content, start and end receiver, ...
+	// TODO : parse the time process attributes, the cue start and end content, start and end trigger, ...
 	
 	return kTTErrGeneric;
 }
@@ -345,7 +462,7 @@ TTErr TimeProcess::WriteAsText(const TTValue& inputValue, TTValue& outputValue)
 	
 	aTextHandler = TTTextHandlerPtr((TTObjectBasePtr)inputValue[0]);
 	
-	// TODO : write the time process attributes, the cue start and end content, start and end receiver, ...
+	// TODO : write the time process attributes, the cue start and end content, start and end trigger, ...
 	
 	return kTTErrGeneric;
 }
@@ -357,7 +474,7 @@ TTErr TimeProcess::ReadFromText(const TTValue& inputValue, TTValue& outputValue)
 	
 	aTextHandler = TTTextHandlerPtr((TTObjectBasePtr)inputValue[0]);
 	
-    // TODO : parse the time process attributes, the cue start and end content, start and end receiver, ...
+    // TODO : parse the time process attributes, the cue start and end content, start and end trigger, ...
 	
 	return kTTErrGeneric;
 }
@@ -367,7 +484,7 @@ TTErr TimeProcess::ReadFromText(const TTValue& inputValue, TTValue& outputValue)
 #pragma mark Some Methods
 #endif
 
-TTErr TimeProcessStartReceiverCallback(TTPtr baton, TTValue& data)
+TTErr TimeProcessStartTriggerCallback(TTPtr baton, TTValue& data)
 {
     TimeProcessPtr  aTimeProcess;
 	TTValuePtr      b;
@@ -388,7 +505,7 @@ TTErr TimeProcessStartReceiverCallback(TTPtr baton, TTValue& data)
     return kTTErrGeneric;
 }
 
-TTErr TimeProcessEndReceiverCallback(TTPtr baton, TTValue& data)
+TTErr TimeProcessEndTriggerCallback(TTPtr baton, TTValue& data)
 {
     TimeProcessPtr  aTimeProcess;
 	TTValuePtr      b;
@@ -424,8 +541,8 @@ void TimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression)
     // then recall the start state
     if (progression == 0.) {
         
-        // close start receiver listening
-        aTimeProcess->mStartReceiver->setAttributeValue(kTTSym_active, NO);
+        // close start trigger listening
+        aTimeProcess->mStartTrigger->setAttributeValue(kTTSym_active, NO);
         
         // notify owner that the start appends
         aTimeProcess->mStartCallback->notify(TTObjectBasePtr(aTimeProcess), kTTValNONE);
@@ -447,8 +564,8 @@ void TimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression)
     // then notify the time process owner that the time process ends
     else if (progression == 1.) {
         
-        // close end receiver listening
-        aTimeProcess->mEndReceiver->setAttributeValue(kTTSym_active, NO);
+        // close end trigger listening
+        aTimeProcess->mEndTrigger->setAttributeValue(kTTSym_active, NO);
         
         // use the specific process end method of the time process
         aTimeProcess->ProcessEnd();

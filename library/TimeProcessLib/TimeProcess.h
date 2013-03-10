@@ -42,6 +42,8 @@ public:
 	TTSymbol                        mAuthor;                        ///< ATTRIBUTE : the author of the time process
     
 protected:
+    TTObjectBasePtr                 mScenario;                      ///< ATTRIBUTE : the parent scenario which constrain the time process
+    
     TTBoolean                       mActive;                        ///< ATTRIBUTE : is the time process active ?
     TTBoolean                       mRunning;                       ///< ATTRIBUTE : is the time process running ?
     
@@ -50,8 +52,8 @@ protected:
     
     TTFloat64                       mProgression;                   ///< ATTRIBUTE : the progression of the time process [0. :: 1.]
     
-    TTObjectBasePtr                 mStartReceiver;                 ///< ATTRIBUTE : an internal receiver to launch the time process execution
-    TTObjectBasePtr                 mEndReceiver;                   ///< ATTRIBUTE : an internal receiver to stop the time process execution
+    TTObjectBasePtr                 mStartTrigger;                  ///< ATTRIBUTE : an internal receiver to launch the time process execution
+    TTObjectBasePtr                 mEndTrigger;                    ///< ATTRIBUTE : an internal receiver to stop the time process execution
     
     TTCallbackPtr                   mStartCallback;                 ///< ATTRIBUTE : a callback to notify the beginning of the time process
     TTCallbackPtr                   mEndCallback;                   ///< ATTRIBUTE : a callback to notify the end of the time process
@@ -68,6 +70,8 @@ private:
     TTAttributePtr                  startAttribute;                 ///< cache start attribute for observer notification
     TTAttributePtr                  endAttribute;                   ///< cache end attribute for observer notification
     TTAttributePtr                  progressionAttribute;           ///< cache progression attribute for observer notification
+    TTAttributePtr                  startTriggerAttribute;          ///< cache start trigger attribute for observer notification
+    TTAttributePtr                  endTriggerAttribute;            ///< cache end trigger attribute for observer notification
     
 public:
 	//** Constructor.	*/
@@ -113,20 +117,20 @@ private :
     /** Add a start trigger on an address
      @param	value           a TTAddress to listen
      @return                an error code if trigger can't be added */
-    TTErr   TriggerStartAdd(const TTValue& inputValue, TTValue& outputValue);
+    TTErr   StartTriggerAdd(const TTValue& inputValue, TTValue& outputValue);
     
     /** Remove a start trigger
      @return                kTTerrNone */
-    TTErr   TriggerStartRemove();
+    TTErr   StartTriggerRemove();
     
     /** Add a end trigger on an address
      @param	value           a TTAddress to listen
      @return                an error code if trigger can't be added */
-    TTErr   TriggerEndAdd(const TTValue& inputValue, TTValue& outputValue);
+    TTErr   EndTriggerAdd(const TTValue& inputValue, TTValue& outputValue);
     
     /** Remove a end trigger
      @return                kTTerrNone */
-    TTErr   TriggerEndRemove();
+    TTErr   EndTriggerRemove();
     
 	/**  needed to be handled by a TTXmlHandler
      @param	value           ..
@@ -140,24 +144,24 @@ private :
 	TTErr	WriteAsText(const TTValue& inputValue, TTValue& outputValue);
 	TTErr	ReadFromText(const TTValue& inputValue, TTValue& outputValue);
     
-    friend TTErr TT_EXTENSION_EXPORT TimeProcessStartReceiverCallback(TTPtr baton, TTValue& data);
-    friend TTErr TT_EXTENSION_EXPORT TimeProcessEndReceiverCallback(TTPtr baton, TTValue& data);
+    friend TTErr TT_EXTENSION_EXPORT TimeProcessStartTriggerCallback(TTPtr baton, TTValue& data);
+    friend TTErr TT_EXTENSION_EXPORT TimeProcessEndTriggerCallback(TTPtr baton, TTValue& data);
     friend void TT_EXTENSION_EXPORT TimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression);
 };
 
 typedef TimeProcess* TimeProcessPtr;
 
-/** The receiver callback to start the time process
+/** The trigger callback to start the time process
  @param	baton						a time process instance
  @param	data						a value to test in a logical expression
  @return							an error code */
-TTErr TT_EXTENSION_EXPORT TimeProcessStartReceiverCallback(TTPtr baton, TTValue& data);
+TTErr TT_EXTENSION_EXPORT TimeProcessStartTriggerCallback(TTPtr baton, TTValue& data);
 
-/** The receiver callback to stop the time process
+/** The trigger callback to stop the time process
  @param	baton						a time process instance
  @param	data						a value to test in a logical expression
  @return							an error code */
-TTErr TT_EXTENSION_EXPORT TimeProcessEndReceiverCallback(TTPtr baton, TTValue& data);
+TTErr TT_EXTENSION_EXPORT TimeProcessEndTriggerCallback(TTPtr baton, TTValue& data);
 
 /** The scheduler time progression callback
  @param	baton						a time process instance
