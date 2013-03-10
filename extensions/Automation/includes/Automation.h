@@ -34,9 +34,6 @@ private :
      @return                kTTErrNone */
 	TTErr getParameterNames(TTValue& value);
     
-    /** Get the progression [0. :: 1.] */
-	TTErr getProgression(TTValue& value);
-    
     /** Specific process method on start
      @return                an error code returned by the process end method */
     TTErr ProcessStart();

@@ -78,16 +78,9 @@ Automation::~Automation()
 TTErr Automation::getParameterNames(TTValue& value)
 {
     value.clear();
-	//value.append(TTSymbol("aPrameterName"));
+	//value.append(TTSymbol("aParameterName"));
 	
 	return kTTErrNone;
-}
-
-TTErr Automation::getProgression(TTValue& value)
-{
-    value = mProgression;
-    
-    return kTTErrNone;
 }
 
 TTErr Automation::ProcessStart()
