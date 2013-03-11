@@ -34,7 +34,7 @@ mNamespace(NULL)
 {
     TIME_PROCESS_INITIALIZE
     
-	TT_ASSERT("Correct number of args to create TTTimeBox", arguments.size() == 0);
+	TT_ASSERT("Correct number of args to create Scenario", arguments.size() == 0);
     
     addMessageWithArguments(TimeProcessAdd);
     addMessageWithArguments(TimeProcessRemove);

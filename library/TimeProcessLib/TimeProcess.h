@@ -52,14 +52,14 @@ protected:
     
     TTFloat64                       mProgression;                   ///< ATTRIBUTE : the progression of the time process [0. :: 1.]
     
-    TTObjectBasePtr                 mStartTrigger;                  ///< ATTRIBUTE : an internal receiver to launch the time process execution
-    TTObjectBasePtr                 mEndTrigger;                    ///< ATTRIBUTE : an internal receiver to stop the time process execution
+    TTObjectBasePtr                 mStartTrigger;                  ///< ATTRIBUTE : the trigger object which handles the time process execution start
+    TTObjectBasePtr                 mEndTrigger;                    ///< ATTRIBUTE : the trigger object which handles the time process execution stop
     
-    TTCallbackPtr                   mStartCallback;                 ///< ATTRIBUTE : a callback to notify the beginning of the time process
-    TTCallbackPtr                   mEndCallback;                   ///< ATTRIBUTE : a callback to notify the end of the time process
+    TTCallbackPtr                   mStartCallback;                 ///< a callback to notify the owner of the beginning of the time process
+    TTCallbackPtr                   mEndCallback;                   ///< a callback to notify the owner of the end of the time process
     
-    TimeProcessProgressionCallback  mProgressionCallback;           ///< a specific callback function used to notify each progression step
-    TTPtr                           mProgressionBaton;              ///< a pointer to store the callback used to notify each progression step
+    TimeProcessProgressionCallback  mProgressionCallback;           ///< a specific callback function used to notify the owner of each progression step
+    TTPtr                           mProgressionBaton;              ///< a pointer to store the callback used to notify the owner of each progression step
     
     TTObjectBasePtr                 mScheduler;                     ///< ATTRIBUTE : the scheduler object which handles the time process execution
     

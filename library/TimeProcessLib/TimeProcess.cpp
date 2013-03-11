@@ -28,7 +28,7 @@ mProgressionCallback(NULL),
 mProgressionBaton(NULL),
 mScheduler(NULL)
 {
-    TT_ASSERT("Correct number of args to create TimeProcess", arguments.size() == 4);
+    TT_ASSERT("Correct number of args to create Automation", arguments.size() == 4);
     
     if (arguments.size() >= 1)
 		mStartCallback = TTCallbackPtr((TTObjectBasePtr)arguments[0]);
@@ -118,7 +118,18 @@ mScheduler(NULL)
 }
 
 TimeProcess::~TimeProcess()
-{    
+{
+    TTValue v;
+    
+    // if the time process is managed by a scenario
+    if (mScenario) {
+        
+        v = TTValue((TTObjectBasePtr)this);
+        
+        // remove the time process from the scenario (even if it can be done by the creator but it is safe to remove our self)
+        mScenario->sendMessage(TTSymbol("TimeProcessRemove"), v, kTTValNONE);
+    }
+    
     if (mStartTrigger) {
         TTObjectBaseRelease(TTObjectBaseHandle(&mStartTrigger));
         mStartTrigger = NULL;
@@ -168,7 +179,7 @@ TTErr TimeProcess::setActive(const TTValue& value)
     // set the internal active value
     mActive = value[0];
         
-    // notify each attribute observers (like a parent scenario for example)
+    // notify each attribute observers
     activeAttribute->sendNotification(kTTSym_notify, mActive);             // we use kTTSym_notify because we know that observers are TTCallback
     
     return kTTErrNone;
@@ -533,7 +544,7 @@ void TimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression)
     // set internal progression value
     aTimeProcess->mProgression = progression;
     
-    // notify each attribute observers (like a parent scenario for example)
+    // notify each attribute observers
     aTimeProcess->progressionAttribute->sendNotification(kTTSym_notify,  aTimeProcess->mProgression);     // we use kTTSym_notify because we know that observers are TTCallback
     
     // Case 0 :
@@ -550,7 +561,7 @@ void TimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression)
         // set internal running state
         aTimeProcess->mRunning = YES;
         
-        // notify each attribute observers (like a parent scenario for example)
+        // notify each attribute observers
         aTimeProcess->runningAttribute->sendNotification(kTTSym_notify, aTimeProcess->mRunning);          // we use kTTSym_notify because we know that observers are TTCallback
         
         // use the specific start process method of the time process
@@ -576,7 +587,7 @@ void TimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression)
         // set internal running state
         aTimeProcess->mRunning = YES;
         
-        // notify each attribute observers (like a parent scenario for example)
+        // notify each attribute observers
         aTimeProcess->runningAttribute->sendNotification(kTTSym_notify, aTimeProcess->mRunning);          // we use kTTSym_notify because we know that observers are TTCallback
         
         return;

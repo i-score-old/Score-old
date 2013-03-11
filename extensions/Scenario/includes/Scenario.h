@@ -121,13 +121,15 @@ private :
     TTErr TimeProcessEndTriggerRemove(const TTValue& inputValue, TTValue& outputValue);
     
 	/**  needed to be handled by a TTXmlHandler
-     @param	value           ..
+     @param	inputValue      ..
+     @param	outputValue     ..
      @return                .. */
 	TTErr	WriteAsXml(const TTValue& inputValue, TTValue& outputValue);
 	TTErr	ReadFromXml(const TTValue& inputValue, TTValue& outputValue);
 	
 	/**  needed to be handled by a TTTextHandler
-     @param	value           ..
+     @param	inputValue      ..
+     @param	outputValue     ..
      @return                .. */
 	TTErr	WriteAsText(const TTValue& inputValue, TTValue& outputValue);
 	TTErr	ReadFromText(const TTValue& inputValue, TTValue& outputValue);
