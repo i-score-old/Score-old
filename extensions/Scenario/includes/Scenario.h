@@ -25,6 +25,7 @@ class Scenario : public TimeProcess
 private :
     
     TTList                      mTimeProcessList;               ///< ATTRIBUTE : all registered time process and their observers
+    TTList                      mTimeEventList;                 ///< ATTRIBUTE : all registered time event and their observers
     
     TTAddressItemPtr            mNamespace;                     ///< ATTRIBUTE : the namespace workspace of the scenario
 	
@@ -84,6 +85,9 @@ private :
      @return                an error code if the end date change fails */
     TTErr TimeProcessEndChange(const TTValue& inputValue, TTValue& outputValue);
     
+    
+    
+    // TODO : TimeProcessStartEventAdd
     /** Add a time process start trigger into the scenario
      note : this method doesn't update the time process internal start trigger
      but it can change attribute of other time processes connected to this one.

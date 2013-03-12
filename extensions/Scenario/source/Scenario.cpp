@@ -220,6 +220,7 @@ TTErr Scenario::TimeProcessActiveChange(const TTValue& inputValue, TTValue& outp
 	
     if (inputValue.size() == 2) {
         
+        // TODO : use dictionnary
         if (inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeBoolean) {
             
             // get time process where the change comes from
@@ -244,6 +245,7 @@ TTErr Scenario::TimeProcessStartChange(const TTValue& inputValue, TTValue& outpu
 	
     if (inputValue.size() == 2) {
         
+        // TODO : use dictionnary
         if (inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeUInt32) {
             
             // get time process where the change comes from
@@ -286,6 +288,7 @@ TTErr Scenario::TimeProcessEndChange(const TTValue& inputValue, TTValue& outputV
 	
     if (inputValue.size() == 2) {
         
+        // TODO : use dictionnary
         if (inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeUInt32) {
             
             // get time process where the change comes from
@@ -326,6 +329,7 @@ TTErr Scenario::TimeProcessStartTriggerAdd(const TTValue& inputValue, TTValue& o
 	
     if (inputValue.size() == 1) {
         
+        // TODO : use dictionnary
         if (inputValue[0].type() == kTypeObject) {
             
             // get time process where the start trigger is added
@@ -345,6 +349,7 @@ TTErr Scenario::TimeProcessStartTriggerRemove(const TTValue& inputValue, TTValue
 	
     if (inputValue.size() == 1) {
         
+        // TODO : use dictionnary
         if (inputValue[0].type() == kTypeObject) {
             
             // get time process where the start trigger is removed
@@ -364,6 +369,7 @@ TTErr Scenario::TimeProcessEndTriggerAdd(const TTValue& inputValue, TTValue& out
 	
     if (inputValue.size() == 1) {
         
+        // TODO : use dictionnary
         if (inputValue[0].type() == kTypeObject) {
             
             // get time process where the end trigger is added
@@ -383,6 +389,7 @@ TTErr Scenario::TimeProcessEndTriggerRemove(const TTValue& inputValue, TTValue& 
 	
     if (inputValue.size() == 1) {
         
+        // TODO : use dictionnary
         if (inputValue[0].type() == kTypeObject) {
             
             // get time process where the end trigger is removed
