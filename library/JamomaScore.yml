@@ -59,6 +59,7 @@ sources:
   - source/TTScoreSymbolCache.cpp
   
   - TimeProcessLib/TimeProcess.cpp
+  - TimeEventLib/TimeEvent.cpp
 
 includes:
   - ECOMachine
@@ -71,6 +72,7 @@ includes:
   - StoryLine
 
   - TimeProcessLib
+  - TimeEventLib
   
   # to build without having the whole jamoma repository
   - ../support/jamoma/includes

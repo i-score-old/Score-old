@@ -16,63 +16,29 @@ TimeProcess::TimeProcess(TTValue& arguments) :
 TTObjectBase(arguments),
 mScenario(NULL),
 mActive(YES),
-mRunning(NO),
-mStart(0),
-mEnd(0),
-mProgression(0.),
-mStartTrigger(NULL),
-mEndTrigger(NULL),
-mStartCallback(NULL),
-mEndCallback(NULL),
-mProgressionCallback(NULL),
-mProgressionBaton(NULL),
+mStartEvent(NULL),
+mEndEvent(NULL),
 mScheduler(NULL)
 {
-    TT_ASSERT("Correct number of args to create Automation", arguments.size() == 4);
+    TTValue args;
+    TTErr   err;
     
-    if (arguments.size() >= 1)
-		mStartCallback = TTCallbackPtr((TTObjectBasePtr)arguments[0]);
-	
-	if (arguments.size() >= 2)
-		mEndCallback = TTCallbackPtr((TTObjectBasePtr)arguments[1]);
-    
-    if (arguments.size() >= 3)
-        mProgressionCallback = TimeProcessProgressionCallback((TTPtr)arguments[2]);
-    
-    if (arguments.size() >= 4)
-        mProgressionBaton = arguments[3];
+    TT_ASSERT("Correct number of args to create TimeProcess", arguments.size() == 0);
     
     addAttribute(Scenario, kTypeObject);
     addAttributeProperty(Scenario, hidden, YES);
 
     addAttributeWithSetter(Active, kTypeBoolean);
     
-    addAttribute(Running, kTypeBoolean);
-    addAttributeProperty(Running, readOnly, YES);
+    addAttribute(StartEvent, kTypeObject);
+    addAttributeProperty(StartEvent, hidden, YES);
     
-	addAttributeWithSetter(Start, kTypeUInt32);
-    addAttributeWithSetter(End, kTypeUInt32);
-    
-    addAttribute(Progression, kTypeUInt32);
-    addAttributeProperty(Progression, readOnly, YES);
-    
-    addAttribute(StartTrigger, kTypeObject);
-    addAttributeProperty(StartTrigger, readOnly, YES);
-    addAttributeProperty(StartTrigger, hidden, YES);
-    
-    addAttribute(EndTrigger, kTypeObject);
-    addAttributeProperty(EndTrigger, readOnly, YES);
-    addAttributeProperty(EndTrigger, hidden, YES);
+    addAttribute(EndEvent, kTypeObject);
+    addAttributeProperty(EndEvent, hidden, YES);
     
     addAttribute(Scheduler, kTypeObject);
     addAttributeProperty(Scheduler, readOnly, YES);
     addAttributeProperty(Scheduler, hidden, YES);
-    
-    addMessageWithArguments(StartTriggerAdd);
-    addMessageWithArguments(StartTriggerRemove);
-    
-    addMessageWithArguments(EndTriggerAdd);
-    addMessageWithArguments(EndTriggerRemove);
 	
 	// needed to be handled by a TTXmlHandler
 	addMessageWithArguments(WriteAsXml);
@@ -86,19 +52,33 @@ mScheduler(NULL)
 	addMessageWithArguments(ReadFromText);
 	addMessageProperty(ReadFromText, hidden, YES);
     
-    // Creation of a scheduler based on the EcoMachine scheduler plugin
-    TTValue args;
-    TTErr   err;
-	
-    // Prepare callback argument to be notified of :
-    //      - a contrained change of the start date (is it needed ?)
-    //      - a contrained change of the end date (is it needed ?)
-    //      - the progression
+    // Creation of a static time event for the start
+    args = TTValue((TTPtr)&TimeProcessStartEventCallback);
+    args.append((TTObjectBasePtr)this);
     
-    //args.append((TTPtr)&TimeProcessChangeStartCallback);
-    //args.append((TTPtr)&TimeProcessChangeEndCallback);
-    args.append((TTPtr)&TimeProcessSchedulerCallback);
-    args.append((TTPtr)this);   // we have to store this as a pointer
+    err = TTObjectBaseInstantiate(TTSymbol("StaticEvent"), TTObjectBaseHandle(&mStartEvent), args);
+    
+	if (err) {
+        mStartEvent = NULL;
+		logError("TimeProcess failed to load a static start event");
+    }
+    
+    // Creation of a static time event for the end
+    args = TTValue((TTPtr)&TimeProcessEndEventCallback);
+    args.append((TTObjectBasePtr)this);
+    
+    err = TTObjectBaseInstantiate(TTSymbol("StaticEvent"), TTObjectBaseHandle(&mEndEvent), args);
+    
+	if (err) {
+        mStartEvent = NULL;
+		logError("TimeProcess failed to load a static end event");
+    }
+    
+    // Creation of a scheduler based on the EcoMachine scheduler plugin
+    // Prepare callback argument to be notified of :
+    //      - the progression
+    args = TTValue((TTPtr)&TimeProcessSchedulerCallback);
+    args.append((TTPtr)this);   // we have to store this as a pointer for Scheduler
     
     err = TTObjectBaseInstantiate(TTSymbol("EcoMachine"), TTObjectBaseHandle(&mScheduler), args);
     
@@ -107,14 +87,8 @@ mScheduler(NULL)
 		logError("TimeProcess failed to load the EcoMachine Scheduler");
     }
     
-    // cache some attributes for high speed notification feedbacks
+    // Cache some attributes for high speed notification feedbacks
     this->findAttribute(TTSymbol("active"), &activeAttribute);
-    this->findAttribute(TTSymbol("running"), &runningAttribute);
-    this->findAttribute(TTSymbol("start"), &startAttribute);
-    this->findAttribute(TTSymbol("end"), &endAttribute);
-    this->findAttribute(TTSymbol("progression"), &progressionAttribute);
-    this->findAttribute(TTSymbol("startTrigger"), &startTriggerAttribute);
-    this->findAttribute(TTSymbol("endTrigger"), &endTriggerAttribute);
 }
 
 TimeProcess::~TimeProcess()
@@ -130,14 +104,14 @@ TimeProcess::~TimeProcess()
         mScenario->sendMessage(TTSymbol("TimeProcessRemove"), v, kTTValNONE);
     }
     
-    if (mStartTrigger) {
-        TTObjectBaseRelease(TTObjectBaseHandle(&mStartTrigger));
-        mStartTrigger = NULL;
+    if (mStartEvent) {
+        TTObjectBaseRelease(TTObjectBaseHandle(&mStartEvent));
+        mStartEvent = NULL;
     }
     
-    if (mEndTrigger) {
-        TTObjectBaseRelease(TTObjectBaseHandle(&mEndTrigger));
-        mEndTrigger = NULL;
+    if (mEndEvent) {
+        TTObjectBaseRelease(TTObjectBaseHandle(&mEndEvent));
+        mEndEvent = NULL;
     }
     
     if (mScheduler) {
@@ -495,15 +469,8 @@ TTErr TimeProcess::ReadFromText(const TTValue& inputValue, TTValue& outputValue)
 #pragma mark Some Methods
 #endif
 
-TTErr TimeProcessStartTriggerCallback(TTPtr baton, TTValue& data)
-{
-    TimeProcessPtr  aTimeProcess;
-	TTValuePtr      b;
-	
-	// unpack baton (a time process)
-	b = (TTValuePtr)baton;
-	aTimeProcess = TimeProcessPtr((TTObjectBasePtr)(*b)[0]);
-	
+TTErr TimeProcessStartEventCallback(TimeProcessPtr aTimeProcess, const TTValue& eventValue)
+{	
     // if the time process active, launch the scheduler
 	if (aTimeProcess->mActive) {
         
@@ -516,15 +483,8 @@ TTErr TimeProcessStartTriggerCallback(TTPtr baton, TTValue& data)
     return kTTErrGeneric;
 }
 
-TTErr TimeProcessEndTriggerCallback(TTPtr baton, TTValue& data)
-{
-    TimeProcessPtr  aTimeProcess;
-	TTValuePtr      b;
-	
-	// unpack baton (a time process)
-	b = (TTValuePtr)baton;
-	aTimeProcess = TimeProcessPtr((TTObjectBasePtr)(*b)[0]);
-	
+TTErr TimeProcessEndEventCallback(TimeProcessPtr aTimeProcess, const TTValue& eventValue)
+{	
     // if the time process active, stop the scheduler
 	if (aTimeProcess->mActive) {
         
@@ -597,3 +557,18 @@ void TimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression)
     // use the specific process method
     aTimeProcess->Process();
 }
+
+/***************************************************************************
+ 
+ TimeProcessLib
+ 
+ ***************************************************************************/
+
+void TimeProcessLib::getTimeProcessNames(TTValue& timeProcessNames)
+{
+	timeProcessNames.clear();
+	timeProcessNames.append(TTSymbol("Automation"));
+    timeProcessNames.append(TTSymbol("Scenario"));
+    timeProcessNames.append(TTSymbol("Relation"));
+}
+
