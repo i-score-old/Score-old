@@ -30,9 +30,13 @@ extern "C" TT_EXTENSION_EXPORT TTErr TTLoadJamomaExtension_Scenario(void)
 }
 
 TIME_PROCESS_CONSTRUCTOR,
-mNamespace(NULL)
+mNamespace(NULL),
+mFirstEvent(NULL),
+mLastEvent(NULL)
 {
     TIME_PROCESS_INITIALIZE
+    
+    TTErr err;
     
 	TT_ASSERT("Correct number of args to create Scenario", arguments.size() == 0);
     
@@ -66,20 +70,38 @@ mNamespace(NULL)
     
 	if (err) {
         mStartEvent = NULL;
-		logError("TimeProcess failed to load a static start event");
+		logError("Scenario failed to load a static start event");
     }
     
+    // Subscribe to the start event using the mStartEventCallback
     mStartEvent->sendMessage(TTSymbol("Subscribe"), mStartEventCallback, kTTValNONE);
     
-    // Creation of a static time event for the end and subscribe to it
+    // Creation of a static time event for the end (but don't subscribe to it)
     err = TTObjectBaseInstantiate(TTSymbol("StaticEvent"), TTObjectBaseHandle(&mEndEvent), kTTValNONE);
     
 	if (err) {
-        mStartEvent = NULL;
-		logError("TimeProcess failed to load a static end event");
+        mEndEvent = NULL;
+		logError("Scenario failed to load a static end event");
     }
     
-    mEndEvent->sendMessage(TTSymbol("Subscribe"), mEndEventCallback, kTTValNONE);
+    // Creation of the first static event of the scenario (but don't subscribe to it)
+    err = TTObjectBaseInstantiate(TTSymbol("StaticEvent"), TTObjectBaseHandle(&mFirstEvent), kTTValNONE);
+    
+	if (err) {
+        mFirstEvent = NULL;
+		logError("Scenario failed to load the first static event");
+    }
+    
+    // Creation of the last static event of the scenario and subscribe to it
+    err = TTObjectBaseInstantiate(TTSymbol("StaticEvent"), TTObjectBaseHandle(&mLastEvent), kTTValNONE);
+    
+	if (err) {
+        mLastEvent = NULL;
+		logError("Scenario failed to load the last static event");
+    }
+    
+    // Subscribe to the last event using the mEndEventCallback (see in ProcessEnd why)
+    mLastEvent->sendMessage(TTSymbol("Subscribe"), mEndEventCallback, kTTValNONE);
 }
 
 Scenario::~Scenario()
@@ -87,6 +109,16 @@ Scenario::~Scenario()
     if (mNamespace) {
         delete mNamespace;
         mNamespace = NULL;
+    }
+    
+    if (mFirstEvent) {
+        TTObjectBaseRelease(TTObjectBaseHandle(&mFirstEvent));
+        mFirstEvent = NULL;
+    }
+    
+    if (mLastEvent) {
+        TTObjectBaseRelease(TTObjectBaseHandle(&mLastEvent));
+        mLastEvent = NULL;
     }
 }
 
@@ -100,11 +132,11 @@ TTErr Scenario::getParameterNames(TTValue& value)
 
 TTErr Scenario::ProcessStart()
 {
-    // Trigger the start event (use this  as trigger value to filter myself inside )
-    //mStartEvent->sendMessage(TTSymbol("Trigger"), TTObjectBasePtr(this), kTTValNONE);
+    // Trigger the first event
+    mFirstEvent->sendMessage(TTSymbol("Trigger"), kTTValNONE, kTTValNONE);
     
-    // Notify the start event subscribers
-    //mStartEvent->sendMessage(TTSymbol("Notify"));
+    // Notify the first event subscribers
+    mFirstEvent->sendMessage(TTSymbol("Notify"));
     
     return kTTErrNone;
 }
@@ -112,11 +144,11 @@ TTErr Scenario::ProcessStart()
 TTErr Scenario::ProcessEnd()
 {
     // Trigger the end event
-    //mEndEvent->sendMessage(TTSymbol("Trigger"), TTObjectBasePtr(this), kTTValNONE);
+    mEndEvent->sendMessage(TTSymbol("Trigger"), kTTValNONE, kTTValNONE);
     
     // Notify the end event subscribers
-    //mEndEvent->sendMessage(TTSymbol("Notify"));
-                             
+    mEndEvent->sendMessage(TTSymbol("Notify"));
+    
     return kTTErrNone;
 }
 
@@ -130,7 +162,7 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
             
             progression = inputValue[0];
             
-            // TODO : normally there is nothing to do as the scenario only contains other time processes which are doing things (?)
+            // TODO : look at ECOMachine to know what to do here ...
             return kTTErrNone;
         }
     }

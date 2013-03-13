@@ -78,56 +78,13 @@ TTErr TimeEvent::setDate(const TTValue& value)
     return kTTErrNone;
 }
 
-TTErr TimeEvent::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
-{
-	TTXmlHandlerPtr	aXmlHandler = NULL;
-	
-	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
-	
-	// TODO : write the time event attributes
-	
-	return kTTErrGeneric;
-}
-
-TTErr TimeEvent::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
-{
-	TTXmlHandlerPtr	aXmlHandler = NULL;
-	
-	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
-	
-	// TODO : parse the time event attributes
-	
-	return kTTErrGeneric;
-}
-
-TTErr TimeEvent::WriteAsText(const TTValue& inputValue, TTValue& outputValue)
-{
-	TTTextHandlerPtr	aTextHandler;
-	
-	aTextHandler = TTTextHandlerPtr((TTObjectBasePtr)inputValue[0]);
-	
-	// TODO : write the time event attributes
-	
-	return kTTErrGeneric;
-}
-
-TTErr TimeEvent::ReadFromText(const TTValue& inputValue, TTValue& outputValue)
-{
-	TTTextHandlerPtr aTextHandler;
-	TTValue	v;
-	
-	aTextHandler = TTTextHandlerPtr((TTObjectBasePtr)inputValue[0]);
-	
-    // TODO : parse the time event attributes
-	
-	return kTTErrGeneric;
-}
-
 TTErr TimeEvent::Subscribe(const TTValue& inputValue, TTValue& outputValue)
 {
     if (inputValue.size() == 1) {
         
         if (inputValue[0].type() == kTypeObject) {
+            
+            // TODO : check the type of the object : callback
             
             mSubscriberList.append(inputValue);
         }

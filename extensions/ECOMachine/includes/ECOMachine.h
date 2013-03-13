@@ -30,7 +30,7 @@ private:
 	TTErr getParameterNames(TTValue& value);
     
     /** Start the scheduler */
-    TTErr Go(const TTValue& inputValue, TTValue& outputValue);
+    TTErr Go();
     
     /** Halt the sheduler */
     void Stop();

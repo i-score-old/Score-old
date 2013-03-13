@@ -49,44 +49,45 @@ TTErr ECOMachine::getParameterNames(TTValue& value)
 	return kTTErrNone;
 }
 
-TTErr ECOMachine::Go(const TTValue& inputValue, TTValue& outputValue)
+TTErr ECOMachine::Go()
 {
-    TTFloat64 time;
-    
-    if (inputValue.size() == 1) {
+    // do we need to ramp at all ?
+    if (mDuration <= 0.) {
         
-        time = inputValue[0];
+        mRunning = NO;
+        mProgression = 0.;
+        mElapsedTime = 0.;
         
-        // do we need to ramp at all ?
-        if (time <= 0.) {
-            
-            mRunning = NO;
-            mProgression = 0.;
-            (mCallback)(mBaton, mProgression);
-            
-            // notify each running attribute observers
-            runningAttribute->sendNotification(kTTSym_notify, mRunning);          // we use kTTSym_notify because we know that observers are TTCallback
-            
-            // notify each progression attribute observers
-            progressionAttribute->sendNotification(kTTSym_notify, mProgression);  // we use kTTSym_notify because we know that observers are TTCallback
-        }
-        else {
-            
-            mRunning = YES;
-            mProgression = 0.;
-            (mCallback)(mBaton, mProgression);
-            
-            // notify each running attribute observers
-            runningAttribute->sendNotification(kTTSym_notify, mRunning);          // we use kTTSym_notify because we know that observers are TTCallback
-            
-            // notify each progression attribute observers
-            progressionAttribute->sendNotification(kTTSym_notify, mProgression);  // we use kTTSym_notify because we know that observers are TTCallback
-        }
+        (mCallback)(mBaton, mProgression);
         
-        return kTTErrNone;
+        // notify each running attribute observers
+        runningAttribute->sendNotification(kTTSym_notify, mRunning);          // we use kTTSym_notify because we know that observers are TTCallback
+        
+        // notify each progression attribute observers
+        progressionAttribute->sendNotification(kTTSym_notify, mProgression);  // we use kTTSym_notify because we know that observers are TTCallback
+        
+        // notify each elapsed time attribute observers
+        elapsedTimeAttribute->sendNotification(kTTSym_notify, mElapsedTime);  // we use kTTSym_notify because we know that observers are TTCallback
+    }
+    else {
+        
+        mRunning = YES;
+        mProgression = 0.;
+        mElapsedTime = 0.;
+        
+        (mCallback)(mBaton, mProgression);
+        
+        // notify each running attribute observers
+        runningAttribute->sendNotification(kTTSym_notify, mRunning);          // we use kTTSym_notify because we know that observers are TTCallback
+        
+        // notify each progression attribute observers
+        progressionAttribute->sendNotification(kTTSym_notify, mProgression);  // we use kTTSym_notify because we know that observers are TTCallback
+        
+        // notify each elapsed time attribute observers
+        elapsedTimeAttribute->sendNotification(kTTSym_notify, mElapsedTime);  // we use kTTSym_notify because we know that observers are TTCallback
     }
     
-    return kTTErrGeneric;
+    return kTTErrNone;
 }
 
 void ECOMachine::Stop()
@@ -105,10 +106,16 @@ void ECOMachine::Tick()
         cout << "ECOMachine::Tick !" << endl;
 #endif
         
+        //mProgression = ?;
+        //mElapsedTime = ?;
+        
         (mCallback)(mBaton, mProgression);
             
         // notify each progression attribute observers
         progressionAttribute->sendNotification(kTTSym_notify, mProgression);  // we use kTTSym_notify because we know that observers are TTCallback
+        
+        // notify each elapsed time attribute observers
+        elapsedTimeAttribute->sendNotification(kTTSym_notify, mElapsedTime);  // we use kTTSym_notify because we know that observers are TTCallback
 	}
 }
 

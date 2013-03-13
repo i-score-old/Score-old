@@ -28,6 +28,9 @@ private :
     TTList                      mTimeEventList;                 ///< ATTRIBUTE : all registered time events and their observers
     
     TTAddressItemPtr            mNamespace;                     ///< ATTRIBUTE : the namespace workspace of the scenario
+    
+    TTObjectBasePtr             mFirstEvent;                    ///< the first event of the scenario (which is not the start event)
+    TTObjectBasePtr             mLastEvent;                     ///< the last event of the scenario (which is not the end event)
 	
     /** Get parameters names needed by this time process
      @param	value           the returned parameter names
