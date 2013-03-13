@@ -60,6 +60,26 @@ mNamespace(NULL)
 	addMessageProperty(WriteAsText, hidden, YES);
 	addMessageWithArguments(ReadFromText);
 	addMessageProperty(ReadFromText, hidden, YES);
+    
+    // Creation of a static time event for the start and subscribe to it
+    err = TTObjectBaseInstantiate(TTSymbol("StaticEvent"), TTObjectBaseHandle(&mStartEvent), kTTValNONE);
+    
+	if (err) {
+        mStartEvent = NULL;
+		logError("TimeProcess failed to load a static start event");
+    }
+    
+    mStartEvent->sendMessage(TTSymbol("Subscribe"), mStartEventCallback, kTTValNONE);
+    
+    // Creation of a static time event for the end and subscribe to it
+    err = TTObjectBaseInstantiate(TTSymbol("StaticEvent"), TTObjectBaseHandle(&mEndEvent), kTTValNONE);
+    
+	if (err) {
+        mStartEvent = NULL;
+		logError("TimeProcess failed to load a static end event");
+    }
+    
+    mEndEvent->sendMessage(TTSymbol("Subscribe"), mEndEventCallback, kTTValNONE);
 }
 
 Scenario::~Scenario()
@@ -80,20 +100,42 @@ TTErr Scenario::getParameterNames(TTValue& value)
 
 TTErr Scenario::ProcessStart()
 {
-    // TODO : launch the processing of the first time process (?)
-    return kTTErrGeneric;
+    // Trigger the start event (use this  as trigger value to filter myself inside )
+    //mStartEvent->sendMessage(TTSymbol("Trigger"), TTObjectBasePtr(this), kTTValNONE);
+    
+    // Notify the start event subscribers
+    //mStartEvent->sendMessage(TTSymbol("Notify"));
+    
+    return kTTErrNone;
 }
 
 TTErr Scenario::ProcessEnd()
 {
-    // TODO : is there something to do at the end of a scenario ?
-    return kTTErrGeneric;
+    // Trigger the end event
+    //mEndEvent->sendMessage(TTSymbol("Trigger"), TTObjectBasePtr(this), kTTValNONE);
+    
+    // Notify the end event subscribers
+    //mEndEvent->sendMessage(TTSymbol("Notify"));
+                             
+    return kTTErrNone;
 }
 
-TTErr Scenario::Process()
+TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
 {
-    // TODO : normally there is nothing to do as the scenario only contains other time processes which are doing things (?)
-    return kTTErrNone;
+    TTFloat64 progression;
+    
+    if (inputValue.size() == 1) {
+        
+        if (inputValue[0].type() == kTypeFloat64) {
+            
+            progression = inputValue[0];
+            
+            // TODO : normally there is nothing to do as the scenario only contains other time processes which are doing things (?)
+            return kTTErrNone;
+        }
+    }
+    
+    return kTTErrGeneric;
 }
 
 TTErr Scenario::TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue)
@@ -416,7 +458,9 @@ void Scenario::makeTimeProcessCacheElement(TimeProcessPtr aTimeProcess, TTValue&
 	// 0 : cache time process object
 	newCacheElement.append((TTObjectBasePtr)aTimeProcess);
     
-    aScheduler = aTimeProcess->mScheduler;
+    // get the scheduler
+    aTimeProcess->getAttributeValue(TTSymbol("scheduler"), v);
+    aScheduler = v[0];
     
     // 1 : create and cache scheduler running attribute observer on this time process
     err = aScheduler->findAttribute(TTSymbol("running"), &anAttribute);
@@ -468,7 +512,9 @@ void Scenario::deleteTimeProcessCacheElement(const TTValue& oldCacheElement)
     // 0 : get cached time process
     aTimeProcess = TimeProcessPtr((TTObjectBasePtr)oldCacheElement[0]);
     
-    aScheduler = aTimeProcess->mScheduler;
+    // get the scheduler
+    aTimeProcess->getAttributeValue(TTSymbol("scheduler"), v);
+    aScheduler = v[0];
     
     // 1 : delete scheduler running attribute observer
     anObserver = NULL;

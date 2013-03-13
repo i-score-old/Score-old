@@ -27,13 +27,17 @@ private :
     /** Get parameters names needed by this time event
      @param	value           the returned parameter names
      @return                kTTErrNone */
-	TTErr getParameterNames(TTValue& value);
+	TTErr   getParameterNames(TTValue& value);
     
-    /** Specific trigger method
+    /** Specific triggering method : append the triggered value to the trigger list
      @param	inputValue      a value to pass thru the TimeEventTriggerCallback
      @param	outputValue     kTTValNone
-     @return                an error code returned by the process method */
-    TTErr Trigger(const TTValue& inputValue, TTValue& outputValue);
+     @return                an error code returned by the trigger method */
+    TTErr   Trigger(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Specific notification method : notify all subscribers if the trigger list have at least one value
+     @return                an error code returned by the notify method */
+    TTErr   Notify();
     
 	/**  needed to be handled by a TTXmlHandler
      @param	inputValue      ..

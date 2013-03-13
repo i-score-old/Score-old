@@ -30,12 +30,17 @@ extern "C" TT_EXTENSION_EXPORT TTErr TTLoadJamomaExtension_InteractiveEvent(void
 }
 
 TIME_EVENT_CONSTRUCTOR,
+mDateMin(0),
+mDateMax(0),
 mAddress(kTTAdrsEmpty),
 mReceiver(NULL)
 {
     TIME_EVENT_INITIALIZE
     
 	TT_ASSERT("Correct number of args to create InteractiveEvent", arguments.size() == 0);
+    
+    addAttribute(DateMin, kTypeUInt32);
+    addAttribute(DateMax, kTypeUInt32);
     
     addAttributeWithSetter(Address, kTypeSymbol);
 	
@@ -89,7 +94,30 @@ TTErr InteractiveEvent::getParameterNames(TTValue& value)
 
 TTErr InteractiveEvent::Trigger(const TTValue& inputValue, TTValue& outputValue)
 {
-    (mCallback)(mBaton, inputValue);
+    // append the triggered value to the trigger list
+    mTriggerList.append(inputValue);
+    
+    return kTTErrNone;
+}
+
+TTErr InteractiveEvent::Notify()
+{    
+    // if there is no triggered value : don't notify any subscriber
+    if (mTriggerList.isEmpty())
+        return kTTErrGeneric;
+    
+    TTObjectBasePtr aCallback;
+    
+    // notify all subscriber using the first triggered value
+    for (mSubscriberList.begin(); mSubscriberList.end(); mSubscriberList.next()) {
+        
+        aCallback = mSubscriberList.current()[0];
+        
+        aCallback->sendMessage(kTTSym_notify, mTriggerList.getHead(), kTTValNONE);
+    }
+    
+    // clear the trigger list
+    mTriggerList.clear();
     
     return kTTErrNone;
 }
@@ -99,7 +127,7 @@ TTErr InteractiveEvent::setAddress(const TTValue& value)
     if (value.size() == 1) {
         if (value[0].type() == kTypeSymbol) {
             
-            mAddress = value [0];
+            mAddress = value[0];
             
             // if the receiver exist, set the address to listen
             if (mReceiver)

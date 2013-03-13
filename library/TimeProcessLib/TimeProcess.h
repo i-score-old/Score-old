@@ -50,8 +50,12 @@ protected:
     TTBoolean                       mActive;                        ///< ATTRIBUTE : is the time process active ?
     
     TTObjectBasePtr                 mStartEvent;                    ///< ATTRIBUTE : the event object which handles the time process execution start
+    TTObjectBasePtr                 mStartEventCallback;            ///< a callback to subscribe for start event notification
+    
     // ? : TTList                       mIntermediateEvents;            ///< ATTRIBUTE : the list of intermediate events
+    
     TTObjectBasePtr                 mEndEvent;                      ///< ATTRIBUTE : the event object which handles the time process execution stop
+    TTObjectBasePtr                 mEndEventCallback;              ///< a callback to subscribe for end event notification
     
     TTObjectBasePtr                 mScheduler;                     ///< ATTRIBUTE : the scheduler object which handles the time process execution
     
@@ -60,6 +64,7 @@ private:
     TTAttributePtr                  activeAttribute;                ///< cache active attribute for observer notification
     
 public:
+    
 	//** Constructor.	*/
 	TimeProcess(TTValue& arguments);
 	
@@ -116,29 +121,29 @@ private :
      @return                an error code if the date is wrong */
     TTErr	setEndEvent(const TTValue& value);
     
-    friend TTErr TT_EXTENSION_EXPORT TimeProcessStartEventCallback(TTPtr object);
-    friend TTErr TT_EXTENSION_EXPORT TimeProcessEndEventCallback(TTPtr object);
+    friend TTErr TT_EXTENSION_EXPORT TimeProcessStartEventCallback(TTPtr baton, TTValue& data);
+    friend TTErr TT_EXTENSION_EXPORT TimeProcessEndEventCallback(TTPtr baton, TTValue& data);
     friend void TT_EXTENSION_EXPORT TimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression);
 };
 
 typedef TimeProcess* TimeProcessPtr;
 
 /** The start event callback to start the time process execution
- @param	aTimeProcess                a time process instance
- @param	eventValue					a value to test in a logical expression
- @return							an error code */
-TTErr TT_EXTENSION_EXPORT TimeProcessStartEventCallback(TTPtr object);
+ @param	baton               a time process instance
+ @param	data                a value relative to the event
+ @return					an error code */
+TTErr TT_EXTENSION_EXPORT TimeProcessStartEventCallback(TTPtr baton, TTValue& data);
 
 /** The end event callback to end the time process execution
- @param	aTimeProcess                a time process instance
- @param	eventValue					a value to test in a logical expression
- @return							an error code */
-TTErr TT_EXTENSION_EXPORT TimeProcessEndEventCallback(TTPtr object);
+ @param	baton               a time process instance
+ @param	data                a value relative to the event
+ @return					an error code */
+TTErr TT_EXTENSION_EXPORT TimeProcessEndEventCallback(TTPtr baton, TTValue& data);
 
 /** The scheduler time progression callback
- @param	baton						a time process instance
- @param	data						the time progression
- @return							an error code */
+ @param	object				a time process instance
+ @param	progression			the time progression
+ @return					an error code */
 void TT_EXTENSION_EXPORT TimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression);
 
 #endif // __TIME_PROCESS_H__

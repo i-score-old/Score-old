@@ -36,7 +36,9 @@ mNamespace(NULL)
 {
     TIME_PROCESS_INITIALIZE
     
-	TT_ASSERT("Correct number of args to create TTTimeBox", arguments.size() == 0);
+    TTErr           err;
+    
+	TT_ASSERT("Correct number of args to create Automation", arguments.size() == 0);
     
     addAttribute(StartCue, kTypeObject);
     addAttributeProperty(StartCue, hidden, YES);
@@ -55,6 +57,26 @@ mNamespace(NULL)
 	addMessageProperty(WriteAsText, hidden, YES);
 	addMessageWithArguments(ReadFromText);
 	addMessageProperty(ReadFromText, hidden, YES);
+    
+    // Creation of a static time event for the start and subscribe to it
+    err = TTObjectBaseInstantiate(TTSymbol("StaticEvent"), TTObjectBaseHandle(&mStartEvent), kTTValNONE);
+    
+	if (err) {
+        mStartEvent = NULL;
+		logError("TimeProcess failed to load a static start event");
+    }
+    
+    mStartEvent->sendMessage(TTSymbol("Subscribe"), mStartEventCallback, kTTValNONE);
+    
+    // Creation of a static time event for the end and subscribe to it
+    err = TTObjectBaseInstantiate(TTSymbol("StaticEvent"), TTObjectBaseHandle(&mEndEvent), kTTValNONE);
+    
+	if (err) {
+        mStartEvent = NULL;
+		logError("TimeProcess failed to load a static end event");
+    }
+    
+    mEndEvent->sendMessage(TTSymbol("Subscribe"), mEndEventCallback, kTTValNONE);
 }
 
 Automation::~Automation()
@@ -95,10 +117,22 @@ TTErr Automation::ProcessEnd()
     return mEndCue->sendMessage(TTSymbol("Recall"), kTTValNONE, kTTValNONE);
 }
 
-TTErr Automation::Process()
+TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
 {
-    // process the interpolation between the start state and the end state
-    return TTCueInterpolate(TTCuePtr(mStartCue), TTCuePtr(mEndCue), mProgression);
+    TTFloat64 progression;
+    
+    if (inputValue.size() == 1) {
+        
+        if (inputValue[0].type() == kTypeFloat64) {
+            
+            progression = inputValue[0];
+            
+            // process the interpolation between the start state and the end state
+            return TTCueInterpolate(TTCuePtr(mStartCue), TTCuePtr(mEndCue), progression);
+        }
+    }
+    
+    return kTTErrGeneric;
 }
 
 TTErr Automation::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)

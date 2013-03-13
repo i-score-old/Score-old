@@ -14,17 +14,16 @@
 
 TimeEvent::TimeEvent(TTValue& arguments) :
 TTObjectBase(arguments),
-mDate(0),
-mCallback(NULL)
+mDate(0)
 {
-    TT_ASSERT("Correct number of args to create TimeEvent", arguments.size() == 2);
+    TT_ASSERT("Correct number of args to create TimeEvent", arguments.size() == 0);
     
-    if (arguments.size() == 2) {
-        mCallback = TimeEventTriggerCallback((TTPtr)arguments[0]);
-        mBaton = arguments[1];
-    }
-
    	addAttributeWithSetter(Date, kTypeUInt32);
+    
+    addMessageWithArguments(Trigger);
+    addMessageWithArguments(Subscribe);
+    addMessageWithArguments(Unsubscribe);
+    addMessage(Notify);
     
 	// needed to be handled by a TTXmlHandler
 	addMessageWithArguments(WriteAsXml);
@@ -122,6 +121,32 @@ TTErr TimeEvent::ReadFromText(const TTValue& inputValue, TTValue& outputValue)
     // TODO : parse the time event attributes
 	
 	return kTTErrGeneric;
+}
+
+TTErr TimeEvent::Subscribe(const TTValue& inputValue, TTValue& outputValue)
+{
+    if (inputValue.size() == 1) {
+        
+        if (inputValue[0].type() == kTypeObject) {
+            
+            mSubscriberList.append(inputValue);
+        }
+    }
+    
+    return kTTErrGeneric;
+}
+
+TTErr TimeEvent::Unsubscribe(const TTValue& inputValue, TTValue& outputValue)
+{
+    if (inputValue.size() == 1) {
+        
+        if (inputValue[0].type() == kTypeObject) {
+            
+            mSubscriberList.remove(inputValue);
+        }
+    }
+    
+    return kTTErrGeneric;
 }
 
 #if 0

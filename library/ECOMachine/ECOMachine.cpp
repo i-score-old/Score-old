@@ -258,13 +258,13 @@ void ECOMachine::compileECO(std::map<unsigned int, StoryLine> hierarchyStoryLine
 
 PetriNet* ECOMachine::compilePetriNet(StoryLine storyLineToCompile,                         // NOTE : all the story is stored inside a Scenario
 									  std::map<unsigned int,StoryLine> hierarchyStoryLine,  // NOTE : all the story is stored inside a Scenario
-									  std::vector<unsigned int>& processIdToStop,           // a list of process : used for what ?
-									  unsigned int timeToStartTriggerPoint,                 // a date : used for what ?
-									  void(*triggerAction)(void*, bool, Transition*))       // a callback method used for what ?
+									  std::vector<unsigned int>& processIdToStop,           // a list of process : what is the point ?
+									  unsigned int timeToStartTriggerPoint,                 // a date : what is the point ?
+									  void(*triggerAction)(void*, bool, Transition*))       // a callback method : what is the point ?
 {
 	PetriNet* petriNet = new PetriNet();
 
-    // NOTE : registration of 
+    // NOTE : registration of the callback method
 	if (triggerAction != NULL) {
 		petriNet->addWaitedTriggerPointMessageAction(this, triggerAction);
 	}
@@ -330,11 +330,15 @@ PetriNet* ECOMachine::compilePetriNet(StoryLine storyLineToCompile,             
          endDate = v[0];
         */
 		unsigned int boxEndTime = currentBox->beginValue() + currentBox->lengthValue();
-
+        
+        // NOTE : this is used to do the GOTO.
+        // it is offsetting the date of the process if we need to start in the middle of himself
 		if (((unsigned int) currentBox->beginValue() < timeToStartTriggerPoint) && (boxEndTime > timeToStartTriggerPoint)) {
 			currentProcess->setTimeOffsetInMs(timeToStartTriggerPoint - (currentBox->beginValue()));
 		}
 
+        // NOTE : is the control point list still usefull ?
+        // if yes, TODO : add an TimeProcess::mIntermediateEventsList  
 		vector<unsigned int>* controlPointID = new vector <unsigned int>;
 		currentBox->getAllControlPointsId(controlPointID);
 

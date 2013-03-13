@@ -24,18 +24,27 @@ class InteractiveEvent : public TimeEvent
 	
 private :
     
-    TTAddress           mAddress;               ///< ATTRIBUTE : the address to listen
+    TTUInt32                        mDateMin;                       ///< ATTRIBUTE : the minimal date of the interactive event
+    TTUInt32                        mDateMax;                       ///< ATTRIBUTE : the maximal date of the interactive event
     
-    TTObjectBasePtr     mReceiver;              ///< a receiver used to bind on the address
+    TTAddress                       mAddress;                       ///< ATTRIBUTE : the address to listen
+    
+    TTObjectBasePtr                 mReceiver;                      ///< a receiver used to bind on the address
     
     /** Get parameters names needed by this time event
      @param	value           the returned parameter names
      @return                kTTErrNone */
-	TTErr getParameterNames(TTValue& value);
+	TTErr   getParameterNames(TTValue& value);
     
-    /** Specific trigger method
-     @return                an error code returned by the process method */
-    TTErr Trigger(const TTValue& inputValue, TTValue& outputValue);
+    /** Specific triggering method : append the triggered value to the trigger list
+     @param	inputValue      a value to pass thru the TimeEventTriggerCallback
+     @param	outputValue     kTTValNone
+     @return                an error code returned by the trigger method */
+    TTErr   Trigger(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Specific notification method : notify all subscribers if the trigger list have at least one value
+     @return                an error code returned by the notify method */
+    TTErr   Notify();
     
 	/**  needed to be handled by a TTXmlHandler
      @param	inputValue      ..

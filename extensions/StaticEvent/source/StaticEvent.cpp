@@ -63,10 +63,34 @@ TTErr StaticEvent::getParameterNames(TTValue& value)
 
 TTErr StaticEvent::Trigger(const TTValue& inputValue, TTValue& outputValue)
 {
-    (mCallback)(mBaton, inputValue);
+    // append the triggered value to the trigger list
+    mTriggerList.append(inputValue);
     
     return kTTErrNone;
 }
+
+TTErr StaticEvent::Notify()
+{
+    // if there is no triggered value : don't notify any subscriber
+    if (mTriggerList.isEmpty())
+        return kTTErrGeneric;
+    
+    TTObjectBasePtr aCallback;
+    
+    // notify all subscriber using the first triggered value
+    for (mSubscriberList.begin(); mSubscriberList.end(); mSubscriberList.next()) {
+        
+        aCallback = mSubscriberList.current()[0];
+        
+        aCallback->sendMessage(kTTSym_notify, mTriggerList.getHead(), kTTValNONE);
+    }
+    
+    // clear the trigger list
+    mTriggerList.clear();
+    
+    return kTTErrNone;
+}
+
 
 TTErr StaticEvent::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 {

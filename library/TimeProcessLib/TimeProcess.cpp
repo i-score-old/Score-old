@@ -17,13 +17,16 @@ TTObjectBase(arguments),
 mScenario(NULL),
 mActive(YES),
 mStartEvent(NULL),
+mStartEventCallback(NULL),
 mEndEvent(NULL),
+mEndEventCallback(NULL),
 mScheduler(NULL)
 {
-    TTValue args;
-    TTErr   err;
-    
     TT_ASSERT("Correct number of args to create TimeProcess", arguments.size() == 0);
+    
+    TTValue     args;
+    TTErr       err;
+    TTValuePtr  startEventBaton, endEventBaton;
     
     addAttribute(Scenario, kTypeObject);
     addAttributeProperty(Scenario, hidden, YES);
@@ -39,6 +42,10 @@ mScheduler(NULL)
     addAttribute(Scheduler, kTypeObject);
     addAttributeProperty(Scheduler, readOnly, YES);
     addAttributeProperty(Scheduler, hidden, YES);
+    
+    addMessage(ProcessStart);
+    addMessage(ProcessEnd);
+    addMessageWithArguments(Process);
 	
 	// needed to be handled by a TTXmlHandler
 	addMessageWithArguments(WriteAsXml);
@@ -52,27 +59,23 @@ mScheduler(NULL)
 	addMessageWithArguments(ReadFromText);
 	addMessageProperty(ReadFromText, hidden, YES);
     
-    // Creation of a static time event for the start
-    args = TTValue((TTPtr)&TimeProcessStartEventCallback);
-    args.append((TTPtr)this);      // we have to store this as a pointer for TimeEvent
+    // Create a start event callback to be notified and start the process execution
+    mStartEventCallback = NULL;
+    TTObjectBaseInstantiate(TTSymbol("callback"), &mStartEventCallback, kTTValNONE);
     
-    err = TTObjectBaseInstantiate(TTSymbol("StaticEvent"), TTObjectBaseHandle(&mStartEvent), args);
+    startEventBaton = new TTValue(TTObjectBasePtr(this));
     
-	if (err) {
-        mStartEvent = NULL;
-		logError("TimeProcess failed to load a static start event");
-    }
+    mStartEventCallback->setAttributeValue(kTTSym_baton, TTPtr(startEventBaton));
+    mStartEventCallback->setAttributeValue(kTTSym_function, TTPtr(&TimeProcessStartEventCallback));
     
-    // Creation of a static time event for the end
-    args = TTValue((TTPtr)&TimeProcessEndEventCallback);
-    args.append((TTPtr)this);      // we have to store this as a pointer for TimeEvent
+    // Create a end event callback to be notified and end the process execution
+    mEndEventCallback = NULL;
+    TTObjectBaseInstantiate(TTSymbol("callback"), &mEndEventCallback, kTTValNONE);
     
-    err = TTObjectBaseInstantiate(TTSymbol("StaticEvent"), TTObjectBaseHandle(&mEndEvent), args);
+    endEventBaton = new TTValue(TTObjectBasePtr(this));
     
-	if (err) {
-        mStartEvent = NULL;
-		logError("TimeProcess failed to load a static end event");
-    }
+    mEndEventCallback->setAttributeValue(kTTSym_baton, TTPtr(endEventBaton));
+    mEndEventCallback->setAttributeValue(kTTSym_function, TTPtr(&TimeProcessEndEventCallback));
     
     // Creation of a scheduler based on the EcoMachine scheduler plugin
     // Prepare callback argument to be notified of :
@@ -115,9 +118,21 @@ TimeProcess::~TimeProcess()
         mStartEvent = NULL;
     }
     
+    if (mStartEventCallback) {
+        delete (TTValuePtr)TTCallbackPtr(mStartEventCallback)->getBaton();
+        TTObjectBaseRelease(TTObjectBaseHandle(&mStartEventCallback));
+        mStartEventCallback = NULL;
+    }
+    
     if (mEndEvent) {
         TTObjectBaseRelease(TTObjectBaseHandle(&mEndEvent));
         mEndEvent = NULL;
+    }
+    
+    if (mEndEventCallback) {
+        delete (TTValuePtr)TTCallbackPtr(mEndEventCallback)->getBaton();
+        TTObjectBaseRelease(TTObjectBaseHandle(&mEndEventCallback));
+        mEndEventCallback = NULL;
     }
     
     if (mScheduler) {
@@ -171,21 +186,13 @@ TTErr TimeProcess::setStartEvent(const TTValue& value)
         
         if (value[0].type() == kTypeObject) {
             
-            // if the time process is managed by a scenario
-            if (mScenario) {
+            // unsubscribe to the old start event
+            mStartEvent->sendMessage(TTSymbol("Unsubscribe"), mStartEventCallback, kTTValNONE);
                 
-                // remove the old start event
-                mScenario->sendMessage(TTSymbol("TimeEventRemove"), mStartEvent, kTTValNONE);
+            mStartEvent = value[0];
                 
-                // delete the start end event
-                TTObjectBaseRelease(TTObjectBaseHandle(&mStartEvent));
-                
-                mStartEvent = value[0];
-                // TODO : lui donner TimeProcessStartEventCallback
-                
-                // add the new start event
-                return mScenario->sendMessage(TTSymbol("TimeEventAdd"), value, kTTValNONE);
-            }
+            // subscribe to the new start event
+            return mStartEvent->sendMessage(TTSymbol("Subscribe"), mStartEventCallback, kTTValNONE);
         }
     }
     
@@ -198,21 +205,13 @@ TTErr TimeProcess::setEndEvent(const TTValue& value)
         
         if (value[0].type() == kTypeObject) {
             
-            // if the time process is managed by a scenario
-            if (mScenario) {
-                
-                // remove the old end event
-                mScenario->sendMessage(TTSymbol("TimeEventRemove"), mEndEvent, kTTValNONE);
-                
-                // delete the old end event
-                TTObjectBaseRelease(TTObjectBaseHandle(&mEndEvent));
-                
-                mEndEvent = value[0];
-                // TODO : lui donner TimeProcessEndEventCallback
-                
-                // add the new start event
-                return mScenario->sendMessage(TTSymbol("TimeEventAdd"), value, kTTValNONE);
-            }
+           // unsubscribe to the old end event
+           mEndEvent->sendMessage(TTSymbol("Unsubscribe"), mEndEventCallback, kTTValNONE);
+           
+           mEndEvent = value[0];
+           
+           // subscribe to the new end event
+           return mEndEvent->sendMessage(TTSymbol("Subscribe"), mEndEventCallback, kTTValNONE);
         }
     }
     
@@ -224,11 +223,16 @@ TTErr TimeProcess::setEndEvent(const TTValue& value)
 #pragma mark Some Methods
 #endif
 
-TTErr TimeProcessStartEventCallback(TTPtr object)
+TTErr TimeProcessStartEventCallback(TTPtr baton, TTValue& data)
 {
-    TimeProcessPtr aTimeProcess = (TimeProcessPtr)object;
-    TTUInt32       start, end, duration;
-    TTValue        v;
+    TimeProcessPtr  aTimeProcess;
+    TTValuePtr      b;
+    TTValue         v;
+    TTUInt32        start, end;
+    
+	// unpack baton (a time process)
+	b = (TTValuePtr)baton;
+	aTimeProcess = TimeProcessPtr((TTObjectBasePtr)(*b)[0]);
     
     // if the time process active, launch the scheduler
     // note : the ProcessStart method is called inside TimeProcessSchedulerCallback
@@ -242,18 +246,24 @@ TTErr TimeProcessStartEventCallback(TTPtr object)
         
         if (end > start) {
             
-            duration = end - start;
+            v = TTValue(end - start);
             
-            return aTimeProcess->mScheduler->sendMessage(TTSymbol("Go"), duration, kTTValNONE);
+            aTimeProcess->mScheduler->setAttributeValue(TTSymbol("duration"), v);
+            return aTimeProcess->mScheduler->sendMessage(TTSymbol("Go"));
         }
     }
     
     return kTTErrGeneric;
 }
 
-TTErr TimeProcessEndEventCallback(TTPtr object)
+TTErr TimeProcessEndEventCallback(TTPtr baton, TTValue& data)
 {
-    TimeProcessPtr aTimeProcess = (TimeProcessPtr)object;
+    TimeProcessPtr  aTimeProcess;
+    TTValuePtr      b;
+
+	// unpack baton (a time process)
+	b = (TTValuePtr)baton;
+	aTimeProcess = TimeProcessPtr((TTObjectBasePtr)(*b)[0]);
     
     // if the time process active, stop the scheduler
     // note : the ProcessStart method is called inside TimeProcessSchedulerCallback

@@ -26,13 +26,11 @@ mAuthor = TTSymbol(thisTimeEventAuthor); \
 registerAttribute(TTSymbol("ParameterNames"), kTypeLocalValue, NULL, (TTGetterMethod)& thisTTClass::getParameterNames); \
 /*addAttributeProperty(ParameterNames, readOnly, YES); \ */
 
-typedef void (*TimeEventTriggerCallback)(TTPtr,const TTValue&);
-
 /****************************************************************************************************/
 // Class Specification
 
 /**	Time Event is the base class for all Time Event Unit.
- It still has knowledge and support for ...
+ A TimeEvent allows subcription to be notified depending a specific strategy based on the processing of the list of all triggered values
  */
 class TimeEvent : public TTObjectBase {
     
@@ -44,16 +42,12 @@ public:
 protected:
     
     TTUInt32                        mDate;                          ///< ATTRIBUTE : the date of the event
-    
-    // 
-    
-    TimeEventTriggerCallback        mCallback;                      ///< the callback to use to notify the triggering
-    TTPtr                           mBaton;                         ///< the baton to use to notify the triggering
+    TTList                          mTriggerList;                   ///< ATTRIBUTE : all the triggered values to evaluate in Notify method
+    TTList                          mSubscriberList;                ///< ATTRIBUTE : all the callbacks to use in Notify method
     
 private:
     
-    TTAttributePtr                  dateAttribute;                  ///< cache active attribute for observer notification
-    TTMessagePtr                    triggerMessage;                 ///< cache trigger message for observer notification
+    TTAttributePtr                  dateAttribute;                  ///< cache date attribute for observer notification
     
 public:
 	//** Constructor.	*/
@@ -65,13 +59,17 @@ public:
 	/** Get parameters names needed by this time event 
      @param	value           the returned parameter names
      @return                kTTErrNone */
-	virtual TTErr getParameterNames(TTValue& value) = 0;
-    
-    /** Specific trigger method
+	virtual TTErr   getParameterNames(TTValue& value) = 0;
+
+    /** Specific triggering method : append the triggered value to the trigger list depending on a specific strategy
      @param	inputValue      a value to pass thru the TimeEventTriggerCallback
      @param	outputValue     kTTValNone
      @return                an error code returned by the trigger method */
-    virtual TTErr Trigger(const TTValue& inputValue, TTValue& outputValue) = 0;
+    virtual TTErr   Trigger(const TTValue& inputValue, TTValue& outputValue) = 0;
+    
+    /** Specific notification method : evaluate the trigger list to notify the subscriber's depending on a specific strategy
+     @return                an error code returned by the notify method */
+    virtual TTErr   Notify() = 0;
     
     /**  needed to be handled by a TTXmlHandler
      @param	inputValue      ..
@@ -86,6 +84,18 @@ public:
      @return                .. */
 	virtual TTErr	WriteAsText(const TTValue& inputValue, TTValue& outputValue) = 0;
 	virtual TTErr	ReadFromText(const TTValue& inputValue, TTValue& outputValue) = 0;
+    
+    /** Subscribe for event triggering
+     @param	inputValue      a TTCallbackPtr to notify
+     @param	outputValue     kTTValNone
+     @return                kTTErrNone */
+    TTErr           Subscribe(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Unsubscribe for event triggering
+     @param	inputValue      a TTCallbackPtr to don't notify anymore
+     @param	outputValue     kTTValNone
+     @return                kTTErrNone */
+    TTErr           Unsubscribe(const TTValue& inputValue, TTValue& outputValue);
 
 private :
     
