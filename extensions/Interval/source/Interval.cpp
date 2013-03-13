@@ -1,6 +1,6 @@
 /*
  * Interval time process
- * Copyright © 2013, Théo de la Hogue
+ * Copyright © 2013, Théo de la Hogue, Clément Bossut
  *
  * License: This code is licensed under the terms of the "New BSD License"
  * http://creativecommons.org/licenses/BSD/
