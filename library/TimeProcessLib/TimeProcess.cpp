@@ -77,13 +77,13 @@ mScheduler(NULL)
     mEndEventCallback->setAttributeValue(kTTSym_baton, TTPtr(endEventBaton));
     mEndEventCallback->setAttributeValue(kTTSym_function, TTPtr(&TimeProcessEndEventCallback));
     
-    // Creation of a scheduler based on the EcoMachine scheduler plugin
+    // Creation of a scheduler based on the System scheduler plugin
     // Prepare callback argument to be notified of :
     //      - the progression
     args = TTValue((TTPtr)&TimeProcessSchedulerCallback);
     args.append((TTPtr)this);   // we have to store this as a pointer for Scheduler
     
-    err = TTObjectBaseInstantiate(TTSymbol("EcoMachine"), TTObjectBaseHandle(&mScheduler), args);
+    err = TTObjectBaseInstantiate(TTSymbol("System"), TTObjectBaseHandle(&mScheduler), args);
     
 	if (err) {
         mScheduler = NULL;
