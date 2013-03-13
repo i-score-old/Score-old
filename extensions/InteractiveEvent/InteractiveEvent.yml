@@ -1,14 +1,13 @@
 #defines:
-#  - TIME_PROCESS_DEBUG
+#  - TIME_EVENT_DEBUG
 
 sources:
-  - ../../library/TimeProcessLib/TimeProcess.cpp	
-  - source/Automation.cpp
+  - ../../library/TimeEventLib/TimeEvent.cpp	
+  - source/InteractiveEvent.cpp
   
 includes:
   - "."
   - "includes"
-  - "../../library/TimeProcessLib"
   - "../../library/TimeEventLib"
   - "../../../Foundation/library/includes"
   - "../../../DSP/library/includes"

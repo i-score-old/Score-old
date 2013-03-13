@@ -24,8 +24,8 @@ class Scenario : public TimeProcess
 	
 private :
     
-    TTList                      mTimeProcessList;               ///< ATTRIBUTE : all registered time process and their observers
-    TTList                      mTimeEventList;                 ///< ATTRIBUTE : all registered time event and their observers
+    TTList                      mTimeProcessList;               ///< ATTRIBUTE : all registered time processes and their observers
+    TTList                      mTimeEventList;                 ///< ATTRIBUTE : all registered time events and their observers
     
     TTAddressItemPtr            mNamespace;                     ///< ATTRIBUTE : the namespace workspace of the scenario
 	
@@ -46,85 +46,7 @@ private :
      @return                an error code returned by the process method */
     TTErr Process();
     
-    /** Register a time process for scenario management
-     @inputvalue            a time process object
-     @outputvalue           kTTValNONE
-     @return                an error code if the registration fails */
-    TTErr TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue);
-    
-    /** Unregister a time process for scenario management
-     @inputValue            a time process object
-     @outputvalue           kTTValNONE
-     @return                an error code if the unregistration fails */
-    TTErr TimeProcessRemove(const TTValue& inputValue, TTValue& outputValue);
-    
-    /** Change a time process active state into the scenario
-     note : this method doesn't update the time process internal acive state
-     but it can change attribute of other time processes connected to this one.
-     
-     @inputvalue            a time process object, a new active state
-     @outputvalue           kTTValNONE
-     @return                an error code if the active state change fails */
-    TTErr TimeProcessActiveChange(const TTValue& inputValue, TTValue& outputValue);
-    
-    /** Change a time process start date into the scenario 
-     note : this method doesn't update the time process internal start date 
-     but it can change attribute of other time processes connected to this one.
-     
-     @inputvalue            a time process object, a new start date
-     @outputvalue           a constrained start date
-     @return                an error code if the start date change fails */
-    TTErr TimeProcessStartChange(const TTValue& inputValue, TTValue& outputValue);
-    
-    /** Change a time process end date into the scenario
-     note : this method doesn't update the time process internal start date
-     but it can change attribute of other time processes connected to this one.
-     
-     @inputvalue            a time process object, a new end date
-     @outputvalue           a constrained end date
-     @return                an error code if the end date change fails */
-    TTErr TimeProcessEndChange(const TTValue& inputValue, TTValue& outputValue);
-    
-    
-    
-    // TODO : TimeProcessStartEventAdd
-    /** Add a time process start trigger into the scenario
-     note : this method doesn't update the time process internal start trigger
-     but it can change attribute of other time processes connected to this one.
-     
-     @inputvalue            a time process object
-     @outputvalue           kTTValNONE
-     @return                an error code if the start trigger change fails */
-    TTErr TimeProcessStartTriggerAdd(const TTValue& inputValue, TTValue& outputValue);
-    
-    /** Remove a time process start trigger into the scenario
-     note : this method doesn't update the time process internal start trigger
-     but it can change attribute of other time processes connected to this one.
-     
-     @inputvalue            a time process object
-     @outputvalue           kTTValNONE
-     @return                an error code if the start trigger change fails */
-    TTErr TimeProcessStartTriggerRemove(const TTValue& inputValue, TTValue& outputValue);
-    
-    /** Add a time process end trigger into the scenario
-     note : this method doesn't update the time process internal end trigger
-     but it can change attribute of other time processes connected to this one.
-     
-     @inputvalue            a time process object
-     @outputvalue           kTTValNONE
-     @return                an error code if the end trigger change fails */
-    TTErr TimeProcessEndTriggerAdd(const TTValue& inputValue, TTValue& outputValue);
-    
-    /** Remove a time process end trigger into the scenario
-     note : this method doesn't update the time process internal end trigger
-     but it can change attribute of other time processes connected to this one.
-     
-     @inputvalue            a time process object
-     @outputvalue           kTTValNONE
-     @return                an error code if the end trigger change fails */
-    TTErr TimeProcessEndTriggerRemove(const TTValue& inputValue, TTValue& outputValue);
-    
-	/**  needed to be handled by a TTXmlHandler
+    /**  needed to be handled by a TTXmlHandler
      @param	inputValue      ..
      @param	outputValue     ..
      @return                .. */
@@ -138,14 +60,62 @@ private :
 	TTErr	WriteAsText(const TTValue& inputValue, TTValue& outputValue);
 	TTErr	ReadFromText(const TTValue& inputValue, TTValue& outputValue);
     
+    /** Register a time process for scenario management
+     @inputvalue            a time process object
+     @outputvalue           kTTValNONE
+     @return                an error code if the registration fails */
+    TTErr TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Unregister a time process for scenario management
+     @inputValue            a time process object
+     @outputvalue           kTTValNONE
+     @return                an error code if the unregistration fails */
+    TTErr TimeProcessRemove(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Register a time event for scenario management
+     @inputvalue            a time event object
+     @outputvalue           kTTValNONE
+     @return                an error code if the registration fails */
+    TTErr TimeEventAdd(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Unregister a time event for scenario management
+     @inputValue            a time event object
+     @outputvalue           kTTValNONE
+     @return                an error code if the unregistration fails */
+    TTErr TimeEventRemove(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Change a time process active state into the scenario
+     note : this method doesn't update the time process internal acive state
+     but it can change attribute of other time processes or time events connected to this one.
+     
+     @inputvalue            a time process object, a new active state
+     @outputvalue           kTTValNONE
+     @return                an error code if the active state change fails */
+    TTErr TimeProcessActiveChange(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Change a time event date into the scenario 
+     note : this method doesn't update the time event internal date 
+     but it can change attribute of other time processes or time events connected to this one.
+     
+     @inputvalue            a time process object, a new start date
+     @outputvalue           a constrained start date
+     @return                an error code if the start date change fails */
+    TTErr TimeEventDateChange(const TTValue& inputValue, TTValue& outputValue);
+    
     /** an internal method used to create all time process attribute observers */
-    void makeCacheElement(TimeProcessPtr aTimeProcess, TTValue& newCacheElement);
+    void makeTimeProcessCacheElement(TimeProcessPtr aTimeProcess, TTValue& newCacheElement);
     
     /** an internal method used to delete all time process attribute observers */
-    void deleteCacheElement(const TTValue& oldCacheElement);
+    void deleteTimeProcessCacheElement(const TTValue& oldCacheElement);
     
-    friend TTErr TT_EXTENSION_EXPORT ScenarioTimeProcessRunningAttributeCallback(TTPtr baton, TTValue& data);
-    friend TTErr TT_EXTENSION_EXPORT ScenarioTimeProcessProgressionAttributeCallback(TTPtr baton, TTValue& data);
+    /** an internal method used to create all time event attribute observers */
+    void makeTimeEventCacheElement(TimeEventPtr aTimeEvent, TTValue& newCacheElement);
+    
+    /** an internal method used to delete all time event attribute observers */
+    void deleteTimeEventCacheElement(const TTValue& oldCacheElement);
+    
+    friend TTErr TT_EXTENSION_EXPORT ScenarioSchedulerRunningAttributeCallback(TTPtr baton, TTValue& data);
+    friend TTErr TT_EXTENSION_EXPORT ScenarioSchedulerProgressionAttributeCallback(TTPtr baton, TTValue& data);
 };
 
 typedef Scenario* ScenarioPtr;
@@ -153,17 +123,20 @@ typedef Scenario* ScenarioPtr;
 /* a TTFunctionMatch to find a time process and all his observers in the scenario depending on the time process object him self */
 void TT_EXTENSION_EXPORT ScenarioFindTimeProcess(const TTValue& aValue, TTPtr timeProcessPtrToMatch, TTBoolean& found);
 
-/** The callback method used to observe time processes running attribute change
+/* a TTFunctionMatch to find a time event and all his observers in the scenario depending on the time event object him self */
+void TT_EXTENSION_EXPORT ScenarioFindTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found);
+
+/** The callback method used to observe time processes scheduler running attribute change
  @param	baton						a time process instance
  @param	data						a new running value
  @return							an error code */
-TTErr TT_EXTENSION_EXPORT ScenarioTimeProcessRunningAttributeCallback(TTPtr baton, TTValue& data);
+TTErr TT_EXTENSION_EXPORT ScenarioSchedulerRunningAttributeCallback(TTPtr baton, TTValue& data);
 
-/** The callback method used to observe time processes progression attribute change
+/** The callback method used to observe time processes scheduler progression attribute change
  @param	baton						a time process instance
  @param	data						a new progression value
  @return							an error code */
-TTErr TT_EXTENSION_EXPORT ScenarioTimeProcessProgressionAttributeCallback(TTPtr baton, TTValue& data);
+TTErr TT_EXTENSION_EXPORT ScenarioSchedulerProgressionAttributeCallback(TTPtr baton, TTValue& data);
 
 
 #endif // __SCENARIO_H__

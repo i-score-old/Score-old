@@ -107,7 +107,7 @@ TTErr Automation::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
 	
-	// TODO : write the time box attributes, the cue start and end content, start and end receiver, ...
+	// TODO : write the automation attributes, the cue start and end content
 	
 	return kTTErrGeneric;
 }
@@ -118,7 +118,7 @@ TTErr Automation::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
 	
-	// TODO : parse the time box attributes, the cue start and end content, start and end receiver, ...
+	// TODO : parse the automation attributes, the cue start and end content
 	
 	return kTTErrGeneric;
 }
@@ -129,7 +129,7 @@ TTErr Automation::WriteAsText(const TTValue& inputValue, TTValue& outputValue)
 	
 	aTextHandler = TTTextHandlerPtr((TTObjectBasePtr)inputValue[0]);
 	
-	// TODO : write the time box attributes, the cue start and end content, start and end receiver, ...
+	// TODO : write the automation attributes, the cue start and end content
 	
 	return kTTErrGeneric;
 }
@@ -141,7 +141,7 @@ TTErr Automation::ReadFromText(const TTValue& inputValue, TTValue& outputValue)
 	
 	aTextHandler = TTTextHandlerPtr((TTObjectBasePtr)inputValue[0]);
 	
-    // TODO : parse the time box attributes, the cue start and end content, start and end receiver, ...
+    // TODO : parse the automation attributes, the cue start and end content
 	
 	return kTTErrGeneric;
 }

@@ -26,12 +26,12 @@ mAuthor = TTSymbol(thisTimeEventAuthor); \
 registerAttribute(TTSymbol("ParameterNames"), kTypeLocalValue, NULL, (TTGetterMethod)& thisTTClass::getParameterNames); \
 /*addAttributeProperty(ParameterNames, readOnly, YES); \ */
 
-typedef void (*TimeEventTriggerCallback)(TimeProcessPtr, const TTValue&);
+typedef void (*TimeEventTriggerCallback)(TTPtr,const TTValue&);
 
 /****************************************************************************************************/
 // Class Specification
 
-/**	Time Process is the base class for all Time Process Unit.
+/**	Time Event is the base class for all Time Event Unit.
  It still has knowledge and support for ...
  */
 class TimeEvent : public TTObjectBase {
@@ -43,11 +43,12 @@ public:
     
 protected:
     
-    // TimeProcessPtr               mParent; ?
-    
     TTUInt32                        mDate;                          ///< ATTRIBUTE : the date of the event
     
-    TTCallbackPtr                   mCallback;                      ///< a callback to notify the time process owner that the event appends
+    // 
+    
+    TimeEventTriggerCallback        mCallback;                      ///< the callback to use to notify the triggering
+    TTPtr                           mBaton;                         ///< the baton to use to notify the triggering
     
 private:
     
@@ -67,27 +68,32 @@ public:
 	virtual TTErr getParameterNames(TTValue& value) = 0;
     
     /** Specific trigger method
+     @param	inputValue      a value to pass thru the TimeEventTriggerCallback
+     @param	outputValue     kTTValNone
      @return                an error code returned by the trigger method */
-    virtual TTErr Trigger() = 0;
+    virtual TTErr Trigger(const TTValue& inputValue, TTValue& outputValue) = 0;
+    
+    /**  needed to be handled by a TTXmlHandler
+     @param	inputValue      ..
+     @param	outputValue     ..
+     @return                .. */
+	virtual TTErr	WriteAsXml(const TTValue& inputValue, TTValue& outputValue) = 0;
+	virtual TTErr	ReadFromXml(const TTValue& inputValue, TTValue& outputValue) = 0;
+	
+	/**  needed to be handled by a TTTextHandler
+     @param	inputValue      ..
+     @param	outputValue     ..
+     @return                .. */
+	virtual TTErr	WriteAsText(const TTValue& inputValue, TTValue& outputValue) = 0;
+	virtual TTErr	ReadFromText(const TTValue& inputValue, TTValue& outputValue) = 0;
 
 private :
     
     /** Set the date of the time event
      @param	value           a date
      @return                an error code if the date is wrong */
-    //TTErr	setDate(const TTValue& value);
+    TTErr	setDate(const TTValue& value);
     
-	/**  needed to be handled by a TTXmlHandler
-     @param	value           ..
-     @return                .. */
-	TTErr	WriteAsXml(const TTValue& inputValue, TTValue& outputValue);
-	TTErr	ReadFromXml(const TTValue& inputValue, TTValue& outputValue);
-	
-	/**  needed to be handled by a TTTextHandler
-     @param	value           ..
-     @return                .. */
-	TTErr	WriteAsText(const TTValue& inputValue, TTValue& outputValue);
-	TTErr	ReadFromText(const TTValue& inputValue, TTValue& outputValue);
 };
 
 typedef TimeEvent* TimeEventPtr;

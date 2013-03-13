@@ -17,10 +17,12 @@ TTObjectBase(arguments),
 mDate(0),
 mCallback(NULL)
 {
-    TT_ASSERT("Correct number of args to create Event", arguments.size() == 1);
+    TT_ASSERT("Correct number of args to create TimeEvent", arguments.size() == 2);
     
-    if (arguments.size() >= 1)
-		mCallback = TTCallbackPtr((TTObjectBasePtr)arguments[0]);
+    if (arguments.size() == 2) {
+        mCallback = TimeEventTriggerCallback((TTPtr)arguments[0]);
+        mBaton = arguments[1];
+    }
 
    	addAttributeWithSetter(Date, kTypeUInt32);
     
@@ -42,12 +44,7 @@ mCallback(NULL)
 
 TimeEvent::~TimeEvent()
 {
-    TTValue v;
-    
-    if (mCallback) {
-        TTObjectBaseRelease(TTObjectBaseHandle(&mCallback));
-        mCallback = NULL;
-    }
+    ;
 }
 
 TTErr TimeEvent::getParameterNames(TTValue& value)

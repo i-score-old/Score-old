@@ -39,24 +39,15 @@ mNamespace(NULL)
     addMessageWithArguments(TimeProcessAdd);
     addMessageWithArguments(TimeProcessRemove);
     
-    // all messages below are hidden because they are internaly
-    addMessageWithArguments(TimeProcessStartChange);
-    addMessageProperty(TimeProcessStartChange, hidden, YES);
+     addMessageWithArguments(TimeEventAdd);
+     addMessageWithArguments(TimeEventRemove);
     
-    addMessageWithArguments(TimeProcessEndChange);
-    addMessageProperty(TimeProcessEndChange, hidden, YES);
+    // all messages below are hidden because they are for internal use
+    addMessageWithArguments(TimeProcessActiveChange);
+    addMessageProperty(TimeProcessActiveChange, hidden, YES);
     
-    addMessageWithArguments(TimeProcessStartTriggerAdd);
-    addMessageProperty(TimeProcessStartTriggerAdd, hidden, YES);
-    
-    addMessageWithArguments(TimeProcessStartTriggerRemove);
-    addMessageProperty(TimeProcessStartTriggerRemove, hidden, YES);
-    
-    addMessageWithArguments(TimeProcessEndTriggerAdd);
-    addMessageProperty(TimeProcessEndTriggerAdd, hidden, YES);
-    
-    addMessageWithArguments(TimeProcessEndTriggerRemove);
-    addMessageProperty(TimeProcessEndTriggerRemove, hidden, YES);
+    addMessageWithArguments(TimeEventDateChange);
+    addMessageProperty(TimeEventDateChange, hidden, YES);
 	
 	// needed to be handled by a TTXmlHandler
 	addMessageWithArguments(WriteAsXml);
@@ -120,8 +111,8 @@ TTErr Scenario::TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue)
             // set this scenario as parent scenario for the time process
             aTimeProcess->setAttributeValue(TTSymbol("scenario"), (TTObjectBasePtr)this);
             
-            // create all attribute observers
-            makeCacheElement(aTimeProcess, aCacheElement);
+            // create all observers
+            makeTimeProcessCacheElement(aTimeProcess, aCacheElement);
             
             // store time process object and observers
             mTimeProcessList.append(aCacheElement);
@@ -181,8 +172,10 @@ TTErr Scenario::TimeProcessRemove(const TTValue& inputValue, TTValue& outputValu
                 // remove time process object and observers
                 mTimeProcessList.remove(aCacheElement);
                 
-                // delete all attribute observers
-                deleteCacheElement(aCacheElement);
+                // delete all observers
+                deleteTimeProcessCacheElement(aCacheElement);
+                
+                // ? : where are removed the start and end time events of the time process
             
                 // update the CSP depending on the type of the time process
                 timeProcessType = aTimeProcess->getName();
@@ -203,6 +196,98 @@ TTErr Scenario::TimeProcessRemove(const TTValue& inputValue, TTValue& outputValu
                     
                     // TODO : update the CSP in Relation case
                     // cf : CSP::removeTemporalRelation
+                    return kTTErrGeneric;
+                }
+                // else if ...
+            }
+        }
+    }
+    
+    return kTTErrGeneric;
+}
+
+TTErr Scenario::TimeEventAdd(const TTValue& inputValue, TTValue& outputValue)
+{
+    TimeEventPtr    aTimeEvent;
+    TTValue         aCacheElement;
+    TTSymbol        timeEventType;
+    
+    if (inputValue.size() == 1) {
+        
+        if (inputValue[0].type() == kTypeObject) {
+            
+            aTimeEvent = TimeEventPtr((TTObjectBasePtr)inputValue[0]);
+            
+            // set this scenario as parent scenario for the time event
+            //aTimeEvent->setAttributeValue(TTSymbol("scenario"), (TTObjectBasePtr)this);
+            
+            // create all observers
+            makeTimeEventCacheElement(aTimeEvent, aCacheElement);
+            
+            // store time event object and observers
+            mTimeEventList.append(aCacheElement);
+            
+            // update the CSP depending on the type of the time event
+            timeEventType = aTimeEvent->getName();
+            
+            if (timeEventType == TTSymbol("StaticEvent")) {
+                
+                // TODO : update the CSP in StaticEvent case
+                return kTTErrGeneric;
+            }
+            else if (timeEventType == TTSymbol("InteractiveEvent")) {
+                
+                // TODO : update the CSP in InteractiveEvent case
+                return kTTErrGeneric;
+            }
+            // else if ...
+            
+        }
+    }
+    
+    return kTTErrGeneric;
+}
+
+TTErr Scenario::TimeEventRemove(const TTValue& inputValue, TTValue& outputValue)
+{
+    TimeEventPtr    aTimeEvent;
+    TTValue         aCacheElement;
+    TTSymbol        timeEventType;
+    
+    if (inputValue.size() == 1) {
+        
+        if (inputValue[0].type() == kTypeObject) {
+            
+            aTimeEvent = TimeEventPtr((TTObjectBasePtr)inputValue[0]);
+            
+            // set no scenario as parent scenario for the time event
+            //aTimeProcess->setAttributeValue(TTSymbol("scenario"), (TTObjectBasePtr)NULL);
+            
+            // try to find the time event
+            mTimeEventList.find(&ScenarioFindTimeEvent, (TTPtr)aTimeEvent, aCacheElement);
+            
+            // couldn't find the same time event in the scenario :
+            if (aCacheElement == kTTValNONE)
+                return kTTErrValueNotFound;
+            else {
+                
+                // remove time event object and observers
+                mTimeEventList.remove(aCacheElement);
+                
+                // delete all observers
+                deleteTimeEventCacheElement(aCacheElement);
+                
+                // update the CSP depending on the type of the time process
+                timeEventType = aTimeEvent->getName();
+                
+                if (timeEventType == TTSymbol("StaticEvent")) {
+                    
+                    // TODO : update the CSP in StaticEvent case
+                    return kTTErrGeneric;
+                }
+                else if (timeEventType == TTSymbol("InteractiveEvent")) {
+                    
+                    // TODO : update the CSP in InteractiveEvent case
                     return kTTErrGeneric;
                 }
                 // else if ...
@@ -237,166 +322,38 @@ TTErr Scenario::TimeProcessActiveChange(const TTValue& inputValue, TTValue& outp
     return kTTErrGeneric;
 }
 
-TTErr Scenario::TimeProcessStartChange(const TTValue& inputValue, TTValue& outputValue)
+TTErr Scenario::TimeEventDateChange(const TTValue& inputValue, TTValue& outputValue)
 {
-    TimeProcessPtr  aTimeProcess;
-    TTSymbol        timeProcessType;
-    TTUInt32        start;
+    TimeEventPtr    aTimeEvent;
+    TTSymbol        timeEventType;
+    TTUInt32        date;
 	
     if (inputValue.size() == 2) {
         
         // TODO : use dictionnary
         if (inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeUInt32) {
             
-            // get time process where the change comes from
-            aTimeProcess = TimeProcessPtr((TTObjectBasePtr)inputValue[0]);
+            // get time event where the change comes from
+            aTimeEvent = TimeEventPtr((TTObjectBasePtr)inputValue[0]);
             
-            // get new start value
-            start = inputValue[1];
+            // get new date value
+            date = inputValue[1];
             
-            // TODO : warn CSP that this time process start date have changed
-            // TODO : update all CSP consequences by setting time processes attributes that are affected by the consequence
-            timeProcessType = aTimeProcess->getName();
+            // TODO : warn CSP that this time event date have changed
+            // TODO : update all CSP consequences by setting time processes or time event attributes that are affected by the consequence
+            timeEventType = aTimeEvent->getName();
             
-            if (timeProcessType == TTSymbol("Automation")) {
+            if (timeEventType == TTSymbol("StaticEvent")) {
                 
-                // TODO : update the CSP in Automation case
+                // TODO : update the CSP in StaticEvent case
                 return kTTErrGeneric;
             }
-            else if (timeProcessType == TTSymbol("Scenario")) {
+            else if (timeEventType == TTSymbol("InteractiveEvent")) {
                 
-                // TODO : update the CSP in Scenario case
-                return kTTErrGeneric;
-            }
-            else if (timeProcessType == TTSymbol("Relation")) {
-                
-                // TODO : update the CSP in Relation case
+                // TODO : update the CSP in InteractiveEvent case
                 return kTTErrGeneric;
             }
             // else if ...
-        }
-    }
-    
-    return kTTErrGeneric;
-}
-
-TTErr Scenario::TimeProcessEndChange(const TTValue& inputValue, TTValue& outputValue)
-{
-    TimeProcessPtr  aTimeProcess;
-    TTSymbol        timeProcessType;
-    TTUInt32        end;
-	
-    if (inputValue.size() == 2) {
-        
-        // TODO : use dictionnary
-        if (inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeUInt32) {
-            
-            // get time process where the change comes from
-            aTimeProcess = TimeProcessPtr((TTObjectBasePtr)inputValue[0]);
-            
-            // get new end value
-            end = inputValue[1];
-            
-            // TODO : warn CSP that this time process end date have changed
-            // TODO : update all CSP consequences by setting time processes attributes that are affected by the consequence
-            timeProcessType = aTimeProcess->getName();
-            
-            if (timeProcessType == TTSymbol("Automation")) {
-                
-                // TODO : update the CSP in Automation case
-                return kTTErrGeneric;
-            }
-            else if (timeProcessType == TTSymbol("Scenario")) {
-                
-                // TODO : update the CSP in Scenario case
-                return kTTErrGeneric;
-            }
-            else if (timeProcessType == TTSymbol("Relation")) {
-                
-                // TODO : update the CSP in Relation case
-                return kTTErrGeneric;
-            }
-            // else if ...
-        }
-    }
-    
-    return kTTErrGeneric;
-}
-
-TTErr Scenario::TimeProcessStartTriggerAdd(const TTValue& inputValue, TTValue& outputValue)
-{
-    TimeProcessPtr  aTimeProcess;
-	
-    if (inputValue.size() == 1) {
-        
-        // TODO : use dictionnary
-        if (inputValue[0].type() == kTypeObject) {
-            
-            // get time process where the start trigger is added
-            aTimeProcess = TimeProcessPtr((TTObjectBasePtr)inputValue[0]);
-            
-            // TODO : warn CSP that this time process have a start trigger
-            // TODO : update all CSP consequences by setting time processes attributes that are affected by the consequence
-        }
-    }
-    
-    return kTTErrGeneric;
-}
-
-TTErr Scenario::TimeProcessStartTriggerRemove(const TTValue& inputValue, TTValue& outputValue)
-{
-    TimeProcessPtr  aTimeProcess;
-	
-    if (inputValue.size() == 1) {
-        
-        // TODO : use dictionnary
-        if (inputValue[0].type() == kTypeObject) {
-            
-            // get time process where the start trigger is removed
-            aTimeProcess = TimeProcessPtr((TTObjectBasePtr)inputValue[0]);
-            
-            // TODO : warn CSP that this time process have no start trigger
-            // TODO : update all CSP consequences by setting time processes attributes that are affected by the consequence
-        }
-    }
-    
-    return kTTErrGeneric;
-}
-
-TTErr Scenario::TimeProcessEndTriggerAdd(const TTValue& inputValue, TTValue& outputValue)
-{
-    TimeProcessPtr  aTimeProcess;
-	
-    if (inputValue.size() == 1) {
-        
-        // TODO : use dictionnary
-        if (inputValue[0].type() == kTypeObject) {
-            
-            // get time process where the end trigger is added
-            aTimeProcess = TimeProcessPtr((TTObjectBasePtr)inputValue[0]);
-            
-            // TODO : warn CSP that this time process have an end trigger
-            // TODO : update all CSP consequences by setting time processes attributes that are affected by the consequence
-        }
-    }
-    
-    return kTTErrGeneric;
-}
-
-TTErr Scenario::TimeProcessEndTriggerRemove(const TTValue& inputValue, TTValue& outputValue)
-{
-    TimeProcessPtr  aTimeProcess;
-	
-    if (inputValue.size() == 1) {
-        
-        // TODO : use dictionnary
-        if (inputValue[0].type() == kTypeObject) {
-            
-            // get time process where the end trigger is removed
-            aTimeProcess = TimeProcessPtr((TTObjectBasePtr)inputValue[0]);
-            
-            // TODO : warn CSP that this time process have no end trigger
-            // TODO : update all CSP consequences by setting time processes attributes that are affected by the consequence
         }
     }
     
@@ -409,7 +366,7 @@ TTErr Scenario::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
 	
-	// TODO : pass the XmlHandlerPtr to all the time processes of the scenario to write their content into the file
+	// TODO : pass the XmlHandlerPtr to all the time processes and their time events of the scenario to write their content into the file
 	
 	return kTTErrGeneric;
 }
@@ -448,65 +405,77 @@ TTErr Scenario::ReadFromText(const TTValue& inputValue, TTValue& outputValue)
 	return kTTErrGeneric;
 }
 
-void Scenario::makeCacheElement(TimeProcessPtr aTimeProcess, TTValue& newCacheElement)
+void Scenario::makeTimeProcessCacheElement(TimeProcessPtr aTimeProcess, TTValue& newCacheElement)
 {
     TTValue			v;
-    TTAttributePtr	anAttribute = NULL;
-	TTObjectBasePtr	runningObserver, progressionObserver;
+    TTAttributePtr	anAttribute;
+	TTObjectBasePtr	aScheduler, runningObserver, progressionObserver;
     TTValuePtr		runningBaton, progressionBaton;
+    TTErr           err;
 	
 	// 0 : cache time process object
 	newCacheElement.append((TTObjectBasePtr)aTimeProcess);
     
-    // 1 : create and cache running Attribute observer on this time process
-    aTimeProcess->findAttribute(TTSymbol("running"), &anAttribute);
+    aScheduler = aTimeProcess->mScheduler;
     
-    runningObserver = NULL;
-    TTObjectBaseInstantiate(TTSymbol("callback"), &runningObserver, kTTValNONE);
+    // 1 : create and cache scheduler running attribute observer on this time process
+    err = aScheduler->findAttribute(TTSymbol("running"), &anAttribute);
     
-    runningBaton = new TTValue(TTObjectBasePtr(this));
-    runningBaton->append(TTObjectBasePtr(aTimeProcess));
-    
-    runningObserver->setAttributeValue(kTTSym_baton, TTPtr(runningBaton));
-    runningObserver->setAttributeValue(kTTSym_function, TTPtr(&ScenarioTimeProcessRunningAttributeCallback));
-    
-    anAttribute->registerObserverForNotifications(*runningObserver);
+    if (!err) {
+        
+        runningObserver = NULL;
+        TTObjectBaseInstantiate(TTSymbol("callback"), &runningObserver, kTTValNONE);
+        
+        runningBaton = new TTValue(TTObjectBasePtr(this));
+        runningBaton->append(TTObjectBasePtr(aTimeProcess));
+        
+        runningObserver->setAttributeValue(kTTSym_baton, TTPtr(runningBaton));
+        runningObserver->setAttributeValue(kTTSym_function, TTPtr(&ScenarioSchedulerRunningAttributeCallback));
+        
+        anAttribute->registerObserverForNotifications(*runningObserver);
+    }
     
     newCacheElement.append(runningObserver);
     
-    // 2 : create and cache progression Attribute observer on this time process
-    aTimeProcess->findAttribute(TTSymbol("progression"), &anAttribute);
+    // 2 : create and cache scheduler progression attribute observer on this time process
+    err = aScheduler->findAttribute(TTSymbol("progression"), &anAttribute);
     
-    progressionObserver = NULL;
-    TTObjectBaseInstantiate(TTSymbol("callback"), &progressionObserver, kTTValNONE);
-    
-    progressionBaton = new TTValue(TTObjectBasePtr(this));
-    progressionBaton->append(TTObjectBasePtr(aTimeProcess));
-    
-    progressionObserver->setAttributeValue(kTTSym_baton, TTPtr(progressionBaton));
-    progressionObserver->setAttributeValue(kTTSym_function, TTPtr(&ScenarioTimeProcessProgressionAttributeCallback));
-    
-    anAttribute->registerObserverForNotifications(*progressionObserver);
+    if (!err) {
+        
+        progressionObserver = NULL;
+        TTObjectBaseInstantiate(TTSymbol("callback"), &progressionObserver, kTTValNONE);
+        
+        progressionBaton = new TTValue(TTObjectBasePtr(this));
+        progressionBaton->append(TTObjectBasePtr(aTimeProcess));
+        
+        progressionObserver->setAttributeValue(kTTSym_baton, TTPtr(progressionBaton));
+        progressionObserver->setAttributeValue(kTTSym_function, TTPtr(&ScenarioSchedulerProgressionAttributeCallback));
+        
+        anAttribute->registerObserverForNotifications(*progressionObserver);
+    }
     
     newCacheElement.append(progressionObserver);
 }
 
-void Scenario::deleteCacheElement(const TTValue& oldCacheElement)
+void Scenario::deleteTimeProcessCacheElement(const TTValue& oldCacheElement)
 {
 	TTValue			v;
-    TTObjectBasePtr	aTimeProcess, anObserver;
+    TimeProcessPtr	aTimeProcess;
+    TTObjectBasePtr aScheduler, anObserver;
 	TTAttributePtr	anAttribute;
 	TTErr			err;
     
     // 0 : get cached time process
-    aTimeProcess = oldCacheElement[0];
+    aTimeProcess = TimeProcessPtr((TTObjectBasePtr)oldCacheElement[0]);
     
-    // 1 : delete running attribute observer
+    aScheduler = aTimeProcess->mScheduler;
+    
+    // 1 : delete scheduler running attribute observer
     anObserver = NULL;
     anObserver = oldCacheElement[1];
     
     anAttribute = NULL;
-    err = aTimeProcess->findAttribute(TTSymbol("running"), &anAttribute);
+    err = aScheduler->findAttribute(TTSymbol("running"), &anAttribute);
     
     if (!err) {
         
@@ -516,12 +485,12 @@ void Scenario::deleteCacheElement(const TTValue& oldCacheElement)
             TTObjectBaseRelease(&anObserver);
     }
     
-    // 2 : delete end attribute observer
+    // 2 : delete scheduler progression attribute observer
     anObserver = NULL;
     anObserver = oldCacheElement[2];
     
     anAttribute = NULL;
-    err = aTimeProcess->findAttribute(TTSymbol("progression"), &anAttribute);
+    err = aScheduler->findAttribute(TTSymbol("progression"), &anAttribute);
     
     if (!err) {
         
@@ -530,6 +499,63 @@ void Scenario::deleteCacheElement(const TTValue& oldCacheElement)
         if (!err)
             TTObjectBaseRelease(&anObserver);
     }    
+}
+
+void Scenario::makeTimeEventCacheElement(TimeEventPtr aTimeEvent, TTValue& newCacheElement)
+{
+    TTValue			v;
+    TTMessagePtr	aMessage;
+	TTObjectBasePtr	triggerObserver;
+    TTValuePtr		triggerBaton;
+    TTErr           err;
+	
+	// 0 : cache time process object
+	newCacheElement.append((TTObjectBasePtr)aTimeEvent);
+    
+    // 1 : create and cache event trigger message observer on this time event
+    err = aTimeEvent->findMessage(TTSymbol("Trigger"), &aMessage);
+    
+    if (!err) {
+        triggerObserver = NULL;
+        TTObjectBaseInstantiate(TTSymbol("callback"), &triggerObserver, kTTValNONE);
+        
+        triggerBaton = new TTValue(TTObjectBasePtr(this));
+        triggerBaton->append(TTObjectBasePtr(aTimeEvent));
+        
+        triggerObserver->setAttributeValue(kTTSym_baton, TTPtr(triggerBaton));
+        triggerObserver->setAttributeValue(kTTSym_function, TTPtr(&ScenarioSchedulerRunningAttributeCallback));
+        
+        aMessage->registerObserverForNotifications(*triggerObserver);
+    }
+    
+    newCacheElement.append(triggerObserver);
+}
+
+void Scenario::deleteTimeEventCacheElement(const TTValue& oldCacheElement)
+{
+    TTValue			v;
+    TimeEventPtr	aTimeEvent;
+    TTObjectBasePtr anObserver;
+	TTMessagePtr	aMessage;
+	TTErr			err;
+    
+    // 0 : get cached time event
+    aTimeEvent = TimeEventPtr((TTObjectBasePtr)oldCacheElement[0]);
+    
+    // 1 : delete event trigger message observer observer
+    anObserver = NULL;
+    anObserver = oldCacheElement[1];
+    
+    aMessage = NULL;
+    err = aTimeEvent->findMessage(TTSymbol("Trigger"), &aMessage);
+    
+    if (!err) {
+        
+        err = aMessage->unregisterObserverForNotifications(*anObserver);
+        
+        if (!err)
+            TTObjectBaseRelease(&anObserver);
+    }
 }
 
 #if 0
@@ -542,7 +568,12 @@ void ScenarioFindTimeProcess(const TTValue& aValue, TTPtr timeProcessPtrToMatch,
 	found = (TTObjectBasePtr)aValue[0] == (TTObjectBasePtr)timeProcessPtrToMatch;
 }
 
-TTErr ScenarioTimeProcessRunningAttributeCallback(TTPtr baton, TTValue& data)
+void ScenarioFindTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found)
+{
+    found = (TTObjectBasePtr)aValue[0] == (TTObjectBasePtr)timeEventPtrToMatch;
+}
+
+TTErr ScenarioSchedulerRunningAttributeCallback(TTPtr baton, TTValue& data)
 {
     TimeProcessPtr  aScenario, aTimeProcess;
 	TTValuePtr      b;
@@ -557,22 +588,21 @@ TTErr ScenarioTimeProcessRunningAttributeCallback(TTPtr baton, TTValue& data)
     // get new running value
     running = data[0];
     
-    // TODO : warn Scheduler that this time process running state have changed (?)
     timeProcessType = aTimeProcess->getName();
     
     if (timeProcessType == TTSymbol("Automation")) {
         
-        // TODO : update the CSP in Automation case
+        // TODO : update scenario's ECOMachine scheduler in Automation case
         return kTTErrGeneric;
     }
     else if (timeProcessType == TTSymbol("Scenario")) {
         
-        // TODO : update the CSP in Scenario case
+        // TODO : update scenario's ECOMachine scheduler in Scenario case
         return kTTErrGeneric;
     }
     else if (timeProcessType == TTSymbol("Relation")) {
         
-        // TODO : update the CSP in Relation case
+        // TODO : update scenario's ECOMachine scheduler in Relation case
         return kTTErrGeneric;
     }
     // else if ...
@@ -580,7 +610,7 @@ TTErr ScenarioTimeProcessRunningAttributeCallback(TTPtr baton, TTValue& data)
     return kTTErrGeneric;
 }
 
-TTErr ScenarioTimeProcessProgressionAttributeCallback(TTPtr baton, TTValue& data)
+TTErr ScenarioSchedulerProgressionAttributeCallback(TTPtr baton, TTValue& data)
 {
     TimeProcessPtr  aScenario, aTimeProcess;
 	TTValuePtr      b;
@@ -600,17 +630,17 @@ TTErr ScenarioTimeProcessProgressionAttributeCallback(TTPtr baton, TTValue& data
     
     if (timeProcessType == TTSymbol("Automation")) {
         
-        // TODO : update the CSP in Automation case
+        // TODO : update scenario's ECOMachine scheduler in Automation case
         return kTTErrGeneric;
     }
     else if (timeProcessType == TTSymbol("Scenario")) {
         
-        // TODO : update the CSP in Scenario case
+        // TODO : update scenario's ECOMachine scheduler in Scenario case
         return kTTErrGeneric;
     }
     else if (timeProcessType == TTSymbol("Relation")) {
         
-        // TODO : update the CSP in Relation case
+        // TODO : update scenario's ECOMachine scheduler in Relation case
         return kTTErrGeneric;
     }
     // else if ...

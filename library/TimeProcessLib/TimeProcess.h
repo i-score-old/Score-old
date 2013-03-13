@@ -30,10 +30,6 @@ registerAttribute(TTSymbol("ParameterNames"), kTypeLocalValue, NULL, (TTGetterMe
 
 typedef void (*TimeProcessProgressionCallback)(TTPtr, TTFloat64);
 
-// we assume the Scenario plugin exists and it is loaded
-class Scenario;
-typedef Scenario* ScenarioPtr;
-
 /****************************************************************************************************/
 // Class Specification
 
@@ -49,12 +45,13 @@ public:
     
 protected:
 
-    ScenarioPtr                     mScenario;                      ///< ATTRIBUTE : the parent scenario which constrains the time process
+    TTObjectBasePtr                 mScenario;                      ///< ATTRIBUTE : the parent scenario which constrains the time process
     
     TTBoolean                       mActive;                        ///< ATTRIBUTE : is the time process active ?
     
-    TimeEventPtr                    mStartEvent;                    ///< ATTRIBUTE : the event object which handles the time process execution start
-    TimeEventPtr                    mEndEvent;                      ///< ATTRIBUTE : the event object which handles the time process execution stop
+    TTObjectBasePtr                 mStartEvent;                    ///< ATTRIBUTE : the event object which handles the time process execution start
+    // ? : TTList                       mIntermediateEvents;            ///< ATTRIBUTE : the list of intermediate events
+    TTObjectBasePtr                 mEndEvent;                      ///< ATTRIBUTE : the event object which handles the time process execution stop
     
     TTObjectBasePtr                 mScheduler;                     ///< ATTRIBUTE : the scheduler object which handles the time process execution
     
@@ -83,8 +80,24 @@ public:
     virtual TTErr ProcessEnd() = 0;
     
     /** Specific process method
+     @param	inputValue      progression of the scheduler
+     @param	outputValue     return an error of the processing
      @return                an error code returned by the process method */
-    virtual TTErr Process() = 0;
+    virtual TTErr Process(const TTValue& inputValue, TTValue& outputValue) = 0;
+    
+    /**  needed to be handled by a TTXmlHandler
+     @param	inputValue      ..
+     @param	outputValue     ..
+     @return                .. */
+	virtual TTErr	WriteAsXml(const TTValue& inputValue, TTValue& outputValue) = 0;
+	virtual TTErr	ReadFromXml(const TTValue& inputValue, TTValue& outputValue) = 0;
+	
+	/**  needed to be handled by a TTTextHandler
+     @param	inputValue      ..
+     @param	outputValue     ..
+     @return                .. */
+	virtual TTErr	WriteAsText(const TTValue& inputValue, TTValue& outputValue) = 0;
+	virtual TTErr	ReadFromText(const TTValue& inputValue, TTValue& outputValue) = 0;
 
 private :
     
@@ -93,48 +106,18 @@ private :
      @return                kTTErrNone */
     TTErr	setActive(const TTValue& value);
     
-    /** Set the start event date of the time process
+    /** Set the start event of the time process
      @param	value           a date
      @return                an error code if the date is wrong */
-    TTErr	setStart(const TTValue& value);
+    TTErr	setStartEvent(const TTValue& value);
     
-    /** Set the end event date of the time process
+    /** Set the end event of the time process
      @param	value           a date
      @return                an error code if the date is wrong */
-    TTErr	setEnd(const TTValue& value);
+    TTErr	setEndEvent(const TTValue& value);
     
-    /** Add a start trigger on an address
-     @param	value           a TTAddress to listen
-     @return                an error code if trigger can't be added */
-    TTErr   StartTriggerAdd(const TTValue& inputValue, TTValue& outputValue);
-    
-    /** Remove a start trigger
-     @return                kTTerrNone */
-    TTErr   StartTriggerRemove();
-    
-    /** Add a end trigger on an address
-     @param	value           a TTAddress to listen
-     @return                an error code if trigger can't be added */
-    TTErr   EndTriggerAdd(const TTValue& inputValue, TTValue& outputValue);
-    
-    /** Remove a end trigger
-     @return                kTTerrNone */
-    TTErr   EndTriggerRemove();
-    
-	/**  needed to be handled by a TTXmlHandler
-     @param	value           ..
-     @return                .. */
-	TTErr	WriteAsXml(const TTValue& inputValue, TTValue& outputValue);
-	TTErr	ReadFromXml(const TTValue& inputValue, TTValue& outputValue);
-	
-	/**  needed to be handled by a TTTextHandler
-     @param	value           ..
-     @return                .. */
-	TTErr	WriteAsText(const TTValue& inputValue, TTValue& outputValue);
-	TTErr	ReadFromText(const TTValue& inputValue, TTValue& outputValue);
-    
-    friend TTErr TT_EXTENSION_EXPORT TimeProcessStartEventCallback(TimeProcessPtr  aTimeProcess, const TTValue& eventValue);
-    friend TTErr TT_EXTENSION_EXPORT TimeProcessEndEventCallback(TimeProcessPtr  aTimeProcess, const TTValue& eventValue);
+    friend TTErr TT_EXTENSION_EXPORT TimeProcessStartEventCallback(TTPtr object);
+    friend TTErr TT_EXTENSION_EXPORT TimeProcessEndEventCallback(TTPtr object);
     friend void TT_EXTENSION_EXPORT TimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression);
 };
 
@@ -144,13 +127,13 @@ typedef TimeProcess* TimeProcessPtr;
  @param	aTimeProcess                a time process instance
  @param	eventValue					a value to test in a logical expression
  @return							an error code */
-TTErr TT_EXTENSION_EXPORT TimeProcessStartEventCallback(TimeProcessPtr aTimeProcess, const TTValue& eventValue);
+TTErr TT_EXTENSION_EXPORT TimeProcessStartEventCallback(TTPtr object);
 
 /** The end event callback to end the time process execution
  @param	aTimeProcess                a time process instance
  @param	eventValue					a value to test in a logical expression
  @return							an error code */
-TTErr TT_EXTENSION_EXPORT TimeProcessEndEventCallback(TimeProcessPtr aTimeProcess, const TTValue& eventValue);
+TTErr TT_EXTENSION_EXPORT TimeProcessEndEventCallback(TTPtr object);
 
 /** The scheduler time progression callback
  @param	baton						a time process instance

@@ -9,6 +9,7 @@ includes:
   - "."
   - "includes"
   - "../../library/TimeProcessLib"
+  - "../../library/TimeEventLib"
   - "../../../Foundation/library/includes"
   - "../../../DSP/library/includes"
   - "../../../../Modules/Modular/library/includes"
