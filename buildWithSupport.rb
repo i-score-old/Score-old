@@ -54,7 +54,8 @@ elsif mac?
     
     # Copy Score headers to include them into other application
     # (except the includes folder because it is done by the support/build.rb script) 
-    `cp "#{glibdir}"/library/PeerObject/*.h /usr/local/jamoma/includes`
+    `cp "#{glibdir}"/library/TimeProcessLib/*.h /usr/local/jamoma/includes`
+    `cp "#{glibdir}"/library/TimeEventLib/*.h /usr/local/jamoma/includes`
     
 end
 
