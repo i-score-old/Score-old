@@ -1,5 +1,5 @@
 /*
- * Relation time process
+ * Interval time process
  * Copyright © 2013, Théo de la Hogue
  *
  * License: This code is licensed under the terms of the "New BSD License"
@@ -7,26 +7,23 @@
  */
 
 /*!
- * \class Relation
+ * \class Interval
  *
- *  Relation time process class
+ *  Interval time process class
  *
  */
 
-#ifndef __RELATION_H__
-#define __RELATION_H__
+#ifndef __INTERVAL_H__
+#define __INTERVAL_H__
 
 #include "TimeProcess.h"
 
-class Relation : public TimeProcess
+class Interval : public TimeProcess
 {
-	TTCLASS_SETUP(Relation)
+	TTCLASS_SETUP(Interval)
 	
 private :
        
-	TTObjectBasePtr				mFrom;                  ///< ATTRIBUTE : the time process on which the relation is connected from
-    TTObjectBasePtr				mTo;                    ///< ATTRIBUTE : the time process on which the relation is connected to
-	
     /** Get parameters names needed by this time process
      @param	value           the returned parameter names
      @return                kTTErrNone */
@@ -42,17 +39,7 @@ private :
     
     /** Specific process method
      @return                an error code returned by the process method */
-    TTErr Process();
-    
-    /** Set the the time process on which the relation is connected from
-     @param	value           a time process
-     @return                an error code if the relation can't be done */
-    TTErr	setFrom(const TTValue& value);
-    
-    /** Set the the time process on which the relation is connected to
-     @param	value           a time process
-     @return                an error code if the relation can't be done */
-    TTErr	setTo(const TTValue& value);
+    TTErr Process(const TTValue& inputValue, TTValue& outputValue);
     
 	/**  needed to be handled by a TTXmlHandler
      @param	inputValue      ..
@@ -69,6 +56,6 @@ private :
 	TTErr	ReadFromText(const TTValue& inputValue, TTValue& outputValue);
 };
 
-typedef Relation* RelationPtr;
+typedef Interval* IntervalPtr;
 
-#endif // __RELATION_H__
+#endif // __INTERVAL_H__

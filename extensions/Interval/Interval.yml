@@ -3,7 +3,7 @@
 
 sources:
   - ../../library/TimeProcessLib/TimeProcess.cpp	
-  - source/Relation.cpp
+  - source/Interval.cpp
   
 includes:
   - "."

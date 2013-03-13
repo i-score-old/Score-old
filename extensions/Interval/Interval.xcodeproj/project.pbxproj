@@ -7,43 +7,43 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		4617A82116ED49F4007A6E44 /* Relation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Relation.h; sourceTree = "<group>"; };
-		4617A82316ED49FC007A6E44 /* Relation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Relation.cpp; sourceTree = "<group>"; };
-		4617A82516ED4A1F007A6E44 /* TimeProcess.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TimeProcess.cpp; sourceTree = "<group>"; };
-		4617A82616ED4A1F007A6E44 /* TimeProcess.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TimeProcess.h; sourceTree = "<group>"; };
+		46F4620A16F0D1BA0092840F /* Interval.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Interval.cpp; sourceTree = "<group>"; };
+		46F4620C16F0D1C40092840F /* Interval.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Interval.h; sourceTree = "<group>"; };
+		46F4620E16F0D1CE0092840F /* TimeProcess.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TimeProcess.cpp; sourceTree = "<group>"; };
+		46F4620F16F0D1CE0092840F /* TimeProcess.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TimeProcess.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
-		4617A81516ED49BE007A6E44 = {
+		46F461FE16F0D1980092840F = {
 			isa = PBXGroup;
 			children = (
-				4617A82416ED4A1F007A6E44 /* TimeProcessLib */,
-				4617A82016ED49F4007A6E44 /* includes */,
-				4617A82216ED49FC007A6E44 /* source */,
+				46F4620D16F0D1CE0092840F /* TimeProcessLib */,
+				46F4620B16F0D1C40092840F /* includes */,
+				46F4620916F0D1BA0092840F /* source */,
 			);
 			sourceTree = "<group>";
 		};
-		4617A82016ED49F4007A6E44 /* includes */ = {
+		46F4620916F0D1BA0092840F /* source */ = {
 			isa = PBXGroup;
 			children = (
-				4617A82116ED49F4007A6E44 /* Relation.h */,
-			);
-			path = includes;
-			sourceTree = "<group>";
-		};
-		4617A82216ED49FC007A6E44 /* source */ = {
-			isa = PBXGroup;
-			children = (
-				4617A82316ED49FC007A6E44 /* Relation.cpp */,
+				46F4620A16F0D1BA0092840F /* Interval.cpp */,
 			);
 			path = source;
 			sourceTree = "<group>";
 		};
-		4617A82416ED4A1F007A6E44 /* TimeProcessLib */ = {
+		46F4620B16F0D1C40092840F /* includes */ = {
 			isa = PBXGroup;
 			children = (
-				4617A82616ED4A1F007A6E44 /* TimeProcess.h */,
-				4617A82516ED4A1F007A6E44 /* TimeProcess.cpp */,
+				46F4620C16F0D1C40092840F /* Interval.h */,
+			);
+			path = includes;
+			sourceTree = "<group>";
+		};
+		46F4620D16F0D1CE0092840F /* TimeProcessLib */ = {
+			isa = PBXGroup;
+			children = (
+				46F4620F16F0D1CE0092840F /* TimeProcess.h */,
+				46F4620E16F0D1CE0092840F /* TimeProcess.cpp */,
 			);
 			name = TimeProcessLib;
 			path = ../../library/TimeProcessLib;
@@ -52,47 +52,47 @@
 /* End PBXGroup section */
 
 /* Begin PBXLegacyTarget section */
-		4617A81A16ED49BE007A6E44 /* Relation */ = {
+		46F4620316F0D1980092840F /* Interval */ = {
 			isa = PBXLegacyTarget;
 			buildArgumentsString = "$(ACTION) $(Configuration)";
-			buildConfigurationList = 4617A81D16ED49BE007A6E44 /* Build configuration list for PBXLegacyTarget "Relation" */;
+			buildConfigurationList = 46F4620616F0D1980092840F /* Build configuration list for PBXLegacyTarget "Interval" */;
 			buildPhases = (
 			);
 			buildToolPath = /usr/bin/make;
 			buildWorkingDirectory = "";
 			dependencies = (
 			);
-			name = Relation;
+			name = Interval;
 			passBuildSettingsInEnvironment = 1;
-			productName = Relation;
+			productName = Interval;
 		};
 /* End PBXLegacyTarget section */
 
 /* Begin PBXProject section */
-		4617A81616ED49BE007A6E44 /* Project object */ = {
+		46F461FF16F0D1980092840F /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0460;
 				ORGANIZATIONNAME = OSSIA;
 			};
-			buildConfigurationList = 4617A81916ED49BE007A6E44 /* Build configuration list for PBXProject "Relation" */;
+			buildConfigurationList = 46F4620216F0D1980092840F /* Build configuration list for PBXProject "Interval" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 			);
-			mainGroup = 4617A81516ED49BE007A6E44;
+			mainGroup = 46F461FE16F0D1980092840F;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				4617A81A16ED49BE007A6E44 /* Relation */,
+				46F4620316F0D1980092840F /* Interval */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin XCBuildConfiguration section */
-		4617A81B16ED49BE007A6E44 /* Debug */ = {
+		46F4620416F0D1980092840F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -124,7 +124,7 @@
 			};
 			name = Debug;
 		};
-		4617A81C16ED49BE007A6E44 /* Release */ = {
+		46F4620516F0D1980092840F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -149,7 +149,7 @@
 			};
 			name = Release;
 		};
-		4617A81E16ED49BE007A6E44 /* Debug */ = {
+		46F4620716F0D1980092840F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEBUGGING_SYMBOLS = YES;
@@ -161,7 +161,7 @@
 			};
 			name = Debug;
 		};
-		4617A81F16ED49BE007A6E44 /* Release */ = {
+		46F4620816F0D1980092840F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				OTHER_CFLAGS = "";
@@ -173,25 +173,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		4617A81916ED49BE007A6E44 /* Build configuration list for PBXProject "Relation" */ = {
+		46F4620216F0D1980092840F /* Build configuration list for PBXProject "Interval" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				4617A81B16ED49BE007A6E44 /* Debug */,
-				4617A81C16ED49BE007A6E44 /* Release */,
+				46F4620416F0D1980092840F /* Debug */,
+				46F4620516F0D1980092840F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4617A81D16ED49BE007A6E44 /* Build configuration list for PBXLegacyTarget "Relation" */ = {
+		46F4620616F0D1980092840F /* Build configuration list for PBXLegacyTarget "Interval" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				4617A81E16ED49BE007A6E44 /* Debug */,
-				4617A81F16ED49BE007A6E44 /* Release */,
+				46F4620716F0D1980092840F /* Debug */,
+				46F4620816F0D1980092840F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 4617A81616ED49BE007A6E44 /* Project object */;
+	rootObject = 46F461FF16F0D1980092840F /* Project object */;
 }

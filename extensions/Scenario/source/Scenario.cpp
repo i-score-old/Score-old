@@ -206,9 +206,9 @@ TTErr Scenario::TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue)
                 // cf : CSP::addBox
                 return kTTErrGeneric;
             }
-            else if (timeProcessType == TTSymbol("Relation")) {
+            else if (timeProcessType == TTSymbol("Interval")) {
                 
-                // TODO : update the CSP in Relation case
+                // TODO : update the CSP in Interval case
                 // cf : CSP::addAntPostRelation
                 return kTTErrGeneric;
             }
@@ -266,9 +266,9 @@ TTErr Scenario::TimeProcessRemove(const TTValue& inputValue, TTValue& outputValu
                     // cf : CSP::removeBox
                     return kTTErrGeneric;
                 }
-                else if (timeProcessType == TTSymbol("Relation")) {
+                else if (timeProcessType == TTSymbol("Interval")) {
                     
-                    // TODO : update the CSP in Relation case
+                    // TODO : update the CSP in Interval case
                     // cf : CSP::removeTemporalRelation
                     return kTTErrGeneric;
                 }
@@ -678,9 +678,9 @@ TTErr ScenarioSchedulerRunningAttributeCallback(TTPtr baton, TTValue& data)
         // TODO : update scenario's ECOMachine scheduler in Scenario case
         return kTTErrGeneric;
     }
-    else if (timeProcessType == TTSymbol("Relation")) {
+    else if (timeProcessType == TTSymbol("Interval")) {
         
-        // TODO : update scenario's ECOMachine scheduler in Relation case
+        // TODO : update scenario's ECOMachine scheduler in Interval case
         return kTTErrGeneric;
     }
     // else if ...
@@ -716,9 +716,9 @@ TTErr ScenarioSchedulerProgressionAttributeCallback(TTPtr baton, TTValue& data)
         // TODO : update scenario's ECOMachine scheduler in Scenario case
         return kTTErrGeneric;
     }
-    else if (timeProcessType == TTSymbol("Relation")) {
+    else if (timeProcessType == TTSymbol("Interval")) {
         
-        // TODO : update scenario's ECOMachine scheduler in Relation case
+        // TODO : update scenario's ECOMachine scheduler in Interval case
         return kTTErrGeneric;
     }
     // else if ...

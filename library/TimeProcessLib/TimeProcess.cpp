@@ -316,6 +316,6 @@ void TimeProcessLib::getTimeProcessNames(TTValue& timeProcessNames)
 	timeProcessNames.clear();
 	timeProcessNames.append(TTSymbol("Automation"));
     timeProcessNames.append(TTSymbol("Scenario"));
-    timeProcessNames.append(TTSymbol("Relation"));
+    timeProcessNames.append(TTSymbol("Interval"));
 }
 
