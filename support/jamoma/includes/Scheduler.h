@@ -36,7 +36,8 @@ typedef void (*SchedulerProgressionCallback)(TTPtr, TTFloat64);
  */
 class Scheduler : public TTObjectBase {
 
-public:																															
+public:
+    
 	TTSymbol                        mName;					///< ATTRIBUTE : the name of the scheduler							
 	TTSymbol                        mVersion;				///< ATTRIBUTE : the version of the scheduler								
 	TTSymbol                        mAuthor;				///< ATTRIBUTE : the author of the scheduler								
@@ -49,8 +50,12 @@ protected:
     
     SchedulerProgressionCallback    mCallback;              ///< the callback to use for each step
     TTPtr                           mBaton;                 ///< the baton to use for each step
+    
+    TTAttributePtr                  runningAttribute;       ///< cache running attribute for observer notification
+    TTAttributePtr                  progressionAttribute;   ///< cache progression attribute for observer notification
 	
 public:
+    
 	//** Constructor.	*/
 	Scheduler(TTValue& arguments);
 	
@@ -59,9 +64,6 @@ public:
 	
 	/** Get parameters names needed by this scheduler */
 	virtual TTErr getParameterNames(TTValue& value) = 0;
-    
-    /** Get the progression [0. :: 1.] */
-	virtual TTErr getProgression(TTValue& value) = 0;
 	
 	/** Start the scheduler */
     virtual TTErr Go(const TTValue& inputValue, TTValue& outputValue) = 0;
