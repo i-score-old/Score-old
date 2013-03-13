@@ -256,14 +256,15 @@ void ECOMachine::compileECO(std::map<unsigned int, StoryLine> hierarchyStoryLine
 //	}
 }
 
-PetriNet* ECOMachine::compilePetriNet(StoryLine storyLineToCompile,
-									  std::map<unsigned int, StoryLine> hierarchyStoryLine,
-									  std::vector<unsigned int>& processIdToStop,
-									  unsigned int timeToStartTriggerPoint,
-									  void(*triggerAction)(void*, bool, Transition*))
+PetriNet* ECOMachine::compilePetriNet(StoryLine storyLineToCompile,                         // NOTE : all the story is stored inside a Scenario
+									  std::map<unsigned int,StoryLine> hierarchyStoryLine,  // NOTE : all the story is stored inside a Scenario
+									  std::vector<unsigned int>& processIdToStop,           // a list of process : used for what ?
+									  unsigned int timeToStartTriggerPoint,                 // a date : used for what ?
+									  void(*triggerAction)(void*, bool, Transition*))       // a callback method used for what ?
 {
 	PetriNet* petriNet = new PetriNet();
 
+    // NOTE : registration of 
 	if (triggerAction != NULL) {
 		petriNet->addWaitedTriggerPointMessageAction(this, triggerAction);
 	}
@@ -293,6 +294,15 @@ PetriNet* ECOMachine::compilePetriNet(StoryLine storyLineToCompile,
 	startArc->changeRelativeTime(integer0, plusInfinity);
 	endArc->changeRelativeTime(integer0, plusInfinity);
 
+    /* REPLACE : for each TimeProcess of a Scenario (except the relations : see FIRST COMPILATION PHASE comment)
+     
+     for (aScenario->mTimeProcessList.begin(); aScenario->mTimeProcessList.end(); aScenario->mTimeProcessList.next();) {
+        aTimeProcess = TimeProcessPtr((TTObjectBasePtr)aScenario->mTimeProcessList.current()[0]);
+     
+        if (aTimeProcess->getName() == TTSymbol("Relation"))
+            continue;
+     
+    */
 	for (unsigned int i = 0 ; i < storyLineToCompile.m_constrainedBoxes.size() ; ++i) {
 		Transition* previousTransition = startTransition;
 		ConstrainedBox* currentBox = storyLineToCompile.m_constrainedBoxes[i];
@@ -303,8 +313,22 @@ PetriNet* ECOMachine::compilePetriNet(StoryLine storyLineToCompile,
 		Place* currentPlace;
 
 		ECOProcess* currentProcess = m_process[currentBoxId];
+        
+        // REPLACE : aTimeProcess->sendMessage(TTSymbol("Init"));
+        // TODO : add a TimeProcess::Init() method
 		currentProcess->init();
 
+        /* REPLACE :
+         aTimeProcess->getAttributeValue(TTSymbol("startEvent"), v);
+         aStartEvent = v[0];
+         aStartEvent->getAttributeValue(TTSymbol("date"), v);
+         startDate = v[0];
+        
+         aTimeProcess->getAttributeValue(TTSymbol("endEvent"), v);
+         anEndEvent = v[0];
+         aStartEvent->getAttributeValue(TTSymbol("date"), v);
+         endDate = v[0];
+        */
 		unsigned int boxEndTime = currentBox->beginValue() + currentBox->lengthValue();
 
 		if (((unsigned int) currentBox->beginValue() < timeToStartTriggerPoint) && (boxEndTime > timeToStartTriggerPoint)) {
