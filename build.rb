@@ -50,6 +50,7 @@ elsif mac?
     `cp /usr/local/jamoma/extensions/NetworkLib.ttdylib "#{glibdir}"/support/jamoma/extensions`
     `cp /usr/local/jamoma/extensions/Minuit.ttdylib "#{glibdir}"/support/jamoma/extensions`
     `cp /usr/local/jamoma/extensions/OSC.ttdylib "#{glibdir}"/support/jamoma/extensions`
+    `cp /usr/local/jamoma/extensions/System.ttdylib "#{glibdir}"/support/jamoma/extensions`
     
     # Foundation includes
     `cp "#{glibdir}"/../Foundation/library/includes/* "#{glibdir}"/support/jamoma/includes`
@@ -65,9 +66,6 @@ elsif mac?
     
     `cp "#{glibdir}"/../../Modules/Modular/library/ProtocolLib/Protocol.h "#{glibdir}"/support/jamoma/includes`
     `cp "#{glibdir}"/../../Modules/Modular/library/SchedulerLib/Scheduler.h "#{glibdir}"/support/jamoma/includes`
-
-    # Modular sources (used to build our own ECOMachine Scheduler outside the Modular folder)
-    `cp "#{glibdir}"/../../Modules/Modular/library/SchedulerLib/Scheduler.cpp "#{glibdir}"/support/jamoma/source`
     
     # Foundation and Modular lib
     `cp /usr/local/jamoma/lib/JamomaFoundation.dylib "#{glibdir}"/support/jamoma/lib`
