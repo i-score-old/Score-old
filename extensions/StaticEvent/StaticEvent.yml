@@ -9,12 +9,9 @@ includes:
   - "."
   - "includes"
   - "../../library/TimeEventLib"
-  - "../../../Foundation/library/includes"
-  - "../../../DSP/library/includes"
-  - "../../../../Modules/Modular/library/includes"
-  - "../../../../Modules/Modular/library/PeerObject"
-  - "../../../../Modules/Modular/library/ProtocolLib"
-  - "../../../../Modules/Modular/library/SchedulerLib"
+  
+  # to build without having the whole jamoma repository
+  - ../../support/jamoma/includes
 
 libraries:
   - FOUNDATION

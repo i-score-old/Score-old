@@ -132,6 +132,10 @@ TTErr Scenario::getParameterNames(TTValue& value)
 
 TTErr Scenario::ProcessStart()
 {
+    
+    // TODO : compile the PetriNet to prepare scenario execution
+    // cf : ECOMachine::compilePetriNet
+    
     // Trigger the first event
     mFirstEvent->sendMessage(TTSymbol("Trigger"), kTTValNONE, kTTValNONE);
     
@@ -149,6 +153,8 @@ TTErr Scenario::ProcessEnd()
     // Notify the end event subscribers
     mEndEvent->sendMessage(TTSymbol("Notify"));
     
+    // TODO : clear PetriNet as we don't need it until the next execution
+    
     return kTTErrNone;
 }
 
@@ -162,7 +168,8 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
             
             progression = inputValue[0];
             
-            // TODO : look at ECOMachine to know what to do here ...
+            // TODO : we need to update the PetriNet to process the scenario
+            // cf : PetriNet::makeOneStep()
             return kTTErrNone;
         }
     }

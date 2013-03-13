@@ -2,7 +2,24 @@
 #  - TIME_PROCESS_DEBUG
 
 sources:
-  - ../../library/TimeProcessLib/TimeProcess.cpp		
+  - ../../library/TimeProcessLib/TimeProcess.cpp
+  		
+  - source/PetriNet/Arc.cpp
+  - source/PetriNet/ArithmeticException.cpp
+  - source/PetriNet/ExtendedInt.cpp
+  - source/PetriNet/IncoherentStateException.cpp
+  - source/PetriNet/OutOfBoundException.cpp
+  - source/PetriNet/PetriNet.cpp
+  - source/PetriNet/PetriNetItem.cpp                    # is it needed ?
+  - source/PetriNet/PetriNetNode.cpp                    # is it needed ?
+  - source/PetriNet/Place.cpp
+  - source/PetriNet/PriorityTransitionAction.cpp        # is it needed ?
+  - source/PetriNet/ThreadSafeList.cpp                  # is it needed ?
+  - source/PetriNet/Token.cpp
+  - source/PetriNet/Transition.cpp
+  - source/PetriNet/TransitionAction.cpp                # is it needed ?
+  - source/PetriNet/TransitionBitArray.cpp              # is it needed ?
+  
   - source/Scenario.cpp
   
 includes:
@@ -10,12 +27,10 @@ includes:
   - "includes"
   - "../../library/TimeProcessLib"
   - "../../library/TimeEventLib"
-  - "../../../Foundation/library/includes"
-  - "../../../DSP/library/includes"
-  - "../../../../Modules/Modular/library/includes"
-  - "../../../../Modules/Modular/library/PeerObject"
-  - "../../../../Modules/Modular/library/ProtocolLib"
-  - "../../../../Modules/Modular/library/SchedulerLib"
+  - "source/PetriNet"
+  
+  # to build without having the whole jamoma repository
+  - ../../support/jamoma/includes
 
 libraries:
   - FOUNDATION
