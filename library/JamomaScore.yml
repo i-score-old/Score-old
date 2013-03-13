@@ -50,11 +50,10 @@ sources:
   - Editor/gecode-solver/searchEngine.cpp
   - Editor/gecode-solver/solver_wrap.cpp
   
-  - PeerObject/TTEngine.cpp
-  
   - source/EnginesPrivate.cpp
   - source/TTScore.cpp
   - source/TTScoreSymbolCache.cpp
+  - source/TTEngine.cpp
   
   - StoryLine/StoryLine.cpp
 
