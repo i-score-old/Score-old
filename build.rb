@@ -65,6 +65,9 @@ elsif mac?
     
     `cp "#{glibdir}"/../../Modules/Modular/library/ProtocolLib/Protocol.h "#{glibdir}"/support/jamoma/includes`
     `cp "#{glibdir}"/../../Modules/Modular/library/SchedulerLib/Scheduler.h "#{glibdir}"/support/jamoma/includes`
+
+    # Modular sources (used to build our own ECOMachine Scheduler outside the Modular folder)
+    `cp "#{glibdir}"/../../Modules/Modular/library/SchedulerLib/Scheduler.cpp "#{glibdir}"/support/jamoma/source`
     
     # Foundation and Modular lib
     `cp /usr/local/jamoma/lib/JamomaFoundation.dylib "#{glibdir}"/support/jamoma/lib`
@@ -73,7 +76,7 @@ elsif mac?
     
     # Copy Score headers to include them into other application
     # (except the includes folder because it is done by the support/build.rb script)
-    `cp "#{glibdir}"/library/PeerObject/*.h /usr/local/jamoma/includes`
+    #`cp "#{glibdir}"/library/PeerObject/*.h /usr/local/jamoma/includes`
     
 end
 
