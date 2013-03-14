@@ -128,6 +128,16 @@ Scenario::~Scenario()
         TTObjectBaseRelease(TTObjectBaseHandle(&mLastEvent));
         mLastEvent = NULL;
     }
+    
+    if (mEditionSolver) {
+        delete mEditionSolver;
+        mEditionSolver = NULL;
+    }
+    
+    if (mExecutionGraph) {
+        delete mExecutionGraph;
+        mExecutionGraph = NULL;
+    }
 }
 
 TTErr Scenario::getParameterNames(TTValue& value)
