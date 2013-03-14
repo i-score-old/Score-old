@@ -72,31 +72,6 @@ PetriNet::PetriNet(unsigned int nbColors)
 	resetEvents();
 }
 
-void* mainThreadFunction(void* threadArg)
-{
-	PetriNet* petriNet = (PetriNet*) threadArg;
-    
-    cout << "PetriNet::mainThreadFunction -- start" << endl;
-
-	petriNet->m_startPlace->produceTokens(1);
-	petriNet->m_endPlace->consumeTokens(petriNet->m_endPlace->nbOfTokens());
-
-	petriNet->addTime(petriNet->getTimeOffset() * 1000);
-	//petriNet->makeOneStep();
-
-	while (petriNet->m_endPlace->nbOfTokens() == 0 && !petriNet->m_mustStop) {
-		petriNet->update();
-        
-        cout << "PetriNet::mainThreadFunction -- " << petriNet->m_currentTime << endl;
-	}
-
-	petriNet->m_isRunning = false;
-    
-    cout << "PetriNet::mainThreadFunction -- end" << endl;
-
-	return NULL;
-}
-
 void PetriNet::makeOneStep()
 {
     // NOTE : the scenario have to set the current time before to call makeOneStep() using PetriNet::setCurrentTimeInMs
@@ -198,12 +173,6 @@ void PetriNet::makeOneStep()
 	}
 
 	m_transitionsToCrossWhenAcceleration.clear();
-}
-
-void PetriNet::launch()
-{
-	m_isRunning = true;
-	pthread_create(&m_thread, NULL, mainThreadFunction, this);
 }
 
 void PetriNet::setCurrentTimeInMs(double currentTimeInMs)
@@ -638,7 +607,9 @@ void externLaunch(void* arg)
 		petriNet->setUpdateFactor(petriNet->m_parentPetriNet->getUpdateFactor());
 	}
 
-	petriNet->launch();
+    // NOTE : the line below is commented out because we don't need to launch the thread execution anymore
+    // see in : Scenario.cpp
+	//petriNet->launch();
 }
 
 void externMustStop(void* arg)

@@ -39,6 +39,47 @@
 		46F4624416F13E9B0092840F /* TransitionAction.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TransitionAction.hpp; sourceTree = "<group>"; };
 		46F4624516F13E9B0092840F /* TransitionBitArray.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TransitionBitArray.cpp; sourceTree = "<group>"; };
 		46F4624616F13E9B0092840F /* TransitionBitArray.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TransitionBitArray.hpp; sourceTree = "<group>"; };
+		46F4624816F149130092840F /* AllenRelation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AllenRelation.cpp; sourceTree = "<group>"; };
+		46F4624916F149130092840F /* AllenRelation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AllenRelation.hpp; sourceTree = "<group>"; };
+		46F4624A16F149130092840F /* AntPostRelation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AntPostRelation.cpp; sourceTree = "<group>"; };
+		46F4624B16F149130092840F /* AntPostRelation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AntPostRelation.hpp; sourceTree = "<group>"; };
+		46F4624C16F149130092840F /* BinaryRelation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BinaryRelation.cpp; sourceTree = "<group>"; };
+		46F4624D16F149130092840F /* BinaryRelation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BinaryRelation.hpp; sourceTree = "<group>"; };
+		46F4624E16F149130092840F /* BinaryTemporalRelation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BinaryTemporalRelation.cpp; sourceTree = "<group>"; };
+		46F4624F16F149130092840F /* BinaryTemporalRelation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BinaryTemporalRelation.hpp; sourceTree = "<group>"; };
+		46F4625016F149130092840F /* ConstrainedBox.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ConstrainedBox.cpp; sourceTree = "<group>"; };
+		46F4625116F149130092840F /* ConstrainedBox.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ConstrainedBox.hpp; sourceTree = "<group>"; };
+		46F4625216F149130092840F /* ConstrainedTemporalEntity.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ConstrainedTemporalEntity.cpp; sourceTree = "<group>"; };
+		46F4625316F149130092840F /* ConstrainedTemporalEntity.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ConstrainedTemporalEntity.hpp; sourceTree = "<group>"; };
+		46F4625416F149130092840F /* ControlPoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ControlPoint.cpp; sourceTree = "<group>"; };
+		46F4625516F149130092840F /* ControlPoint.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ControlPoint.hpp; sourceTree = "<group>"; };
+		46F4625616F149130092840F /* CSP.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CSP.cpp; sourceTree = "<group>"; };
+		46F4625716F149130092840F /* CSP.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CSP.hpp; sourceTree = "<group>"; };
+		46F4625816F149130092840F /* CSPConstrainedVariable.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CSPConstrainedVariable.cpp; sourceTree = "<group>"; };
+		46F4625916F149130092840F /* CSPConstrainedVariable.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CSPConstrainedVariable.hpp; sourceTree = "<group>"; };
+		46F4625A16F149130092840F /* CSPLinearConstraint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CSPLinearConstraint.cpp; sourceTree = "<group>"; };
+		46F4625B16F149130092840F /* CSPLinearConstraint.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CSPLinearConstraint.hpp; sourceTree = "<group>"; };
+		46F4625C16F149130092840F /* IllegalArgumentException.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IllegalArgumentException.hpp; sourceTree = "<group>"; };
+		46F4625D16F149130092840F /* IntervalRelation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IntervalRelation.cpp; sourceTree = "<group>"; };
+		46F4625E16F149130092840F /* IntervalRelation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IntervalRelation.hpp; sourceTree = "<group>"; };
+		46F4625F16F149130092840F /* InvalidFileFormatException.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = InvalidFileFormatException.hpp; sourceTree = "<group>"; };
+		46F4626016F149130092840F /* OutOfBoundException.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = OutOfBoundException.hpp; sourceTree = "<group>"; };
+		46F4626116F149130092840F /* TriggerPoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TriggerPoint.cpp; sourceTree = "<group>"; };
+		46F4626216F149130092840F /* TriggerPoint.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TriggerPoint.hpp; sourceTree = "<group>"; };
+		46F4626416F14AD20092840F /* customSpace.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = customSpace.cpp; sourceTree = "<group>"; };
+		46F4626516F14AD20092840F /* customSpace.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = customSpace.hpp; sourceTree = "<group>"; };
+		46F4626616F14AD20092840F /* gecode_headers.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = gecode_headers.hpp; sourceTree = "<group>"; };
+		46F4626716F14AD20092840F /* integerVariable.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = integerVariable.cpp; sourceTree = "<group>"; };
+		46F4626816F14AD20092840F /* integerVariable.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = integerVariable.hpp; sourceTree = "<group>"; };
+		46F4626916F14AD20092840F /* linearConstraint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = linearConstraint.cpp; sourceTree = "<group>"; };
+		46F4626A16F14AD20092840F /* linearConstraint.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = linearConstraint.hpp; sourceTree = "<group>"; };
+		46F4626B16F14AD20092840F /* relations_type.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = relations_type.hpp; sourceTree = "<group>"; };
+		46F4626C16F14AD20092840F /* searchEngine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = searchEngine.cpp; sourceTree = "<group>"; };
+		46F4626D16F14AD20092840F /* searchEngine.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = searchEngine.hpp; sourceTree = "<group>"; };
+		46F4626E16F14AD20092840F /* solver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = solver.cpp; sourceTree = "<group>"; };
+		46F4626F16F14AD20092840F /* solver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = solver.hpp; sourceTree = "<group>"; };
+		46F4627016F14AD20092840F /* solver_wrap.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = solver_wrap.cpp; sourceTree = "<group>"; };
+		46F4627116F14AD20092840F /* solver_wrap.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = solver_wrap.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -63,6 +104,8 @@
 			isa = PBXGroup;
 			children = (
 				4617A81016ECF93D007A6E44 /* Scenario.cpp */,
+				46F4624716F149130092840F /* CSP */,
+				46F4626316F14AD20092840F /* Gecode */,
 				46F4622916F13E9B0092840F /* PetriNet */,
 			);
 			path = source;
@@ -111,6 +154,61 @@
 				46F4624516F13E9B0092840F /* TransitionBitArray.cpp */,
 			);
 			path = PetriNet;
+			sourceTree = "<group>";
+		};
+		46F4624716F149130092840F /* CSP */ = {
+			isa = PBXGroup;
+			children = (
+				46F4624916F149130092840F /* AllenRelation.hpp */,
+				46F4624816F149130092840F /* AllenRelation.cpp */,
+				46F4624B16F149130092840F /* AntPostRelation.hpp */,
+				46F4624A16F149130092840F /* AntPostRelation.cpp */,
+				46F4624D16F149130092840F /* BinaryRelation.hpp */,
+				46F4624C16F149130092840F /* BinaryRelation.cpp */,
+				46F4624F16F149130092840F /* BinaryTemporalRelation.hpp */,
+				46F4624E16F149130092840F /* BinaryTemporalRelation.cpp */,
+				46F4625116F149130092840F /* ConstrainedBox.hpp */,
+				46F4625016F149130092840F /* ConstrainedBox.cpp */,
+				46F4625316F149130092840F /* ConstrainedTemporalEntity.hpp */,
+				46F4625216F149130092840F /* ConstrainedTemporalEntity.cpp */,
+				46F4625516F149130092840F /* ControlPoint.hpp */,
+				46F4625416F149130092840F /* ControlPoint.cpp */,
+				46F4625716F149130092840F /* CSP.hpp */,
+				46F4625616F149130092840F /* CSP.cpp */,
+				46F4625916F149130092840F /* CSPConstrainedVariable.hpp */,
+				46F4625816F149130092840F /* CSPConstrainedVariable.cpp */,
+				46F4625B16F149130092840F /* CSPLinearConstraint.hpp */,
+				46F4625A16F149130092840F /* CSPLinearConstraint.cpp */,
+				46F4625C16F149130092840F /* IllegalArgumentException.hpp */,
+				46F4625E16F149130092840F /* IntervalRelation.hpp */,
+				46F4625D16F149130092840F /* IntervalRelation.cpp */,
+				46F4625F16F149130092840F /* InvalidFileFormatException.hpp */,
+				46F4626016F149130092840F /* OutOfBoundException.hpp */,
+				46F4626216F149130092840F /* TriggerPoint.hpp */,
+				46F4626116F149130092840F /* TriggerPoint.cpp */,
+			);
+			path = CSP;
+			sourceTree = "<group>";
+		};
+		46F4626316F14AD20092840F /* Gecode */ = {
+			isa = PBXGroup;
+			children = (
+				46F4626416F14AD20092840F /* customSpace.cpp */,
+				46F4626516F14AD20092840F /* customSpace.hpp */,
+				46F4626616F14AD20092840F /* gecode_headers.hpp */,
+				46F4626716F14AD20092840F /* integerVariable.cpp */,
+				46F4626816F14AD20092840F /* integerVariable.hpp */,
+				46F4626916F14AD20092840F /* linearConstraint.cpp */,
+				46F4626A16F14AD20092840F /* linearConstraint.hpp */,
+				46F4626B16F14AD20092840F /* relations_type.hpp */,
+				46F4626C16F14AD20092840F /* searchEngine.cpp */,
+				46F4626D16F14AD20092840F /* searchEngine.hpp */,
+				46F4626E16F14AD20092840F /* solver.cpp */,
+				46F4626F16F14AD20092840F /* solver.hpp */,
+				46F4627016F14AD20092840F /* solver_wrap.cpp */,
+				46F4627116F14AD20092840F /* solver_wrap.hpp */,
+			);
+			path = Gecode;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

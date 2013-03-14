@@ -119,8 +119,6 @@ public:
 	 */
 	void makeOneStep();
 
-	void launch();
-
 	friend void externLaunch(void* arg);
 
     /*!

@@ -3,12 +3,29 @@
 
 sources:
   - ../../library/TimeProcessLib/TimeProcess.cpp
+  
+  - source/CSP/AllenRelation.cpp
+  - source/CSP/AntPostRelation.cpp
+  - source/CSP/BinaryRelation.cpp
+  - source/CSP/BinaryTemporalRelation.cpp
+  - source/CSP/ConstrainedBox.cpp                       # is it needed ?
+  - source/CSP/ConstrainedTemporalEntity.cpp
+  - source/CSP/ControlPoint.cpp                         # is it needed ?
+  - source/CSP/CSP.cpp
+  - source/CSP/CSPConstrainedVariable.cpp
+  - source/CSP/CSPLinearConstraint.cpp
+  - source/CSP/IntervalRelation.cpp
+  - source/CSP/TriggerPoint.cpp
+  
+  - source/Gecode/customSpace.cpp
+  - source/Gecode/integerVariable.cpp
+  - source/Gecode/linearConstraint.cpp
+  - source/Gecode/searchEngine.cpp
+  - source/Gecode/solver_wrap.cpp
+  - source/Gecode/solver.cpp
   		
   - source/PetriNet/Arc.cpp
-  - source/PetriNet/ArithmeticException.cpp
   - source/PetriNet/ExtendedInt.cpp
-  - source/PetriNet/IncoherentStateException.cpp
-  - source/PetriNet/OutOfBoundException.cpp
   - source/PetriNet/PetriNet.cpp
   - source/PetriNet/PetriNetItem.cpp                    # is it needed ?
   - source/PetriNet/PetriNetNode.cpp                    # is it needed ?
@@ -27,12 +44,24 @@ includes:
   - "includes"
   - "../../library/TimeProcessLib"
   - "../../library/TimeEventLib"
+  
+  - "source/CSP"
+  - "source/Gecode"
   - "source/PetriNet"
   
   # to build without having the whole jamoma repository
   - ../../support/jamoma/includes
+  
+  # to include gecode solver library
+  - /Library/Frameworks/gecode.framework
 
 libraries:
   - FOUNDATION
   - DSP
   - MODULAR
+  
+  # to include gecode solver library
+  - /Library/Frameworks/gecode.framework/gecode
+  
+# This project is not available for most architectures (cause of the Gecode 64-bit only dependency)
+arch: "x86_64"

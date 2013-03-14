@@ -17,6 +17,8 @@
 #define __SCENARIO_H__
 
 #include "TimeProcess.h"
+#include "CSP.hpp"
+#include "PetriNet.hpp"
 
 class Scenario : public TimeProcess
 {
@@ -31,6 +33,9 @@ private :
     
     TTObjectBasePtr             mFirstEvent;                    ///< the first event of the scenario (which is not the start event)
     TTObjectBasePtr             mLastEvent;                     ///< the last event of the scenario (which is not the end event)
+    
+    CSP*                        mEditionSolver;                 ///< an internal gecode solver to assist scenario edition
+    PetriNet*                   mExecutionGraph;                ///< an internal petri net to execute the scenario according time event relations
 	
     /** Get parameters names needed by this time process
      @param	value           the returned parameter names

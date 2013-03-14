@@ -32,7 +32,9 @@ extern "C" TT_EXTENSION_EXPORT TTErr TTLoadJamomaExtension_Scenario(void)
 TIME_PROCESS_CONSTRUCTOR,
 mNamespace(NULL),
 mFirstEvent(NULL),
-mLastEvent(NULL)
+mLastEvent(NULL),
+mEditionSolver(NULL),
+mExecutionGraph(NULL)
 {
     TIME_PROCESS_INITIALIZE
     
@@ -102,6 +104,12 @@ mLastEvent(NULL)
     
     // Subscribe to the last event using the mEndEventCallback (see in ProcessEnd why)
     mLastEvent->sendMessage(TTSymbol("Subscribe"), mEndEventCallback, kTTValNONE);
+    
+    // Create the edition solver
+    mEditionSolver = new CSP();
+    
+    // Create the execution graph
+    mExecutionGraph = new PetriNet();
 }
 
 Scenario::~Scenario()
@@ -169,7 +177,24 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
             progression = inputValue[0];
             
             // TODO : we need to update the PetriNet to process the scenario
-            // cf : PetriNet::makeOneStep()
+            
+            /* ADD : from PetriNet::mainThreadFunction
+             
+            petriNet->m_startPlace->produceTokens(1);
+            petriNet->m_endPlace->consumeTokens(petriNet->m_endPlace->nbOfTokens());
+            
+            petriNet->addTime(petriNet->getTimeOffset() * 1000);
+            //petriNet->makeOneStep();
+            
+            while (petriNet->m_endPlace->nbOfTokens() == 0 && !petriNet->m_mustStop) {
+                petriNet->update();
+                
+                cout << "PetriNet::mainThreadFunction -- " << petriNet->m_currentTime << endl;
+            }
+            
+            petriNet->m_isRunning = false;
+            */
+            
             return kTTErrNone;
         }
     }
