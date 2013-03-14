@@ -14,11 +14,16 @@
 
 TimeEvent::TimeEvent(TTValue& arguments) :
 TTObjectBase(arguments),
-mDate(0)
+mDate(0),
+mTriggerOperator(NULL),
+mSubscriberOperator(NULL)
 {
     TT_ASSERT("Correct number of args to create TimeEvent", arguments.size() == 0);
     
    	addAttributeWithSetter(Date, kTypeUInt32);
+    
+    addAttribute(TriggerOperator, kTypeObject);
+    addAttribute(SubscriberOperator, kTypeObject);
     
     addMessageWithArguments(Trigger);
     addMessageWithArguments(Subscribe);

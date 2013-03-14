@@ -45,6 +45,9 @@ protected:
     TTList                          mTriggerList;                   ///< ATTRIBUTE : all the triggered values to evaluate in Notify method
     TTList                          mSubscriberList;                ///< ATTRIBUTE : all the callbacks to use in Notify method
     
+    TTObjectBasePtr                 mTriggerOperator;               ///< ATTRIBUTE : a optionnal operator to dynamically change trigger reception strategy
+    TTObjectBasePtr                 mSubscriberOperator;            ///< ATTRIBUTE : a optionnal operator to dynamically change subscriber notification strategy
+    
 private:
     
     TTAttributePtr                  dateAttribute;                  ///< cache date attribute for observer notification
