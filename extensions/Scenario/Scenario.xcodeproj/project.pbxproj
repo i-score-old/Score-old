@@ -80,6 +80,7 @@
 		46F4626F16F14AD20092840F /* solver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = solver.hpp; sourceTree = "<group>"; };
 		46F4627016F14AD20092840F /* solver_wrap.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = solver_wrap.cpp; sourceTree = "<group>"; };
 		46F4627116F14AD20092840F /* solver_wrap.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = solver_wrap.hpp; sourceTree = "<group>"; };
+		EB9AF3191701C2F600286D55 /* CSPTypes.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CSPTypes.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -179,6 +180,7 @@
 				46F4625816F149130092840F /* CSPConstrainedVariable.cpp */,
 				46F4625B16F149130092840F /* CSPLinearConstraint.hpp */,
 				46F4625A16F149130092840F /* CSPLinearConstraint.cpp */,
+				EB9AF3191701C2F600286D55 /* CSPTypes.hpp */,
 				46F4625C16F149130092840F /* IllegalArgumentException.hpp */,
 				46F4625E16F149130092840F /* IntervalRelation.hpp */,
 				46F4625D16F149130092840F /* IntervalRelation.cpp */,
