@@ -7,6 +7,9 @@ Debug
 Release
 Makefile
 
+# Ignore emacs backup files
+*~
+
 # XCode files to be ignored
 xcuserdata
 *.mode1v3
