@@ -133,30 +133,43 @@ ECOMachine::~ECOMachine()
 	delete m_petriNet;
 }
 
+// cf triggerpoint : get a unique petri message key
 std::string ECOMachine::addNetworkMessage(std::string netMessage)
 {
 	map<string, string>::iterator iter = m_fromNetworkMessagesToPetriMessages.find(netMessage);
-
+    
+    // if the network message is not registered,
+    // create a new and unique "EVENT_NAMEm_lastEventNumber" petri message key
 	if(iter == m_fromNetworkMessagesToPetriMessages.end()) {
 		ostringstream oss;
 	    oss << EVENT_NAME;
 	    oss << m_lastEventNumber;
-
+        
+        // register petri message key at the network message address in the map
 		m_fromNetworkMessagesToPetriMessages[netMessage] = oss.str();
 		++m_lastEventNumber;
-
 	}
+    
+    // return an unique petri message key
 	return m_fromNetworkMessagesToPetriMessages[netMessage];
 }
 
 bool ECOMachine::receiveNetworkMessage(std::string netMessage)
 {
 	map<string, string>::iterator iter = m_fromNetworkMessagesToPetriMessages.find(netMessage);
-
+    
+    // if the received network message is not registered
 	if(iter == m_fromNetworkMessagesToPetriMessages.end()) {
 		return false;
-	} else {
+	}
+    
+    // if the received network message is registered
+    else {
+        
+        // if the petri net is running
 		if (getPetriNet()->getUpdateFactor() != 0) {
+            
+            // append an event to process using the petri message key
 			m_petriNet->putAnEvent(m_fromNetworkMessagesToPetriMessages[netMessage]);
 		}
 		return true;
@@ -243,14 +256,15 @@ void ECOMachine::compileECO(std::map<unsigned int, StoryLine> hierarchyStoryLine
 //	}
 }
 
-PetriNet* ECOMachine::compilePetriNet(StoryLine storyLineToCompile,
-									  std::map<unsigned int, StoryLine> hierarchyStoryLine,
-									  std::vector<unsigned int>& processIdToStop,
-									  unsigned int timeToStartTriggerPoint,
-									  void(*triggerAction)(void*, bool, Transition*))
+PetriNet* ECOMachine::compilePetriNet(StoryLine storyLineToCompile,                         // NOTE : all the story is stored inside a Scenario
+									  std::map<unsigned int,StoryLine> hierarchyStoryLine,  // NOTE : all the story is stored inside a Scenario
+									  std::vector<unsigned int>& processIdToStop,           // a list of process : what is the point ?
+									  unsigned int timeToStartTriggerPoint,                 // a date : what is the point ?
+									  void(*triggerAction)(void*, bool, Transition*))       // a callback method : what is the point ?
 {
 	PetriNet* petriNet = new PetriNet();
 
+    // NOTE : registration of the callback method
 	if (triggerAction != NULL) {
 		petriNet->addWaitedTriggerPointMessageAction(this, triggerAction);
 	}
@@ -280,6 +294,15 @@ PetriNet* ECOMachine::compilePetriNet(StoryLine storyLineToCompile,
 	startArc->changeRelativeTime(integer0, plusInfinity);
 	endArc->changeRelativeTime(integer0, plusInfinity);
 
+    /* REPLACE : for each TimeProcess of a Scenario (except the relations : see FIRST COMPILATION PHASE comment)
+     
+     for (aScenario->mTimeProcessList.begin(); aScenario->mTimeProcessList.end(); aScenario->mTimeProcessList.next();) {
+        aTimeProcess = TimeProcessPtr((TTObjectBasePtr)aScenario->mTimeProcessList.current()[0]);
+     
+        if (aTimeProcess->getName() == TTSymbol("Relation"))
+            continue;
+     
+    */
 	for (unsigned int i = 0 ; i < storyLineToCompile.m_constrainedBoxes.size() ; ++i) {
 		Transition* previousTransition = startTransition;
 		ConstrainedBox* currentBox = storyLineToCompile.m_constrainedBoxes[i];
@@ -290,14 +313,32 @@ PetriNet* ECOMachine::compilePetriNet(StoryLine storyLineToCompile,
 		Place* currentPlace;
 
 		ECOProcess* currentProcess = m_process[currentBoxId];
+        
+        // REPLACE : aTimeProcess->sendMessage(TTSymbol("Init"));
+        // TODO : add a TimeProcess::Init() method
 		currentProcess->init();
 
+        /* REPLACE :
+         aTimeProcess->getAttributeValue(TTSymbol("startEvent"), v);
+         aStartEvent = v[0];
+         aStartEvent->getAttributeValue(TTSymbol("date"), v);
+         startDate = v[0];
+        
+         aTimeProcess->getAttributeValue(TTSymbol("endEvent"), v);
+         anEndEvent = v[0];
+         aStartEvent->getAttributeValue(TTSymbol("date"), v);
+         endDate = v[0];
+        */
 		unsigned int boxEndTime = currentBox->beginValue() + currentBox->lengthValue();
-
+        
+        // NOTE : this is used to do the GOTO.
+        // it is offsetting the date of the process if we need to start in the middle of himself
 		if (((unsigned int) currentBox->beginValue() < timeToStartTriggerPoint) && (boxEndTime > timeToStartTriggerPoint)) {
 			currentProcess->setTimeOffsetInMs(timeToStartTriggerPoint - (currentBox->beginValue()));
 		}
 
+        // NOTE : is the control point list still usefull ?
+        // if yes, TODO : add an TimeProcess::mIntermediateEventsList  
 		vector<unsigned int>* controlPointID = new vector <unsigned int>;
 		currentBox->getAllControlPointsId(controlPointID);
 
@@ -511,7 +552,9 @@ PetriNet* ECOMachine::compilePetriNet(StoryLine storyLineToCompile,
 					if (mergeIterator != mergeTransitions.end()) {
 						currentTransition = mergeIterator->second;
 					}
-
+                    
+                    // cf triggerpoint : register a trigger point as an event inside the petri net event (addNetworkMessage)
+                    // and then register the petri net event key inside the transition (setEvent)
 					currentTransition->setEvent(addNetworkMessage(currentTriggerPoint->getTriggerMessage()));
 
 					currentTransition->setMustWaitThePetriNetToEnd(false);

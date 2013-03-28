@@ -61,8 +61,9 @@ private:
 
     TTObjectBasePtr mRamper;                    ///< Ramp object to ramp value
 
+    TTMethodValue	commandMethod;              ///< a specific method depending on mType.
+                                                ///< we need to wrap the call on specific command methods because a command can be parsed locally (so it have to be deleted after to not create memory leaks)
     
-    TTMessagePtr    commandMessage;             ///< cache command message for observer notification
     TTAttributePtr  valueAttribute;             ///< cache value attribute for observer notification
     TTAttributePtr  initializedAttribute;       ///< cache value message for observer notification
 	
@@ -73,6 +74,8 @@ private:
 			3		: 3 values || 2 values + unit || 1 value + ramp ramptime
 			X		: X values || X-1 values + unit || X-2 values + ramp ramptime || X-3 values + unit + ramp ramptime
 	 */
+    TTErr       Command(const TTValue& inputValue, TTValue& outputValue);
+    
 	TTErr       NoneCommand(const TTValue& inputValue, TTValue& outputValue);
     TTErr       GenericCommand(const TTValue& inputValue, TTValue& outputValue);
     TTErr       BooleanCommand(const TTValue& inputValue, TTValue& outputValue);

@@ -42,6 +42,7 @@
 #include "CSPTypes.hpp"
 
 #include "TTEngine.h"
+#include "TimeProcess.h"
 
 // Macros
 

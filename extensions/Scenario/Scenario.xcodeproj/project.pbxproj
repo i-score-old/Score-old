@@ -1,0 +1,361 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXFileReference section */
+		4617A80E16ECF937007A6E44 /* Scenario.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Scenario.h; sourceTree = "<group>"; };
+		4617A81016ECF93D007A6E44 /* Scenario.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Scenario.cpp; sourceTree = "<group>"; };
+		4617A81216ECF951007A6E44 /* TimeProcess.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TimeProcess.cpp; sourceTree = "<group>"; };
+		4617A81316ECF951007A6E44 /* TimeProcess.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TimeProcess.h; sourceTree = "<group>"; };
+		46F4622A16F13E9B0092840F /* Arc.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Arc.cpp; sourceTree = "<group>"; };
+		46F4622B16F13E9B0092840F /* Arc.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Arc.hpp; sourceTree = "<group>"; };
+		46F4622D16F13E9B0092840F /* ArithmeticException.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ArithmeticException.hpp; sourceTree = "<group>"; };
+		46F4622E16F13E9B0092840F /* ExtendedInt.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ExtendedInt.cpp; sourceTree = "<group>"; };
+		46F4622F16F13E9B0092840F /* ExtendedInt.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ExtendedInt.hpp; sourceTree = "<group>"; };
+		46F4623016F13E9B0092840F /* IllegalArgumentException.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IllegalArgumentException.hpp; sourceTree = "<group>"; };
+		46F4623116F13E9B0092840F /* IncoherentStateException.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IncoherentStateException.hpp; sourceTree = "<group>"; };
+		46F4623216F13E9B0092840F /* OutOfBoundException.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = OutOfBoundException.hpp; sourceTree = "<group>"; };
+		46F4623316F13E9B0092840F /* PetriNet.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PetriNet.cpp; sourceTree = "<group>"; };
+		46F4623416F13E9B0092840F /* PetriNet.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PetriNet.hpp; sourceTree = "<group>"; };
+		46F4623516F13E9B0092840F /* PetriNetItem.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PetriNetItem.cpp; sourceTree = "<group>"; };
+		46F4623616F13E9B0092840F /* PetriNetItem.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PetriNetItem.hpp; sourceTree = "<group>"; };
+		46F4623716F13E9B0092840F /* PetriNetNode.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PetriNetNode.cpp; sourceTree = "<group>"; };
+		46F4623816F13E9B0092840F /* PetriNetNode.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PetriNetNode.hpp; sourceTree = "<group>"; };
+		46F4623916F13E9B0092840F /* Place.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Place.cpp; sourceTree = "<group>"; };
+		46F4623A16F13E9B0092840F /* Place.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Place.hpp; sourceTree = "<group>"; };
+		46F4623B16F13E9B0092840F /* PriorityTransitionAction.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PriorityTransitionAction.cpp; sourceTree = "<group>"; };
+		46F4623C16F13E9B0092840F /* PriorityTransitionAction.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PriorityTransitionAction.hpp; sourceTree = "<group>"; };
+		46F4623D16F13E9B0092840F /* ThreadSafeList.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ThreadSafeList.cpp; sourceTree = "<group>"; };
+		46F4623E16F13E9B0092840F /* ThreadSafeList.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ThreadSafeList.hpp; sourceTree = "<group>"; };
+		46F4623F16F13E9B0092840F /* Token.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Token.cpp; sourceTree = "<group>"; };
+		46F4624016F13E9B0092840F /* Token.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Token.hpp; sourceTree = "<group>"; };
+		46F4624116F13E9B0092840F /* Transition.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Transition.cpp; sourceTree = "<group>"; };
+		46F4624216F13E9B0092840F /* Transition.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Transition.hpp; sourceTree = "<group>"; };
+		46F4624316F13E9B0092840F /* TransitionAction.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TransitionAction.cpp; sourceTree = "<group>"; };
+		46F4624416F13E9B0092840F /* TransitionAction.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TransitionAction.hpp; sourceTree = "<group>"; };
+		46F4624516F13E9B0092840F /* TransitionBitArray.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TransitionBitArray.cpp; sourceTree = "<group>"; };
+		46F4624616F13E9B0092840F /* TransitionBitArray.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TransitionBitArray.hpp; sourceTree = "<group>"; };
+		46F4624816F149130092840F /* AllenRelation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AllenRelation.cpp; sourceTree = "<group>"; };
+		46F4624916F149130092840F /* AllenRelation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AllenRelation.hpp; sourceTree = "<group>"; };
+		46F4624A16F149130092840F /* AntPostRelation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AntPostRelation.cpp; sourceTree = "<group>"; };
+		46F4624B16F149130092840F /* AntPostRelation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AntPostRelation.hpp; sourceTree = "<group>"; };
+		46F4624C16F149130092840F /* BinaryRelation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BinaryRelation.cpp; sourceTree = "<group>"; };
+		46F4624D16F149130092840F /* BinaryRelation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BinaryRelation.hpp; sourceTree = "<group>"; };
+		46F4624E16F149130092840F /* BinaryTemporalRelation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BinaryTemporalRelation.cpp; sourceTree = "<group>"; };
+		46F4624F16F149130092840F /* BinaryTemporalRelation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BinaryTemporalRelation.hpp; sourceTree = "<group>"; };
+		46F4625016F149130092840F /* ConstrainedBox.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ConstrainedBox.cpp; sourceTree = "<group>"; };
+		46F4625116F149130092840F /* ConstrainedBox.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ConstrainedBox.hpp; sourceTree = "<group>"; };
+		46F4625216F149130092840F /* ConstrainedTemporalEntity.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ConstrainedTemporalEntity.cpp; sourceTree = "<group>"; };
+		46F4625316F149130092840F /* ConstrainedTemporalEntity.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ConstrainedTemporalEntity.hpp; sourceTree = "<group>"; };
+		46F4625416F149130092840F /* ControlPoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ControlPoint.cpp; sourceTree = "<group>"; };
+		46F4625516F149130092840F /* ControlPoint.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ControlPoint.hpp; sourceTree = "<group>"; };
+		46F4625616F149130092840F /* CSP.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CSP.cpp; sourceTree = "<group>"; };
+		46F4625716F149130092840F /* CSP.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CSP.hpp; sourceTree = "<group>"; };
+		46F4625816F149130092840F /* CSPConstrainedVariable.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CSPConstrainedVariable.cpp; sourceTree = "<group>"; };
+		46F4625916F149130092840F /* CSPConstrainedVariable.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CSPConstrainedVariable.hpp; sourceTree = "<group>"; };
+		46F4625A16F149130092840F /* CSPLinearConstraint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CSPLinearConstraint.cpp; sourceTree = "<group>"; };
+		46F4625B16F149130092840F /* CSPLinearConstraint.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CSPLinearConstraint.hpp; sourceTree = "<group>"; };
+		46F4625C16F149130092840F /* IllegalArgumentException.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IllegalArgumentException.hpp; sourceTree = "<group>"; };
+		46F4625D16F149130092840F /* IntervalRelation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IntervalRelation.cpp; sourceTree = "<group>"; };
+		46F4625E16F149130092840F /* IntervalRelation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IntervalRelation.hpp; sourceTree = "<group>"; };
+		46F4625F16F149130092840F /* InvalidFileFormatException.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = InvalidFileFormatException.hpp; sourceTree = "<group>"; };
+		46F4626016F149130092840F /* OutOfBoundException.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = OutOfBoundException.hpp; sourceTree = "<group>"; };
+		46F4626116F149130092840F /* TriggerPoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TriggerPoint.cpp; sourceTree = "<group>"; };
+		46F4626216F149130092840F /* TriggerPoint.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TriggerPoint.hpp; sourceTree = "<group>"; };
+		46F4626416F14AD20092840F /* customSpace.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = customSpace.cpp; sourceTree = "<group>"; };
+		46F4626516F14AD20092840F /* customSpace.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = customSpace.hpp; sourceTree = "<group>"; };
+		46F4626616F14AD20092840F /* gecode_headers.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = gecode_headers.hpp; sourceTree = "<group>"; };
+		46F4626716F14AD20092840F /* integerVariable.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = integerVariable.cpp; sourceTree = "<group>"; };
+		46F4626816F14AD20092840F /* integerVariable.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = integerVariable.hpp; sourceTree = "<group>"; };
+		46F4626916F14AD20092840F /* linearConstraint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = linearConstraint.cpp; sourceTree = "<group>"; };
+		46F4626A16F14AD20092840F /* linearConstraint.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = linearConstraint.hpp; sourceTree = "<group>"; };
+		46F4626B16F14AD20092840F /* relations_type.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = relations_type.hpp; sourceTree = "<group>"; };
+		46F4626C16F14AD20092840F /* searchEngine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = searchEngine.cpp; sourceTree = "<group>"; };
+		46F4626D16F14AD20092840F /* searchEngine.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = searchEngine.hpp; sourceTree = "<group>"; };
+		46F4626E16F14AD20092840F /* solver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = solver.cpp; sourceTree = "<group>"; };
+		46F4626F16F14AD20092840F /* solver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = solver.hpp; sourceTree = "<group>"; };
+		46F4627016F14AD20092840F /* solver_wrap.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = solver_wrap.cpp; sourceTree = "<group>"; };
+		46F4627116F14AD20092840F /* solver_wrap.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = solver_wrap.hpp; sourceTree = "<group>"; };
+		EB9AF3191701C2F600286D55 /* CSPTypes.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CSPTypes.hpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		4617A80016ECF434007A6E44 = {
+			isa = PBXGroup;
+			children = (
+				4617A81116ECF951007A6E44 /* TimeProcessLib */,
+				4617A80D16ECF937007A6E44 /* includes */,
+				4617A80F16ECF93D007A6E44 /* source */,
+			);
+			sourceTree = "<group>";
+		};
+		4617A80D16ECF937007A6E44 /* includes */ = {
+			isa = PBXGroup;
+			children = (
+				4617A80E16ECF937007A6E44 /* Scenario.h */,
+			);
+			path = includes;
+			sourceTree = "<group>";
+		};
+		4617A80F16ECF93D007A6E44 /* source */ = {
+			isa = PBXGroup;
+			children = (
+				4617A81016ECF93D007A6E44 /* Scenario.cpp */,
+				46F4624716F149130092840F /* CSP */,
+				46F4626316F14AD20092840F /* Gecode */,
+				46F4622916F13E9B0092840F /* PetriNet */,
+			);
+			path = source;
+			sourceTree = SOURCE_ROOT;
+		};
+		4617A81116ECF951007A6E44 /* TimeProcessLib */ = {
+			isa = PBXGroup;
+			children = (
+				4617A81316ECF951007A6E44 /* TimeProcess.h */,
+				4617A81216ECF951007A6E44 /* TimeProcess.cpp */,
+			);
+			name = TimeProcessLib;
+			path = ../../library/TimeProcessLib;
+			sourceTree = "<group>";
+		};
+		46F4622916F13E9B0092840F /* PetriNet */ = {
+			isa = PBXGroup;
+			children = (
+				46F4622B16F13E9B0092840F /* Arc.hpp */,
+				46F4622A16F13E9B0092840F /* Arc.cpp */,
+				46F4622D16F13E9B0092840F /* ArithmeticException.hpp */,
+				46F4622F16F13E9B0092840F /* ExtendedInt.hpp */,
+				46F4622E16F13E9B0092840F /* ExtendedInt.cpp */,
+				46F4623016F13E9B0092840F /* IllegalArgumentException.hpp */,
+				46F4623116F13E9B0092840F /* IncoherentStateException.hpp */,
+				46F4623216F13E9B0092840F /* OutOfBoundException.hpp */,
+				46F4623416F13E9B0092840F /* PetriNet.hpp */,
+				46F4623316F13E9B0092840F /* PetriNet.cpp */,
+				46F4623616F13E9B0092840F /* PetriNetItem.hpp */,
+				46F4623516F13E9B0092840F /* PetriNetItem.cpp */,
+				46F4623816F13E9B0092840F /* PetriNetNode.hpp */,
+				46F4623716F13E9B0092840F /* PetriNetNode.cpp */,
+				46F4623A16F13E9B0092840F /* Place.hpp */,
+				46F4623916F13E9B0092840F /* Place.cpp */,
+				46F4623C16F13E9B0092840F /* PriorityTransitionAction.hpp */,
+				46F4623B16F13E9B0092840F /* PriorityTransitionAction.cpp */,
+				46F4623E16F13E9B0092840F /* ThreadSafeList.hpp */,
+				46F4623D16F13E9B0092840F /* ThreadSafeList.cpp */,
+				46F4624016F13E9B0092840F /* Token.hpp */,
+				46F4623F16F13E9B0092840F /* Token.cpp */,
+				46F4624216F13E9B0092840F /* Transition.hpp */,
+				46F4624116F13E9B0092840F /* Transition.cpp */,
+				46F4624416F13E9B0092840F /* TransitionAction.hpp */,
+				46F4624316F13E9B0092840F /* TransitionAction.cpp */,
+				46F4624616F13E9B0092840F /* TransitionBitArray.hpp */,
+				46F4624516F13E9B0092840F /* TransitionBitArray.cpp */,
+			);
+			path = PetriNet;
+			sourceTree = "<group>";
+		};
+		46F4624716F149130092840F /* CSP */ = {
+			isa = PBXGroup;
+			children = (
+				46F4624916F149130092840F /* AllenRelation.hpp */,
+				46F4624816F149130092840F /* AllenRelation.cpp */,
+				46F4624B16F149130092840F /* AntPostRelation.hpp */,
+				46F4624A16F149130092840F /* AntPostRelation.cpp */,
+				46F4624D16F149130092840F /* BinaryRelation.hpp */,
+				46F4624C16F149130092840F /* BinaryRelation.cpp */,
+				46F4624F16F149130092840F /* BinaryTemporalRelation.hpp */,
+				46F4624E16F149130092840F /* BinaryTemporalRelation.cpp */,
+				46F4625116F149130092840F /* ConstrainedBox.hpp */,
+				46F4625016F149130092840F /* ConstrainedBox.cpp */,
+				46F4625316F149130092840F /* ConstrainedTemporalEntity.hpp */,
+				46F4625216F149130092840F /* ConstrainedTemporalEntity.cpp */,
+				46F4625516F149130092840F /* ControlPoint.hpp */,
+				46F4625416F149130092840F /* ControlPoint.cpp */,
+				46F4625716F149130092840F /* CSP.hpp */,
+				46F4625616F149130092840F /* CSP.cpp */,
+				46F4625916F149130092840F /* CSPConstrainedVariable.hpp */,
+				46F4625816F149130092840F /* CSPConstrainedVariable.cpp */,
+				46F4625B16F149130092840F /* CSPLinearConstraint.hpp */,
+				46F4625A16F149130092840F /* CSPLinearConstraint.cpp */,
+				EB9AF3191701C2F600286D55 /* CSPTypes.hpp */,
+				46F4625C16F149130092840F /* IllegalArgumentException.hpp */,
+				46F4625E16F149130092840F /* IntervalRelation.hpp */,
+				46F4625D16F149130092840F /* IntervalRelation.cpp */,
+				46F4625F16F149130092840F /* InvalidFileFormatException.hpp */,
+				46F4626016F149130092840F /* OutOfBoundException.hpp */,
+				46F4626216F149130092840F /* TriggerPoint.hpp */,
+				46F4626116F149130092840F /* TriggerPoint.cpp */,
+			);
+			path = CSP;
+			sourceTree = "<group>";
+		};
+		46F4626316F14AD20092840F /* Gecode */ = {
+			isa = PBXGroup;
+			children = (
+				46F4626416F14AD20092840F /* customSpace.cpp */,
+				46F4626516F14AD20092840F /* customSpace.hpp */,
+				46F4626616F14AD20092840F /* gecode_headers.hpp */,
+				46F4626716F14AD20092840F /* integerVariable.cpp */,
+				46F4626816F14AD20092840F /* integerVariable.hpp */,
+				46F4626916F14AD20092840F /* linearConstraint.cpp */,
+				46F4626A16F14AD20092840F /* linearConstraint.hpp */,
+				46F4626B16F14AD20092840F /* relations_type.hpp */,
+				46F4626C16F14AD20092840F /* searchEngine.cpp */,
+				46F4626D16F14AD20092840F /* searchEngine.hpp */,
+				46F4626E16F14AD20092840F /* solver.cpp */,
+				46F4626F16F14AD20092840F /* solver.hpp */,
+				46F4627016F14AD20092840F /* solver_wrap.cpp */,
+				46F4627116F14AD20092840F /* solver_wrap.hpp */,
+			);
+			path = Gecode;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXLegacyTarget section */
+		4617A80516ECF434007A6E44 /* Scenario */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "$(ACTION) $(Configuration)";
+			buildConfigurationList = 4617A80816ECF434007A6E44 /* Build configuration list for PBXLegacyTarget "Scenario" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			buildWorkingDirectory = "";
+			dependencies = (
+			);
+			name = Scenario;
+			passBuildSettingsInEnvironment = 1;
+			productName = Scenario;
+		};
+/* End PBXLegacyTarget section */
+
+/* Begin PBXProject section */
+		4617A80116ECF434007A6E44 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0460;
+				ORGANIZATIONNAME = OSSIA;
+			};
+			buildConfigurationList = 4617A80416ECF434007A6E44 /* Build configuration list for PBXProject "Scenario" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 4617A80016ECF434007A6E44;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				4617A80516ECF434007A6E44 /* Scenario */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		4617A80616ECF434007A6E44 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		4617A80716ECF434007A6E44 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		4617A80916ECF434007A6E44 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEBUGGING_SYMBOLS = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		4617A80A16ECF434007A6E44 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4617A80416ECF434007A6E44 /* Build configuration list for PBXProject "Scenario" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4617A80616ECF434007A6E44 /* Debug */,
+				4617A80716ECF434007A6E44 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4617A80816ECF434007A6E44 /* Build configuration list for PBXLegacyTarget "Scenario" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4617A80916ECF434007A6E44 /* Debug */,
+				4617A80A16ECF434007A6E44 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 4617A80116ECF434007A6E44 /* Project object */;
+}
