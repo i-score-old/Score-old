@@ -59,13 +59,13 @@ elsif mac?
     `cp "#{glibdir}"/../DSP/library/includes/* "#{glibdir}"/support/jamoma/includes`
     
     # Modular includes
-    `cp "#{glibdir}"/../../Modules/Modular/library/includes/TTModular.h "#{glibdir}"/support/jamoma/includes`
-    `cp "#{glibdir}"/../../Modules/Modular/library/includes/TTModularSymbolCache.h "#{glibdir}"/support/jamoma/includes`
+    `cp "#{glibdir}"/../Modular/library/includes/TTModular.h "#{glibdir}"/support/jamoma/includes`
+    `cp "#{glibdir}"/../Modular/library/includes/TTModularSymbolCache.h "#{glibdir}"/support/jamoma/includes`
     
-    `cp "#{glibdir}"/../../Modules/Modular/library/PeerObject/*.h "#{glibdir}"/support/jamoma/includes`
+    `cp "#{glibdir}"/../Modular/library/PeerObject/*.h "#{glibdir}"/support/jamoma/includes`
     
-    `cp "#{glibdir}"/../../Modules/Modular/library/ProtocolLib/Protocol.h "#{glibdir}"/support/jamoma/includes`
-    `cp "#{glibdir}"/../../Modules/Modular/library/SchedulerLib/Scheduler.h "#{glibdir}"/support/jamoma/includes`
+    `cp "#{glibdir}"/../Modular/library/ProtocolLib/Protocol.h "#{glibdir}"/support/jamoma/includes`
+    `cp "#{glibdir}"/../Modular/library/SchedulerLib/Scheduler.h "#{glibdir}"/support/jamoma/includes`
     
     # Foundation and Modular lib
     `cp /usr/local/jamoma/lib/JamomaFoundation.dylib "#{glibdir}"/support/jamoma/lib`
