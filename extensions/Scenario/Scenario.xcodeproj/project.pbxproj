@@ -81,6 +81,8 @@
 		46F4627016F14AD20092840F /* solver_wrap.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = solver_wrap.cpp; sourceTree = "<group>"; };
 		46F4627116F14AD20092840F /* solver_wrap.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = solver_wrap.hpp; sourceTree = "<group>"; };
 		EB9AF3191701C2F600286D55 /* CSPTypes.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CSPTypes.hpp; sourceTree = "<group>"; };
+		EBA5276C1705A49700589E30 /* CSP.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CSP.cpp; sourceTree = "<group>"; };
+		EBA5276E1705D6BB00589E30 /* CSP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CSP.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -96,6 +98,7 @@
 		4617A80D16ECF937007A6E44 /* includes */ = {
 			isa = PBXGroup;
 			children = (
+				EBA5276E1705D6BB00589E30 /* CSP.h */,
 				4617A80E16ECF937007A6E44 /* Scenario.h */,
 			);
 			path = includes;
@@ -104,6 +107,7 @@
 		4617A80F16ECF93D007A6E44 /* source */ = {
 			isa = PBXGroup;
 			children = (
+				EBA5276C1705A49700589E30 /* CSP.cpp */,
 				4617A81016ECF93D007A6E44 /* Scenario.cpp */,
 				46F4624716F149130092840F /* CSP */,
 				46F4626316F14AD20092840F /* Gecode */,

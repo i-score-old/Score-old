@@ -236,25 +236,11 @@ TTErr Scenario::TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue)
             // update the CSP depending on the type of the time process
             timeProcessType = aTimeProcess->getName();
             
-            if (timeProcessType == TTSymbol("Automation")) {
-                
-                // TODO : update the CSP in Automation case
-                // cf : CSP::addBox
-                return kTTErrGeneric;
+            if (timeProcessType == TTSymbol("Interval")) {
+                return CSP::addRelation((IntervalPtr)aTimeProcess);
+            } else {
+                return CSP::addBox(aTimeProcess);
             }
-            else if (timeProcessType == TTSymbol("Scenario")) {
-                
-                // TODO : update the CSP in Scenario case
-                // cf : CSP::addBox
-                return kTTErrGeneric;
-            }
-            else if (timeProcessType == TTSymbol("Interval")) {
-                
-                // TODO : update the CSP in Interval case
-                // cf : CSP::addAntPostRelation
-                return kTTErrGeneric;
-            }
-            // else if ...
 
         }
     }
@@ -296,25 +282,11 @@ TTErr Scenario::TimeProcessRemove(const TTValue& inputValue, TTValue& outputValu
                 // update the CSP depending on the type of the time process
                 timeProcessType = aTimeProcess->getName();
                 
-                if (timeProcessType == TTSymbol("Automation")) {
-                    
-                    // TODO : update the CSP in Automation case
-                    // cf : CSP::removeBox
-                    return kTTErrGeneric;
+                if (timeProcessType == TTSymbol("Interval")) {
+                    return CSP::removeRelation((IntervalPtr)aTimeProcess);
+                } else {
+                    return CSP::removeBox(aTimeProcess);
                 }
-                else if (timeProcessType == TTSymbol("Scenario")) {
-                    
-                    // TODO : update the CSP in Scenario case
-                    // cf : CSP::removeBox
-                    return kTTErrGeneric;
-                }
-                else if (timeProcessType == TTSymbol("Interval")) {
-                    
-                    // TODO : update the CSP in Interval case
-                    // cf : CSP::removeTemporalRelation
-                    return kTTErrGeneric;
-                }
-                // else if ...
             }
         }
     }
