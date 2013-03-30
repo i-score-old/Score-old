@@ -74,21 +74,21 @@ public:
 	/** Get parameters names needed by this time process 
      @param	value           the returned parameter names
      @return                kTTErrNone */
-	virtual TTErr getParameterNames(TTValue& value) = 0;
+	virtual TTErr   getParameterNames(TTValue& value) = 0;
     
     /** Specific process method on start
      @return                an error code returned by the process end method */
-    virtual TTErr ProcessStart() = 0;
+    virtual TTErr   ProcessStart() = 0;
     
     /** Specific process method on end
      @return                an error code returned by the process end method */
-    virtual TTErr ProcessEnd() = 0;
+    virtual TTErr   ProcessEnd() = 0;
     
     /** Specific process method
      @param	inputValue      progression of the scheduler
      @param	outputValue     return an error of the processing
      @return                an error code returned by the process method */
-    virtual TTErr Process(const TTValue& inputValue, TTValue& outputValue) = 0;
+    virtual TTErr   Process(const TTValue& inputValue, TTValue& outputValue) = 0;
     
     /**  needed to be handled by a TTXmlHandler
      @param	inputValue      ..
