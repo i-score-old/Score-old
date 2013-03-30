@@ -52,13 +52,13 @@ protected:
     TTObjectBasePtr                 mStartEvent;                    ///< ATTRIBUTE : the event object which handles the time process execution start
     TTObjectBasePtr                 mStartEventCallback;            ///< a callback to subscribe for start event notification
     
-    // ? : TTList                       mIntermediateEvents;            ///< ATTRIBUTE : the list of intermediate events
+    TTList                          mIntermediateEvents;            ///< ATTRIBUTE : the list of all intermediate events
     
     TTObjectBasePtr                 mEndEvent;                      ///< ATTRIBUTE : the event object which handles the time process execution stop
     TTObjectBasePtr                 mEndEventCallback;              ///< a callback to subscribe for end event notification
     
     TTObjectBasePtr                 mScheduler;                     ///< ATTRIBUTE : the scheduler object which handles the time process execution
-    
+
 private:
     
     TTAttributePtr                  activeAttribute;                ///< cache active attribute for observer notification
@@ -105,6 +105,35 @@ public:
 	virtual TTErr	ReadFromText(const TTValue& inputValue, TTValue& outputValue) = 0;
 
 private :
+    
+    /** get the time process start date
+        this method eases the getting of the start event date
+     @param	value           the returned start date
+     @return                kTTErrNone */
+    TTErr	getStartDate(TTValue& value);
+    
+    /** set the time process start date
+        this method eases the setting of the start event date
+     @param	value           a new start date
+     @return                kTTErrNone */
+    TTErr	setStartDate(const TTValue& value);
+    
+    /** get the time process end date
+        this method eases the getting of the end event date
+     @param	value           the returned end date
+     @return                kTTErrNone */
+    TTErr	getEndDate(TTValue& value);
+    
+    /** set the time process end date
+        this method eases the setting of the end event date
+     @param	value           a new end date
+     @return                kTTErrNone */
+    TTErr	setEndDate(const TTValue& value);
+    
+    /** get the time process duration
+     @param	value           the returned duration
+     @return                kTTErrNone */
+    TTErr	getDuration(TTValue& value);
     
     /** Set the time process active or not
      @param	value           a boolean

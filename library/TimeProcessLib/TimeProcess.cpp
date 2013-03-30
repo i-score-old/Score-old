@@ -24,9 +24,9 @@ mScheduler(NULL)
 {
     TT_ASSERT("Correct number of args to create TimeProcess", arguments.size() == 0);
     
-    TTValue     args;
-    TTErr       err;
-    TTValuePtr  startEventBaton, endEventBaton;
+    TTValue    args;
+    TTErr      err;
+    TTValuePtr startEventBaton, endEventBaton;
     
     addAttribute(Scenario, kTypeObject);
     addAttributeProperty(Scenario, hidden, YES);
@@ -42,6 +42,12 @@ mScheduler(NULL)
     addAttribute(Scheduler, kTypeObject);
     addAttributeProperty(Scheduler, readOnly, YES);
     addAttributeProperty(Scheduler, hidden, YES);
+    
+    // the attributes below are not related to any TimeProcess member
+    // but we need to declare them as attribute to ease the use of the class
+    registerAttribute(TTSymbol("startDate"), kTypeLocalValue, NULL, (TTGetterMethod)& TimeProcess::getStartDate, (TTSetterMethod)& TimeProcess::setStartDate);
+    registerAttribute(TTSymbol("endDate"), kTypeLocalValue, NULL, (TTGetterMethod)& TimeProcess::getEndDate, (TTSetterMethod)& TimeProcess::setEndDate);
+    registerAttribute(TTSymbol("duration"), kTypeLocalValue, NULL, (TTGetterMethod)& TimeProcess::getDuration);
     
     addMessage(ProcessStart);
     addMessage(ProcessEnd);
@@ -167,6 +173,97 @@ TTErr TimeProcess::getParameterNames(TTValue& value)
 	}
 	
 	return kTTErrNone;
+}
+
+TTErr TimeProcess::getStartDate(TTValue& value)
+{
+    if (mStartEvent)
+        return mStartEvent->getAttributeValue(TTSymbol("date"), value);
+    
+    return kTTErrGeneric;
+}
+
+TTErr TimeProcess::setStartDate(const TTValue& value)
+{
+    TTValue v;
+    
+    if (mStartEvent) {
+        
+        if (value.size()) {
+            
+            if (value[0].type() == kTypeUInt32) {
+                
+                // if the time process is handled by a scenario
+                if (mScenario) {
+                    
+                    v = TTValue(mStartEvent);
+                    v.append(value[0]);
+                    
+                    return mScenario->sendMessage(TTSymbol("TimeEventDateChange"), v, kTTValNONE);
+                }
+                else
+                    return mStartEvent->setAttributeValue(TTSymbol("date"), TTUInt32(value[0]));
+                
+            }
+        }
+    }
+    
+    return kTTErrGeneric;
+}
+
+TTErr TimeProcess::getEndDate(TTValue& value)
+{
+    if (mEndEvent)
+        return mEndEvent->getAttributeValue(TTSymbol("date"), value);
+    
+    return kTTErrGeneric;
+}
+
+TTErr TimeProcess::setEndDate(const TTValue& value)
+{
+    TTValue v;
+    
+    if (mEndEvent) {
+        
+        if (value.size()) {
+            
+            if (value[0].type() == kTypeUInt32) {
+                
+                // if the time process is handled by a scenario
+                if (mScenario) {
+                    
+                    v = TTValue(mEndEvent);
+                    v.append(value[0]);
+                    
+                    return mScenario->sendMessage(TTSymbol("TimeEventDateChange"), v, kTTValNONE);
+                }
+                else
+                    return mEndEvent->setAttributeValue(TTSymbol("date"), TTUInt32(value[0]));
+                
+            }
+        }
+    }
+    
+    return kTTErrGeneric;
+}
+
+TTErr TimeProcess::getDuration(TTValue& value)
+{
+    TTValue     start, end;
+    TTUInt32    duration;
+    
+    if (mStartEvent && mEndEvent) {
+        
+        mStartEvent->getAttributeValue(TTSymbol("date"), start);
+        mEndEvent->getAttributeValue(TTSymbol("date"), end);
+    
+        duration = TTUInt32(end[0]) - TTUInt32(start[0]);
+        value = TTValue(duration);
+        
+        return kTTErrNone;
+    }
+    
+    return kTTErrGeneric;
 }
 
 TTErr TimeProcess::setActive(const TTValue& value)
