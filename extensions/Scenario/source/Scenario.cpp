@@ -106,7 +106,7 @@ mExecutionGraph(NULL)
     mLastEvent->sendMessage(TTSymbol("Subscribe"), mEndEventCallback, kTTValNONE);
     
     // Create the edition solver
-    mEditionSolver = new CSP();
+    mEditionSolver = new CSP(this);
     
     // Create the execution graph
     mExecutionGraph = new PetriNet();
@@ -237,9 +237,16 @@ TTErr Scenario::TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue)
             timeProcessType = aTimeProcess->getName();
             
             if (timeProcessType == TTSymbol("Interval")) {
-                return CSP::addRelation((IntervalPtr)aTimeProcess);
+                
+                // THEO : je pense qu'il vaut mieux utiliser le membre réservé plutôt qu'un appel à une methode static
+                return mEditionSolver->addRelation(aTimeProcess);
+                //return CSP::addRelation(aTimeProcess);
+                
             } else {
-                return CSP::addBox(aTimeProcess);
+                
+                // THEO : je pense qu'il vaut mieux utiliser le membre réservé plutôt qu'un appel à une methode static
+                return mEditionSolver->addBox(aTimeProcess);
+                //return CSP::addBox(aTimeProcess);
             }
 
         }
@@ -283,9 +290,17 @@ TTErr Scenario::TimeProcessRemove(const TTValue& inputValue, TTValue& outputValu
                 timeProcessType = aTimeProcess->getName();
                 
                 if (timeProcessType == TTSymbol("Interval")) {
-                    return CSP::removeRelation((IntervalPtr)aTimeProcess);
+                    
+                    // THEO : je pense qu'il vaut mieux utiliser le membre réservé plutôt qu'un appel à une methode static
+                    return mEditionSolver->removeRelation(aTimeProcess);
+                    // return CSP::removeRelation((IntervalPtr)aTimeProcess);
+                    
                 } else {
-                    return CSP::removeBox(aTimeProcess);
+                    
+                    
+                    // THEO : je pense qu'il vaut mieux utiliser le membre réservé plutôt qu'un appel à une methode static
+                    return mEditionSolver->removeBox(aTimeProcess);
+                    //return CSP::removeBox(aTimeProcess);
                 }
             }
         }

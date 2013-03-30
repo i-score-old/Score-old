@@ -17,19 +17,36 @@
 #include "CSPTypes.hpp"
 
 
-CSP::CSP(ScenarioPtr pScenario)
+CSP::CSP(TimeProcessPtr pScenario):
+pScenario(NULL)
 {
-    this->pScenario = pScenario;
+    if (pScenario->getName() == TTSymbol("Scenario"))
+        this->pScenario = pScenario;
+}
+
+CSP::~CSP()
+{
+    // TODO : delete the CSP properly
 }
 
 TTErr CSP::addBox(TimeProcessPtr pBox)
 {
-    // TODO : add methods length, start, (end,) to TimeProcess
-    int beginID = solver.addIntVar(1, pScenario->length(), pBox->start(), BEGIN_VAR_TYPE);
-    int lengthID = solver.addIntVar(10, pScenario->length(), pBox->length(), LENGTH_VAR_TYPE);
+    TTValue boxStart, boxEnd, boxDuration;
+    TTValue scenarioDuration;
     
-    int endID = solver.addIntVar(1, pScenario->length(), pBox->end(), BEGIN_VAR_TYPE);
-    int endLengthID = solver.addIntVar(0, pScenario->length(), 0, LENGTH_VAR_TYPE);
+    // get scenario duration
+    pScenario->getAttributeValue(TTSymbol("duration"), scenarioDuration);
+    
+    // get time process informations
+    pBox->getAttributeValue(TTSymbol("startDate"), boxStart);
+    pBox->getAttributeValue(TTSymbol("endDate"), boxEnd);
+    pBox->getAttributeValue(TTSymbol("duration"), boxDuration);
+    
+    int beginID = solver.addIntVar(1, TTUInt32(scenarioDuration[0]), TTUInt32(boxStart[0]), BEGIN_VAR_TYPE);
+    int lengthID = solver.addIntVar(10, TTUInt32(scenarioDuration[0]), TTUInt32(boxDuration[0]), LENGTH_VAR_TYPE);
+    
+    int endID = solver.addIntVar(1, TTUInt32(scenarioDuration[0]), TTUInt32(boxEnd[0]), BEGIN_VAR_TYPE);
+    int endLengthID = solver.addIntVar(0, TTUInt32(scenarioDuration[0]), 0, LENGTH_VAR_TYPE);
     
     // solver.addIntVar(min, max, val, weight)
     // Here, we have in fact no min and max.
@@ -70,11 +87,18 @@ TTErr CSP::removeEvent(TimeEventPtr pEvent)
     return kTTErrGeneric;
 }
 
-TTerr CSP::addRelation(IntervalPtr pRel)
+TTErr CSP::addRelation(TimeProcessPtr pRel)
 {
     // WARNING : TTEngines used to verify that the relation starts and ends at different points
     
     
     
+    return kTTErrNone;
+}
+
+TTErr CSP::removeRelation(TimeProcessPtr pRel)
+{
+
+        
     return kTTErrNone;
 }

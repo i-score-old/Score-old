@@ -53,8 +53,8 @@
 		46F4625316F149130092840F /* ConstrainedTemporalEntity.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ConstrainedTemporalEntity.hpp; sourceTree = "<group>"; };
 		46F4625416F149130092840F /* ControlPoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ControlPoint.cpp; sourceTree = "<group>"; };
 		46F4625516F149130092840F /* ControlPoint.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ControlPoint.hpp; sourceTree = "<group>"; };
-		46F4625616F149130092840F /* CSP.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CSP.cpp; sourceTree = "<group>"; };
-		46F4625716F149130092840F /* CSP.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CSP.hpp; sourceTree = "<group>"; };
+		46F4625616F149130092840F /* CSPold.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CSPold.cpp; sourceTree = "<group>"; };
+		46F4625716F149130092840F /* CSPold.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CSPold.hpp; sourceTree = "<group>"; };
 		46F4625816F149130092840F /* CSPConstrainedVariable.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CSPConstrainedVariable.cpp; sourceTree = "<group>"; };
 		46F4625916F149130092840F /* CSPConstrainedVariable.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CSPConstrainedVariable.hpp; sourceTree = "<group>"; };
 		46F4625A16F149130092840F /* CSPLinearConstraint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CSPLinearConstraint.cpp; sourceTree = "<group>"; };
@@ -98,8 +98,8 @@
 		4617A80D16ECF937007A6E44 /* includes */ = {
 			isa = PBXGroup;
 			children = (
-				EBA5276E1705D6BB00589E30 /* CSP.h */,
 				4617A80E16ECF937007A6E44 /* Scenario.h */,
+				EBA5276E1705D6BB00589E30 /* CSP.h */,
 			);
 			path = includes;
 			sourceTree = "<group>";
@@ -107,8 +107,8 @@
 		4617A80F16ECF93D007A6E44 /* source */ = {
 			isa = PBXGroup;
 			children = (
-				EBA5276C1705A49700589E30 /* CSP.cpp */,
 				4617A81016ECF93D007A6E44 /* Scenario.cpp */,
+				EBA5276C1705A49700589E30 /* CSP.cpp */,
 				46F4624716F149130092840F /* CSP */,
 				46F4626316F14AD20092840F /* Gecode */,
 				46F4622916F13E9B0092840F /* PetriNet */,
@@ -164,6 +164,8 @@
 		46F4624716F149130092840F /* CSP */ = {
 			isa = PBXGroup;
 			children = (
+				46F4625716F149130092840F /* CSPold.hpp */,
+				46F4625616F149130092840F /* CSPold.cpp */,
 				46F4624916F149130092840F /* AllenRelation.hpp */,
 				46F4624816F149130092840F /* AllenRelation.cpp */,
 				46F4624B16F149130092840F /* AntPostRelation.hpp */,
@@ -178,8 +180,6 @@
 				46F4625216F149130092840F /* ConstrainedTemporalEntity.cpp */,
 				46F4625516F149130092840F /* ControlPoint.hpp */,
 				46F4625416F149130092840F /* ControlPoint.cpp */,
-				46F4625716F149130092840F /* CSP.hpp */,
-				46F4625616F149130092840F /* CSP.cpp */,
 				46F4625916F149130092840F /* CSPConstrainedVariable.hpp */,
 				46F4625816F149130092840F /* CSPConstrainedVariable.cpp */,
 				46F4625B16F149130092840F /* CSPLinearConstraint.hpp */,

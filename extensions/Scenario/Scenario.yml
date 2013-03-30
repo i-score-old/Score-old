@@ -11,7 +11,7 @@ sources:
   - source/CSP/ConstrainedBox.cpp                       # is it needed ?
   - source/CSP/ConstrainedTemporalEntity.cpp
   - source/CSP/ControlPoint.cpp                         # is it needed ?
-  - source/CSP/CSP.cpp
+  - source/CSP/CSPold.cpp
   - source/CSP/CSPConstrainedVariable.cpp
   - source/CSP/CSPLinearConstraint.cpp
   - source/CSP/IntervalRelation.cpp
@@ -38,6 +38,7 @@ sources:
   - source/PetriNet/TransitionBitArray.cpp              # is it needed ?
   
   - source/Scenario.cpp
+  - source/CSP.cpp
   
 includes:
   - "."

@@ -17,7 +17,7 @@
 #define __SCENARIO_H__
 
 #include "TimeProcess.h"
-#include "CSP.hpp"
+#include "CSP.h"
 #include "PetriNet.hpp"
 
 class Scenario : public TimeProcess
@@ -107,7 +107,7 @@ private :
      note : this method doesn't update the time event internal date 
      but it can change attribute of other time processes or time events connected to this one.
      
-     @inputvalue            a time process object, a new start date
+     @inputvalue            a time event object, a new start date
      @outputvalue           a constrained start date
      @return                an error code if the start date change fails */
     TTErr TimeEventDateChange(const TTValue& inputValue, TTValue& outputValue);
