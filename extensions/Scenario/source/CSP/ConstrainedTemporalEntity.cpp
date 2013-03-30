@@ -43,7 +43,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 #include "ConstrainedTemporalEntity.hpp"
 
-#include "CSP.hpp"
+#include "CSPold.hpp"
 #include "CSPConstrainedVariable.hpp"
 
 ConstrainedTemporalEntity::ConstrainedTemporalEntity(CSPConstrainedVariable *beg, CSPConstrainedVariable *length)

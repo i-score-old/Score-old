@@ -37,7 +37,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 */
 
 /*!
- * \file CSP.cpp
+ * \file CSPold.cpp
  * \author Raphael Marczak (LaBRI), based on Bruno Valeze (LaBRI) code
  * \date 2008-2009
  */
@@ -48,7 +48,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 #include <iostream>
 using namespace std;
 
-#include "CSP.hpp"
+#include "CSPold.hpp"
 
 #include "AllenRelation.hpp"
 #include "ConstrainedBox.hpp"
@@ -59,7 +59,7 @@ using namespace std;
 #include "IntervalRelation.hpp"
 
 string
-CSP::getNameFromRelation(TemporalRelationType t)
+CSPold::getNameFromRelation(TemporalRelationType t)
 {
 	switch(t)
 	{
@@ -72,7 +72,7 @@ CSP::getNameFromRelation(TemporalRelationType t)
 	return "";
 }
 
-CSP::CSP()
+CSPold::CSPold()
 {
 	_solver = new Solver();
 
@@ -81,7 +81,7 @@ CSP::CSP()
 	_triggerPoints = new map<unsigned int, TriggerPoint*>;
 }
 
-CSP::~CSP()
+CSPold::~CSPold()
 {
 	delete _triggerPoints;
 	delete _temporalRelations;
@@ -91,7 +91,7 @@ CSP::~CSP()
 }
 
 unsigned int
-CSP::addBox(unsigned int boxId, int boxBeginPos, int boxLength, unsigned int motherId, int maxSceneWidth)
+CSPold::addBox(unsigned int boxId, int boxBeginPos, int boxLength, unsigned int motherId, int maxSceneWidth)
 {
 	map<unsigned int, ConstrainedTemporalEntity *>::iterator iter = (*_cedEntities).find(boxId);
 	if(iter != (*_cedEntities).end())  {
@@ -134,7 +134,7 @@ CSP::addBox(unsigned int boxId, int boxBeginPos, int boxLength, unsigned int mot
 
 
 void
-CSP::removeBox(unsigned int boxId, std::vector<unsigned int>& relationsRemoved, std::vector<unsigned int>& triggersRemoved)
+CSPold::removeBox(unsigned int boxId, std::vector<unsigned int>& relationsRemoved, std::vector<unsigned int>& triggersRemoved)
 {
 	ConstrainedBox* cedBox = getBoxById(boxId);
 
@@ -203,17 +203,17 @@ CSP::removeBox(unsigned int boxId, std::vector<unsigned int>& relationsRemoved, 
 	_solver->removeIntVar(cedBox->lengthID());
 
 	/*
-    remove cedBox from the constrained objects' list of the CSP
+    remove cedBox from the constrained objects' list of the CSPold
 	 */
 
 	_cedEntities->erase(boxId);
 }
 
 unsigned int
-CSP::addAntPostRelation(unsigned int relationId, unsigned int boxId1, unsigned int controlPoint1, unsigned int boxId2, unsigned int controlPoint2, TemporalRelationType type, int minBound, int maxBound, vector<unsigned int>& movedBoxes, bool mustCallSolver)
+CSPold::addAntPostRelation(unsigned int relationId, unsigned int boxId1, unsigned int controlPoint1, unsigned int boxId2, unsigned int controlPoint2, TemporalRelationType type, int minBound, int maxBound, vector<unsigned int>& movedBoxes, bool mustCallSolver)
 {
 	if ((minBound != NO_BOUND) && (maxBound != NO_BOUND) && (minBound>maxBound)) {
-		throw std::invalid_argument("CSP: minBound must be inferior to maxBound");
+		throw std::invalid_argument("CSPold: minBound must be inferior to maxBound");
 	}
 
 	ConstrainedBox* constrainedBox1 = (ConstrainedBox*)getBoxById(boxId1);
@@ -325,7 +325,7 @@ CSP::addAntPostRelation(unsigned int relationId, unsigned int boxId1, unsigned i
 }
 
 //IntervalRelation*
-//CSP::addInterval(ConstrainedTemporalEntity *ent1, ConstrainedTemporalEntity *ent2, int value, int tolerance)
+//CSPold::addInterval(ConstrainedTemporalEntity *ent1, ConstrainedTemporalEntity *ent2, int value, int tolerance)
 //{
 //	CSPConstrainedVariable *var = new CSPConstrainedVariable(_solver->addIntVar(value - tolerance, value + tolerance, value, (int)INTERVAL_VAR_TYPE),
 //			value - tolerance, value + tolerance, value, INTERVAL_VAR_TYPE);
@@ -369,7 +369,7 @@ CSP::addAntPostRelation(unsigned int relationId, unsigned int boxId1, unsigned i
 
 
 //BoundingRelation*
-//CSP::addBoundingRelation(ConstrainedTemporalEntity *ent1, ConstrainedTemporalEntity *ent2)
+//CSPold::addBoundingRelation(ConstrainedTemporalEntity *ent1, ConstrainedTemporalEntity *ent2)
 //{
 //	BoundingRelation *newBounding = new BoundingRelation(ent1, ent2);
 //
@@ -377,7 +377,7 @@ CSP::addAntPostRelation(unsigned int relationId, unsigned int boxId1, unsigned i
 //}
 
 void
-CSP::removeTemporalRelation(BinaryTemporalRelation *rel)
+CSPold::removeTemporalRelation(BinaryTemporalRelation *rel)
 {
 	for (vector<CSPLinearConstraint*>::iterator it = rel->constraints()->begin() ; it != rel->constraints()->end() ; it++)
 		removeConstraint(*it);
@@ -394,7 +394,7 @@ CSP::removeTemporalRelation(BinaryTemporalRelation *rel)
 
 
 void
-CSP::removeTemporalRelation(unsigned int relationId)
+CSPold::removeTemporalRelation(unsigned int relationId)
 {
 	vector<BinaryTemporalRelation*>::iterator it  = _temporalRelations->begin();
 
@@ -421,14 +421,14 @@ CSP::removeTemporalRelation(unsigned int relationId)
 }
 
 //void
-//CSP::removeBoundingRelation(BoundingRelation *rel)
+//CSPold::removeBoundingRelation(BoundingRelation *rel)
 //{
 //	for (vector<CSPLinearConstraint*>::iterator it = rel->constraints()->begin() ; it != rel->constraints()->end() ; it++)
 //		removeConstraint(*it);
 //}
 
 bool
-CSP::performMoving(unsigned int boxesId, int x, int y, vector<unsigned int>& movedBoxes, unsigned int maxModification)
+CSPold::performMoving(unsigned int boxesId, int x, int y, vector<unsigned int>& movedBoxes, unsigned int maxModification)
 {
 	int *varsIDs = new int[3];
 	int *values = new int[3];
@@ -480,13 +480,13 @@ CSP::performMoving(unsigned int boxesId, int x, int y, vector<unsigned int>& mov
 }
 
 vector<BinaryTemporalRelation*> *
-CSP::links() const
+CSPold::links() const
 {
 	return _temporalRelations;
 }
 
 vector<BinaryTemporalRelation*> *
-CSP::links(ConstrainedTemporalEntity *ent) const
+CSPold::links(ConstrainedTemporalEntity *ent) const
 {
 	vector<BinaryTemporalRelation*> *links = new vector<BinaryTemporalRelation*>;
 	vector<BinaryTemporalRelation*>::iterator it;
@@ -500,7 +500,7 @@ CSP::links(ConstrainedTemporalEntity *ent) const
 }
 
 ConstrainedBox*
-CSP::getBoxById(unsigned int boxId) {
+CSPold::getBoxById(unsigned int boxId) {
 	map<unsigned int, ConstrainedTemporalEntity *>::iterator iter = (*_cedEntities).find(boxId);
 
 	if(iter == (*_cedEntities).end())  {
@@ -512,25 +512,25 @@ CSP::getBoxById(unsigned int boxId) {
 
 
 int
-CSP::getBeginValue(unsigned int boxId)
+CSPold::getBeginValue(unsigned int boxId)
 {
 	return getBoxById(boxId)->getFirstControlPoint()->beginValue();
 }
 
 int
-CSP::getEndValue(unsigned int boxId)
+CSPold::getEndValue(unsigned int boxId)
 {
 	return getBoxById(boxId)->getLastControlPoint()->beginValue();
 }
 
 int
-CSP::nbControlPoint(unsigned int boxId)
+CSPold::nbControlPoint(unsigned int boxId)
 {
 	return getBoxById(boxId)->nbControlPoint();
 }
 
 int
-CSP::getFirstControlPointIndex(unsigned int boxId)
+CSPold::getFirstControlPointIndex(unsigned int boxId)
 {
 	// useful to check if the box exist.
 	getBoxById(boxId);
@@ -540,7 +540,7 @@ CSP::getFirstControlPointIndex(unsigned int boxId)
 
 
 int
-CSP::getLastControlPointIndex(unsigned int boxId)
+CSPold::getLastControlPointIndex(unsigned int boxId)
 {
 	// useful to check if the box exist.
 	getBoxById(boxId);
@@ -549,12 +549,12 @@ CSP::getLastControlPointIndex(unsigned int boxId)
 }
 
 void
-CSP::getTriggerPointMap(map<unsigned int, TriggerPoint *>& triggerPoints) {
+CSPold::getTriggerPointMap(map<unsigned int, TriggerPoint *>& triggerPoints) {
 	triggerPoints = *_triggerPoints;
 }
 
 TriggerPoint*
-CSP::getTriggerPoint(unsigned int triggerId) {
+CSPold::getTriggerPoint(unsigned int triggerId) {
 	map<unsigned int, TriggerPoint *>::iterator iter = (*_triggerPoints).find(triggerId);
 
 	if(iter == (*_triggerPoints).end())  {
@@ -565,7 +565,7 @@ CSP::getTriggerPoint(unsigned int triggerId) {
 }
 
 unsigned int
-CSP::addTriggerPoint(unsigned int triggerId)
+CSPold::addTriggerPoint(unsigned int triggerId)
 {
 	map<unsigned int, TriggerPoint *>::iterator iter = (*_triggerPoints).find(triggerId);
 
@@ -579,7 +579,7 @@ CSP::addTriggerPoint(unsigned int triggerId)
 }
 
 void
-CSP::removeTriggerPoint(unsigned int triggerId)
+CSPold::removeTriggerPoint(unsigned int triggerId)
 {
 	if (_triggerPoints->find(triggerId) != _triggerPoints->end()) {
 		removeTriggerPointRelatedControlPoint(triggerId);
@@ -588,32 +588,32 @@ CSP::removeTriggerPoint(unsigned int triggerId)
 }
 
 bool
-CSP::setTriggerPointRelatedControlPoint(unsigned int triggerId, unsigned int boxId, unsigned int controlPointIndex)
+CSPold::setTriggerPointRelatedControlPoint(unsigned int triggerId, unsigned int boxId, unsigned int controlPointIndex)
 {
 	return(getTriggerPoint(triggerId)->setRelatedControlPoint(getBoxById(boxId)->getControlPoint(controlPointIndex)));
 }
 
 void
-CSP::removeTriggerPointRelatedControlPoint(unsigned int triggerId)
+CSPold::removeTriggerPointRelatedControlPoint(unsigned int triggerId)
 {
 	getTriggerPoint(triggerId)->removeRelatedControlPoint();
 }
 
 void
-CSP::setTriggerPointMessage(unsigned int triggerId, std::string triggerMessage)
+CSPold::setTriggerPointMessage(unsigned int triggerId, std::string triggerMessage)
 {
 	getTriggerPoint(triggerId)->setTriggerMessage(triggerMessage);
 }
 
 std::string
-CSP::getTriggerPointMessage(unsigned int triggerId)
+CSPold::getTriggerPointMessage(unsigned int triggerId)
 {
 	return getTriggerPoint(triggerId)->getTriggerMessage();
 }
 
 
 void
-CSP::getAllBoxesId(vector<unsigned int>& boxesID)
+CSPold::getAllBoxesId(vector<unsigned int>& boxesID)
 {
 	boxesID.clear();
 
@@ -626,7 +626,7 @@ CSP::getAllBoxesId(vector<unsigned int>& boxesID)
 }
 
 void
-CSP::getAllAntPostRelationsId(vector<unsigned int>& relationsID)
+CSPold::getAllAntPostRelationsId(vector<unsigned int>& relationsID)
 {
 	relationsID.clear();
 
@@ -638,7 +638,7 @@ CSP::getAllAntPostRelationsId(vector<unsigned int>& relationsID)
 }
 
 void
-CSP::getAllTriggersId(vector<unsigned int>& triggersID)
+CSPold::getAllTriggersId(vector<unsigned int>& triggersID)
 {
 	triggersID.clear();
 
@@ -652,7 +652,7 @@ CSP::getAllTriggersId(vector<unsigned int>& triggersID)
 
 
 void
-CSP::getAllAntPostRelations(vector<AntPostRelation*>& antPostRelations)
+CSPold::getAllAntPostRelations(vector<AntPostRelation*>& antPostRelations)
 {
 	antPostRelations.clear();
 
@@ -664,7 +664,7 @@ CSP::getAllAntPostRelations(vector<AntPostRelation*>& antPostRelations)
 }
 
 AntPostRelation*
-CSP::getAntPostRelationById(unsigned int relationID)
+CSPold::getAntPostRelationById(unsigned int relationID)
 {
 	vector<AntPostRelation*> antPostRelations;
 
@@ -682,13 +682,13 @@ CSP::getAntPostRelationById(unsigned int relationID)
 }
 
 bool
-CSP::areControlPointsInRelation(ControlPoint* cp1, ControlPoint* cp2)
+CSPold::areControlPointsInRelation(ControlPoint* cp1, ControlPoint* cp2)
 {
 	return cp1->isRelatedWith(cp2);
 }
 
 unsigned int
-CSP::getMaxBoxId()
+CSPold::getMaxBoxId()
 {
 	unsigned int maxID = 0;
 
@@ -705,7 +705,7 @@ CSP::getMaxBoxId()
 }
 
 unsigned int
-CSP::getMaxRelationId()
+CSPold::getMaxRelationId()
 {
 	unsigned int maxID = 0;
 
@@ -719,7 +719,7 @@ CSP::getMaxRelationId()
 }
 
 unsigned int
-CSP::getMaxTriggerId()
+CSPold::getMaxTriggerId()
 {
 	unsigned int maxID = 0;
 
@@ -738,7 +738,7 @@ CSP::getMaxTriggerId()
 
 /* NOTE : this have to be moved and rewritten inside Scenario::WriteAsXml method
 void
-CSP::store(xmlNodePtr father)
+CSPold::store(xmlNodePtr father)
 {
 	xmlNodePtr boxesNode = NULL;
 	xmlNodePtr relationsNode = NULL;
@@ -778,9 +778,9 @@ CSP::store(xmlNodePtr father)
 
 /* NOTE : this have to be moved and rewritten inside Scenario::ReadFromXml method
 void
-CSP::load(xmlNodePtr root, std::map<unsigned int, CSP*>& boxesMap,
-		std::map<unsigned int, CSP*>& relationsMap,
-		std::map<unsigned int, CSP*>& triggersMap,
+CSPold::load(xmlNodePtr root, std::map<unsigned int, CSPold*>& boxesMap,
+		std::map<unsigned int, CSPold*>& relationsMap,
+		std::map<unsigned int, CSPold*>& triggersMap,
 		ConstrainedBox* motherBox)
 {
 	xmlNodePtr xmlTemporalObject = NULL;
@@ -799,9 +799,9 @@ CSP::load(xmlNodePtr root, std::map<unsigned int, CSP*>& boxesMap,
 }
 
 void
-CSP::loadBoxes(xmlNodePtr root, std::map<unsigned int, CSP*>& boxesMap,
-		std::map<unsigned int, CSP*>& relationsMap,
-		std::map<unsigned int, CSP*>& triggersMap,
+CSPold::loadBoxes(xmlNodePtr root, std::map<unsigned int, CSPold*>& boxesMap,
+		std::map<unsigned int, CSPold*>& relationsMap,
+		std::map<unsigned int, CSPold*>& triggersMap,
 		ConstrainedBox* motherBox)
 {
 	std::cout << "-> BOXES ";
@@ -852,7 +852,7 @@ CSP::loadBoxes(xmlNodePtr root, std::map<unsigned int, CSP*>& boxesMap,
 
 					boxesMap[m_boxId] = this;
 
-					currentBox->getCSP()->load(xmlBox, boxesMap, relationsMap, triggersMap, currentBox);
+					currentBox->getCSPold()->load(xmlBox, boxesMap, relationsMap, triggersMap, currentBox);
 					//TODO: quand il y aura plusieurs points de control, penser ˆ les charger !
 					// (le 1er et le dernier sont automatiquement crŽŽ avec la boite)
 				} else {
@@ -865,7 +865,7 @@ CSP::loadBoxes(xmlNodePtr root, std::map<unsigned int, CSP*>& boxesMap,
 }
 
 void
-CSP::loadRelations(xmlNodePtr root, std::map<unsigned int, CSP*>& relationsMap)
+CSPold::loadRelations(xmlNodePtr root, std::map<unsigned int, CSPold*>& relationsMap)
 {
 	std::cout << "-> RELATIONS ";
 	std::cout.flush();
@@ -927,7 +927,7 @@ CSP::loadRelations(xmlNodePtr root, std::map<unsigned int, CSP*>& relationsMap)
 }
 
 void
-CSP::loadTriggerPoints(xmlNodePtr root, std::map<unsigned int, CSP*>& triggersMap)
+CSPold::loadTriggerPoints(xmlNodePtr root, std::map<unsigned int, CSPold*>& triggersMap)
 {
 	std::cout << "-> TRIGGER POINTS ";
 	std::cout.flush();
@@ -994,7 +994,7 @@ CSP::loadTriggerPoints(xmlNodePtr root, std::map<unsigned int, CSP*>& triggersMa
 }
 */
                     
-void CSP::changeAllBoxMaxSceneWidth(int newValue)
+void CSPold::changeAllBoxMaxSceneWidth(int newValue)
 {
 	map<unsigned int, ConstrainedTemporalEntity*>::iterator it  = _cedEntities->begin();
 	while (it != _cedEntities->end())
@@ -1012,7 +1012,7 @@ void CSP::changeAllBoxMaxSceneWidth(int newValue)
 /*** PRIVATE ***/
 
 CSPLinearConstraint*
-CSP::addConstraint(vector<int> *varsIDs, vector<int> *varsCoeffs, BinaryRelationType type, int value, bool mustCallSolver)
+CSPold::addConstraint(vector<int> *varsIDs, vector<int> *varsCoeffs, BinaryRelationType type, int value, bool mustCallSolver)
 {
 	int *iDs = new int[varsIDs->size()],  *coeffs = new int[varsIDs->size()];
 	for (unsigned int i=0; i<varsIDs->size(); i++) {
@@ -1032,13 +1032,13 @@ CSP::addConstraint(vector<int> *varsIDs, vector<int> *varsCoeffs, BinaryRelation
 }
 
 bool
-CSP::removeConstraint(CSPLinearConstraint *cst)
+CSPold::removeConstraint(CSPLinearConstraint *cst)
 {
 	return _solver->removeConstraint(cst->getID());
 }
 
 void
-CSP::updateFromSolver()
+CSPold::updateFromSolver()
 {
 	map<unsigned int, ConstrainedTemporalEntity*>::iterator it  = _cedEntities->begin();
 
@@ -1080,7 +1080,7 @@ CSP::updateFromSolver()
 }
 
 AllenRelation*
-CSP::addAllenRelation(ConstrainedTemporalEntity *ent1, ConstrainedTemporalEntity *ent2, AllenType type, bool mustCallSolver)
+CSPold::addAllenRelation(ConstrainedTemporalEntity *ent1, ConstrainedTemporalEntity *ent2, AllenType type, bool mustCallSolver)
 {
 	AllenRelation *newAllen = new AllenRelation(ent1, ent2, type);
 

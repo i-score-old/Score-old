@@ -58,7 +58,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 class CSPConstrainedVariable;
 //class BoundingRelation;
-class CSP;
+class CSPold;
 
 /*!
  * \class ConstrainedBox
@@ -106,7 +106,7 @@ public :
 	int minBound() const;
 	int maxBound() const;
 
-	CSP* getCSP() const;
+	CSPold* getCSP() const;
 
 	void setFlexibilityInformations(unsigned int flexibilityRelationId, int minBound, int maxBound);
 	void setHierarchyInformations(unsigned int hierarchyRelationId);
@@ -121,7 +121,7 @@ private :
 	//std::string _ipAddress;
 	//unsigned int _port;
 
-	CSP* m_csp;
+	CSPold* m_csp;
 
 	//GUIBasicBox *_gBox ;
 	ConstrainedBox *m_motherBox;  // the possible bounding box

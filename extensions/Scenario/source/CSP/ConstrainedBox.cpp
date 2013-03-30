@@ -44,7 +44,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 #include "ConstrainedBox.hpp"
 #include "ConstrainedTemporalEntity.hpp"
-#include "CSP.hpp"
+#include "CSPold.hpp"
 #include "CSPConstrainedVariable.hpp"
 
 ConstrainedBox::ConstrainedBox(CSPConstrainedVariable *beg,  CSPConstrainedVariable *length)
@@ -54,7 +54,7 @@ ConstrainedBox::ConstrainedBox(CSPConstrainedVariable *beg,  CSPConstrainedVaria
 	m_controlPoints = new std::map<unsigned int, ControlPoint*>;
 	m_motherBox = NULL;
 
-	m_csp = new CSP();
+	m_csp = new CSPold();
 
 	m_flexiblityRelationId = NO_ID;
 	m_minBound = NO_BOUND;
@@ -192,7 +192,7 @@ ConstrainedBox::maxBound() const
 	return m_maxBound;
 }
 
-CSP* ConstrainedBox::getCSP() const
+CSPold* ConstrainedBox::getCSP() const
 {
 	return m_csp;
 }

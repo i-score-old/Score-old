@@ -36,13 +36,13 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
 */
 
-#ifndef CSP_H
-#define CSP_H
+#ifndef CSPold_H
+#define CSPold_H
 
 #define NO_MAX_MODIFICATION 0
 
 /*!
- * \file CSP.h
+ * \file CSPold.h
  * \author Raphael Marczak (LaBRI), based on Bruno Valeze (LaBRI) code
  * \date 2008-2009
  */
@@ -70,18 +70,18 @@ class BoundingRelation;
 class StoryLine;
 
 /*!
- * \class CSP
+ * \class CSPold
  * \author Raphael Marczak (LaBRI), based on Bruno Valeze (LaBRI) code
  * \date 2008-2009
  *
- * This class is the top-level interface of the CSP package.
+ * This class is the top-level interface of the CSPold package.
  * The Constraint Solving Problem is composed of several time-defined
  * entities, linked by binary tempolal relations.
  * This class manages the adding/removing of entities/relations and
  * ensures that the temporal configuration always respects the system
  * relations defined by the user
  */
-class CSP
+class CSPold
 {
 public :
 
@@ -89,12 +89,12 @@ public :
 	/*!
 	 * Default constructor.
 	 */
-	CSP();
+	CSPold();
 
 	/*!
 	 * Destructor.
 	 */
-	~CSP();
+	~CSPold();
 
 	/*!
 	 * Gets the name of an AntPostRelation according to its type.
@@ -106,7 +106,7 @@ public :
 	static string getNameFromRelation(TemporalRelationType t);
 
 	/*!
-	 * Adds a new box in the CSP.
+	 * Adds a new box in the CSPold.
 	 *
 	 * Throws an IllegalArgumentException if the boxId already exist.
 	 *
@@ -121,7 +121,7 @@ public :
 	unsigned int addBox(unsigned int boxId, int boxBeginPos, int boxLength, unsigned int motherId, int maxSceneWidth);
 
 	/*!
-	 * Removes a box from the CSP : removes the relation implicating it and the
+	 * Removes a box from the CSPold : removes the relation implicating it and the
 	 * box's variables.
 	 *
 	 * \param boxId : the ID of the box to remove
@@ -276,7 +276,7 @@ public :
 	TriggerPoint* getTriggerPoint(unsigned int triggerId);
 
 	/*!
-	 * Adds a new triggerPoint in CSP.
+	 * Adds a new triggerPoint in CSPold.
 	 *
 	 * \param triggerId : the ID to give to the Trigger.
 	 *
@@ -285,7 +285,7 @@ public :
 	unsigned int addTriggerPoint(unsigned int triggerId);
 
 	/*!
-	 * Removes the triggerPoint from the CSP.
+	 * Removes the triggerPoint from the CSPold.
 	 *
 	 * Throws OutOfBoundException if the ID is not matching any triggerPoint.
 	 *
@@ -339,9 +339,9 @@ public :
 
 
 	/*!
-	 * Fills the given vector with all the boxes ID in this CSP.
+	 * Fills the given vector with all the boxes ID in this CSPold.
 	 *
-	 * \param boxesId : the vector to fill with all the boxes ID in this CSP.
+	 * \param boxesId : the vector to fill with all the boxes ID in this CSPold.
 	 */
 	void getAllBoxesId(vector<unsigned int>& boxesID);
 	void getAllAntPostRelationsId(vector<unsigned int>& relationsID);

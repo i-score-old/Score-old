@@ -44,7 +44,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 #include "AllenRelation.hpp"
 
 #include "ConstrainedTemporalEntity.hpp"
-#include "CSP.hpp"
+#include "CSPold.hpp"
 #include "CSPLinearConstraint.hpp"
 
 AllenRelation::AllenRelation(ConstrainedTemporalEntity *ent1, ConstrainedTemporalEntity *ent2, AllenType type)

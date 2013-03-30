@@ -45,7 +45,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 #include "AntPostRelation.hpp"
 
 #include "ConstrainedTemporalEntity.hpp"
-#include "CSP.hpp"
+#include "CSPold.hpp"
 #include "CSPLinearConstraint.hpp"
 
 #include <sstream>
@@ -85,7 +85,7 @@ AntPostRelation::toString() const
 {
 	string s = "AntPost relation : ";
 
-	s += _entity1->name() + " " + CSP::getNameFromRelation(_type) + " " + _entity2->name();
+	s += _entity1->name() + " " + CSPold::getNameFromRelation(_type) + " " + _entity2->name();
 
 	return s;
 }
