@@ -11,6 +11,7 @@
 
 #include "TTFoundationAPI.h"
 #include "TTModular.h"
+#include <map>
 
 #include "TimeEvent.h"
 
@@ -28,7 +29,20 @@ mAuthor = TTSymbol(thisTimeProcessAuthor); \
 registerAttribute(TTSymbol("ParameterNames"), kTypeLocalValue, NULL, (TTGetterMethod)& thisTTClass::getParameterNames); \
 /*addAttributeProperty(ParameterNames, readOnly, YES); \ */
 
+class TimeProcess;
+typedef TimeProcess* TimeProcessPtr;
+
 typedef void (*TimeProcessProgressionCallback)(TTPtr, TTFloat64);
+
+/** A type that contains a time process and a value */
+typedef std::pair<TimeProcessPtr, TTValue&> TimeProcessKey;
+typedef	TimeProcessKey*	TimeProcessKeyPtr;
+
+/** A type to define a map to store and retreive a value relative to a TimeProcessPtr */
+typedef std::map<TimeProcessPtr, TTValue&> TimeProcessMap;
+typedef	TimeProcessMap*	TimeProcessMapPtr;
+
+typedef void (*TimeProcessMapIterator)(TimeProcessPtr, const TimeProcessKey&);
 
 /****************************************************************************************************/
 // Class Specification

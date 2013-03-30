@@ -46,8 +46,11 @@ private :
     
     Solver solver;
     
-    TimeProcessPtr pScenario;                    // THEO : on utilise TimeProcessPtr et on vérifie nous même que le nom de la classe est bien TTsymbol("Scenario")
+    TimeProcessPtr      pScenario;               // THEO : on utilise TimeProcessPtr et on vérifie nous même que le nom de la classe est bien TTsymbol("Scenario")
     
+    TimeProcessMapPtr   mTimeProcessMap;
+    
+    TimeEventMapPtr     mTimeEventMap;           // THEO : pas sure que ce soit utile mais je l'ai mis pour te montrer que c'est aussi possible
 };
 
 #endif // __CSP_H__

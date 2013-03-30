@@ -26,6 +26,19 @@ mAuthor = TTSymbol(thisTimeEventAuthor); \
 registerAttribute(TTSymbol("ParameterNames"), kTypeLocalValue, NULL, (TTGetterMethod)& thisTTClass::getParameterNames); \
 /*addAttributeProperty(ParameterNames, readOnly, YES); \ */
 
+class TimeEvent;
+typedef TimeEvent* TimeEventPtr;
+
+/** A type that contains a time event and a value */
+typedef std::pair<TimeEventPtr, TTValue&> TimeEventKey;
+typedef	TimeEventKey*	TimeEventKeyPtr;
+
+/** A type to define a map to store and retreive a value relative to a TimeEventPtr */
+typedef std::map<TimeEventPtr, TTValue&> TimeEventMap;
+typedef	TimeEventMap*	TimeEventMapPtr;
+
+typedef void (*TimeEventMapIterator)(TimeEventPtr, const TimeEventKey&);
+
 /****************************************************************************************************/
 // Class Specification
 
