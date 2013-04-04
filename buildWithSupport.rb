@@ -17,7 +17,7 @@ Dir.chdir "#{glibdir}"
 
 if  win32?
     
-elsif mac?
+elsif mac? 
     
     unless File.exist?("/usr/local/include")
         puts
@@ -56,6 +56,9 @@ elsif mac?
     # (except the includes folder because it is done by the support/build.rb script) 
     `cp "#{glibdir}"/library/TimeProcessLib/*.h /usr/local/jamoma/includes`
     `cp "#{glibdir}"/library/TimeEventLib/*.h /usr/local/jamoma/includes`
+   
+    # Copy Jamoma.bundle to make ruby test
+    `sudo cp "#{glibdir}"/support/jamoma/Jamoma.bundle /Library/Ruby/Site/*/universal-darwin*`
     
 end
 
