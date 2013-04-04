@@ -38,6 +38,7 @@ elsif mac?
     # (except the includes folder because it is done by the support/build.rb script) 
     `cp "#{glibdir}"/library/TimeProcessLib/*.h /usr/local/jamoma/includes`
     `cp "#{glibdir}"/library/TimeEventLib/*.h /usr/local/jamoma/includes`
+    `cp "#{glibdir}"/library/tests/*.h /usr/local/jamoma/includes`
     
 end
 
