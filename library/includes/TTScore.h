@@ -39,10 +39,10 @@
 
 #include "TTScoreSymbolCache.h"
 
-#include "CSPTypes.hpp"
-
-#include "TTEngine.h"
 #include "TimeProcess.h"
+#include "TimeEvent.h"
+
+#include "TTScore.test.h"
 
 // Macros
 
