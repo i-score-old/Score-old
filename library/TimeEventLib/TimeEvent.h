@@ -11,6 +11,7 @@
 
 #include "TTFoundationAPI.h"
 #include "TTModular.h"
+#include <map>
 
 #define TIME_EVENT_CONSTRUCTOR \
 TTObjectBasePtr thisTTClass :: instantiate (TTSymbol& name, TTValue& arguments) {return new thisTTClass (arguments);} \

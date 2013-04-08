@@ -20,8 +20,7 @@
 CSP::CSP(TimeProcessPtr pScenario):
 pScenario(NULL)
 {
-    if (pScenario->getName() == TTSymbol("Scenario"))
-        this->pScenario = pScenario;
+    this->pScenario = pScenario;
     
     mTimeProcessMap = new TimeProcessMap();
 }
