@@ -129,5 +129,5 @@ TTErr CSP::removeRelation(TimeProcessPtr pRel)
 {
 
         
-    return kTTErrNone;
+    return kTTErrGeneric;
 }
