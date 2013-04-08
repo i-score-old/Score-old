@@ -54,7 +54,10 @@ includes:
   - ../../support/jamoma/includes
   
   # to include gecode solver library
-  - /Library/Frameworks/gecode.framework
+  - /Library/Frameworks/gecode.framework/Headers
+
+  # to include libxml library
+  - /usr/include/libxml2
 
 libraries:
   - FOUNDATION
