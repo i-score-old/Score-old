@@ -42,7 +42,7 @@ typedef	TimeProcessKey*	TimeProcessKeyPtr;
 typedef std::map<TimeProcessPtr, TTValue&> TimeProcessMap;
 typedef	TimeProcessMap*	TimeProcessMapPtr;
 
-typedef void (*TimeProcessMapIterator)(TimeProcessPtr, const TimeProcessKey&);
+typedef std::map<TimeProcessPtr, TTValue&>::iterator TimeProcessMapIterator;
 
 /****************************************************************************************************/
 // Class Specification
