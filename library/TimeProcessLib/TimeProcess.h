@@ -30,6 +30,7 @@ registerAttribute(TTSymbol("ParameterNames"), kTypeLocalValue, NULL, (TTGetterMe
 /*addAttributeProperty(ParameterNames, readOnly, YES); \ */
 
 class TimeProcess;
+
 typedef TimeProcess* TimeProcessPtr;
 
 typedef void (*TimeProcessProgressionCallback)(TTPtr, TTFloat64);
@@ -168,8 +169,6 @@ private :
     friend TTErr TT_EXTENSION_EXPORT TimeProcessEndEventCallback(TTPtr baton, TTValue& data);
     friend void TT_EXTENSION_EXPORT TimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression);
 };
-
-typedef TimeProcess* TimeProcessPtr;
 
 /** The start event callback to start the time process execution
  @param	baton               a time process instance
