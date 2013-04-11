@@ -15,12 +15,15 @@
 TimeEvent::TimeEvent(TTValue& arguments) :
 TTObjectBase(arguments),
 mDate(0),
+mActive(YES),
 mTriggerOperator(NULL),
 mSubscriberOperator(NULL)
 {
     TT_ASSERT("Correct number of args to create TimeEvent", arguments.size() == 0);
     
    	addAttributeWithSetter(Date, kTypeUInt32);
+    
+    addAttributeWithSetter(Active, kTypeBoolean);
     
     addAttribute(TriggerOperator, kTypeObject);
     addAttribute(SubscriberOperator, kTypeObject);
@@ -44,6 +47,7 @@ mSubscriberOperator(NULL)
     
     // cache some attributes for high speed notification feedbacks
     this->findAttribute(TTSymbol("date"), &dateAttribute);
+    this->findAttribute(TTSymbol("active"), &activeAttribute);
 }
 
 TimeEvent::~TimeEvent()
@@ -79,6 +83,17 @@ TTErr TimeEvent::setDate(const TTValue& value)
         
     // notify each attribute observers
     dateAttribute->sendNotification(kTTSym_notify, mDate);             // we use kTTSym_notify because we know that observers are TTCallback
+    
+    return kTTErrNone;
+}
+
+TTErr TimeEvent::setActive(const TTValue& value)
+{
+    // set the internal active value
+    mActive = value[0];
+    
+    // notify each attribute observers
+    activeAttribute->sendNotification(kTTSym_notify, mActive);             // we use kTTSym_notify because we know that observers are TTCallback
     
     return kTTErrNone;
 }

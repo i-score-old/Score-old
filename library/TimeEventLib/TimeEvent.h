@@ -38,7 +38,7 @@ typedef	TimeEventKey*	TimeEventKeyPtr;
 typedef std::map<TimeEventPtr, TTValue&> TimeEventMap;
 typedef	TimeEventMap*	TimeEventMapPtr;
 
-typedef void (*TimeEventMapIterator)(TimeEventPtr, const TimeEventKey&);
+typedef std::map<TimeEventPtr, TTValue&>::iterator TimeEventMapIterator;
 
 /****************************************************************************************************/
 // Class Specification
@@ -56,6 +56,9 @@ public:
 protected:
     
     TTUInt32                        mDate;                          ///< ATTRIBUTE : the date of the event
+    
+    TTBoolean                       mActive;                        ///< ATTRIBUTE : is the time event active ?
+    
     TTList                          mTriggerList;                   ///< ATTRIBUTE : all the triggered values to evaluate in Notify method
     TTList                          mSubscriberList;                ///< ATTRIBUTE : all the callbacks to use in Notify method
     
@@ -65,6 +68,7 @@ protected:
 private:
     
     TTAttributePtr                  dateAttribute;                  ///< cache date attribute for observer notification
+    TTAttributePtr                  activeAttribute;                ///< cache active attribute for observer notification
     
 public:
 	//** Constructor.	*/
@@ -121,6 +125,10 @@ private :
      @return                an error code if the date is wrong */
     TTErr	setDate(const TTValue& value);
     
+    /** Set enable or disable the time event
+     @param	value           an activation state
+     @return                kTTErrNone */
+    TTErr   setActive(const TTValue& value);
 };
 
 typedef TimeEvent* TimeEventPtr;
