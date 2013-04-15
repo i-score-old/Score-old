@@ -262,7 +262,7 @@ CSPold::addAntPostRelation(unsigned int relationId, unsigned int boxId1, unsigne
 
 		if (maxBound != NO_BOUND) {
 			newAntPost->addLinearConstraint( addConstraint(varsIDs, varsCoeffs, LQ_RELATION, maxBound, mustCallSolver) );
-		}
+		} // double call of the solver eventually, is it necessary ?
 
 
 		break;
@@ -300,7 +300,7 @@ CSPold::addAntPostRelation(unsigned int relationId, unsigned int boxId1, unsigne
 		{
 			movedBoxes.push_back(it->first);
 			it++;
-		}
+		} // in fact, not moved boxes, but just all boxes ...
 
 
 		if (newAntPost == NULL) {
