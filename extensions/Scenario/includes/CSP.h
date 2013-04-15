@@ -16,41 +16,40 @@
 #ifndef __CSP_H__
 #define __CSP_H__
 
-#include "TimeProcess.h"
-#include "TimeEvent.h"
-//#include "Interval.h"                         // THEO : je ne suis pas sure que tu as besoin d'inclure Interval.h puisque un interval est un TimeProcess "pure" (il n'y a pas de membres ou methodes speciales dont tu as besoin)
+#include "CSPAsker.h"
+
 #include "solver.hpp"
+
+using namespace std;
 
 class CSP
 {
     
 public :
     
-    CSP(TimeProcessPtr pScenario);              // THEO : on utilise TimeProcessPtr et on vérifie nous même que le nom de la classe est bien TTsymbol("Scenario")
+    CSP(CSPAsker *pa);
     
     ~CSP();
     
-    TTErr addBox(TimeProcessPtr pBox);
+    int addProcess(void *pProcess, int start, int end); // by default, rigid, move to change
     
-    TTErr removeBox(TimeProcessPtr pBox);
+    int removeProcess(void *pProcess);
     
-    TTErr addEvent(TimeEventPtr pEvent);
+    int moveProcess(); // TODO : remember to check min < max when supple
     
-    TTErr removeEvent(TimeEventPtr pEvent);
+    int addInterval(void *pInterval); // by default, rigid, move to change
     
-    TTErr addRelation(TimeProcessPtr pRel);      // THEO : on utilise TimeProcessPtr et on vérifie nous même que le nom de la classe est bien TTsymbol("Interval")
+    int removeInterval(void *pInterval);
     
-    TTErr removeRelation(TimeProcessPtr pRel);   // THEO : on utilise TimeProcessPtr et on vérifie nous même que le nom de la classe est bien TTsymbol("Interval")
+    int moveInterval(); // TODO : remember to check min < max when supple
     
 private :
     
     Solver solver;
     
-    TimeProcessPtr      pScenario;               // THEO : on utilise TimeProcessPtr et on vérifie nous même que le nom de la classe est bien TTsymbol("Scenario")
+    CSPAsker *pAsker;
     
-    TimeProcessMapPtr   mTimeProcessMap;
-    
-    TimeEventMapPtr     mTimeEventMap;           // THEO : pas sure que ce soit utile mais je l'ai mis pour te montrer que c'est aussi possible
+    unordered_map < void *, int * > varsMap; // unordered because wo don't have to iterate on the elements
 };
 
 #endif // __CSP_H__

@@ -239,13 +239,13 @@ TTErr Scenario::TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue)
             if (timeProcessType == TTSymbol("Interval")) {
                 
                 // THEO : je pense qu'il vaut mieux utiliser le membre réservé plutôt qu'un appel à une methode static
-                return mEditionSolver->addRelation(aTimeProcess);
+                return TTErr(mEditionSolver->addInterval(aTimeProcess));
                 //return CSP::addRelation(aTimeProcess);
                 
             } else {
                 
                 // THEO : je pense qu'il vaut mieux utiliser le membre réservé plutôt qu'un appel à une methode static
-                return mEditionSolver->addBox(aTimeProcess);
+                return TTErr(mEditionSolver->addProcess(aTimeProcess, aTimeProcess->getStart(), aTimeProcess->getEnd()));
                 //return CSP::addBox(aTimeProcess);
             }
 
@@ -292,14 +292,14 @@ TTErr Scenario::TimeProcessRemove(const TTValue& inputValue, TTValue& outputValu
                 if (timeProcessType == TTSymbol("Interval")) {
                     
                     // THEO : je pense qu'il vaut mieux utiliser le membre réservé plutôt qu'un appel à une methode static
-                    return mEditionSolver->removeRelation(aTimeProcess);
+                    return TTErr(mEditionSolver->removeInterval(aTimeProcess));
                     // return CSP::removeRelation((IntervalPtr)aTimeProcess);
                     
                 } else {
                     
                     
                     // THEO : je pense qu'il vaut mieux utiliser le membre réservé plutôt qu'un appel à une methode static
-                    return mEditionSolver->removeBox(aTimeProcess);
+                    return TTErr(mEditionSolver->removeProcess(aTimeProcess));
                     //return CSP::removeBox(aTimeProcess);
                 }
             }
@@ -753,4 +753,21 @@ TTErr ScenarioSchedulerProgressionAttributeCallback(TTPtr baton, TTValue& data)
     // else if ...
     
     return kTTErrGeneric;
+}
+
+/*************************************
+ * CSPAsker interface implementation *
+ *************************************/
+
+int CSPAsker::getMaxValue()
+{
+    TTValue duration;
+    getDuration(duration); // TODO : Error ?
+    //getAttributeValue(TTSymbol("duration"), duration); // TODO : Error ?
+    return duration[0];
+}
+
+void CSPAsker::moveReport(void *pProcess, int newStart, int newEnd)
+{
+    // TODO : move the TimeEvents according to the new values
 }

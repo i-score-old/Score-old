@@ -17,76 +17,61 @@
 #include "CSPTypes.hpp"
 
 
-CSP::CSP(TimeProcessPtr pScenario):
-pScenario(NULL)
+
+CSP::CSP(CSPAsker *pa)
+    :pAsker(pa)
 {
-    this->pScenario = pScenario;
     
-    mTimeProcessMap = new TimeProcessMap();
 }
+
 
 CSP::~CSP()
 {
-    // TODO : clear mTimeProcessMap 
-}
-
-TTErr CSP::addBox(TimeProcessPtr pBox)
-{
-    TTValue     boxStart, boxEnd, boxDuration;
-    TTValue     scenarioDuration;
-    TTValue     boxIDs;
-    TTUInt32    beginID, lengthID, endID, endLengthID; // THEO : utiliser si possible les types TT qui garantissent un support multiplateforme
-    
-    // the box should not be an interval process
-    if (pBox->getName() != TTSymbol("Interval")) {
-        
-        // get scenario duration
-        pScenario->getAttributeValue(TTSymbol("duration"), scenarioDuration);
-        
-        // get time process informations
-        pBox->getAttributeValue(TTSymbol("startDate"), boxStart);
-        pBox->getAttributeValue(TTSymbol("endDate"), boxEnd);
-        pBox->getAttributeValue(TTSymbol("duration"), boxDuration);
-        
-        // add solver variables
-        beginID = solver.addIntVar(1, TTUInt32(scenarioDuration[0]), TTUInt32(boxStart[0]), BEGIN_VAR_TYPE);
-        lengthID = solver.addIntVar(10, TTUInt32(scenarioDuration[0]), TTUInt32(boxDuration[0]), LENGTH_VAR_TYPE);
-        
-        endID = solver.addIntVar(1, TTUInt32(scenarioDuration[0]), TTUInt32(boxEnd[0]), BEGIN_VAR_TYPE);
-        endLengthID = solver.addIntVar(0, TTUInt32(scenarioDuration[0]), 0, LENGTH_VAR_TYPE);
-        
-        // THEO : voici une proposition de mecanisme pour memoriser les IDs mais je ne sais pas si ça va convenir à tout ce qu'il y a faire ...
-        
-        // store all solver variables IDs into a value : <beginID, lengthID, endID, endLengthID>
-        boxIDs.resize(4);
-        
-        boxIDs[0] = beginID;
-        boxIDs[1] = lengthID;
-        boxIDs[2] = endID;
-        boxIDs[3] = endLengthID;
-        
-        // store the IDs using the TimeProcessPtr
-        mTimeProcessMap->insert(TimeProcessKey(pBox, boxIDs));
-        
-        
-        // solver.addIntVar(min, max, val, weight)
-        // Here, we have in fact no min and max.
-        
-        // mins are arbitrary values taken from the original CSP.cpp
-        // max is the length of the parent Scenario
-        // val is explicit
-        // weights are "types" extracted from CSPTypes.hpp
-        
-        // The endLengthID is a weird value, but the solver seem to need it
-        // TODO : Verify what I just said
-        
-        // TODO : What to do with these IDs ? Keep'em here or give'em to their associated TimeProcess
-        
-        return kTTErrNone;
+    for (iterator it = varsMap.begin() ; it != varsMap.end() ; it++) {
+        solver.removeIntVar(*it);
     }
     
-    return kTTErrGeneric;
+    // TODO : suppress associated things (like in removeBox (factoriser le code ?))
 }
+
+
+TTErr CSP::addProcess(void *pProcess, int start, int end) // TODO : Editor créait une relation/interval/WTF de hiérarchie, peut-être ce doit être fait par le scenario
+{
+    // get max value
+    int max = pAsker->getMaxValue();
+    
+    // add solver variables
+    int beginID = solver.addIntVar(1, max, start, BEGIN_VAR_TYPE);
+    int lengthID = solver.addIntVar(10, max, (end - start), LENGTH_VAR_TYPE);
+    
+    int endID = solver.addIntVar(1, max, end, BEGIN_VAR_TYPE);
+    int endLengthID = solver.addIntVar(0, max, 0, LENGTH_VAR_TYPE);
+    
+    // store all solver variables IDs into a tab : {beginID, lengthID, endID, endLengthID}
+    int boxIDs[4] = {beginID, lengthID, endID, endLengthID};
+    
+    // add FINISHES allen relation between the box and it's end (from CSPold addBox, addAllenRelation and addConstraint)
+    int coefs[4] = {1,1,-1,-1};
+    solver.addConstraint(boxIDs, coefs, 4, EQ_RELATION, 0, false);
+    
+    // store the IDs using the TimeProcessPtr
+    varsMap.emplace(pProcess, boxIDs);
+    
+    
+    // solver.addIntVar(min, max, val, weight)
+    // Here, we have in fact no min and max.
+    
+    // mins are arbitrary values taken from the original CSP.cpp
+    // max is the length of the parent Scenario
+    // val is explicit
+    // weights are "types" extracted from CSPTypes.hpp
+    
+    // The endLengthID is a weird value, but the solver seem to need it
+    // TODO : Verify what I just said
+    
+    return kTTErrNone;
+}
+
 
 TTErr CSP::removeBox(TimeProcessPtr pBox)
 {
@@ -97,32 +82,25 @@ TTErr CSP::removeBox(TimeProcessPtr pBox)
     return kTTErrGeneric;
 }
 
-TTErr CSP::addEvent(TimeEventPtr pEvent)
-{
-    // TODO : no sé que hacer, must start condition implementation first I think
-    
-    return kTTErrGeneric;
-}
 
-TTErr CSP::removeEvent(TimeEventPtr pEvent)
+TTErr CSP::addRelation(void *pInterval)
 {
-    // TODO : same thought as above
+    // TODO : TTEngines used to check that the relation starts and ends at different points, someone needs to do that
+    // TODO : Editor used to check that the relation starts and ends in the same Scenario, someone needs to do that
+    // TODO : Editor used to check that the Interval doesn't already exists, someone needs to do that
     
-    return kTTErrGeneric;
-}
-
-TTErr CSP::addRelation(TimeProcessPtr pRel)
-{
-    // WARNING : TTEngines used to verify that the relation starts and ends at different points
+    int beginID1, beginID2;
     
-    // check it is an interval process
-    if (pRel->getName() == TTSymbol("Interval")) {
+    // TODO : retrieve above IDs
     
-        
-    }
+    // add ANTPOST_ANTERIORITY relation (from CSPold addAntPostRelation and addConstraint)
+    int IDs[2] = {beginID2, beginID1};
+    int coefs[2] = {1,-1};
+    solver.addConstraint(IDs, coefs, 2, GQ_RELATION, 0, false); // TODO : must call the solver if the variables aren't in the right order (backward relation), then update the results of the solver
     
     return kTTErrNone;
 }
+
 
 TTErr CSP::removeRelation(TimeProcessPtr pRel)
 {
