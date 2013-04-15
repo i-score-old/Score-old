@@ -160,6 +160,11 @@ private :
      @return                an error code if the date is wrong */
     TTErr	setStartEvent(const TTValue& value);
     
+    /** Get intermediate events of the time process
+     @param	value           returned events
+     @return                kTTErrNone */
+    TTErr	getIntermediateEvents(TTValue& value);
+    
     /** Set the end event of the time process
      @param	value           a date
      @return                an error code if the date is wrong */

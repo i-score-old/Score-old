@@ -36,6 +36,10 @@ mScheduler(NULL)
     addAttributeWithSetter(StartEvent, kTypeObject);
     addAttributeProperty(StartEvent, hidden, YES);
     
+    addAttributeWithGetter(IntermediateEvents, kTypeLocalValue);
+    addAttributeProperty(IntermediateEvents, readOnly, YES);
+    addAttributeProperty(IntermediateEvents, hidden, YES);
+    
     addAttributeWithSetter(EndEvent, kTypeObject);
     addAttributeProperty(EndEvent, hidden, YES);
     
@@ -294,6 +298,13 @@ TTErr TimeProcess::setStartEvent(const TTValue& value)
     }
     
     return kTTErrGeneric;
+}
+
+TTErr TimeProcess::getIntermediateEvents(TTValue& value)
+{
+    mIntermediateEvents.assignToValue(value);
+    
+    return kTTErrNone;
 }
 
 TTErr TimeProcess::setEndEvent(const TTValue& value)
