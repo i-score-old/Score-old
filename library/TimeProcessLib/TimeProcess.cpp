@@ -288,7 +288,8 @@ TTErr TimeProcess::setStartEvent(const TTValue& value)
         if (value[0].type() == kTypeObject) {
             
             // unsubscribe to the old start event
-            mStartEvent->sendMessage(TTSymbol("Unsubscribe"), mStartEventCallback, kTTValNONE);
+            if (mStartEvent)
+                mStartEvent->sendMessage(TTSymbol("Unsubscribe"), mStartEventCallback, kTTValNONE);
                 
             mStartEvent = value[0];
                 
@@ -314,7 +315,8 @@ TTErr TimeProcess::setEndEvent(const TTValue& value)
         if (value[0].type() == kTypeObject) {
             
            // unsubscribe to the old end event
-           mEndEvent->sendMessage(TTSymbol("Unsubscribe"), mEndEventCallback, kTTValNONE);
+            if (mEndEvent)
+                mEndEvent->sendMessage(TTSymbol("Unsubscribe"), mEndEventCallback, kTTValNONE);
            
            mEndEvent = value[0];
            
