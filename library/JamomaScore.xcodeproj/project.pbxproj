@@ -7,109 +7,12 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		46EE0B0A166B71C500163087 /* TTEngine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TTEngine.cpp; path = PeerObject/TTEngine.cpp; sourceTree = SOURCE_ROOT; };
-		46EE0B0B166B71C500163087 /* TTEngine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TTEngine.h; path = PeerObject/TTEngine.h; sourceTree = SOURCE_ROOT; };
-		46EE0B12166B7AA300163087 /* ChangeTempo.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ChangeTempo.cpp; sourceTree = "<group>"; };
-		46EE0B13166B7AA300163087 /* ChangeTempo.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ChangeTempo.hpp; sourceTree = "<group>"; };
-		46EE0B14166B7AA300163087 /* ControlPointInformations.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ControlPointInformations.cpp; sourceTree = "<group>"; };
-		46EE0B15166B7AA300163087 /* ControlPointInformations.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ControlPointInformations.hpp; sourceTree = "<group>"; };
-		46EE0B16166B7AA300163087 /* ECOMachine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ECOMachine.cpp; sourceTree = "<group>"; };
-		46EE0B17166B7AA300163087 /* ECOMachine.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ECOMachine.hpp; sourceTree = "<group>"; };
-		46EE0B19166B7AA300163087 /* Arc.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Arc.cpp; sourceTree = "<group>"; };
-		46EE0B1A166B7AA300163087 /* Arc.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Arc.hpp; sourceTree = "<group>"; };
-		46EE0B1B166B7AA300163087 /* ArithmeticException.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ArithmeticException.hpp; sourceTree = "<group>"; };
-		46EE0B1C166B7AA300163087 /* ExtendedInt.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ExtendedInt.cpp; sourceTree = "<group>"; };
-		46EE0B1D166B7AA300163087 /* ExtendedInt.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ExtendedInt.hpp; sourceTree = "<group>"; };
-		46EE0B1E166B7AA300163087 /* IllegalArgumentException.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IllegalArgumentException.hpp; sourceTree = "<group>"; };
-		46EE0B1F166B7AA300163087 /* IncoherentStateException.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IncoherentStateException.hpp; sourceTree = "<group>"; };
-		46EE0B20166B7AA300163087 /* OutOfBoundException.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = OutOfBoundException.hpp; sourceTree = "<group>"; };
-		46EE0B21166B7AA300163087 /* PetriNet.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PetriNet.cpp; sourceTree = "<group>"; };
-		46EE0B22166B7AA300163087 /* PetriNet.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PetriNet.hpp; sourceTree = "<group>"; };
-		46EE0B23166B7AA300163087 /* PetriNetItem.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PetriNetItem.cpp; sourceTree = "<group>"; };
-		46EE0B24166B7AA300163087 /* PetriNetItem.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PetriNetItem.hpp; sourceTree = "<group>"; };
-		46EE0B25166B7AA300163087 /* PetriNetNode.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PetriNetNode.cpp; sourceTree = "<group>"; };
-		46EE0B26166B7AA300163087 /* PetriNetNode.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PetriNetNode.hpp; sourceTree = "<group>"; };
-		46EE0B27166B7AA300163087 /* Place.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Place.cpp; sourceTree = "<group>"; };
-		46EE0B28166B7AA300163087 /* Place.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Place.hpp; sourceTree = "<group>"; };
-		46EE0B29166B7AA300163087 /* PriorityTransitionAction.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PriorityTransitionAction.cpp; sourceTree = "<group>"; };
-		46EE0B2A166B7AA300163087 /* PriorityTransitionAction.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PriorityTransitionAction.hpp; sourceTree = "<group>"; };
-		46EE0B2B166B7AA300163087 /* ThreadSafeList.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ThreadSafeList.cpp; sourceTree = "<group>"; };
-		46EE0B2C166B7AA300163087 /* ThreadSafeList.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ThreadSafeList.hpp; sourceTree = "<group>"; };
-		46EE0B2D166B7AA300163087 /* Token.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Token.cpp; sourceTree = "<group>"; };
-		46EE0B2E166B7AA300163087 /* Token.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Token.hpp; sourceTree = "<group>"; };
-		46EE0B2F166B7AA300163087 /* Transition.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Transition.cpp; sourceTree = "<group>"; };
-		46EE0B30166B7AA300163087 /* Transition.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Transition.hpp; sourceTree = "<group>"; };
-		46EE0B31166B7AA300163087 /* TransitionAction.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TransitionAction.cpp; sourceTree = "<group>"; };
-		46EE0B32166B7AA300163087 /* TransitionAction.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TransitionAction.hpp; sourceTree = "<group>"; };
-		46EE0B33166B7AA300163087 /* TransitionBitArray.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TransitionBitArray.cpp; sourceTree = "<group>"; };
-		46EE0B34166B7AA300163087 /* TransitionBitArray.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TransitionBitArray.hpp; sourceTree = "<group>"; };
-		46EE0B36166B7AA300163087 /* MultiTypeCurve.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MultiTypeCurve.cpp; sourceTree = "<group>"; };
-		46EE0B37166B7AA300163087 /* MultiTypeCurve.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MultiTypeCurve.hpp; sourceTree = "<group>"; };
-		46EE0B38166B7AA300163087 /* NetworkMessageCurves.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = NetworkMessageCurves.cpp; sourceTree = "<group>"; };
-		46EE0B39166B7AA300163087 /* NetworkMessageCurves.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = NetworkMessageCurves.hpp; sourceTree = "<group>"; };
-		46EE0B3A166B7AA300163087 /* Process.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Process.cpp; sourceTree = "<group>"; };
-		46EE0B3B166B7AA300163087 /* Process.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Process.hpp; sourceTree = "<group>"; };
-		46EE0B3C166B7AA300163087 /* ProcessInclude.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ProcessInclude.hpp; sourceTree = "<group>"; };
-		46EE0B3D166B7AA300163087 /* ProcessStep.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ProcessStep.hpp; sourceTree = "<group>"; };
-		46EE0B3E166B7AA300163087 /* SendNetworkMessageProcess.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SendNetworkMessageProcess.cpp; sourceTree = "<group>"; };
-		46EE0B3F166B7AA300163087 /* SendNetworkMessageProcess.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SendNetworkMessageProcess.hpp; sourceTree = "<group>"; };
-		46EE0B40166B7AA300163087 /* StringParser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StringParser.cpp; sourceTree = "<group>"; };
-		46EE0B41166B7AA300163087 /* StringParser.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StringParser.hpp; sourceTree = "<group>"; };
-		46EE0B42166B7AA300163087 /* StringTypeFunctions.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StringTypeFunctions.cpp; sourceTree = "<group>"; };
-		46EE0B43166B7AA300163087 /* StringTypeFunctions.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StringTypeFunctions.hpp; sourceTree = "<group>"; };
-		46EE0B44166B7AA300163087 /* TriggerPointInformations.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TriggerPointInformations.cpp; sourceTree = "<group>"; };
-		46EE0B45166B7AA300163087 /* TriggerPointInformations.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TriggerPointInformations.hpp; sourceTree = "<group>"; };
-		46EE0B48166B7AAD00163087 /* AllenRelation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AllenRelation.cpp; sourceTree = "<group>"; };
-		46EE0B49166B7AAD00163087 /* AllenRelation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AllenRelation.hpp; sourceTree = "<group>"; };
-		46EE0B4A166B7AAD00163087 /* AntPostRelation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AntPostRelation.cpp; sourceTree = "<group>"; };
-		46EE0B4B166B7AAD00163087 /* AntPostRelation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AntPostRelation.hpp; sourceTree = "<group>"; };
-		46EE0B4C166B7AAD00163087 /* BinaryRelation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BinaryRelation.cpp; sourceTree = "<group>"; };
-		46EE0B4D166B7AAD00163087 /* BinaryRelation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BinaryRelation.hpp; sourceTree = "<group>"; };
-		46EE0B4E166B7AAD00163087 /* BinaryTemporalRelation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BinaryTemporalRelation.cpp; sourceTree = "<group>"; };
-		46EE0B4F166B7AAD00163087 /* BinaryTemporalRelation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BinaryTemporalRelation.hpp; sourceTree = "<group>"; };
-		46EE0B50166B7AAD00163087 /* ConstrainedBox.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ConstrainedBox.cpp; sourceTree = "<group>"; };
-		46EE0B51166B7AAD00163087 /* ConstrainedBox.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ConstrainedBox.hpp; sourceTree = "<group>"; };
-		46EE0B52166B7AAD00163087 /* ConstrainedTemporalEntity.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ConstrainedTemporalEntity.cpp; sourceTree = "<group>"; };
-		46EE0B53166B7AAD00163087 /* ConstrainedTemporalEntity.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ConstrainedTemporalEntity.hpp; sourceTree = "<group>"; };
-		46EE0B54166B7AAD00163087 /* ControlPoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ControlPoint.cpp; sourceTree = "<group>"; };
-		46EE0B55166B7AAD00163087 /* ControlPoint.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ControlPoint.hpp; sourceTree = "<group>"; };
-		46EE0B56166B7AAD00163087 /* CSP.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CSP.cpp; sourceTree = "<group>"; };
-		46EE0B57166B7AAD00163087 /* CSP.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CSP.hpp; sourceTree = "<group>"; };
-		46EE0B58166B7AAD00163087 /* CSPConstrainedVariable.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CSPConstrainedVariable.cpp; sourceTree = "<group>"; };
-		46EE0B59166B7AAD00163087 /* CSPConstrainedVariable.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CSPConstrainedVariable.hpp; sourceTree = "<group>"; };
-		46EE0B5A166B7AAD00163087 /* CSPLinearConstraint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CSPLinearConstraint.cpp; sourceTree = "<group>"; };
-		46EE0B5B166B7AAD00163087 /* CSPLinearConstraint.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CSPLinearConstraint.hpp; sourceTree = "<group>"; };
-		46EE0B5C166B7AAD00163087 /* IllegalArgumentException.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IllegalArgumentException.hpp; sourceTree = "<group>"; };
-		46EE0B5D166B7AAD00163087 /* IntervalRelation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IntervalRelation.cpp; sourceTree = "<group>"; };
-		46EE0B5E166B7AAD00163087 /* IntervalRelation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IntervalRelation.hpp; sourceTree = "<group>"; };
-		46EE0B5F166B7AAD00163087 /* InvalidFileFormatException.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = InvalidFileFormatException.hpp; sourceTree = "<group>"; };
-		46EE0B60166B7AAD00163087 /* OutOfBoundException.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = OutOfBoundException.hpp; sourceTree = "<group>"; };
-		46EE0B61166B7AAD00163087 /* TriggerPoint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TriggerPoint.cpp; sourceTree = "<group>"; };
-		46EE0B62166B7AAD00163087 /* TriggerPoint.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TriggerPoint.hpp; sourceTree = "<group>"; };
-		46EE0B63166B7AAD00163087 /* XMLConversion.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = XMLConversion.cpp; sourceTree = "<group>"; };
-		46EE0B64166B7AAD00163087 /* XMLConversion.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = XMLConversion.hpp; sourceTree = "<group>"; };
-		46EE0B65166B7AAD00163087 /* XMLInclude.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = XMLInclude.hpp; sourceTree = "<group>"; };
-		46EE0B66166B7AAD00163087 /* Editor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Editor.cpp; sourceTree = "<group>"; };
-		46EE0B67166B7AAD00163087 /* Editor.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Editor.hpp; sourceTree = "<group>"; };
-		46EE0B69166B7AAD00163087 /* customSpace.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = customSpace.cpp; sourceTree = "<group>"; };
-		46EE0B6A166B7AAD00163087 /* customSpace.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = customSpace.hpp; sourceTree = "<group>"; };
-		46EE0B6B166B7AAD00163087 /* gecode_headers.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = gecode_headers.hpp; sourceTree = "<group>"; };
-		46EE0B6C166B7AAD00163087 /* integerVariable.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = integerVariable.cpp; sourceTree = "<group>"; };
-		46EE0B6D166B7AAD00163087 /* integerVariable.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = integerVariable.hpp; sourceTree = "<group>"; };
-		46EE0B6E166B7AAD00163087 /* linearConstraint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = linearConstraint.cpp; sourceTree = "<group>"; };
-		46EE0B6F166B7AAD00163087 /* linearConstraint.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = linearConstraint.hpp; sourceTree = "<group>"; };
-		46EE0B70166B7AAD00163087 /* relations_type.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = relations_type.hpp; sourceTree = "<group>"; };
-		46EE0B71166B7AAD00163087 /* searchEngine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = searchEngine.cpp; sourceTree = "<group>"; };
-		46EE0B72166B7AAD00163087 /* searchEngine.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = searchEngine.hpp; sourceTree = "<group>"; };
-		46EE0B73166B7AAD00163087 /* solver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = solver.cpp; sourceTree = "<group>"; };
-		46EE0B74166B7AAD00163087 /* solver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = solver.hpp; sourceTree = "<group>"; };
-		46EE0B75166B7AAD00163087 /* solver_wrap.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = solver_wrap.cpp; sourceTree = "<group>"; };
-		46EE0B76166B7AAD00163087 /* solver_wrap.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = solver_wrap.hpp; sourceTree = "<group>"; };
-		46EE0B78166B7AC100163087 /* StoryLine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StoryLine.cpp; sourceTree = "<group>"; };
-		46EE0B79166B7AC100163087 /* StoryLine.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StoryLine.hpp; sourceTree = "<group>"; };
-		46EE0B7A166B7AE300163087 /* CSPTypes.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = CSPTypes.hpp; path = includes/CSPTypes.hpp; sourceTree = SOURCE_ROOT; };
-		46EE0B7C166B7AE300163087 /* EnginesPrivate.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = EnginesPrivate.hpp; path = includes/EnginesPrivate.hpp; sourceTree = SOURCE_ROOT; };
-		46EE0B7E166B7AF300163087 /* EnginesPrivate.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = EnginesPrivate.cpp; path = source/EnginesPrivate.cpp; sourceTree = SOURCE_ROOT; };
+		464C14BB16EDEB4F00319B1B /* TimeEvent.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TimeEvent.cpp; sourceTree = "<group>"; };
+		464C14BC16EDEB4F00319B1B /* TimeEvent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TimeEvent.h; sourceTree = "<group>"; };
+		46B79E1516E789100052A04E /* TimeProcess.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TimeProcess.cpp; sourceTree = "<group>"; };
+		46B79E1616E789100052A04E /* TimeProcess.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TimeProcess.h; sourceTree = "<group>"; };
+		46BFD37D170DAE9900B99389 /* TTScore.test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TTScore.test.cpp; sourceTree = "<group>"; };
+		46BFD37E170DAE9900B99389 /* TTScore.test.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TTScore.test.h; sourceTree = "<group>"; };
 		46F5057A166699BE00CFC3A2 /* TTScore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TTScore.h; path = includes/TTScore.h; sourceTree = SOURCE_ROOT; };
 		46F5057B166699BE00CFC3A2 /* TTScoreSymbolCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TTScoreSymbolCache.h; path = includes/TTScoreSymbolCache.h; sourceTree = SOURCE_ROOT; };
 		46F5059016669CFC00CFC3A2 /* TTScore.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TTScore.cpp; path = source/TTScore.cpp; sourceTree = SOURCE_ROOT; };
@@ -117,155 +20,31 @@
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
-		46EE0B11166B7AA300163087 /* ECOMachine */ = {
+		464C14BA16EDEB4F00319B1B /* TimeEventLib */ = {
 			isa = PBXGroup;
 			children = (
-				46EE0B12166B7AA300163087 /* ChangeTempo.cpp */,
-				46EE0B13166B7AA300163087 /* ChangeTempo.hpp */,
-				46EE0B14166B7AA300163087 /* ControlPointInformations.cpp */,
-				46EE0B15166B7AA300163087 /* ControlPointInformations.hpp */,
-				46EE0B16166B7AA300163087 /* ECOMachine.cpp */,
-				46EE0B17166B7AA300163087 /* ECOMachine.hpp */,
-				46EE0B18166B7AA300163087 /* PetriNet */,
-				46EE0B35166B7AA300163087 /* Process */,
-				46EE0B44166B7AA300163087 /* TriggerPointInformations.cpp */,
-				46EE0B45166B7AA300163087 /* TriggerPointInformations.hpp */,
+				464C14BC16EDEB4F00319B1B /* TimeEvent.h */,
+				464C14BB16EDEB4F00319B1B /* TimeEvent.cpp */,
 			);
-			path = ECOMachine;
+			path = TimeEventLib;
 			sourceTree = "<group>";
 		};
-		46EE0B18166B7AA300163087 /* PetriNet */ = {
+		46B79E1416E789100052A04E /* TimeProcessLib */ = {
 			isa = PBXGroup;
 			children = (
-				46EE0B19166B7AA300163087 /* Arc.cpp */,
-				46EE0B1A166B7AA300163087 /* Arc.hpp */,
-				46EE0B1B166B7AA300163087 /* ArithmeticException.hpp */,
-				46EE0B1C166B7AA300163087 /* ExtendedInt.cpp */,
-				46EE0B1D166B7AA300163087 /* ExtendedInt.hpp */,
-				46EE0B1E166B7AA300163087 /* IllegalArgumentException.hpp */,
-				46EE0B1F166B7AA300163087 /* IncoherentStateException.hpp */,
-				46EE0B20166B7AA300163087 /* OutOfBoundException.hpp */,
-				46EE0B21166B7AA300163087 /* PetriNet.cpp */,
-				46EE0B22166B7AA300163087 /* PetriNet.hpp */,
-				46EE0B23166B7AA300163087 /* PetriNetItem.cpp */,
-				46EE0B24166B7AA300163087 /* PetriNetItem.hpp */,
-				46EE0B25166B7AA300163087 /* PetriNetNode.cpp */,
-				46EE0B26166B7AA300163087 /* PetriNetNode.hpp */,
-				46EE0B27166B7AA300163087 /* Place.cpp */,
-				46EE0B28166B7AA300163087 /* Place.hpp */,
-				46EE0B29166B7AA300163087 /* PriorityTransitionAction.cpp */,
-				46EE0B2A166B7AA300163087 /* PriorityTransitionAction.hpp */,
-				46EE0B2B166B7AA300163087 /* ThreadSafeList.cpp */,
-				46EE0B2C166B7AA300163087 /* ThreadSafeList.hpp */,
-				46EE0B2D166B7AA300163087 /* Token.cpp */,
-				46EE0B2E166B7AA300163087 /* Token.hpp */,
-				46EE0B2F166B7AA300163087 /* Transition.cpp */,
-				46EE0B30166B7AA300163087 /* Transition.hpp */,
-				46EE0B31166B7AA300163087 /* TransitionAction.cpp */,
-				46EE0B32166B7AA300163087 /* TransitionAction.hpp */,
-				46EE0B33166B7AA300163087 /* TransitionBitArray.cpp */,
-				46EE0B34166B7AA300163087 /* TransitionBitArray.hpp */,
+				46B79E1616E789100052A04E /* TimeProcess.h */,
+				46B79E1516E789100052A04E /* TimeProcess.cpp */,
 			);
-			path = PetriNet;
+			path = TimeProcessLib;
 			sourceTree = "<group>";
 		};
-		46EE0B35166B7AA300163087 /* Process */ = {
+		46BFD37C170DAE9900B99389 /* tests */ = {
 			isa = PBXGroup;
 			children = (
-				46EE0B36166B7AA300163087 /* MultiTypeCurve.cpp */,
-				46EE0B37166B7AA300163087 /* MultiTypeCurve.hpp */,
-				46EE0B38166B7AA300163087 /* NetworkMessageCurves.cpp */,
-				46EE0B39166B7AA300163087 /* NetworkMessageCurves.hpp */,
-				46EE0B3A166B7AA300163087 /* Process.cpp */,
-				46EE0B3B166B7AA300163087 /* Process.hpp */,
-				46EE0B3C166B7AA300163087 /* ProcessInclude.hpp */,
-				46EE0B3D166B7AA300163087 /* ProcessStep.hpp */,
-				46EE0B3E166B7AA300163087 /* SendNetworkMessageProcess.cpp */,
-				46EE0B3F166B7AA300163087 /* SendNetworkMessageProcess.hpp */,
-				46EE0B40166B7AA300163087 /* StringParser.cpp */,
-				46EE0B41166B7AA300163087 /* StringParser.hpp */,
-				46EE0B42166B7AA300163087 /* StringTypeFunctions.cpp */,
-				46EE0B43166B7AA300163087 /* StringTypeFunctions.hpp */,
+				46BFD37E170DAE9900B99389 /* TTScore.test.h */,
+				46BFD37D170DAE9900B99389 /* TTScore.test.cpp */,
 			);
-			path = Process;
-			sourceTree = "<group>";
-		};
-		46EE0B46166B7AAD00163087 /* Editor */ = {
-			isa = PBXGroup;
-			children = (
-				46EE0B67166B7AAD00163087 /* Editor.hpp */,
-				46EE0B66166B7AAD00163087 /* Editor.cpp */,
-				46EE0B47166B7AAD00163087 /* CSP */,
-				46EE0B68166B7AAD00163087 /* gecode-solver */,
-			);
-			path = Editor;
-			sourceTree = "<group>";
-		};
-		46EE0B47166B7AAD00163087 /* CSP */ = {
-			isa = PBXGroup;
-			children = (
-				46EE0B48166B7AAD00163087 /* AllenRelation.cpp */,
-				46EE0B49166B7AAD00163087 /* AllenRelation.hpp */,
-				46EE0B4A166B7AAD00163087 /* AntPostRelation.cpp */,
-				46EE0B4B166B7AAD00163087 /* AntPostRelation.hpp */,
-				46EE0B4C166B7AAD00163087 /* BinaryRelation.cpp */,
-				46EE0B4D166B7AAD00163087 /* BinaryRelation.hpp */,
-				46EE0B4E166B7AAD00163087 /* BinaryTemporalRelation.cpp */,
-				46EE0B4F166B7AAD00163087 /* BinaryTemporalRelation.hpp */,
-				46EE0B50166B7AAD00163087 /* ConstrainedBox.cpp */,
-				46EE0B51166B7AAD00163087 /* ConstrainedBox.hpp */,
-				46EE0B52166B7AAD00163087 /* ConstrainedTemporalEntity.cpp */,
-				46EE0B53166B7AAD00163087 /* ConstrainedTemporalEntity.hpp */,
-				46EE0B54166B7AAD00163087 /* ControlPoint.cpp */,
-				46EE0B55166B7AAD00163087 /* ControlPoint.hpp */,
-				46EE0B56166B7AAD00163087 /* CSP.cpp */,
-				46EE0B57166B7AAD00163087 /* CSP.hpp */,
-				46EE0B58166B7AAD00163087 /* CSPConstrainedVariable.cpp */,
-				46EE0B59166B7AAD00163087 /* CSPConstrainedVariable.hpp */,
-				46EE0B5A166B7AAD00163087 /* CSPLinearConstraint.cpp */,
-				46EE0B5B166B7AAD00163087 /* CSPLinearConstraint.hpp */,
-				46EE0B5C166B7AAD00163087 /* IllegalArgumentException.hpp */,
-				46EE0B5D166B7AAD00163087 /* IntervalRelation.cpp */,
-				46EE0B5E166B7AAD00163087 /* IntervalRelation.hpp */,
-				46EE0B5F166B7AAD00163087 /* InvalidFileFormatException.hpp */,
-				46EE0B60166B7AAD00163087 /* OutOfBoundException.hpp */,
-				46EE0B61166B7AAD00163087 /* TriggerPoint.cpp */,
-				46EE0B62166B7AAD00163087 /* TriggerPoint.hpp */,
-				46EE0B63166B7AAD00163087 /* XMLConversion.cpp */,
-				46EE0B64166B7AAD00163087 /* XMLConversion.hpp */,
-				46EE0B65166B7AAD00163087 /* XMLInclude.hpp */,
-			);
-			path = CSP;
-			sourceTree = "<group>";
-		};
-		46EE0B68166B7AAD00163087 /* gecode-solver */ = {
-			isa = PBXGroup;
-			children = (
-				46EE0B69166B7AAD00163087 /* customSpace.cpp */,
-				46EE0B6A166B7AAD00163087 /* customSpace.hpp */,
-				46EE0B6B166B7AAD00163087 /* gecode_headers.hpp */,
-				46EE0B6C166B7AAD00163087 /* integerVariable.cpp */,
-				46EE0B6D166B7AAD00163087 /* integerVariable.hpp */,
-				46EE0B6E166B7AAD00163087 /* linearConstraint.cpp */,
-				46EE0B6F166B7AAD00163087 /* linearConstraint.hpp */,
-				46EE0B70166B7AAD00163087 /* relations_type.hpp */,
-				46EE0B71166B7AAD00163087 /* searchEngine.cpp */,
-				46EE0B72166B7AAD00163087 /* searchEngine.hpp */,
-				46EE0B73166B7AAD00163087 /* solver.cpp */,
-				46EE0B74166B7AAD00163087 /* solver.hpp */,
-				46EE0B75166B7AAD00163087 /* solver_wrap.cpp */,
-				46EE0B76166B7AAD00163087 /* solver_wrap.hpp */,
-			);
-			path = "gecode-solver";
-			sourceTree = "<group>";
-		};
-		46EE0B77166B7AC100163087 /* StoryLine */ = {
-			isa = PBXGroup;
-			children = (
-				46EE0B78166B7AC100163087 /* StoryLine.cpp */,
-				46EE0B79166B7AC100163087 /* StoryLine.hpp */,
-			);
-			path = StoryLine;
+			path = tests;
 			sourceTree = "<group>";
 		};
 		46F5055F166698EB00CFC3A2 = {
@@ -273,18 +52,15 @@
 			children = (
 				46F5056F1666991700CFC3A2 /* includes */,
 				46F505731666991700CFC3A2 /* source */,
-				46F505721666991700CFC3A2 /* PeerObject */,
-				46EE0B11166B7AA300163087 /* ECOMachine */,
-				46EE0B46166B7AAD00163087 /* Editor */,
-				46EE0B77166B7AC100163087 /* StoryLine */,
+				464C14BA16EDEB4F00319B1B /* TimeEventLib */,
+				46B79E1416E789100052A04E /* TimeProcessLib */,
+				46BFD37C170DAE9900B99389 /* tests */,
 			);
 			sourceTree = "<group>";
 		};
 		46F5056F1666991700CFC3A2 /* includes */ = {
 			isa = PBXGroup;
 			children = (
-				46EE0B7A166B7AE300163087 /* CSPTypes.hpp */,
-				46EE0B7C166B7AE300163087 /* EnginesPrivate.hpp */,
 				46F5057A166699BE00CFC3A2 /* TTScore.h */,
 				46F5057B166699BE00CFC3A2 /* TTScoreSymbolCache.h */,
 			);
@@ -292,20 +68,9 @@
 			path = ../includes;
 			sourceTree = "<group>";
 		};
-		46F505721666991700CFC3A2 /* PeerObject */ = {
-			isa = PBXGroup;
-			children = (
-				46EE0B0B166B71C500163087 /* TTEngine.h */,
-				46EE0B0A166B71C500163087 /* TTEngine.cpp */,
-			);
-			name = PeerObject;
-			path = ../PeerObject;
-			sourceTree = "<group>";
-		};
 		46F505731666991700CFC3A2 /* source */ = {
 			isa = PBXGroup;
 			children = (
-				46EE0B7E166B7AF300163087 /* EnginesPrivate.cpp */,
 				46F5059016669CFC00CFC3A2 /* TTScore.cpp */,
 				46F5059116669CFC00CFC3A2 /* TTScoreSymbolCache.cpp */,
 			);
@@ -336,7 +101,7 @@
 		46F50561166698EB00CFC3A2 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0450;
+				LastUpgradeCheck = 0460;
 				ORGANIZATIONNAME = OSSIA;
 			};
 			buildConfigurationList = 46F50564166698EB00CFC3A2 /* Build configuration list for PBXProject "JamomaScore" */;

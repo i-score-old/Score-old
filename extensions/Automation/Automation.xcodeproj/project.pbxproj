@@ -1,0 +1,197 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXFileReference section */
+		46B79E2516E7A8120052A04E /* TimeProcess.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TimeProcess.cpp; sourceTree = "<group>"; };
+		46B79E2616E7A8120052A04E /* TimeProcess.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TimeProcess.h; sourceTree = "<group>"; };
+		46B79E2816E7A8230052A04E /* Automation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Automation.h; sourceTree = "<group>"; };
+		46B79E2A16E7A82C0052A04E /* Automation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Automation.cpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		46B79E1916E7A7B00052A04E = {
+			isa = PBXGroup;
+			children = (
+				46B79E2416E7A8120052A04E /* TimeProcessLib */,
+				46B79E2716E7A8230052A04E /* includes */,
+				46B79E2916E7A82C0052A04E /* source */,
+			);
+			sourceTree = "<group>";
+		};
+		46B79E2416E7A8120052A04E /* TimeProcessLib */ = {
+			isa = PBXGroup;
+			children = (
+				46B79E2616E7A8120052A04E /* TimeProcess.h */,
+				46B79E2516E7A8120052A04E /* TimeProcess.cpp */,
+			);
+			name = TimeProcessLib;
+			path = ../../library/TimeProcessLib;
+			sourceTree = "<group>";
+		};
+		46B79E2716E7A8230052A04E /* includes */ = {
+			isa = PBXGroup;
+			children = (
+				46B79E2816E7A8230052A04E /* Automation.h */,
+			);
+			path = includes;
+			sourceTree = "<group>";
+		};
+		46B79E2916E7A82C0052A04E /* source */ = {
+			isa = PBXGroup;
+			children = (
+				46B79E2A16E7A82C0052A04E /* Automation.cpp */,
+			);
+			path = source;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXLegacyTarget section */
+		46B79E1E16E7A7B00052A04E /* Automation */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "$(ACTION) $(Configuration)";
+			buildConfigurationList = 46B79E2116E7A7B00052A04E /* Build configuration list for PBXLegacyTarget "Automation" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			buildWorkingDirectory = "";
+			dependencies = (
+			);
+			name = Automation;
+			passBuildSettingsInEnvironment = 1;
+			productName = Automation;
+		};
+/* End PBXLegacyTarget section */
+
+/* Begin PBXProject section */
+		46B79E1A16E7A7B00052A04E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0460;
+				ORGANIZATIONNAME = OSSIA;
+			};
+			buildConfigurationList = 46B79E1D16E7A7B00052A04E /* Build configuration list for PBXProject "Automation" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 46B79E1916E7A7B00052A04E;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				46B79E1E16E7A7B00052A04E /* Automation */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		46B79E1F16E7A7B00052A04E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		46B79E2016E7A7B00052A04E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		46B79E2216E7A7B00052A04E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEBUGGING_SYMBOLS = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		46B79E2316E7A7B00052A04E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		46B79E1D16E7A7B00052A04E /* Build configuration list for PBXProject "Automation" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				46B79E1F16E7A7B00052A04E /* Debug */,
+				46B79E2016E7A7B00052A04E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		46B79E2116E7A7B00052A04E /* Build configuration list for PBXLegacyTarget "Automation" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				46B79E2216E7A7B00052A04E /* Debug */,
+				46B79E2316E7A7B00052A04E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 46B79E1A16E7A7B00052A04E /* Project object */;
+}

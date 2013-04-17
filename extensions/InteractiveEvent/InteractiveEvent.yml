@@ -1,0 +1,22 @@
+#defines:
+#  - TIME_EVENT_DEBUG
+
+sources:
+  - ../../library/TimeEventLib/TimeEvent.cpp	
+  - source/InteractiveEvent.cpp
+  
+includes:
+  - "."
+  - "includes"
+  - "../../library/TimeEventLib"
+  
+  # to build without having the whole jamoma repository
+  - ../../support/jamoma/includes
+
+libraries:
+  - FOUNDATION
+  - DSP
+  - MODULAR
+
+# This project is not available for most architectures (cause of the Gecode 64-bit only dependency)
+arch: "x86_64"

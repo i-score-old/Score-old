@@ -24,7 +24,7 @@ void TTScoreInit()
 		TTScoreHasInitialized = true;
 		
 		// register classes -- both internal and external
-		TTEngine::registerClass();
+		TTScoreTest::registerClass();
 		
 
 #ifdef TT_DEBUG
