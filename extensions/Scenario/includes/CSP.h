@@ -18,7 +18,7 @@
 
 #include "TimeProcess.h"
 #include "TimeEvent.h"
-//#include "Interval.h"                         // THEO : je ne suis pas sure que tu as besoin d'inclure Interval.h puisque un interval est un TimeProcess "pure" (il n'y a pas de membres ou methodes speciales dont tu as besoin)
+
 #include "solver.hpp"
 
 class CSP
@@ -26,11 +26,11 @@ class CSP
     
 public :
     
-    CSP(TimeProcessPtr pScenario);              // THEO : on utilise TimeProcessPtr et on vérifie nous même que le nom de la classe est bien TTsymbol("Scenario")
+    CSP();
     
     ~CSP();
     
-    TTErr addBox(TimeProcessPtr pBox);
+    TTErr addBox(TimeProcessPtr pBox, TTUInt32 boxStart, TTUInt32 boxEnd, TTUInt32 boxDuration, TTUInt32 scenarioDuration);
     
     TTErr removeBox(TimeProcessPtr pBox);
     
@@ -38,15 +38,13 @@ public :
     
     TTErr removeEvent(TimeEventPtr pEvent);
     
-    TTErr addRelation(TimeProcessPtr pRel);      // THEO : on utilise TimeProcessPtr et on vérifie nous même que le nom de la classe est bien TTsymbol("Interval")
+    TTErr addRelation(TimeProcessPtr pRel);
     
-    TTErr removeRelation(TimeProcessPtr pRel);   // THEO : on utilise TimeProcessPtr et on vérifie nous même que le nom de la classe est bien TTsymbol("Interval")
+    TTErr removeRelation(TimeProcessPtr pRel);
     
 private :
     
-    Solver solver;
-    
-    TimeProcessPtr      pScenario;               // THEO : on utilise TimeProcessPtr et on vérifie nous même que le nom de la classe est bien TTsymbol("Scenario")
+    Solver              mSolver;
     
     TimeProcessMapPtr   mTimeProcessMap;
     

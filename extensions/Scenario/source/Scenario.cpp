@@ -215,7 +215,7 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
 TTErr Scenario::TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue)
 {
     TimeProcessPtr  aTimeProcess;
-    TTValue         aCacheElement;
+    TTValue         aCacheElement, v;
     TTSymbol        timeProcessType;
     
     if (inputValue.size() == 1) {
@@ -225,7 +225,8 @@ TTErr Scenario::TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue)
             aTimeProcess = TimeProcessPtr((TTObjectBasePtr)inputValue[0]);
             
             // set this scenario as parent scenario for the time process
-            aTimeProcess->setAttributeValue(TTSymbol("scenario"), (TTObjectBasePtr)this);
+            v = TTValue((TTObjectBasePtr)this);
+            aTimeProcess->setAttributeValue(TTSymbol("scenario"), v);
             
             // create all observers
             makeTimeProcessCacheElement(aTimeProcess, aCacheElement);
@@ -238,15 +239,22 @@ TTErr Scenario::TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue)
             
             if (timeProcessType == TTSymbol("Interval")) {
                 
-                // THEO : je pense qu'il vaut mieux utiliser le membre réservé plutôt qu'un appel à une methode static
                 return mEditionSolver->addRelation(aTimeProcess);
-                //return CSP::addRelation(aTimeProcess);
                 
             } else {
                 
-                // THEO : je pense qu'il vaut mieux utiliser le membre réservé plutôt qu'un appel à une methode static
-                return mEditionSolver->addBox(aTimeProcess);
-                //return CSP::addBox(aTimeProcess);
+                TTValue boxStart, boxEnd, boxDuration, scenarioDuration;
+                
+                // get scenario duration
+                this->getAttributeValue(TTSymbol("duration"), scenarioDuration);
+                
+                // get time process informations
+                aTimeProcess->getAttributeValue(TTSymbol("startDate"), boxStart);
+                aTimeProcess->getAttributeValue(TTSymbol("endDate"), boxEnd);
+                aTimeProcess->getAttributeValue(TTSymbol("duration"), boxDuration);
+                
+                // add a constrain to the solver
+                return mEditionSolver->addBox(aTimeProcess, boxStart[0], boxEnd[0], boxDuration[0], scenarioDuration[0]);
             }
 
         }
@@ -276,6 +284,7 @@ TTErr Scenario::TimeProcessRemove(const TTValue& inputValue, TTValue& outputValu
             // couldn't find the same time in the scenario :
             if (aCacheElement == kTTValNONE)
                 return kTTErrValueNotFound;
+            
             else {
                 
                 // remove time process object and observers
@@ -291,16 +300,11 @@ TTErr Scenario::TimeProcessRemove(const TTValue& inputValue, TTValue& outputValu
                 
                 if (timeProcessType == TTSymbol("Interval")) {
                     
-                    // THEO : je pense qu'il vaut mieux utiliser le membre réservé plutôt qu'un appel à une methode static
                     return mEditionSolver->removeRelation(aTimeProcess);
-                    // return CSP::removeRelation((IntervalPtr)aTimeProcess);
                     
                 } else {
-                    
-                    
-                    // THEO : je pense qu'il vaut mieux utiliser le membre réservé plutôt qu'un appel à une methode static
+ 
                     return mEditionSolver->removeBox(aTimeProcess);
-                    //return CSP::removeBox(aTimeProcess);
                 }
             }
         }

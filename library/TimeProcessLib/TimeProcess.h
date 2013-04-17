@@ -36,14 +36,14 @@ typedef TimeProcess* TimeProcessPtr;
 typedef void (*TimeProcessProgressionCallback)(TTPtr, TTFloat64);
 
 /** A type that contains a time process and a value */
-typedef std::pair<TimeProcessPtr, TTValue&> TimeProcessKey;
+typedef std::pair<TimeProcessPtr, TTValuePtr> TimeProcessKey;
 typedef	TimeProcessKey*	TimeProcessKeyPtr;
 
 /** A type to define a map to store and retreive a value relative to a TimeProcessPtr */
-typedef std::map<TimeProcessPtr, TTValue&> TimeProcessMap;
+typedef std::map<TimeProcessPtr, TTValuePtr> TimeProcessMap;
 typedef	TimeProcessMap*	TimeProcessMapPtr;
 
-typedef std::map<TimeProcessPtr, TTValue&>::iterator TimeProcessMapIterator;
+typedef std::map<TimeProcessPtr, TTValuePtr>::iterator TimeProcessMapIterator;
 
 /****************************************************************************************************/
 // Class Specification
