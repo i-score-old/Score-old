@@ -18,8 +18,8 @@
 
 
 
-CSP::CSP(CSPAsker *pa)
-    :pAsker(pa)
+CSP::CSP(void(*aCSPReportCallback)(void*, CSPReport))
+    :pCallback(aCSPReportCallback)
 {
     
 }
@@ -35,11 +35,8 @@ CSP::~CSP()
 }
 
 
-TTErr CSP::addProcess(void *pProcess, int start, int end) // TODO : Editor créait une relation/interval/WTF de hiérarchie, peut-être ce doit être fait par le scenario
+CSPError CSP::addProcess(void *pProcess, int start, int end, int max, int minBound = 0, int maxBound = 0) // TODO : Editor créait une relation/interval/WTF de hiérarchie, peut-être ce doit être fait par le scenario
 {
-    // get max value
-    int max = pAsker->getMaxValue();
-    
     // add solver variables
     int beginID = solver.addIntVar(1, max, start, BEGIN_VAR_TYPE);
     int lengthID = solver.addIntVar(10, max, (end - start), LENGTH_VAR_TYPE);
@@ -69,21 +66,21 @@ TTErr CSP::addProcess(void *pProcess, int start, int end) // TODO : Editor créa
     // The endLengthID is a weird value, but the solver seem to need it
     // TODO : Verify what I just said
     
-    return kTTErrNone;
+    return CSPErrorNone;
 }
 
 
-TTErr CSP::removeBox(TimeProcessPtr pBox)
+CSPError CSP::removeBox(TimeProcessPtr pBox)
 {
     // TODO : remove the variables from the solver, wherever the IDs are stored (read upward)
     
     // TODO : remove the associated intervals (or whatever is associated)
     
-    return kTTErrGeneric;
+    return CSPErrorNone;
 }
 
 
-TTErr CSP::addRelation(void *pInterval)
+CSPError CSP::addRelation(void *pInterval)
 {
     // TODO : TTEngines used to check that the relation starts and ends at different points, someone needs to do that
     // TODO : Editor used to check that the relation starts and ends in the same Scenario, someone needs to do that
@@ -98,13 +95,13 @@ TTErr CSP::addRelation(void *pInterval)
     int coefs[2] = {1,-1};
     solver.addConstraint(IDs, coefs, 2, GQ_RELATION, 0, false); // TODO : must call the solver if the variables aren't in the right order (backward relation), then update the results of the solver
     
-    return kTTErrNone;
+    return CSPErrorNone;
 }
 
 
-TTErr CSP::removeRelation(TimeProcessPtr pRel)
+CSPError CSP::removeRelation(TimeProcessPtr pRel)
 {
 
         
-    return kTTErrGeneric;
+    return CSPErrorNone;
 }

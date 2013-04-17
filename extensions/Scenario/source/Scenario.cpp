@@ -106,7 +106,7 @@ mExecutionGraph(NULL)
     mLastEvent->sendMessage(TTSymbol("Subscribe"), mEndEventCallback, kTTValNONE);
     
     // Create the edition solver
-    mEditionSolver = new CSP(this);
+    mEditionSolver = new CSP(NULL); // TODO pass ta CSPReportCallback
     
     // Create the execution graph
     mExecutionGraph = new PetriNet();
@@ -217,6 +217,7 @@ TTErr Scenario::TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue)
     TimeProcessPtr  aTimeProcess;
     TTValue         aCacheElement, v;
     TTSymbol        timeProcessType;
+    CSPError        cErr;
     
     if (inputValue.size() == 1) {
         
@@ -239,7 +240,10 @@ TTErr Scenario::TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue)
             
             if (timeProcessType == TTSymbol("Interval")) {
                 
-                return mEditionSolver->addRelation(aTimeProcess);
+                cErr = mEditionSolver->addInterval(aTimeProcess);
+                
+                if (!cErr)
+                    return kTTErrNone;
                 
             } else {
                 
@@ -251,10 +255,12 @@ TTErr Scenario::TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue)
                 // get time process informations
                 aTimeProcess->getAttributeValue(TTSymbol("startDate"), boxStart);
                 aTimeProcess->getAttributeValue(TTSymbol("endDate"), boxEnd);
-                aTimeProcess->getAttributeValue(TTSymbol("duration"), boxDuration);
                 
                 // add a constrain to the solver
-                return mEditionSolver->addBox(aTimeProcess, boxStart[0], boxEnd[0], boxDuration[0], scenarioDuration[0]);
+                cErr = mEditionSolver->addProcess(aTimeProcess, boxStart[0], boxEnd[0], scenarioDuration[0]);
+                
+                if (!cErr)
+                    return kTTErrNone;
             }
 
         }
@@ -268,6 +274,7 @@ TTErr Scenario::TimeProcessRemove(const TTValue& inputValue, TTValue& outputValu
     TimeProcessPtr  aTimeProcess;
     TTValue         aCacheElement;
     TTSymbol        timeProcessType;
+    CSPError        cErr;
     
     if (inputValue.size() == 1) {
         
@@ -300,11 +307,17 @@ TTErr Scenario::TimeProcessRemove(const TTValue& inputValue, TTValue& outputValu
                 
                 if (timeProcessType == TTSymbol("Interval")) {
                     
-                    return mEditionSolver->removeRelation(aTimeProcess);
+                    cErr = mEditionSolver->removeInterval(aTimeProcess);
+                    
+                    if (!cErr)
+                        return kTTErrNone;
                     
                 } else {
  
-                    return mEditionSolver->removeBox(aTimeProcess);
+                    cErr = mEditionSolver->removeProcess(aTimeProcess);
+                    
+                    if (!cErr)
+                        return kTTErrNone;
                 }
             }
         }

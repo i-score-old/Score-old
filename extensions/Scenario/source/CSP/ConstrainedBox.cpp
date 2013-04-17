@@ -54,12 +54,7 @@ ConstrainedBox::ConstrainedBox(CSPConstrainedVariable *beg,  CSPConstrainedVaria
 	m_controlPoints = new std::map<unsigned int, ControlPoint*>;
 	m_motherBox = NULL;
 
-<<<<<<< HEAD:library/Editor/CSP/ConstrainedBox.cpp
-	// Memory leak : TODO delete m_csp
-	m_csp = new CSP();
-=======
 	m_csp = new CSPold();
->>>>>>> d1845f29974808a13a5ddecda6692fbdb3811066:extensions/Scenario/source/CSP/ConstrainedBox.cpp
 
 	m_flexiblityRelationId = NO_ID;
 	m_minBound = NO_BOUND;

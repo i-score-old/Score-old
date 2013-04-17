@@ -19,9 +19,8 @@
 #include "TimeProcess.h"
 #include "CSP.h"
 #include "PetriNet.hpp"
-#include "CSPAsker.h"
 
-class Scenario : public TimeProcess, public CSPAsker
+class Scenario : public TimeProcess
 {
 	TTCLASS_SETUP(Scenario)
 	

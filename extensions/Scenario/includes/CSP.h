@@ -16,38 +16,55 @@
 #ifndef __CSP_H__
 #define __CSP_H__
 
-#include "CSPAsker.h"
-
 #include "solver.hpp"
 
 using namespace std;
+
+/**	\ingroup enums
+ CSP Error Codes
+ Enumeration of error codes that might be returned by any of CSP operations.	*/
+enum CSPError {
+	CSPErrorNone = 0,		///< No Error.
+    CSPErrorOutOfBounds		///< TODO example of error CSP can return
+};
+
+/**	\ingroup enums
+ CSP Change Codes
+ Enumeration of error codes that might be returned by any of CSP operations.	*/
+enum CSPReport {
+	CSPReportNone = 0,      ///< No change.
+    CSPReportChange         ///< TODO example of report CSP can return
+};
+
+// the callback type to get report from CSP
+typedef void(*CSPReportCallback)(void*, CSPReport);
 
 class CSP
 {
     
 public :
     
-    CSP(CSPAsker *pa);
+    CSP(void(*aCSPReportCallback)(void*, CSPReport));
     
     ~CSP();
     
-    int addProcess(void *pProcess, int start, int end); // by default, rigid, move to change
+    CSPError addProcess(void *pProcess, int start, int end, int max, int minBound = 0, int maxBound = 0); // by default, rigid, move to change
     
-    int removeProcess(void *pProcess);
+    CSPError removeProcess(void *pProcess);
     
-    int moveProcess(); // TODO : remember to check min < max when supple
+    CSPError moveProcess(); // TODO : remember to check min < max when supple
     
-    int addInterval(void *pInterval); // by default, rigid, move to change
+    CSPError addInterval(void *pInterval); // by default, rigid, move to change
     
-    int removeInterval(void *pInterval);
+    CSPError removeInterval(void *pInterval);
     
-    int moveInterval(); // TODO : remember to check min < max when supple
+    CSPError moveInterval(); // TODO : remember to check min < max when supple
     
 private :
     
     Solver solver;
     
-    CSPAsker *pAsker;
+    CSPReportCallback *pCallback;
     
     unordered_map < void *, int * > varsMap; // unordered because wo don't have to iterate on the elements
 };
