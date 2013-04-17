@@ -54,6 +54,7 @@ ConstrainedBox::ConstrainedBox(CSPConstrainedVariable *beg,  CSPConstrainedVaria
 	m_controlPoints = new std::map<unsigned int, ControlPoint*>;
 	m_motherBox = NULL;
 
+	// Memory leak : TODO delete m_csp
 	m_csp = new CSP();
 
 	m_flexiblityRelationId = NO_ID;

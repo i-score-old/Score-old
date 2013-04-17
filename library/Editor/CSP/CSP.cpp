@@ -93,28 +93,36 @@ CSP::~CSP()
 unsigned int
 CSP::addBox(unsigned int boxId, int boxBeginPos, int boxLength, unsigned int motherId, int maxSceneWidth)
 {
+
+	// Vérification de la non existence de boxId
 	map<unsigned int, ConstrainedTemporalEntity *>::iterator iter = (*_cedEntities).find(boxId);
 	if(iter != (*_cedEntities).end())  {
 		throw IllegalArgumentException();
 	}
 
+	// Création dans le solver et dans le CSP des valeurs de début et de taille de la boite
 	CSPConstrainedVariable *begin = new CSPConstrainedVariable(_solver->addIntVar(1, maxSceneWidth, boxBeginPos, (int)BEGIN_VAR_TYPE),
 			1, maxSceneWidth, boxBeginPos, BEGIN_VAR_TYPE);
 	CSPConstrainedVariable *length = new CSPConstrainedVariable(_solver->addIntVar(10, maxSceneWidth, (int)boxLength, (int)LENGTH_VAR_TYPE),
 			10, maxSceneWidth, (int)boxLength, LENGTH_VAR_TYPE);
 
+	// Création de la boite
 	ConstrainedBox *newBox = new ConstrainedBox(begin, length);
 
+	// Création dans le solver et dans le CSP des valeurs du ControlPoint de fin de la boite
 	CSPConstrainedVariable *CP2begin = new CSPConstrainedVariable(_solver->addIntVar(1, maxSceneWidth, boxBeginPos + boxLength, (int)BEGIN_VAR_TYPE),
 			1, maxSceneWidth, boxBeginPos + boxLength, BEGIN_VAR_TYPE);
 	CSPConstrainedVariable *CP2length = new CSPConstrainedVariable(_solver->addIntVar(0, maxSceneWidth, 0, (int)LENGTH_VAR_TYPE),
 			0, maxSceneWidth, 0, LENGTH_VAR_TYPE);
 
+	// Création et ajout dans la boite d'un CP équivalent à la boite et d'un autre à la fin
 	newBox->addControlPoint(new ControlPoint(begin, length, boxId), BEGIN_CONTROL_POINT_INDEX);
 	newBox->addControlPoint(new ControlPoint(CP2begin, CP2length, boxId), END_CONTROL_POINT_INDEX);
 
+	// Ajout de la relation entre la boite et sa fin
 	addAllenRelation(newBox->getLastControlPoint(), newBox, ALLEN_FINISHES, false);
 
+	// ??
 	newBox->getFirstControlPoint()->setProcessStepId(1);
 	newBox->getLastControlPoint()->setProcessStepId(2);
 
@@ -440,6 +448,7 @@ CSP::performMoving(unsigned int boxesId, int x, int y, vector<unsigned int>& mov
 	varsIDs[0] = box->getFirstControlPoint()->beginID();
 	values[0] = x;
 
+	// maxSceneWidth = mother's length
 	int maxSceneWidth = box->getFirstControlPoint()->getBeginMax();
 
 	varsIDs[1] = box->getLastControlPoint()->beginID();

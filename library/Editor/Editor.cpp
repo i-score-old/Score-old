@@ -314,6 +314,7 @@ int Editor::getRelationMaxBound(unsigned int relationId)
 	return relation->maxBound();
 }
 
+// x = begin ; y = end ; movedBoxes = return container
 bool Editor::performMoving(unsigned int boxId, int x, int y, vector<unsigned int>& movedBoxes, int maxModification)
 {
 	CSP* containingCSP = m_boxIdToContainingCSP[boxId];
@@ -337,6 +338,7 @@ bool Editor::performMoving(unsigned int boxId, int x, int y, vector<unsigned int
 		boxCSP->getAllBoxesId(boxesId);
 
 		if (boxesId.size() != 0) {
+			// maxValue = minSize de la box
 			unsigned int maxValue = 0;
 
 			for (unsigned int i = 0; i < boxesId.size(); ++i) {
@@ -347,6 +349,7 @@ bool Editor::performMoving(unsigned int boxId, int x, int y, vector<unsigned int
 				}
 			}
 
+			// On ne peut pas réduire la boite en-deça de sa taille minimum
 			if ((unsigned int)(y - x) < maxValue) {
 				return false;
 			}

@@ -78,7 +78,7 @@ class StoryLine;
  *
  * This class is the top-level interface of the CSP package.
  * The Constraint Solving Problem is composed of several time-defined
- * entities, linked by binary tempolal relations.
+ * entities, linked by binary temporal relations.
  * This class manages the adding/removing of entities/relations and
  * ensures that the temporal configuration always respects the system
  * relations defined by the user
