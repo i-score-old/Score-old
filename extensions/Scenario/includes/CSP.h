@@ -16,39 +16,40 @@
 #ifndef __CSP_H__
 #define __CSP_H__
 
-#include "TimeProcess.h"
-#include "TimeEvent.h"
+#include "CSPAsker.h"
 
 #include "solver.hpp"
+
+using namespace std;
 
 class CSP
 {
     
 public :
     
-    CSP();
+    CSP(CSPAsker *pa);
     
     ~CSP();
     
-    TTErr addBox(TimeProcessPtr pBox, TTUInt32 boxStart, TTUInt32 boxEnd, TTUInt32 boxDuration, TTUInt32 scenarioDuration);
+    int addProcess(void *pProcess, int start, int end); // by default, rigid, move to change
     
-    TTErr removeBox(TimeProcessPtr pBox);
+    int removeProcess(void *pProcess);
     
-    TTErr addEvent(TimeEventPtr pEvent);
+    int moveProcess(); // TODO : remember to check min < max when supple
     
-    TTErr removeEvent(TimeEventPtr pEvent);
+    int addInterval(void *pInterval); // by default, rigid, move to change
     
-    TTErr addRelation(TimeProcessPtr pRel);
+    int removeInterval(void *pInterval);
     
-    TTErr removeRelation(TimeProcessPtr pRel);
+    int moveInterval(); // TODO : remember to check min < max when supple
     
 private :
     
-    Solver              mSolver;
+    Solver solver;
     
-    TimeProcessMapPtr   mTimeProcessMap;
+    CSPAsker *pAsker;
     
-    TimeEventMapPtr     mTimeEventMap;           // THEO : pas sure que ce soit utile mais je l'ai mis pour te montrer que c'est aussi possible
+    unordered_map < void *, int * > varsMap; // unordered because wo don't have to iterate on the elements
 };
 
 #endif // __CSP_H__
