@@ -30,15 +30,24 @@ registerAttribute(TTSymbol("ParameterNames"), kTypeLocalValue, NULL, (TTGetterMe
 class TimeEvent;
 typedef TimeEvent* TimeEventPtr;
 
-/** A type that contains a time event and a value */
-typedef std::pair<TimeEventPtr, TTValue&> TimeEventKey;
-typedef	TimeEventKey*	TimeEventKeyPtr;
+/** A type to define an unordered map to store and retreive a value relative to a TimeEventPtr */
+#ifdef TT_PLATFORM_WIN
+    #include <hash_map>
+    using namespace stdext;	// Visual Studio 2008 puts the hash_map in this namespace
+    typedef hash_map<TimeEventPtr,TTValuePtr>    TimeEventMap;
+#else
+    //	#ifdef TT_PLATFORM_LINUX
+    // at least for GCC 4.6 on the BeagleBoard, the unordered map is standard
+    #include <unordered_map>
+    //	#else
+    //		#include "boost/unordered_map.hpp"
+    //		using namespace boost;
+    //	#endif
+    typedef std::unordered_map<TimeEventPtr,TTValuePtr>	TimeEventMap;
+#endif
 
-/** A type to define a map to store and retreive a value relative to a TimeEventPtr */
-typedef std::map<TimeEventPtr, TTValue&> TimeEventMap;
 typedef	TimeEventMap*	TimeEventMapPtr;
-
-typedef std::map<TimeEventPtr, TTValue&>::iterator TimeEventMapIterator;
+typedef TimeEventMap::const_iterator	TimeEventMapIterator;
 
 /****************************************************************************************************/
 // Class Specification
@@ -144,7 +153,7 @@ public:
 
 	/**	Return a list of all available time events 
      @param	value           the returned time event names*/
-	static void getTimeEventNames(TTValue& timeProcessNames);
+	static void getTimeEventNames(TTValue& TimeEventNames);
 };
 
 #endif	//__TIME_EVENT_LIB_H__

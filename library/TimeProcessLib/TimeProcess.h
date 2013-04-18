@@ -35,15 +35,24 @@ typedef TimeProcess* TimeProcessPtr;
 
 typedef void (*TimeProcessProgressionCallback)(TTPtr, TTFloat64);
 
-/** A type that contains a time process and a value */
-typedef std::pair<TimeProcessPtr, TTValuePtr> TimeProcessKey;
-typedef	TimeProcessKey*	TimeProcessKeyPtr;
+/** A type to define an unordered map to store and retreive a value relative to a TimeProcessPtr */
+#ifdef TT_PLATFORM_WIN
+    #include <hash_map>
+    using namespace stdext;	// Visual Studio 2008 puts the hash_map in this namespace
+    typedef hash_map<TimeProcessPtr,TTValuePtr>    TimeProcessMap;
+#else
+    //	#ifdef TT_PLATFORM_LINUX
+    // at least for GCC 4.6 on the BeagleBoard, the unordered map is standard
+    #include <unordered_map>
+    //	#else
+    //		#include "boost/unordered_map.hpp"
+    //		using namespace boost;
+    //	#endif
+    typedef std::unordered_map<TimeProcessPtr,TTValuePtr>	TimeProcessMap;
+#endif
 
-/** A type to define a map to store and retreive a value relative to a TimeProcessPtr */
-typedef std::map<TimeProcessPtr, TTValuePtr> TimeProcessMap;
 typedef	TimeProcessMap*	TimeProcessMapPtr;
-
-typedef std::map<TimeProcessPtr, TTValuePtr>::iterator TimeProcessMapIterator;
+typedef TimeProcessMap::const_iterator	TimeProcessMapIterator;
 
 /****************************************************************************************************/
 // Class Specification
