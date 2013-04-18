@@ -82,6 +82,12 @@ private :
      @return                an error code if the unregistration fails */
     TTErr TimeProcessRemove(const TTValue& inputValue, TTValue& outputValue);
     
+    /** Move a time process into the scenario
+     @inputValue            a time process object, new start date, new end date
+     @outputvalue           kTTValNONE
+     @return                an error code if the movement fails */
+    TTErr TimeProcessMove(const TTValue& inputValue, TTValue& outputValue);
+    
     /** Register a time event for scenario management
      @inputvalue            a time event object
      @outputvalue           kTTValNONE
@@ -93,6 +99,12 @@ private :
      @outputvalue           kTTValNONE
      @return                an error code if the unregistration fails */
     TTErr TimeEventRemove(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Move a time event into the scenario
+     @inputValue            a time event object, new date
+     @outputvalue           kTTValNONE
+     @return                an error code if the movement fails */
+    TTErr TimeEventMove(const TTValue& inputValue, TTValue& outputValue);
     
     /** Change a time process active state into the scenario
      note : this method doesn't update the time process internal acive state
@@ -147,6 +159,11 @@ TTErr TT_EXTENSION_EXPORT ScenarioSchedulerRunningAttributeCallback(TTPtr baton,
  @param	data						a new progression value
  @return							an error code */
 TTErr TT_EXTENSION_EXPORT ScenarioSchedulerProgressionAttributeCallback(TTPtr baton, TTValue& data);
+
+/** The callback method used to get time event date back from CSP
+ @param	baton						a time event instance
+ @param	data						a new date value */
+void TT_EXTENSION_EXPORT ScenarioCSPReportFunction(void* timeEvent, CSPValue date);
 
 
 #endif // __SCENARIO_H__

@@ -20,53 +20,72 @@
 
 using namespace std;
 
+/** A type to define an unordered map to store and retreive CSP element IDs relative to any object pointer */
+#ifdef TT_PLATFORM_WIN
+    #include <hash_map>
+    using namespace stdext;	// Visual Studio 2008 puts the hash_map in this namespace
+    typedef hash_map<void*, int*>    CSPElementMap;
+#else
+    //	#ifdef TT_PLATFORM_LINUX
+    // at least for GCC 4.6 on the BeagleBoard, the unordered map is standard
+    #include <unordered_map>
+    //	#else
+    //		#include "boost/unordered_map.hpp"
+    //		using namespace boost;
+    //	#endif
+    typedef std::unordered_map<void*, int*>	CSPElementMap;
+#endif
+
+typedef	CSPElementMap*	CSPElementMapPtr;
+typedef CSPElementMap::const_iterator	CSPElementMapIterator;
+
 /**	\ingroup enums
  CSP Error Codes
  Enumeration of error codes that might be returned by any of CSP operations.	*/
 enum CSPError {
-	CSPErrorNone = 0,		///< No Error.
-    CSPErrorOutOfBounds		///< TODO example of error CSP can return
+	CSPErrorNone = 0,		///< No Error
+    CSPErrorGeneric,        ///< ...
+    CSPErrorOutOfBounds		///< ...
 };
 
-/**	\ingroup enums
- CSP Change Codes
- Enumeration of error codes that might be returned by any of CSP operations.	*/
-enum CSPReport {
-	CSPReportNone = 0,      ///< No change.
-    CSPReportChange         ///< TODO example of report CSP can return
-};
+/* a type to define values handled by the CSP   */
+typedef unsigned int CSPValue;
 
-// the callback type to get report from CSP
-typedef void(*CSPReportCallback)(void*, CSPReport);
+/* a type to define a function type to get report back from CSP.     */
+typedef void(*CSPReportFunction)(void*, CSPValue);
 
 class CSP
 {
     
 public :
     
-    CSP(void(*aCSPReportCallback)(void*, CSPReport));
+    CSP(void(*CSPReportFunction)(void*, CSPValue));
     
     ~CSP();
     
-    CSPError addProcess(void *pProcess, int start, int end, int max, int minBound = 0, int maxBound = 0); // by default, rigid, move to change
+    CSPError addProcess(void *pStartObject, void *pEndObject, CSPValue start, CSPValue end, CSPValue max, CSPValue minBound = 0, CSPValue maxBound = 0); // by default, rigid, move to change
     
-    CSPError removeProcess(void *pProcess);
+    CSPError removeProcess(void *pStartObject, void *pEndObject);
     
-    CSPError moveProcess(); // TODO : remember to check min < max when supple
+    CSPError moveProcess(void *pStartObject, void *pEndObject, CSPValue newStart, CSPValue newEnd); // TODO : remember to check min < max when supple
     
-    CSPError addInterval(void *pInterval); // by default, rigid, move to change
+    CSPError addInterval(void *pStartObject, void *pEndObject); // by default, rigid, move to change
     
-    CSPError removeInterval(void *pInterval);
+    CSPError removeInterval(void *pStartObject, void *pEndObject);
     
-    CSPError moveInterval(); // TODO : remember to check min < max when supple
+    CSPError moveInterval(void *pStartObject, void *pEndObject, CSPValue newStart, CSPValue newEnd); // TODO : remember to check min < max when supple
     
 private :
     
-    Solver solver;
+    Solver                          mSolver;
     
-    CSPReportCallback *pCallback;
+    CSPReportFunction               mCallback;
     
-    unordered_map < void *, int * > varsMap; // unordered because wo don't have to iterate on the elements
+    CSPElementMap                   mVariablesMap;                    // unordered because wo don't have to iterate on the elements
+    
+    CSPElementMap                   mProcessConstraintsMap;           // unordered because wo don't have to iterate on the elements
+    
+    CSPElementMap                   mIntervalConstraintsMap;           // unordered because wo don't have to iterate on the elements
 };
 
 #endif // __CSP_H__

@@ -44,9 +44,11 @@ mExecutionGraph(NULL)
     
     addMessageWithArguments(TimeProcessAdd);
     addMessageWithArguments(TimeProcessRemove);
+    addMessageWithArguments(TimeProcessMove);
     
-     addMessageWithArguments(TimeEventAdd);
-     addMessageWithArguments(TimeEventRemove);
+    addMessageWithArguments(TimeEventAdd);
+    addMessageWithArguments(TimeEventRemove);
+    addMessageWithArguments(TimeEventMove);
     
     // all messages below are hidden because they are for internal use
     addMessageWithArguments(TimeProcessActiveChange);
@@ -106,7 +108,7 @@ mExecutionGraph(NULL)
     mLastEvent->sendMessage(TTSymbol("Subscribe"), mEndEventCallback, kTTValNONE);
     
     // Create the edition solver
-    mEditionSolver = new CSP(NULL); // TODO pass ta CSPReportCallback
+    mEditionSolver = new CSP(&ScenarioCSPReportFunction);
     
     // Create the execution graph
     mExecutionGraph = new PetriNet();
@@ -216,6 +218,7 @@ TTErr Scenario::TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue)
 {
     TimeProcessPtr  aTimeProcess;
     TTValue         aCacheElement, v;
+    TTValue         startEvent, endEvent;
     TTSymbol        timeProcessType;
     CSPError        cErr;
     
@@ -238,26 +241,34 @@ TTErr Scenario::TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue)
             // update the CSP depending on the type of the time process
             timeProcessType = aTimeProcess->getName();
             
+            // get time process events
+            aTimeProcess->getAttributeValue(TTSymbol("startEvent"), startEvent);
+            aTimeProcess->getAttributeValue(TTSymbol("endEvent"), endEvent);
+            
             if (timeProcessType == TTSymbol("Interval")) {
                 
-                cErr = mEditionSolver->addInterval(aTimeProcess);
+                // TODO : TTEngines used to check that the relation starts and ends at different points, someone needs to do that
+                // TODO : Editor used to check that the relation starts and ends in the same Scenario, someone needs to do that
+                // TODO : Editor used to check that the Interval doesn't already exists, someone needs to do that
+                
+                cErr = mEditionSolver->addInterval(TTObjectBasePtr(startEvent[0]), TTObjectBasePtr(endEvent[0]));
                 
                 if (!cErr)
                     return kTTErrNone;
                 
             } else {
                 
-                TTValue boxStart, boxEnd, boxDuration, scenarioDuration;
+                TTValue startDate, endDate, scenarioDuration;
                 
                 // get scenario duration
                 this->getAttributeValue(TTSymbol("duration"), scenarioDuration);
                 
                 // get time process informations
-                aTimeProcess->getAttributeValue(TTSymbol("startDate"), boxStart);
-                aTimeProcess->getAttributeValue(TTSymbol("endDate"), boxEnd);
+                aTimeProcess->getAttributeValue(TTSymbol("startDate"), startDate);
+                aTimeProcess->getAttributeValue(TTSymbol("endDate"), endDate);
                 
                 // add a constrain to the solver
-                cErr = mEditionSolver->addProcess(aTimeProcess, boxStart[0], boxEnd[0], scenarioDuration[0]);
+                cErr = mEditionSolver->addProcess(TTObjectBasePtr(startEvent[0]), TTObjectBasePtr(endEvent[0]), startDate[0], endDate[0], scenarioDuration[0]);
                 
                 if (!cErr)
                     return kTTErrNone;
@@ -273,6 +284,7 @@ TTErr Scenario::TimeProcessRemove(const TTValue& inputValue, TTValue& outputValu
 {
     TimeProcessPtr  aTimeProcess;
     TTValue         aCacheElement;
+    TTValue         startEvent, endEvent;
     TTSymbol        timeProcessType;
     CSPError        cErr;
     
@@ -305,21 +317,69 @@ TTErr Scenario::TimeProcessRemove(const TTValue& inputValue, TTValue& outputValu
                 // update the CSP depending on the type of the time process
                 timeProcessType = aTimeProcess->getName();
                 
+                // get time process events
+                aTimeProcess->getAttributeValue(TTSymbol("startEvent"), startEvent);
+                aTimeProcess->getAttributeValue(TTSymbol("endEvent"), endEvent);
+                
                 if (timeProcessType == TTSymbol("Interval")) {
                     
-                    cErr = mEditionSolver->removeInterval(aTimeProcess);
+                    cErr = mEditionSolver->removeInterval(TTObjectBasePtr(startEvent[0]), TTObjectBasePtr(endEvent[0]));
                     
                     if (!cErr)
                         return kTTErrNone;
                     
                 } else {
  
-                    cErr = mEditionSolver->removeProcess(aTimeProcess);
+                    cErr = mEditionSolver->removeProcess(TTObjectBasePtr(startEvent[0]), TTObjectBasePtr(endEvent[0]));
                     
                     if (!cErr)
                         return kTTErrNone;
                 }
             }
+        }
+    }
+    
+    return kTTErrGeneric;
+}
+
+TTErr Scenario::TimeProcessMove(const TTValue& inputValue, TTValue& outputValue)
+{
+    TimeProcessPtr  aTimeProcess;
+    TTValue         v;
+    TTValue         startEvent, endEvent;
+    TTSymbol        timeProcessType;
+    CSPError        cErr;
+    
+    if (inputValue.size() == 3) {
+        
+        if (inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeUInt32 && inputValue[2].type() == kTypeUInt32) {
+            
+            aTimeProcess = TimeProcessPtr((TTObjectBasePtr)inputValue[0]);
+            
+            // update the CSP depending on the type of the time process
+            timeProcessType = aTimeProcess->getName();
+            
+            // get time process events
+            aTimeProcess->getAttributeValue(TTSymbol("startEvent"), startEvent);
+            aTimeProcess->getAttributeValue(TTSymbol("endEvent"), endEvent);
+            
+            if (timeProcessType == TTSymbol("Interval")) {
+                
+                // use solver to update time event dates changement (see in : ScenarioCSPReportFunction)
+                cErr = mEditionSolver->moveInterval(TTObjectBasePtr(startEvent[0]), TTObjectBasePtr(endEvent[0]), inputValue[1], inputValue[2]);
+                
+                if (!cErr)
+                    return kTTErrNone;
+                
+            } else {
+                
+                // use solver to update time event dates changement (see in : ScenarioCSPReportFunction)
+                cErr = mEditionSolver->moveProcess(TTObjectBasePtr(startEvent[0]), TTObjectBasePtr(endEvent[0]), inputValue[1], inputValue[2]);
+                
+                if (!cErr)
+                    return kTTErrNone;
+            }
+            
         }
     }
     
@@ -418,6 +478,46 @@ TTErr Scenario::TimeEventRemove(const TTValue& inputValue, TTValue& outputValue)
     return kTTErrGeneric;
 }
 
+TTErr Scenario::TimeEventMove(const TTValue& inputValue, TTValue& outputValue)
+{
+    TimeEventPtr    aTimeEvent;
+    TTValue         v;
+    TTSymbol        timeEventType;
+    CSPError        cErr;
+    
+    if (inputValue.size() == 2) {
+        
+        if (inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeUInt32 ) {
+            
+            aTimeEvent = TimeEventPtr((TTObjectBasePtr)inputValue[0]);
+            
+            // update the CSP depending on the type of the time event
+            timeEventType = aTimeEvent->getName();
+            
+            if (timeEventType == TTSymbol("StaticEvent")) {
+                
+                // use solver to update time event dates changement (see in : ScenarioCSPReportFunction)
+                // TODO : cErr = mEditionSolver->moveEvent(aTimeEvent, inputValue[1]);
+                
+                if (!cErr)
+                    return kTTErrNone;
+                
+            } if (timeEventType == TTSymbol("InteractiveEvent")) {
+                
+                // use solver to update time event dates changement (see in : ScenarioCSPReportFunction)
+                // TODO : cErr = mEditionSolver->moveEvent(aTimeEvent, inputValue[1]);
+                
+                if (!cErr)
+                    return kTTErrNone;
+            }
+            // else if ...
+            
+        }
+    }
+    
+    return kTTErrGeneric;
+}
+
 TTErr Scenario::TimeProcessActiveChange(const TTValue& inputValue, TTValue& outputValue)
 {
     TimeProcessPtr  aTimeProcess;
@@ -459,8 +559,6 @@ TTErr Scenario::TimeEventDateChange(const TTValue& inputValue, TTValue& outputVa
             // get new date value
             date = inputValue[1];
             
-            // TODO : warn CSP that this time event date have changed
-            // TODO : update all CSP consequences by setting time processes or time event attributes that are affected by the consequence
             timeEventType = aTimeEvent->getName();
             
             if (timeEventType == TTSymbol("StaticEvent")) {
@@ -770,4 +868,9 @@ TTErr ScenarioSchedulerProgressionAttributeCallback(TTPtr baton, TTValue& data)
     // else if ...
     
     return kTTErrGeneric;
+}
+
+void ScenarioCSPReportFunction(void *timeEvent, CSPValue date)
+{
+    TimeEventPtr(timeEvent)->setAttributeValue(TTSymbol("date"), TTUInt32(date));
 }
