@@ -69,7 +69,7 @@ public :
     
     CSPError moveProcess(void *pStartObject, void *pEndObject, CSPValue newStart, CSPValue newEnd); // TODO : remember to check min < max when supple
     
-    CSPError addInterval(void *pStartObject, void *pEndObject); // by default, rigid, move to change
+    CSPError addInterval(void *pStartObject, void *pEndObject, CSPValue start, CSPValue end, CSPValue minBound = 0, CSPValue maxBound = 0); // by default, rigid, move to change
     
     CSPError removeInterval(void *pStartObject, void *pEndObject);
     

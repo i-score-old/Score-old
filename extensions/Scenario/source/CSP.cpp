@@ -43,8 +43,26 @@ CSP::~CSP()
     }
     
     // clear process constraint map
+    for (it = mProcessConstraintsMap.begin() ; it != mProcessConstraintsMap.end() ; it++) {
+        
+        IDs = it->second;
+        
+        // remove process constraint
+        mSolver.removeConstraint(IDs[0]);
+        
+        delete IDs;
+    }
     
     // clear interval constraint map
+    for (it = mIntervalConstraintsMap.begin() ; it != mIntervalConstraintsMap.end() ; it++) {
+        
+        IDs = it->second;
+        
+        // remove interval constraint
+        mSolver.removeConstraint(IDs[0]);
+        
+        delete IDs;
+    }
 }
 
 CSPError CSP::addProcess(void *pStartObject, void *pEndObject, CSPValue start, CSPValue end, CSPValue max, CSPValue minBound, CSPValue maxBound)
@@ -189,10 +207,12 @@ CSPError CSP::moveProcess(void *pStartObject, void *pEndObject, CSPValue newStar
     return CSPErrorGeneric;
 }
 
-CSPError CSP::addInterval(void *pStartObject, void *pEndObject)
+CSPError CSP::addInterval(void *pStartObject, void *pEndObject, CSPValue start, CSPValue end, CSPValue minBound, CSPValue maxBound)
 {
     CSPElementMapIterator it;
     int startID, endID;
+    
+    int *constraintID;
     
     // get IDs back for startObject
     it = mVariablesMap.find(pStartObject);
@@ -204,11 +224,20 @@ CSPError CSP::addInterval(void *pStartObject, void *pEndObject)
     
     // add ANTPOST_ANTERIORITY relation
     // (see in : CSPold addAntPostRelation and addConstraint)
-    int IDs[2] = {startID, endID};
+    int IDs[2] = { start > end ? startID : endID, end >= start ? startID : endID };
     int coefs[2] = {1,-1};
     
-    int *constraintID = new int[1];
-    constraintID[0] = mSolver.addConstraint(IDs, coefs, 2, GQ_RELATION, 0, false);
+    if (minBound && maxBound) {
+        
+        constraintID = new int[2];
+        constraintID[0] = mSolver.addConstraint(IDs, coefs, 2, GQ_RELATION, minBound, false);
+        constraintID[1] = mSolver.addConstraint(IDs, coefs, 2, LQ_RELATION, maxBound, false);
+    }
+    else {
+        
+        constraintID = new int[1];
+        constraintID[0] = mSolver.addConstraint(IDs, coefs, 2, GQ_RELATION, 0, false);
+    }
     
     // TODO : must call the mSolver if the variables aren't in the right order (backward relation), then update the results of the mSolver
     

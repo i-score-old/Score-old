@@ -216,10 +216,13 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr Scenario::TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue)
 {
-    TimeProcessPtr  aTimeProcess;
+    TimeProcessPtr  aTimeProcess, tp1, tp2;
     TTValue         aCacheElement, v;
     TTValue         startEvent, endEvent;
+    TTValue         startDate, endDate;
     TTSymbol        timeProcessType;
+    TTBoolean       fromEnd, toStart;
+    TTUInt32        duration;
     CSPError        cErr;
     
     if (inputValue.size() == 1) {
@@ -245,29 +248,105 @@ TTErr Scenario::TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue)
             aTimeProcess->getAttributeValue(TTSymbol("startEvent"), startEvent);
             aTimeProcess->getAttributeValue(TTSymbol("endEvent"), endEvent);
             
+            // get time process dates
+            aTimeProcess->getAttributeValue(TTSymbol("startDate"), startDate);
+            aTimeProcess->getAttributeValue(TTSymbol("endDate"), endDate);
+            
             if (timeProcessType == TTSymbol("Interval")) {
                 
-                // TODO : TTEngines used to check that the relation starts and ends at different points, someone needs to do that
-                // TODO : Editor used to check that the relation starts and ends in the same Scenario, someone needs to do that
-                // TODO : Editor used to check that the Interval doesn't already exists, someone needs to do that
+                // Events have to be different
+                if (startEvent == endEvent)
+                    return kTTErrGeneric;
                 
-                cErr = mEditionSolver->addInterval(TTObjectBasePtr(startEvent[0]), TTObjectBasePtr(endEvent[0]));
+                // TODO : Is this interval doesn't exist all ready ?
+                
+/* IS THIS REALLY USEFULL : CHECK I-SCORE ON MASTER
+ 
+                // Find process with the same startEvent (except interval process)
+                mTimeProcessList.find(&ScenarioFindTimeProcessWithTimeEvent, (TTPtr)TTObjectBasePtr(startEvent[0]), aCacheElement);
+                
+                if (aCacheElement.size() == 0)
+                    return kTTErrGeneric;
+                
+                tp1 = TimeProcessPtr(TTObjectBasePtr(aCacheElement[0]));
+                
+                // is it his endEvent ?
+                tp1->getAttributeValue(TTSymbol("endEvent"), v);
+                fromEnd = startEvent == v;
+                
+                // Find process with the same endEvent (except interval process)
+                mTimeProcessList.find(&ScenarioFindTimeProcessWithTimeEvent, (TTPtr)TTObjectBasePtr(endEvent[0]), aCacheElement);
+                
+                if (aCacheElement.size() == 0)
+                    return kTTErrGeneric;
+                
+                tp2 = TimeProcessPtr(TTObjectBasePtr(aCacheElement[0]));
+                
+                // is it his startEvent ?
+                tp2->getAttributeValue(TTSymbol("startEvent"), v);
+                toStart = endEvent == v;
+                
+                // When the interval is not consistent,
+                // we move the time process at the end of the relation :
+                
+                // an interval from a end event to a start event which is before is not consistent
+                if (fromEnd && toStart && startEvent < endEvent) {
+                    
+                    // get duration of tp2
+                    tp2->getAttributeValue(TTSymbol("duration"), v);
+                    duration = v[0];
+                    
+                    // move the tp2 after the tp1
+                    v = TTValue(TTObjectBasePtr(tp2));
+                    v.append(TTUInt32(startDate[0]) + 1);
+                    v.append(TTUInt32(startDate[0]) + duration + 1);
+                    
+                    TimeProcessMove(v, kTTValNONE);
+                    
+                    // the endEvent should have change
+                    aTimeProcess->getAttributeValue(TTSymbol("endDate"), endDate);
+                        
+                }
+                // an interval from a start event to a end event which is after is not consistent
+                else if (!fromEnd && !toStart && startEvent > endEvent) {
+                    
+                    // get duration of tp2
+                    tp2->getAttributeValue(TTSymbol("duration"), v);
+                    duration = v[0];
+                    
+                    // if possible, move the tp2 before the tp1
+                    if (TTUInt32(endDate[0]) - duration - 1 > 0) {
+                        
+                        v = TTValue(TTObjectBasePtr(tp2));
+                        v.append(TTUInt32(endDate[0]) - duration - 1);
+                        v.append(TTUInt32(endDate) - 1);
+                    
+                        TimeProcessMove(v, kTTValNONE);
+                        
+                        // the endEvent should have change
+                        aTimeProcess->getAttributeValue(TTSymbol("endDate"), endDate);
+                        
+                    }
+                    else
+                        return kTTErrGeneric;
+                }
+*/
+                
+                // add a constraint to the solver
+                cErr = mEditionSolver->addInterval(TTObjectBasePtr(startEvent[0]), TTObjectBasePtr(endEvent[0]), startDate[0], endDate[0]);
                 
                 if (!cErr)
                     return kTTErrNone;
                 
-            } else {
+            }
+            else {
                 
-                TTValue startDate, endDate, scenarioDuration;
+                TTValue scenarioDuration;
                 
                 // get scenario duration
                 this->getAttributeValue(TTSymbol("duration"), scenarioDuration);
                 
-                // get time process informations
-                aTimeProcess->getAttributeValue(TTSymbol("startDate"), startDate);
-                aTimeProcess->getAttributeValue(TTSymbol("endDate"), endDate);
-                
-                // add a constrain to the solver
+                // add a constraint to the solver
                 cErr = mEditionSolver->addProcess(TTObjectBasePtr(startEvent[0]), TTObjectBasePtr(endEvent[0]), startDate[0], endDate[0], scenarioDuration[0]);
                 
                 if (!cErr)
@@ -788,6 +867,29 @@ void Scenario::deleteTimeEventCacheElement(const TTValue& oldCacheElement)
 void ScenarioFindTimeProcess(const TTValue& aValue, TTPtr timeProcessPtrToMatch, TTBoolean& found)
 {
 	found = (TTObjectBasePtr)aValue[0] == (TTObjectBasePtr)timeProcessPtrToMatch;
+}
+
+void ScenarioFindTimeProcessWithTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found)
+{
+    TimeProcessPtr  timeProcess = TimeProcessPtr(TTObjectBasePtr(aValue[0]));
+    TTValue         v;
+    
+    // ignore interval process
+    if (timeProcess->getName() != TTSymbol("Interval")) {
+        
+        // check start event
+        timeProcess->getAttributeValue(TTSymbol("startEvent"), v);
+        found = TTObjectBasePtr(v[0]) == TTObjectBasePtr(timeEventPtrToMatch);
+        
+        if (found)
+            return;
+        
+        // check end event
+        timeProcess->getAttributeValue(TTSymbol("endEvent"), v);
+        found = TTObjectBasePtr(v[0]) == TTObjectBasePtr(timeEventPtrToMatch);
+        
+        return;
+    }
 }
 
 void ScenarioFindTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found)

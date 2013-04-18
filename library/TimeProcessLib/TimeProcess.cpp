@@ -107,24 +107,28 @@ mScheduler(NULL)
 
 TimeProcess::~TimeProcess()
 {
-    TTValue v;
+    TTValue     v;
+    TTBoolean   isInterval = this->getName() == TTSymbol("Interval");
     
     // if the time process is managed by a scenario
     if (mScenario) {
         
         v = TTValue((TTObjectBasePtr)this);
         
+        if (!isInterval) {
+            
+            // remove the start event
+            mScenario->sendMessage(TTSymbol("TimeEventRemove"), mStartEvent, kTTValNONE);
+        
+            // remove the end event
+            mScenario->sendMessage(TTSymbol("TimeEventRemove"), mEndEvent, kTTValNONE);
+        }
+        
         // remove the time process from the scenario (even if it can be done by the creator but it is safe to remove our self)
         mScenario->sendMessage(TTSymbol("TimeProcessRemove"), v, kTTValNONE);
-        
-        // remove the start event
-        mScenario->sendMessage(TTSymbol("TimeEventRemove"), mStartEvent, kTTValNONE);
-        
-        // remove the end event
-        mScenario->sendMessage(TTSymbol("TimeEventRemove"), mEndEvent, kTTValNONE);
     }
     
-    if (mStartEvent) {
+    if (mStartEvent && !isInterval) {
         TTObjectBaseRelease(TTObjectBaseHandle(&mStartEvent));
         mStartEvent = NULL;
     }
@@ -135,7 +139,7 @@ TimeProcess::~TimeProcess()
         mStartEventCallback = NULL;
     }
     
-    if (mEndEvent) {
+    if (mEndEvent && !isInterval) {
         TTObjectBaseRelease(TTObjectBaseHandle(&mEndEvent));
         mEndEvent = NULL;
     }

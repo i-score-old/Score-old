@@ -145,6 +145,10 @@ typedef Scenario* ScenarioPtr;
 /* a TTFunctionMatch to find a time process and all his observers in the scenario depending on the time process object him self */
 void TT_EXTENSION_EXPORT ScenarioFindTimeProcess(const TTValue& aValue, TTPtr timeProcessPtrToMatch, TTBoolean& found);
 
+/* a TTFunctionMatch to find a time process and all his observers in the scenario depending on a time event it binds.
+   This function ignores Interval process. */
+void TT_EXTENSION_EXPORT ScenarioFindTimeProcessWithTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found);
+
 /* a TTFunctionMatch to find a time event and all his observers in the scenario depending on the time event object him self */
 void TT_EXTENSION_EXPORT ScenarioFindTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found);
 

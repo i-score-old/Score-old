@@ -78,11 +78,17 @@ TTErr TimeEvent::getParameterNames(TTValue& value)
 
 TTErr TimeEvent::setDate(const TTValue& value)
 {
-    // set the internal active value
-    mDate = value[0];
+    TTUInt32 newDate = value[0];
+    
+    // filter repetitions
+    if (newDate != mDate) {
         
-    // notify each attribute observers
-    dateAttribute->sendNotification(kTTSym_notify, mDate);             // we use kTTSym_notify because we know that observers are TTCallback
+        // set the internal active value
+        mDate = newDate;
+        
+        // notify each attribute observers
+        dateAttribute->sendNotification(kTTSym_notify, mDate);             // we use kTTSym_notify because we know that observers are TTCallback
+    }
     
     return kTTErrNone;
 }
