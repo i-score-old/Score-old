@@ -38,6 +38,8 @@ CSP::~CSP()
         
         // remove length variable
         mSolver.removeIntVar(IDs[1]);
+        
+        delete IDs;
     }
     
     // clear process constraint map
@@ -63,13 +65,19 @@ CSPError CSP::addProcess(void *pStartObject, void *pEndObject, CSPValue start, C
     // (see in : CSPold addBox, addAllenRelation and addConstraint)
     int variableIDs[4] = {startID, startLengthID, endID, endLengthID};
     int coefs[4] = {1,1,-1,-1};
-    int constraintID[1] = { mSolver.addConstraint(variableIDs, coefs, 4, EQ_RELATION, 0, false) };
+    
+    int *constraintID = new int[1];
+    constraintID[0] = mSolver.addConstraint(variableIDs, coefs, 4, EQ_RELATION, 0, false);
     
     // store the variable IDs related to each object
-    int startObjectIDs[2] = {startID, startLengthID};
+    int *startObjectIDs = new int[2];
+    startObjectIDs[0] = startID;
+    startObjectIDs[1] = startLengthID;
     mVariablesMap.emplace(pStartObject, startObjectIDs);
     
-    int endObjectIDs[2] = {endID, endLengthID};
+    int *endObjectIDs = new int[2];
+    endObjectIDs[0] = endID;
+    endObjectIDs[1] = endLengthID;
     mVariablesMap.emplace(pEndObject, endObjectIDs);
     
     // store the process constraint ID twice (one for each object)
@@ -103,6 +111,8 @@ CSPError CSP::removeProcess(void *pStartObject, void *pEndObject)
     mSolver.removeIntVar(IDs[0]);
     mSolver.removeIntVar(IDs[1]);
     
+    delete IDs;
+    
     // get variable IDs back for startObject
     it = mVariablesMap.find(pEndObject);
     IDs = it->second;
@@ -111,12 +121,16 @@ CSPError CSP::removeProcess(void *pStartObject, void *pEndObject)
     mSolver.removeIntVar(IDs[0]);
     mSolver.removeIntVar(IDs[1]);
     
+    delete IDs;
+    
     // get constraint ID back using startObject (or endObject it doesn't matter)
     it = mProcessConstraintsMap.find(pStartObject);
     IDs = it->second;
     
     // remove constraint relative to both objects
     mSolver.removeConstraint(IDs[0]);
+    
+    delete IDs;
     
     // finally remove all from the maps
     mVariablesMap.erase(pStartObject);
@@ -192,7 +206,9 @@ CSPError CSP::addInterval(void *pStartObject, void *pEndObject)
     // (see in : CSPold addAntPostRelation and addConstraint)
     int IDs[2] = {startID, endID};
     int coefs[2] = {1,-1};
-    int constraintID[1] = { mSolver.addConstraint(IDs, coefs, 2, GQ_RELATION, 0, false) };
+    
+    int *constraintID = new int[1];
+    constraintID[0] = mSolver.addConstraint(IDs, coefs, 2, GQ_RELATION, 0, false);
     
     // TODO : must call the mSolver if the variables aren't in the right order (backward relation), then update the results of the mSolver
     
@@ -216,6 +232,8 @@ CSPError CSP::removeInterval(void *pStartObject, void *pEndObject)
     
     // remove constraint relative to both objects
     mSolver.removeConstraint(IDs[0]);
+    
+    delete IDs;
     
     // finally remove all from the map
     mIntervalConstraintsMap.erase(pStartObject);
