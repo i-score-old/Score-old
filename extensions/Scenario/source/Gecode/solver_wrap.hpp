@@ -64,7 +64,7 @@ extern "C" {
 	int remove_constraint( void *solver, int constID );
 
 	// TODO
-	int suggest_values( void *solver, int *x, int *vals, int nbVars );
+	int suggest_values( void *solver, int *x, unsigned int *vals, int nbVars );
 
 	// deallocate solver
 	void delete_solver( void *solver );

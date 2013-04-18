@@ -123,7 +123,7 @@ public :
 	bool removeConstraint(int constID); 
 
 	// check if the new value for the variable 'varID' is in the variable's domain
-	bool suggestValues(int *varsIDs, int* values, int nbVars, int maxModification = NO_MAX_MODIFICATION);
+	bool suggestValues(int *varsIDs, unsigned int* values, int nbVars, int maxModification = NO_MAX_MODIFICATION);
 
 	// find a solution to the system
 	// returns NULL if there's no solution

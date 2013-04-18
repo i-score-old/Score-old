@@ -378,7 +378,7 @@ Solver::updateState()
 
 // edit some variables and try to reach the new values
 bool
-Solver::suggestValues(int *varsIDs, int* values, int nbVars, int maxModification)
+Solver::suggestValues(int *varsIDs, unsigned int* values, int nbVars, int maxModification)
 {
 	_suggest = true;
 

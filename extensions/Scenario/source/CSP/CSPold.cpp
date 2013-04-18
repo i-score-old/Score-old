@@ -439,7 +439,7 @@ bool
 CSPold::performMoving(unsigned int boxesId, int x, int y, vector<unsigned int>& movedBoxes, unsigned int maxModification)
 {
 	int *varsIDs = new int[3];
-	int *values = new int[3];
+	unsigned int *values = new unsigned int[3];
 
 
 	//ConstrainedBox* box = (ConstrainedBox*)(*_cedEntities)[boxesId];

@@ -76,7 +76,7 @@ int remove_constraint( void *solver, int constID )
 	return 0;
 }
 
-int suggest_values( void *solver, int *x, int *vals, int nbVars )
+int suggest_values( void *solver, int *x, unsigned int *vals, int nbVars )
 {
 	if (static_cast<Solver*>(solver)->suggestValues(x, vals, nbVars))
 		return 1;
