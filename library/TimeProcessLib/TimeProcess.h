@@ -11,7 +11,6 @@
 
 #include "TTFoundationAPI.h"
 #include "TTModular.h"
-#include <map>
 
 #include "TimeEvent.h"
 
