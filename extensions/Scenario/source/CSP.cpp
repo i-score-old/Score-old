@@ -211,7 +211,6 @@ CSPError CSP::addInterval(void *pStartObject, void *pEndObject, CSPValue start, 
 {
     CSPElementMapIterator it;
     int startID, endID;
-    
     int *constraintID;
     
     // get IDs back for startObject
@@ -240,6 +239,7 @@ CSPError CSP::addInterval(void *pStartObject, void *pEndObject, CSPValue start, 
     }
     
     // TODO : must call the mSolver if the variables aren't in the right order (backward relation), then update the results of the mSolver
+    // THEO : in Scenario, I've commented out a part of code that move processes in case of backward relation ... maybe it can replace the TODO ?
     
     // store the process constraint ID twice (one for each object)
     mIntervalConstraintsMap.emplace(pStartObject, constraintID);
