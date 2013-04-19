@@ -17,25 +17,20 @@ Dir.chdir "#{glibdir}"
 
 if  win32?
     
-elsif mac? 
-    
-    unless File.exist?("/usr/local/include")
-        puts
-        puts "Need Password to create an directories directory into /usr/local/include"
-        puts "==================================================="
-        puts
-        `sudo mkdir -p /usr/local/include`
-        `sudo chgrp admin /usr/local/include`
-        `sudo chmod g+w /usr/local/include`
-    end
+elsif mac?
     
     # Copy support/jamoma folder into /usr/local/jamoma folder
     `cp "#{glibdir}"/support/jamoma/extensions/* /usr/local/jamoma/extensions`
     `cp "#{glibdir}"/support/jamoma/includes/* /usr/local/jamoma/includes`
     `cp "#{glibdir}"/support/jamoma/lib/* /usr/local/jamoma/lib`
     
+    # Create alias
+    `sudo ln -s /usr/local/jamoma/lib/JamomaFoundation.dylib /usr/local/lib/JamomaFoundation.dylib`
+    `sudo ln -s /usr/local/jamoma/lib/JamomaDSP.dylib /usr/local/lib/JamomaDSP.dylib`
+    `sudo ln -s /usr/local/jamoma/lib/JamomaModular.dylib /usr/local/lib/JamomaModular.dylib`
+    
     # Copy Score headers to include them into other application
-    # (except the includes folder because it is done by the support/build.rb script) 
+    # (except the includes folder because it is done by the support/build.rb script)
     `cp "#{glibdir}"/library/TimeProcessLib/*.h /usr/local/jamoma/includes`
     `cp "#{glibdir}"/library/TimeEventLib/*.h /usr/local/jamoma/includes`
     `cp "#{glibdir}"/library/tests/*.h /usr/local/jamoma/includes`
