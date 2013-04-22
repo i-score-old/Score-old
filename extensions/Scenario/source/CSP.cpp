@@ -193,7 +193,7 @@ CSPError CSP::moveProcess(void *pStartObject, void *pEndObject, CSPValue newStar
     // compute a solution
     if ( mSolver.suggestValues(variableIDs, position, 3, deltaMax) ) {
     
-        // then update each variable
+        // then update each variable // TODO : comment vérifier que ça a vraiment changé ?
         for (it = mVariablesMap.begin() ; it != mVariablesMap.end() ; it++) {
         
             // return solved position variable back
@@ -223,10 +223,10 @@ CSPError CSP::addInterval(void *pStartObject, void *pEndObject, CSPValue start, 
     
     // add ANTPOST_ANTERIORITY relation
     // (see in : CSPold addAntPostRelation and addConstraint)
-    int IDs[2] = { start > end ? startID : endID, end >= start ? startID : endID };
+    int IDs[2] = { start > end ? startID : endID, end >= start ? startID : endID };     // TODO : est-ce vraiment nécessaire si on évite le backward relation
     int coefs[2] = {1,-1};
     
-    if (minBound && maxBound) {
+    if (minBound && maxBound) { // TODO : ça devient rigide si on donne un minbound et un maxBound égaux
         
         constraintID = new int[2];
         constraintID[0] = mSolver.addConstraint(IDs, coefs, 2, GQ_RELATION, minBound, false);

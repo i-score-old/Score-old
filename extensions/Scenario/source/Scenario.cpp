@@ -260,7 +260,7 @@ TTErr Scenario::TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue)
                 
                 // TODO : Is this interval doesn't exist all ready ?
                 
-/* IS THIS REALLY USEFULL : CHECK I-SCORE ON MASTER
+/* IS THIS REALLY USEFULL : MAYBE WE SHOULD USE THE mustCallSolver OPTION (see in CSP)
  
                 // Find process with the same startEvent (except interval process)
                 mTimeProcessList.find(&ScenarioFindTimeProcessWithTimeEvent, (TTPtr)TTObjectBasePtr(startEvent[0]), aCacheElement);
