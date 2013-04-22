@@ -29,11 +29,26 @@ elsif mac?
     `sudo ln -s /usr/local/jamoma/lib/JamomaDSP.dylib /usr/local/lib/JamomaDSP.dylib`
     `sudo ln -s /usr/local/jamoma/lib/JamomaModular.dylib /usr/local/lib/JamomaModular.dylib`
     
+    `sudo ln -s /usr/local/jamoma/extensions/AnalysisLib.ttdylib /usr/local/lib/AnalysisLib.ttdylib`
+    `sudo ln -s /usr/local/jamoma/extensions/FunctionLib.ttdylib /usr/local/lib/FunctionLib.ttdylib`
+    `sudo ln -s /usr/local/jamoma/extensions/NetworkLib.ttdylib /usr/local/lib/NetworkLib.ttdylib`
+    `sudo ln -s /usr/local/jamoma/extensions/System.ttdylib /usr/local/lib/System.ttdylib`
+    `sudo ln -s /usr/local/jamoma/extensions/DataspaceLib.ttdylib /usr/local/lib/DataspaceLib.ttdylib`
+    `sudo ln -s /usr/local/jamoma/extensions/Minuit.ttdylib /usr/local/lib/Minuit.ttdylib`
+    `sudo ln -s /usr/local/jamoma/extensions/OSC.ttdylib /usr/local/lib/OSC.ttdylib`
+    
     # Copy Score headers to include them into other application
     # (except the includes folder because it is done by the support/build.rb script)
     `cp "#{glibdir}"/library/TimeProcessLib/*.h /usr/local/jamoma/includes`
     `cp "#{glibdir}"/library/TimeEventLib/*.h /usr/local/jamoma/includes`
     `cp "#{glibdir}"/library/tests/*.h /usr/local/jamoma/includes`
+    
+    # Create alias
+    `sudo ln -s /usr/local/jamoma/extensions/Automation.ttdylib /usr/local/lib/Automation.ttdylib`
+    `sudo ln -s /usr/local/jamoma/extensions/InteractiveEvent.ttdylib /usr/local/lib/InteractiveEvent.ttdylib`
+    `sudo ln -s /usr/local/jamoma/extensions/Interval.ttdylib /usr/local/lib/Interval.ttdylib`
+    `sudo ln -s /usr/local/jamoma/extensions/Scenario.ttdylib /usr/local/lib/Scenario.ttdylib`
+    `sudo ln -s /usr/local/jamoma/extensions/StaticEvent.ttdylib /usr/local/lib/StaticEvent.ttdylib`
     
 end
 
