@@ -7,10 +7,10 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		46877690172576B20096DA35 /* TimeEvent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TimeEvent.h; sourceTree = "<group>"; };
+		46877691172576CE0096DA35 /* TimeEvent.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TimeEvent.cpp; sourceTree = "<group>"; };
 		46DAF52F16EF7F86000C952F /* InteractiveEvent.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = InteractiveEvent.cpp; sourceTree = "<group>"; };
 		46DAF53116EF7F8D000C952F /* InteractiveEvent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InteractiveEvent.h; sourceTree = "<group>"; };
-		46DAF53316EF7F97000C952F /* TimeEvent.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TimeEvent.cpp; sourceTree = "<group>"; };
-		46DAF53416EF7F97000C952F /* TimeEvent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TimeEvent.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -42,8 +42,8 @@
 		46DAF53216EF7F97000C952F /* TimeEventLib */ = {
 			isa = PBXGroup;
 			children = (
-				46DAF53416EF7F97000C952F /* TimeEvent.h */,
-				46DAF53316EF7F97000C952F /* TimeEvent.cpp */,
+				46877690172576B20096DA35 /* TimeEvent.h */,
+				46877691172576CE0096DA35 /* TimeEvent.cpp */,
 			);
 			name = TimeEventLib;
 			path = ../../library/TimeEventLib;

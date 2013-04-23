@@ -80,7 +80,8 @@ private:
     TTAttributePtr                  activeAttribute;                ///< cache active attribute for observer notification
     
 public:
-	//** Constructor.	*/
+	/** Constructor
+    @param	arguments       kTTValNONE  */
 	TimeEvent(TTValue& arguments);
 	
 	/** Destructor. */

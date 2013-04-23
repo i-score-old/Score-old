@@ -70,6 +70,9 @@ protected:
 
     TTObjectBasePtr                 mScenario;                      ///< ATTRIBUTE : the parent scenario which constrains the time process
     
+    TTUInt32                        mDurationMin;                   ///< ATTRIBUTE : the minimal duration of the time process
+    TTUInt32                        mDurationMax;                   ///< ATTRIBUTE : the maximal duration of the time process
+    
     TTBoolean                       mActive;                        ///< ATTRIBUTE : is the time process active ?
     
     TTObjectBasePtr                 mStartEvent;                    ///< ATTRIBUTE : the event object which handles the time process execution start
@@ -88,10 +91,13 @@ private:
     
 public:
     
-	//** Constructor.	*/
+	/** Constructor	
+     @param	arguments       kTTValNONE  */
 	TimeProcess(TTValue& arguments);
 	
-	/** Destructor. */
+	/** Destructor
+        The events are not destroyed here but their destruction can 
+        be managed using ReleaseStartEvent or ReleaseEndEvent message   */
 	virtual ~TimeProcess();
 	
 	/** Get parameters names needed by this time process 
@@ -128,6 +134,26 @@ public:
 	virtual TTErr	ReadFromText(const TTValue& inputValue, TTValue& outputValue) = 0;
 
 private :
+    
+    /** get the time process rigidity
+     @param	value           rigidity state
+     @return                kTTErrNone */
+    TTErr	getRigid(TTValue& value);
+    
+    /** set the time process rigidity
+     @param	value           a new rigidity state
+     @return                kTTErrNone */
+    TTErr	setRigid(const TTValue& value);
+    
+    /** set the time process minimal duration
+     @param	value           a new minimal duration
+     @return                kTTErrNone */
+    TTErr	setDurationMin(const TTValue& value);
+    
+    /** set the time process maximal duration
+     @param	value           a new maximal duration
+     @return                kTTErrNone */
+    TTErr	setDurationMax(const TTValue& value);
     
     /** get the time process start date
         this method eases the getting of the start event date
@@ -177,6 +203,30 @@ private :
      @param	value           a date
      @return                an error code if the date is wrong */
     TTErr	setEndEvent(const TTValue& value);
+    
+    /** Create a start event for the time process
+     @param	value           event type, a date (optional)
+     @return                an error code if the event can't be created */
+    TTErr	CreateStartEvent(const TTValue& value);
+    
+    /** Release the start event of the time process
+     @return                an error code if the event can't be destroyed */
+    TTErr	ReleaseStartEvent();
+    
+    /** Create a end event for the time process
+     @param	value           event type, a date (optional)
+     @return                an error code if the event can't be created */
+    TTErr	CreateEndEvent(const TTValue& value);
+    
+    /** Release the end event of the time process
+     @return                an error code if the event can't be destroyed */
+    TTErr	ReleaseEndEvent();
+    
+    /** Limit the time process duration
+        this method eases the setting of the minimal and maximal durations
+     @param	value           duration min, duration max
+     @return                an error code if the limitation fails */
+    TTErr	Limit(const TTValue& inputValue, TTValue& outputValue);
     
     friend TTErr TT_EXTENSION_EXPORT TimeProcessStartEventCallback(TTPtr baton, TTValue& data);
     friend TTErr TT_EXTENSION_EXPORT TimeProcessEndEventCallback(TTPtr baton, TTValue& data);

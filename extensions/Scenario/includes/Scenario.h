@@ -17,7 +17,7 @@
 #define __SCENARIO_H__
 
 #include "TimeProcess.h"
-#include "CSP.h"
+#include "ScenarioSolver.h"
 #include "PetriNet.hpp"
 
 class Scenario : public TimeProcess
@@ -34,7 +34,11 @@ private :
     TTObjectBasePtr             mFirstEvent;                    ///< the first event of the scenario (which is not the start event)
     TTObjectBasePtr             mLastEvent;                     ///< the last event of the scenario (which is not the end event)
     
-    CSP*                        mEditionSolver;                 ///< an internal gecode solver to assist scenario edition
+    SolverPtr                   mEditionSolver;                 ///< an internal gecode solver to assist scenario edition
+    SolverObjectMap             mVariablesMap;                  ///< a map to store and retreive SolverVariablePtr using TimeEventPtr
+    SolverObjectMap             mConstraintsMap;                ///< a map to store and retreive SolverConstraintPtr using TimeProcessPtr
+    SolverObjectMap             mRelationsMap;                  ///< a map to store and retreive SolverRelationPtr using TimeProcessPtr
+    
     PetriNet*                   mExecutionGraph;                ///< an internal petri net to execute the scenario according time event relations
 	
     /** Get parameters names needed by this time process
@@ -88,6 +92,12 @@ private :
      @return                an error code if the movement fails */
     TTErr TimeProcessMove(const TTValue& inputValue, TTValue& outputValue);
     
+    /** imit a time process duration into the scenario
+     @inputValue            a time process object, new duration min, new duration max
+     @outputvalue           kTTValNONE
+     @return                an error code if the limitation fails */
+    TTErr TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue);
+    
     /** Register a time event for scenario management
      @inputvalue            a time event object
      @outputvalue           kTTValNONE
@@ -114,15 +124,6 @@ private :
      @outputvalue           kTTValNONE
      @return                an error code if the active state change fails */
     TTErr TimeProcessActiveChange(const TTValue& inputValue, TTValue& outputValue);
-    
-    /** Change a time event date into the scenario 
-     note : this method doesn't update the time event internal date 
-     but it can change attribute of other time processes or time events connected to this one.
-     
-     @inputvalue            a time event object, a new start date
-     @outputvalue           a constrained start date
-     @return                an error code if the start date change fails */
-    TTErr TimeEventDateChange(const TTValue& inputValue, TTValue& outputValue);
     
     /** an internal method used to create all time process attribute observers */
     void makeTimeProcessCacheElement(TimeProcessPtr aTimeProcess, TTValue& newCacheElement);
@@ -163,11 +164,5 @@ TTErr TT_EXTENSION_EXPORT ScenarioSchedulerRunningAttributeCallback(TTPtr baton,
  @param	data						a new progression value
  @return							an error code */
 TTErr TT_EXTENSION_EXPORT ScenarioSchedulerProgressionAttributeCallback(TTPtr baton, TTValue& data);
-
-/** The callback method used to get time event date back from CSP
- @param	baton						a time event instance
- @param	data						a new date value */
-void TT_EXTENSION_EXPORT ScenarioCSPReportFunction(void* timeEvent, CSPValue date);
-
 
 #endif // __SCENARIO_H__

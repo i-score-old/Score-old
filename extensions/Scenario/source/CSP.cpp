@@ -65,7 +65,7 @@ CSP::~CSP()
     }
 }
 
-CSPError CSP::addProcess(void *pStartObject, void *pEndObject, CSPValue start, CSPValue end, CSPValue max, CSPValue minBound, CSPValue maxBound)
+CSPError CSP::addProcess(void *pProcessObject, void *pStartObject, void *pEndObject, CSPValue start, CSPValue end, CSPValue max, CSPValue minBound, CSPValue maxBound)
 {
     // TODO : Editor créait une relation/interval/WTF de hiérarchie, peut-être ce doit être fait par le scenario
     
@@ -98,9 +98,8 @@ CSPError CSP::addProcess(void *pStartObject, void *pEndObject, CSPValue start, C
     endObjectIDs[1] = endLengthID;
     mVariablesMap.emplace(pEndObject, endObjectIDs);
     
-    // store the process constraint ID twice (one for each object)
-    mProcessConstraintsMap.emplace(pStartObject, constraintID);
-    mProcessConstraintsMap.emplace(pEndObject, constraintID);
+    // store the process constraint ID twice
+    mProcessConstraintsMap.emplace(pProcessObject, constraintID);
     
     // NOTE :
     // mSolver.addIntVar(min, max, val, weight)
@@ -116,7 +115,7 @@ CSPError CSP::addProcess(void *pStartObject, void *pEndObject, CSPValue start, C
     return CSPErrorNone;
 }
 
-CSPError CSP::removeProcess(void *pStartObject, void *pEndObject)
+CSPError CSP::removeProcess(void *pProcessObject, void *pStartObject, void *pEndObject)
 {
     CSPElementMapIterator it;
     int *IDs;
@@ -141,8 +140,8 @@ CSPError CSP::removeProcess(void *pStartObject, void *pEndObject)
     
     delete IDs;
     
-    // get constraint ID back using startObject (or endObject it doesn't matter)
-    it = mProcessConstraintsMap.find(pStartObject);
+    // get constraint ID relative to processObject
+    it = mProcessConstraintsMap.find(pProcessObject);
     IDs = it->second;
     
     // remove constraint relative to both objects
@@ -154,8 +153,7 @@ CSPError CSP::removeProcess(void *pStartObject, void *pEndObject)
     mVariablesMap.erase(pStartObject);
     mVariablesMap.erase(pEndObject);
     
-    mProcessConstraintsMap.erase(pStartObject);
-    mProcessConstraintsMap.erase(pEndObject);
+    mProcessConstraintsMap.erase(pProcessObject);
     
     return CSPErrorNone;
 }
@@ -207,7 +205,7 @@ CSPError CSP::moveProcess(void *pStartObject, void *pEndObject, CSPValue newStar
     return CSPErrorGeneric;
 }
 
-CSPError CSP::addInterval(void *pStartObject, void *pEndObject, CSPValue start, CSPValue end, CSPValue minBound, CSPValue maxBound)
+CSPError CSP::addInterval(void *pProcessObject, void *pStartObject, void *pEndObject, CSPValue minBound, CSPValue maxBound)
 {
     CSPElementMapIterator it;
     int startID, endID;
@@ -223,50 +221,55 @@ CSPError CSP::addInterval(void *pStartObject, void *pEndObject, CSPValue start, 
     
     // add ANTPOST_ANTERIORITY relation
     // (see in : CSPold addAntPostRelation and addConstraint)
-    int IDs[2] = { start > end ? startID : endID, end >= start ? startID : endID };     // TODO : est-ce vraiment nécessaire si on évite le backward relation
+    int IDs[2] = {endID, startID};
     int coefs[2] = {1,-1};
     
-    if (minBound && maxBound) { // TODO : ça devient rigide si on donne un minbound et un maxBound égaux
+    // add a rigid constraint
+    if (minBound && maxBound) {
         
         constraintID = new int[2];
-        constraintID[0] = mSolver.addConstraint(IDs, coefs, 2, GQ_RELATION, minBound, false);
-        constraintID[1] = mSolver.addConstraint(IDs, coefs, 2, LQ_RELATION, maxBound, false);
+        constraintID[0] = mSolver.addConstraint(IDs, coefs, 2, GQ_RELATION, minBound, true);
+        constraintID[1] = mSolver.addConstraint(IDs, coefs, 2, LQ_RELATION, maxBound, true);
     }
+    
+    // add a strechable constraint
     else {
         
         constraintID = new int[1];
         constraintID[0] = mSolver.addConstraint(IDs, coefs, 2, GQ_RELATION, 0, false);
     }
     
-    // TODO : must call the mSolver if the variables aren't in the right order (backward relation), then update the results of the mSolver
-    // THEO : in Scenario, I've commented out a part of code that move processes in case of backward relation ... maybe it can replace the TODO ?
+    // store the process constraint ID
+    mIntervalConstraintsMap.emplace(pProcessObject, constraintID);
     
-    // store the process constraint ID twice (one for each object)
-    mIntervalConstraintsMap.emplace(pStartObject, constraintID);
-    mIntervalConstraintsMap.emplace(pEndObject, constraintID);
+    // update each variable // TODO : comment vérifier que ça a vraiment changé ?
+    for (it = mVariablesMap.begin() ; it != mVariablesMap.end() ; it++) {
+        
+        // return solved position variable back
+        mCallback(it->first, mSolver.getVariableValue(it->second[0]));
+        
+    }
     
     return CSPErrorNone;
 }
 
-CSPError CSP::removeInterval(void *pStartObject, void *pEndObject)
+CSPError CSP::removeInterval(void *pProcessObject)
 {
     CSPElementMapIterator it;
     int *IDs;
     
-    // don't remove variables ! (see in : removeProcess)
-    
-    // get constraint ID back using startObject (or endObject it doesn't matter)
-    it = mIntervalConstraintsMap.find(pStartObject);
+    // get constraint ID relative to processObject
+    it = mIntervalConstraintsMap.find(pProcessObject);
     IDs = it->second;
     
     // remove constraint relative to both objects
     mSolver.removeConstraint(IDs[0]);
+    mSolver.removeConstraint(IDs[1]);
     
     delete IDs;
     
     // finally remove all from the map
-    mIntervalConstraintsMap.erase(pStartObject);
-    mIntervalConstraintsMap.erase(pEndObject);
+    mIntervalConstraintsMap.erase(pProcessObject);
     
     return CSPErrorNone;
 }
@@ -288,3 +291,7 @@ CSPError CSP::moveInterval(void *pStartObject, void *pEndObject, CSPValue newSta
     
     return CSPErrorNone;
 }
+
+
+
+

@@ -4,19 +4,6 @@
 sources:
   - ../../library/TimeProcessLib/TimeProcess.cpp
   
-  - source/CSP/AllenRelation.cpp
-  - source/CSP/AntPostRelation.cpp
-  - source/CSP/BinaryRelation.cpp
-  - source/CSP/BinaryTemporalRelation.cpp
-  - source/CSP/ConstrainedBox.cpp                       # is it needed ?
-  - source/CSP/ConstrainedTemporalEntity.cpp
-  - source/CSP/ControlPoint.cpp                         # is it needed ?
-  - source/CSP/CSPold.cpp
-  - source/CSP/CSPConstrainedVariable.cpp
-  - source/CSP/CSPLinearConstraint.cpp
-  - source/CSP/IntervalRelation.cpp
-  - source/CSP/TriggerPoint.cpp
-  
   - source/Gecode/customSpace.cpp
   - source/Gecode/integerVariable.cpp
   - source/Gecode/linearConstraint.cpp
@@ -38,7 +25,7 @@ sources:
   - source/PetriNet/TransitionBitArray.cpp              # is it needed ?
   
   - source/Scenario.cpp
-  - source/CSP.cpp
+  - source/ScenarioSolver.cpp
   
 includes:
   - "."
@@ -46,7 +33,6 @@ includes:
   - "../../library/TimeProcessLib"
   - "../../library/TimeEventLib"
   
-  - "source/CSP"
   - "source/Gecode"
   - "source/PetriNet"
   

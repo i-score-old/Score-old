@@ -30,17 +30,12 @@ extern "C" TT_EXTENSION_EXPORT TTErr TTLoadJamomaExtension_InteractiveEvent(void
 }
 
 TIME_EVENT_CONSTRUCTOR,
-mDateMin(0),
-mDateMax(0),
 mAddress(kTTAdrsEmpty),
 mReceiver(NULL)
 {
     TIME_EVENT_INITIALIZE
     
 	TT_ASSERT("Correct number of args to create InteractiveEvent", arguments.size() == 0);
-    
-    addAttribute(DateMin, kTypeUInt32);
-    addAttribute(DateMax, kTypeUInt32);
     
     addAttributeWithSetter(Address, kTypeSymbol);
 	

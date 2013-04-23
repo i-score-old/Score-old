@@ -24,9 +24,6 @@ class InteractiveEvent : public TimeEvent
 	
 private :
     
-    TTUInt32                        mDateMin;                       ///< ATTRIBUTE : the minimal date of the interactive event
-    TTUInt32                        mDateMax;                       ///< ATTRIBUTE : the maximal date of the interactive event
-    
     TTAddress                       mAddress;                       ///< ATTRIBUTE : the address to listen
     
     TTObjectBasePtr                 mReceiver;                      ///< a receiver used to bind on the address

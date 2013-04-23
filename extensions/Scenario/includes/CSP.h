@@ -39,14 +39,7 @@ using namespace std;
 typedef	CSPElementMap*	CSPElementMapPtr;
 typedef CSPElementMap::const_iterator	CSPElementMapIterator;
 
-/**	\ingroup enums
- CSP Error Codes
- Enumeration of error codes that might be returned by any of CSP operations.	*/
-enum CSPError {
-	CSPErrorNone = 0,		///< No Error
-    CSPErrorGeneric,        ///< ...
-    CSPErrorOutOfBounds		///< ...
-};
+
 
 /* a type to define values handled by the CSP   */
 typedef unsigned int CSPValue;
@@ -63,17 +56,17 @@ public :
     
     ~CSP();
     
-    CSPError addProcess(void *pStartObject, void *pEndObject, CSPValue start, CSPValue end, CSPValue max, CSPValue minBound = 0, CSPValue maxBound = 0); // by default, rigid, move to change
+    CSPError addProcess(void *pProcessObject, void *pStartObject, void *pEndObject, CSPValue start, CSPValue end, CSPValue max, CSPValue minBound = 0, CSPValue maxBound = 0); // by default, rigid, move to change
     
-    CSPError removeProcess(void *pStartObject, void *pEndObject);
+    CSPError removeProcess(void *pProcessObject, void *pStartObject, void *pEndObject);
     
-    CSPError moveProcess(void *pStartObject, void *pEndObject, CSPValue newStart, CSPValue newEnd); // TODO : remember to check min < max when supple
+    CSPError moveProcess(void *pStartObject, void *pEndObject, CSPValue newStart, CSPValue newEnd);
     
-    CSPError addInterval(void *pStartObject, void *pEndObject, CSPValue start, CSPValue end, CSPValue minBound = 0, CSPValue maxBound = 0); // by default, rigid, move to change
+    CSPError addInterval(void *pProcessObject, void *pStartObject, void *pEndObject, CSPValue minBound = 0, CSPValue maxBound = 0);
     
-    CSPError removeInterval(void *pStartObject, void *pEndObject);
+    CSPError removeInterval(void *pProcessObject);
     
-    CSPError moveInterval(void *pStartObject, void *pEndObject, CSPValue newStart, CSPValue newEnd); // TODO : remember to check min < max when supple
+    CSPError moveInterval(void *pStartObject, void *pEndObject, CSPValue newStart, CSPValue newEnd);
     
 private :
     

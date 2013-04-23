@@ -7,55 +7,55 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		46B79E2516E7A8120052A04E /* TimeProcess.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TimeProcess.cpp; sourceTree = "<group>"; };
-		46B79E2616E7A8120052A04E /* TimeProcess.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TimeProcess.h; sourceTree = "<group>"; };
-		46B79E2816E7A8230052A04E /* Automation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Automation.h; sourceTree = "<group>"; };
-		46B79E2A16E7A82C0052A04E /* Automation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Automation.cpp; sourceTree = "<group>"; };
+		468776AD1725DB430096DA35 /* Automation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Automation.cpp; sourceTree = "<group>"; };
+		468776B11725DB4B0096DA35 /* Automation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Automation.h; sourceTree = "<group>"; };
+		468776B31725DB610096DA35 /* TimeProcess.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TimeProcess.cpp; sourceTree = "<group>"; };
+		468776B41725DB610096DA35 /* TimeProcess.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TimeProcess.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
-		46B79E1916E7A7B00052A04E = {
+		468776A11725DAF80096DA35 = {
 			isa = PBXGroup;
 			children = (
-				46B79E2416E7A8120052A04E /* TimeProcessLib */,
-				46B79E2716E7A8230052A04E /* includes */,
-				46B79E2916E7A82C0052A04E /* source */,
+				468776B21725DB610096DA35 /* TimeProcessLib */,
+				468776B01725DB4B0096DA35 /* includes */,
+				468776AC1725DB430096DA35 /* source */,
 			);
 			sourceTree = "<group>";
 		};
-		46B79E2416E7A8120052A04E /* TimeProcessLib */ = {
+		468776AC1725DB430096DA35 /* source */ = {
 			isa = PBXGroup;
 			children = (
-				46B79E2616E7A8120052A04E /* TimeProcess.h */,
-				46B79E2516E7A8120052A04E /* TimeProcess.cpp */,
+				468776AD1725DB430096DA35 /* Automation.cpp */,
+			);
+			path = source;
+			sourceTree = "<group>";
+		};
+		468776B01725DB4B0096DA35 /* includes */ = {
+			isa = PBXGroup;
+			children = (
+				468776B11725DB4B0096DA35 /* Automation.h */,
+			);
+			path = includes;
+			sourceTree = "<group>";
+		};
+		468776B21725DB610096DA35 /* TimeProcessLib */ = {
+			isa = PBXGroup;
+			children = (
+				468776B41725DB610096DA35 /* TimeProcess.h */,
+				468776B31725DB610096DA35 /* TimeProcess.cpp */,
 			);
 			name = TimeProcessLib;
 			path = ../../library/TimeProcessLib;
 			sourceTree = "<group>";
 		};
-		46B79E2716E7A8230052A04E /* includes */ = {
-			isa = PBXGroup;
-			children = (
-				46B79E2816E7A8230052A04E /* Automation.h */,
-			);
-			path = includes;
-			sourceTree = "<group>";
-		};
-		46B79E2916E7A82C0052A04E /* source */ = {
-			isa = PBXGroup;
-			children = (
-				46B79E2A16E7A82C0052A04E /* Automation.cpp */,
-			);
-			path = source;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXLegacyTarget section */
-		46B79E1E16E7A7B00052A04E /* Automation */ = {
+		468776A61725DAF80096DA35 /* Automation */ = {
 			isa = PBXLegacyTarget;
 			buildArgumentsString = "$(ACTION) $(Configuration)";
-			buildConfigurationList = 46B79E2116E7A7B00052A04E /* Build configuration list for PBXLegacyTarget "Automation" */;
+			buildConfigurationList = 468776A91725DAF80096DA35 /* Build configuration list for PBXLegacyTarget "Automation" */;
 			buildPhases = (
 			);
 			buildToolPath = /usr/bin/make;
@@ -69,30 +69,30 @@
 /* End PBXLegacyTarget section */
 
 /* Begin PBXProject section */
-		46B79E1A16E7A7B00052A04E /* Project object */ = {
+		468776A21725DAF80096DA35 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0460;
 				ORGANIZATIONNAME = OSSIA;
 			};
-			buildConfigurationList = 46B79E1D16E7A7B00052A04E /* Build configuration list for PBXProject "Automation" */;
+			buildConfigurationList = 468776A51725DAF80096DA35 /* Build configuration list for PBXProject "Automation" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 			);
-			mainGroup = 46B79E1916E7A7B00052A04E;
+			mainGroup = 468776A11725DAF80096DA35;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				46B79E1E16E7A7B00052A04E /* Automation */,
+				468776A61725DAF80096DA35 /* Automation */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin XCBuildConfiguration section */
-		46B79E1F16E7A7B00052A04E /* Debug */ = {
+		468776A71725DAF80096DA35 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -124,7 +124,7 @@
 			};
 			name = Debug;
 		};
-		46B79E2016E7A7B00052A04E /* Release */ = {
+		468776A81725DAF80096DA35 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -149,7 +149,7 @@
 			};
 			name = Release;
 		};
-		46B79E2216E7A7B00052A04E /* Debug */ = {
+		468776AA1725DAF80096DA35 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEBUGGING_SYMBOLS = YES;
@@ -161,7 +161,7 @@
 			};
 			name = Debug;
 		};
-		46B79E2316E7A7B00052A04E /* Release */ = {
+		468776AB1725DAF80096DA35 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				OTHER_CFLAGS = "";
@@ -173,25 +173,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		46B79E1D16E7A7B00052A04E /* Build configuration list for PBXProject "Automation" */ = {
+		468776A51725DAF80096DA35 /* Build configuration list for PBXProject "Automation" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				46B79E1F16E7A7B00052A04E /* Debug */,
-				46B79E2016E7A7B00052A04E /* Release */,
+				468776A71725DAF80096DA35 /* Debug */,
+				468776A81725DAF80096DA35 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		46B79E2116E7A7B00052A04E /* Build configuration list for PBXLegacyTarget "Automation" */ = {
+		468776A91725DAF80096DA35 /* Build configuration list for PBXLegacyTarget "Automation" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				46B79E2216E7A7B00052A04E /* Debug */,
-				46B79E2316E7A7B00052A04E /* Release */,
+				468776AA1725DAF80096DA35 /* Debug */,
+				468776AB1725DAF80096DA35 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 46B79E1A16E7A7B00052A04E /* Project object */;
+	rootObject = 468776A21725DAF80096DA35 /* Project object */;
 }

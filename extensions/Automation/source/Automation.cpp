@@ -36,8 +36,6 @@ mNamespace(NULL)
 {
     TIME_PROCESS_INITIALIZE
     
-    TTErr           err;
-    
 	TT_ASSERT("Correct number of args to create Automation", arguments.size() == 0);
     
     addAttribute(StartCue, kTypeObject);
@@ -56,27 +54,7 @@ mNamespace(NULL)
 	addMessageWithArguments(WriteAsText);
 	addMessageProperty(WriteAsText, hidden, YES);
 	addMessageWithArguments(ReadFromText);
-	addMessageProperty(ReadFromText, hidden, YES);
-    
-    // Creation of a static time event for the start and subscribe to it
-    err = TTObjectBaseInstantiate(TTSymbol("StaticEvent"), TTObjectBaseHandle(&mStartEvent), kTTValNONE);
-    
-	if (err) {
-        mStartEvent = NULL;
-		logError("TimeProcess failed to load a static start event");
-    }
-    
-    mStartEvent->sendMessage(TTSymbol("Subscribe"), mStartEventCallback, kTTValNONE);
-    
-    // Creation of a static time event for the end and subscribe to it
-    err = TTObjectBaseInstantiate(TTSymbol("StaticEvent"), TTObjectBaseHandle(&mEndEvent), kTTValNONE);
-    
-	if (err) {
-        mStartEvent = NULL;
-		logError("TimeProcess failed to load a static end event");
-    }
-    
-    mEndEvent->sendMessage(TTSymbol("Subscribe"), mEndEventCallback, kTTValNONE);
+	addMessageProperty(ReadFromText, hidden, YES);    
 }
 
 Automation::~Automation()
