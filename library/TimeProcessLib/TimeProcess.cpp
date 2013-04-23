@@ -29,8 +29,7 @@ mScheduler(NULL)
     TTErr      err;
     TTValuePtr startEventBaton, endEventBaton;
     
-    addAttribute(Scenario, kTypeObject);
-    addAttributeProperty(Scenario, hidden, YES);
+    addAttributeWithSetter(Scenario, kTypeObject);
     
     // the rigid state handles the DurationMin and DurationMax attribute
     registerAttribute(TTSymbol("rigid"), kTypeBoolean, NULL, (TTGetterMethod)& TimeProcess::getRigid, (TTSetterMethod)& TimeProcess::setRigid);
@@ -70,6 +69,7 @@ mScheduler(NULL)
     addMessageWithArguments(CreateEndEvent);
     addMessage(ReleaseEndEvent);
     
+    addMessageWithArguments(Move);
     addMessageWithArguments(Limit);
     
 	// needed to be handled by a TTXmlHandler
@@ -128,7 +128,8 @@ TimeProcess::~TimeProcess()
         
         v = TTValue((TTObjectBasePtr)this);
         
-        // remove the time process from the scenario (even if it can be done by the creator but it is safe to remove our self)
+        // remove the time process from the scenario
+        //(even if it can be done by the creator but it is safe to remove our self)
         mScenario->sendMessage(TTSymbol("TimeProcessRemove"), v, kTTValNONE);
     }
     
@@ -176,6 +177,29 @@ TTErr TimeProcess::getParameterNames(TTValue& value)
 	}
 	
 	return kTTErrNone;
+}
+
+TTErr TimeProcess::setScenario(const TTValue& value)
+{
+    // remove to from the old scenario
+    if (mScenario) {
+        mScenario->sendMessage(TTSymbol("TimeProcessRemove"), TTObjectBasePtr(this), kTTValNONE);
+        mScenario = NULL;
+    }
+    
+    if (value.size() == 1) {
+        
+        if (value[0].type() == kTypeObject) {
+            
+            mScenario = value[0];
+            
+            // add to the new scenario
+            if (mScenario)
+                return mScenario->sendMessage(TTSymbol("TimeProcessAdd"), TTObjectBasePtr(this), kTTValNONE);
+        }
+    }
+    
+    return kTTErrNone;
 }
 
 TTErr TimeProcess::getRigid(TTValue& value)
@@ -380,25 +404,26 @@ TTErr TimeProcess::setActive(const TTValue& value)
 
 TTErr TimeProcess::setStartEvent(const TTValue& value)
 {
+    // unsubscribe to the old start event
+    if (mStartEvent) {
+        mStartEvent->sendMessage(TTSymbol("Unsubscribe"), mStartEventCallback, kTTValNONE);
+        mStartEvent = NULL;
+    }
+    
     if (value.size() == 1) {
         
         if (value[0].type() == kTypeObject) {
-            
-            // unsubscribe to the old start event
-            if (mStartEvent)
-                mStartEvent->sendMessage(TTSymbol("Unsubscribe"), mStartEventCallback, kTTValNONE);
             
             mStartEvent = value[0];
             
             // subscribe to the new start event
             if (mStartEvent)
                 return mStartEvent->sendMessage(TTSymbol("Subscribe"), mStartEventCallback, kTTValNONE);
-            else
-                return kTTErrNone;
+        
         }
     }
     
-    return kTTErrGeneric;
+    return kTTErrNone;
 }
 
 TTErr TimeProcess::getIntermediateEvents(TTValue& value)
@@ -410,25 +435,25 @@ TTErr TimeProcess::getIntermediateEvents(TTValue& value)
 
 TTErr TimeProcess::setEndEvent(const TTValue& value)
 {
+    // unsubscribe to the old end event
+    if (mEndEvent) {
+        mEndEvent->sendMessage(TTSymbol("Unsubscribe"), mEndEventCallback, kTTValNONE);
+        mEndEvent = NULL;
+    }
+    
     if (value.size() == 1) {
         
         if (value[0].type() == kTypeObject) {
-            
-            // unsubscribe to the old end event
-            if (mEndEvent)
-                mEndEvent->sendMessage(TTSymbol("Unsubscribe"), mEndEventCallback, kTTValNONE);
             
             mEndEvent = value[0];
             
             // subscribe to the new end event
             if (mEndEvent)
                 return mEndEvent->sendMessage(TTSymbol("Subscribe"), mEndEventCallback, kTTValNONE);
-            else
-                return kTTErrNone;
         }
     }
     
-    return kTTErrGeneric;
+    return kTTErrNone;
 }
 
 TTErr TimeProcess::CreateStartEvent(const TTValue& value)
@@ -531,6 +556,35 @@ TTErr TimeProcess::ReleaseEndEvent()
     mEndEvent = NULL;
     
     return kTTErrNone;
+}
+
+TTErr TimeProcess::Move(const TTValue& inputValue, TTValue& outputValue)
+{
+    TTValue v;
+    
+    if (inputValue.size() == 2) {
+        
+        if (inputValue[0].type() == kTypeUInt32 && inputValue[1].type() == kTypeUInt32) {
+            
+            if (TTUInt32(inputValue[0]) <= TTUInt32(inputValue[1])) {
+                
+                // if the time process is handled by a scenario
+                if (mScenario) {
+                    
+                    v = TTValue(TTObjectBasePtr(this));
+                    v.append(TTUInt32(inputValue[0]));
+                    v.append(TTUInt32(inputValue[1]));
+                    
+                    return mScenario->sendMessage(TTSymbol("TimeProcessMove"), v, kTTValNONE);
+                }
+                else
+                    return kTTErrNone;
+            }
+        }
+    }
+    
+    return kTTErrGeneric;
+
 }
 
 TTErr TimeProcess::Limit(const TTValue& inputValue, TTValue& outputValue)

@@ -135,6 +135,11 @@ public:
 
 private :
     
+    /** set the scenario object to add the time process to it
+     @param	value           a new scenario to be part of
+     @return                kTTErrNone */
+    TTErr	setScenario(const TTValue& value);
+    
     /** get the time process rigidity
      @param	value           rigidity state
      @return                kTTErrNone */
@@ -221,6 +226,12 @@ private :
     /** Release the end event of the time process
      @return                an error code if the event can't be destroyed */
     TTErr	ReleaseEndEvent();
+    
+    /** Move the time process
+     this method eases the setting of the start and end event dates
+     @param	value           new start date, new end date
+     @return                an error code if the movement fails */
+    TTErr	Move(const TTValue& inputValue, TTValue& outputValue);
     
     /** Limit the time process duration
         this method eases the setting of the minimal and maximal durations

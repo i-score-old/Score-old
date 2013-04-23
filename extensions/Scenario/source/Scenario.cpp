@@ -43,9 +43,16 @@ mExecutionGraph(NULL)
 	TT_ASSERT("Correct number of args to create Scenario", arguments.size() == 0);
     
     addMessageWithArguments(TimeProcessAdd);
+    addMessageProperty(TimeProcessAdd, hidden, YES);
+    
     addMessageWithArguments(TimeProcessRemove);
+    addMessageProperty(TimeProcessRemove, hidden, YES);
+    
     addMessageWithArguments(TimeProcessMove);
+    addMessageProperty(TimeProcessMove, hidden, YES);
+    
     addMessageWithArguments(TimeProcessLimit);
+    addMessageProperty(TimeProcessLimit, hidden, YES);
     
     addMessageWithArguments(TimeEventAdd);
     addMessageWithArguments(TimeEventRemove);
@@ -229,10 +236,6 @@ TTErr Scenario::TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue)
             // check time process duration before to do anything
             if (!aTimeProcess->getAttributeValue(TTSymbol("duration"), duration)) {
                 
-                // set this scenario as parent scenario for the time process
-                v = TTValue((TTObjectBasePtr)this);
-                aTimeProcess->setAttributeValue(TTSymbol("scenario"), v);
-                
                 // create all observers
                 makeTimeProcessCacheElement(aTimeProcess, aCacheElement);
                 
@@ -316,9 +319,6 @@ TTErr Scenario::TimeProcessRemove(const TTValue& inputValue, TTValue& outputValu
         if (inputValue[0].type() == kTypeObject) {
             
             aTimeProcess = TimeProcessPtr((TTObjectBasePtr)inputValue[0]);
-            
-            // set no scenario as parent scenario for the time process
-            aTimeProcess->setAttributeValue(TTSymbol("scenario"), (TTObjectBasePtr)NULL);
             
             // try to find the time process
             mTimeProcessList.find(&ScenarioFindTimeProcess, (TTPtr)aTimeProcess, aCacheElement);
