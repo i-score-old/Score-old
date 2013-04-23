@@ -44,21 +44,25 @@ private :
     /** Get parameters names needed by this time process
      @param	value           the returned parameter names
      @return                kTTErrNone */
-	TTErr getParameterNames(TTValue& value);
+	TTErr   getParameterNames(TTValue& value);
     
     /** Specific process method on start
      @return                an error code returned by the process end method */
-    TTErr ProcessStart();
+    TTErr   ProcessStart();
     
     /** Specific process method on end
      @return                an error code returned by the process end method */
-    TTErr ProcessEnd();
+    TTErr   ProcessEnd();
     
     /** Specific process method
      @param	inputValue      progression of the scheduler
      @param	outputValue     return an error of the processing
      @return                an error code returned by the process method */
-    TTErr Process(const TTValue& inputValue, TTValue& outputValue);
+    TTErr   Process(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Compile the scenario to prepare the petri net before execution
+     @return                an error code returned by the compile method */
+    //TTErr   Compile();
     
     /**  needed to be handled by a TTXmlHandler
      @param	inputValue      ..
@@ -78,43 +82,43 @@ private :
      @inputvalue            a time process object
      @outputvalue           kTTValNONE
      @return                an error code if the registration fails */
-    TTErr TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue);
+    TTErr   TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue);
     
     /** Unregister a time process for scenario management
      @inputValue            a time process object
      @outputvalue           kTTValNONE
      @return                an error code if the unregistration fails */
-    TTErr TimeProcessRemove(const TTValue& inputValue, TTValue& outputValue);
+    TTErr   TimeProcessRemove(const TTValue& inputValue, TTValue& outputValue);
     
     /** Move a time process into the scenario
      @inputValue            a time process object, new start date, new end date
      @outputvalue           kTTValNONE
      @return                an error code if the movement fails */
-    TTErr TimeProcessMove(const TTValue& inputValue, TTValue& outputValue);
+    TTErr   TimeProcessMove(const TTValue& inputValue, TTValue& outputValue);
     
     /** imit a time process duration into the scenario
      @inputValue            a time process object, new duration min, new duration max
      @outputvalue           kTTValNONE
      @return                an error code if the limitation fails */
-    TTErr TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue);
+    TTErr   TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue);
     
     /** Register a time event for scenario management
      @inputvalue            a time event object
      @outputvalue           kTTValNONE
      @return                an error code if the registration fails */
-    TTErr TimeEventAdd(const TTValue& inputValue, TTValue& outputValue);
+    TTErr   TimeEventAdd(const TTValue& inputValue, TTValue& outputValue);
     
     /** Unregister a time event for scenario management
      @inputValue            a time event object
      @outputvalue           kTTValNONE
      @return                an error code if the unregistration fails */
-    TTErr TimeEventRemove(const TTValue& inputValue, TTValue& outputValue);
+    TTErr   TimeEventRemove(const TTValue& inputValue, TTValue& outputValue);
     
     /** Move a time event into the scenario
      @inputValue            a time event object, new date
      @outputvalue           kTTValNONE
      @return                an error code if the movement fails */
-    TTErr TimeEventMove(const TTValue& inputValue, TTValue& outputValue);
+    TTErr   TimeEventMove(const TTValue& inputValue, TTValue& outputValue);
     
     /** Change a time process active state into the scenario
      note : this method doesn't update the time process internal acive state
@@ -123,7 +127,7 @@ private :
      @inputvalue            a time process object, a new active state
      @outputvalue           kTTValNONE
      @return                an error code if the active state change fails */
-    TTErr TimeProcessActiveChange(const TTValue& inputValue, TTValue& outputValue);
+    TTErr   TimeProcessActiveChange(const TTValue& inputValue, TTValue& outputValue);
     
     /** an internal method used to create all time process attribute observers */
     void makeTimeProcessCacheElement(TimeProcessPtr aTimeProcess, TTValue& newCacheElement);

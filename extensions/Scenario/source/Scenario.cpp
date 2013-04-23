@@ -74,25 +74,6 @@ mExecutionGraph(NULL)
 	addMessageWithArguments(ReadFromText);
 	addMessageProperty(ReadFromText, hidden, YES);
     
-    // Creation of a static time event for the start and subscribe to it
-    err = TTObjectBaseInstantiate(TTSymbol("StaticEvent"), TTObjectBaseHandle(&mStartEvent), kTTValNONE);
-    
-	if (err) {
-        mStartEvent = NULL;
-		logError("Scenario failed to load a static start event");
-    }
-    
-    // Subscribe to the start event using the mStartEventCallback
-    mStartEvent->sendMessage(TTSymbol("Subscribe"), mStartEventCallback, kTTValNONE);
-    
-    // Creation of a static time event for the end (but don't subscribe to it)
-    err = TTObjectBaseInstantiate(TTSymbol("StaticEvent"), TTObjectBaseHandle(&mEndEvent), kTTValNONE);
-    
-	if (err) {
-        mEndEvent = NULL;
-		logError("Scenario failed to load a static end event");
-    }
-    
     // Creation of the first static event of the scenario (but don't subscribe to it)
     err = TTObjectBaseInstantiate(TTSymbol("StaticEvent"), TTObjectBaseHandle(&mFirstEvent), kTTValNONE);
     
