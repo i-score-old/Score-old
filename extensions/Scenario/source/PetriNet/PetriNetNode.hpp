@@ -52,7 +52,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 #include <vector>
 
-typedef std::vector<Arc*> arcList;
+typedef std::vector<Arc*> arcList; // TODO : refactor, because later we don't know what is an arcList !
 typedef std::vector<arcList> arcListByColor;
 typedef std::vector<PetriNetNode*> petriNetNodeList;
 
@@ -71,7 +71,7 @@ public:
 	/*!
 	 * Destructor.
 	 */
-	virtual ~PetriNetNode();
+	virtual ~PetriNetNode(); // TODO : only virtual method that permits the use of dynamic_cast (in Place for example), dangerous
 
 	/*!
 	 * Gets all the in-going arcs of this node (all colors taken together).
@@ -211,7 +211,7 @@ public:
 	Arc* haveArcFrom(PetriNetNode* from);
 
 	/*!
-	 * Tests if an arc exist between the current node, and from another given (all colors taken together).
+	 * Tests if an arc exist between the current node, and from another given.
 	 *
 	 * Throws a OutOfBoundException if colorLabel is not valid.
 	 *
@@ -222,7 +222,7 @@ public:
 	Arc* haveArcFrom(PetriNetNode* from, int colorLabel);
 
 	/*!
-	 * Tests if an arc exist between the current node, and to another given.
+	 * Tests if an arc exist between the current node, and to another given (all colors taken together).
 	 *
 	 * \param to : node to.
 	 * \return the matching arc if it exists (NULL if not).

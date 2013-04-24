@@ -80,7 +80,7 @@ unsigned int Place::consumeTokens(unsigned int nbOfTokens, unsigned int colorLab
 	unsigned int time = 0;
 
 	if (m_tokenByColor[colorLabel].size() < nbOfTokens) {
-		throw IllegalArgumentException();
+		throw IllegalArgumentException("Not enough tokens to consume");
 	} else {
 		for (unsigned int i = 0; i < nbOfTokens; ++i) {
 			time = m_tokenByColor[colorLabel].back().getRemainingTime();
@@ -105,11 +105,11 @@ void Place::produceTokens(unsigned int nbOfTokens, unsigned int colorLabel, unsi
 		for (unsigned int i = 0 ; i < outGoingArcs.size() ; ++i) {
 			Arc* arc = outGoingArcs[i];
 
-			if (!(dynamic_cast<Transition*>(arc->getTo()))) {
+            Transition* transitionTo = dynamic_cast<Transition*>(arc->getTo());
+            
+			if (!transitionTo) {
 				throw IncoherentStateException();
 			}
-
-			Transition* transitionTo = ((Transition*) arc->getTo());
 
 			transitionTo->setArcAsActive(arc, tokensTime, true);
 

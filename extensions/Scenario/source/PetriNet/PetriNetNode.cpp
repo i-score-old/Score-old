@@ -149,12 +149,12 @@ void PetriNetNode::removeOutGoingArcs(Arc* arcToRemove) {
 }
 
 void PetriNetNode::removeInGoingArcs(Arc* arcToRemove, int colorLabel) {
-	int indexToRemove = -1;
-
 	if (!isColorValid(colorLabel)) {
 		throw OutOfBoundException();
 	}
 
+	int indexToRemove = -1;
+    
 	colorLabel --;
 
 	for (unsigned int i = 0; i < m_inGoingArcs[colorLabel].size(); i++) {
@@ -169,12 +169,12 @@ void PetriNetNode::removeInGoingArcs(Arc* arcToRemove, int colorLabel) {
 }
 
 void PetriNetNode::removeOutGoingArcs(Arc* arcToRemove, int colorLabel) {
-	int indexToRemove = -1;
-
 	if (!isColorValid(colorLabel)) {
 		throw OutOfBoundException();
 	}
 
+	int indexToRemove = -1;
+    
 	colorLabel --;
 
 	for (unsigned int i = 0; i < m_outGoingArcs[colorLabel].size(); i++) {

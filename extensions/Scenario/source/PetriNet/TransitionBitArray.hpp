@@ -39,7 +39,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 #ifndef TRANSITIONBITARRAY_H_
 #define TRANSITIONBITARRAY_H_
 
-#include <stdint.h>
+#include <cstdint>
 #include "OutOfBoundException.hpp"
 
 /*!
@@ -114,7 +114,7 @@ public:
 private :
 	unsigned int m_size; // BitArray size.
 	unsigned int m_maxIndexInBitArray; // Max index of the BitArray.
-	uint16_t* m_bitArray; // BitArray.
+	uint16_t* m_bitArray; // BitArray. // TODO : uint16_t not portable because optionnal, see uint_least16_t maybe
 };
 
 #endif /*TRANSITIONBITARRAY_H_*/

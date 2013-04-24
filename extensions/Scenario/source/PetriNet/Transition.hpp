@@ -77,7 +77,7 @@ public:
 	void setEvent(std::string s);
 
 	/*!
-	 * Correcty creates the BitArray (representing actives arcs).
+	 * Correctly creates the BitArray (representing actives arcs).
 	 */
 	void createBitArray();
 

@@ -52,7 +52,7 @@ ExtendedInt::ExtendedInt()
 
 }
 
-ExtendedInt::ExtendedInt(short type, int value)
+ExtendedInt::ExtendedInt(short type, int value) // TODO : Should check that the type is valid
 :m_type(type), m_value(value)
 {
 
