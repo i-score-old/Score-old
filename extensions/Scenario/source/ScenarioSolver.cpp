@@ -125,36 +125,27 @@ SolverError SolverConstraint::limit(SolverValue newDurationMin, SolverValue newD
 SolverRelation::SolverRelation(SolverPtr aSolver, SolverVariablePtr variableA, SolverVariablePtr variableB, SolverValue durationMin, SolverValue durationMax):
 solver(aSolver), minBoundID(0), maxBoundID(0)
 {
-    TTValue   vA, vB, v;
+    TTValue     vA, vB, v;
+    TTBoolean   mustCallSolver = NO;
     
     // check duration bounds
     if (durationMin > durationMax)
         return;
     
-    // we need to order the variables in time
-    variableA->event->getAttributeValue(TTSymbol("date"), vA);
-    variableB->event->getAttributeValue(TTSymbol("date"), vB);
+    startVariable = variableA;
+    endVariable = variableB;
     
-    if (vA < vB) {
-        
-        startVariable = variableA;
-        endVariable = variableB;
-    }
-    else {
-        
-        startVariable = variableB;
-        endVariable = variableA;
-    }
-    
+    mustCallSolver = vA >= vB;
+
     // add ANTPOST_ANTERIORITY relation
     // (see in : CSPold addAntPostRelation and addConstraint)
     int IDs[2] = {endVariable->dateID, startVariable->dateID};
     int coefs[2] = {1,-1};
     
-    minBoundID = solver->addConstraint(IDs, coefs, 2, GQ_RELATION, durationMin, true);
-    
     if (durationMax)
-        maxBoundID = solver->addConstraint(IDs, coefs, 2, LQ_RELATION, durationMax, true);
+        maxBoundID = solver->addConstraint(IDs, coefs, 2, GQ_RELATION, durationMax, NO);
+    
+     minBoundID = solver->addConstraint(IDs, coefs, 2, LQ_RELATION, durationMin, mustCallSolver);
 }
 
 SolverRelation::~SolverRelation()
