@@ -57,6 +57,7 @@ mExecutionGraph(NULL)
     addMessageWithArguments(TimeEventAdd);
     addMessageWithArguments(TimeEventRemove);
     addMessageWithArguments(TimeEventMove);
+    addMessageWithArguments(TimeEventReplace);
     
     // all messages below are hidden because they are for internal use
     addMessageWithArguments(TimeProcessActiveChange);
@@ -588,6 +589,76 @@ TTErr Scenario::TimeEventMove(const TTValue& inputValue, TTValue& outputValue)
                 
                 return kTTErrNone;
             }
+        }
+    }
+    
+    return kTTErrGeneric;
+}
+
+TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue)
+{
+    TimeEventPtr            aFormerTimeEvent, aNewTimeEvent, timeEvent;
+    TimeProcessPtr          aTimeProcess;
+    TTBoolean               isStatic;
+    TTValue                 v;
+    SolverObjectMapIterator it;
+    
+    if (inputValue.size() == 2) {
+        
+        if (inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeObject) {
+            
+            aFormerTimeEvent = TimeEventPtr((TTObjectBasePtr)inputValue[0]);
+            aNewTimeEvent = TimeEventPtr((TTObjectBasePtr)inputValue[1]);
+            
+            // is the new event static ?
+            isStatic = aNewTimeEvent->getName() == TTSymbol("Static");
+                        
+            // replace the former time event in all time process which binds on it
+            for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
+                
+                aTimeProcess = TimeProcessPtr(TTObjectBasePtr(mTimeProcessList.current()[0]));
+                
+                aTimeProcess->getAttributeValue(TTSymbol("startEvent"), v);
+                timeEvent = TimeEventPtr(TTObjectBasePtr(v[0]));
+                
+                if (timeEvent == aFormerTimeEvent) {
+                    
+                    aTimeProcess->sendMessage(TTSymbol("StartEventRelease"));
+                    aTimeProcess->setAttributeValue(TTSymbol("startEvent"), TTObjectBasePtr(aNewTimeEvent));
+                    continue;
+                }
+                
+                aTimeProcess->getAttributeValue(TTSymbol("endEvent"), v);
+                timeEvent = TimeEventPtr(TTObjectBasePtr(v[0]));
+                
+                if (timeEvent == aFormerTimeEvent) {
+                    
+                    aTimeProcess->sendMessage(TTSymbol("EndEventRelease"));
+                    aTimeProcess->setAttributeValue(TTSymbol("endEvent"), TTObjectBasePtr(aNewTimeEvent));
+                    
+                    // a time process with a none static end event cannot be rigid
+                    // TODO : lookat i-score Relation::updateFlexibility() to make the same behaviour
+                    v = TTBoolean(isStatic);
+                    aTimeProcess->setAttributeValue(TTSymbol("rigid"), v);
+                }
+            }
+            
+            // retreive solver variable relative to the time event
+            it = mVariablesMap.find(aFormerTimeEvent);
+            SolverVariablePtr variable = SolverVariablePtr(it->second);
+            
+            // replace the time event
+            // note : only in the variable as all other solver elements binds on variables
+            variable->event = aNewTimeEvent;
+            
+            // update the variable (this will copy the date into the new time event)
+            variable->update();
+            
+            // update the variables map
+            mVariablesMap.erase(aFormerTimeEvent);
+            mVariablesMap.emplace(aNewTimeEvent, variable);
+            
+            return kTTErrNone;
         }
     }
     

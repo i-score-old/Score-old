@@ -63,11 +63,13 @@ mScheduler(NULL)
     addMessage(ProcessEnd);
     addMessageWithArguments(Process);
     
-    addMessageWithArguments(CreateStartEvent);
-    addMessage(ReleaseStartEvent);
+    addMessageWithArguments(StartEventCreate);
+    addMessageWithArguments(StartEventReplace);
+    addMessage(StartEventRelease);
     
-    addMessageWithArguments(CreateEndEvent);
-    addMessage(ReleaseEndEvent);
+    addMessageWithArguments(EndEventCreate);
+    addMessageWithArguments(EndEventReplace);
+    addMessage(EndEventRelease);
     
     addMessageWithArguments(Move);
     addMessageWithArguments(Limit);
@@ -219,7 +221,7 @@ TTErr TimeProcess::setRigid(const TTValue& value)
             
             getDuration(v);
             
-            if (TTBoolean(v[0]))
+            if (TTBoolean(value[0]))
                 v.append(TTUInt32(v[0]));   // Limit(duration, duration)
             else
                 v.prepend(TTUInt32(0));     // Limit(0, duration)
@@ -408,6 +410,8 @@ TTErr TimeProcess::setStartEvent(const TTValue& value)
     if (mStartEvent) {
         mStartEvent->sendMessage(TTSymbol("Unsubscribe"), mStartEventCallback, kTTValNONE);
         mStartEvent = NULL;
+        
+        // TODO : if (mScenario) tell the scenario there is a new start event
     }
     
     if (value.size() == 1) {
@@ -419,6 +423,8 @@ TTErr TimeProcess::setStartEvent(const TTValue& value)
             // subscribe to the new start event
             if (mStartEvent)
                 return mStartEvent->sendMessage(TTSymbol("Subscribe"), mStartEventCallback, kTTValNONE);
+            
+            // TODO : if (mScenario) tell the scenario there is a new start event
         
         }
     }
@@ -439,6 +445,8 @@ TTErr TimeProcess::setEndEvent(const TTValue& value)
     if (mEndEvent) {
         mEndEvent->sendMessage(TTSymbol("Unsubscribe"), mEndEventCallback, kTTValNONE);
         mEndEvent = NULL;
+        
+        // TODO : if (mScenario) tell to the scenario there is a new end event
     }
     
     if (value.size() == 1) {
@@ -450,13 +458,15 @@ TTErr TimeProcess::setEndEvent(const TTValue& value)
             // subscribe to the new end event
             if (mEndEvent)
                 return mEndEvent->sendMessage(TTSymbol("Subscribe"), mEndEventCallback, kTTValNONE);
+            
+            // TODO : if (mScenario) tell to the scenario there is a new end event
         }
     }
     
     return kTTErrNone;
 }
 
-TTErr TimeProcess::CreateStartEvent(const TTValue& value)
+TTErr TimeProcess::StartEventCreate(const TTValue& value)
 {
     TimeEventPtr timeEvent;
     TTErr err;
@@ -494,7 +504,64 @@ TTErr TimeProcess::CreateStartEvent(const TTValue& value)
     return kTTErrGeneric;
 }
 
-TTErr TimeProcess::ReleaseStartEvent()
+TTErr TimeProcess::StartEventReplace(const TTValue& value)
+{
+    TimeEventPtr    formerStartEvent, timeEvent;
+    TTValue         v, args;
+    TTErr           err;
+    
+    // it needs a start event to replace
+    if (!mStartEvent)
+        return kTTErrGeneric;
+    
+    if (value.size() >= 1) {
+        
+        if (value[0].type() == kTypeSymbol) {
+            
+            // create a time event for the start
+            timeEvent = NULL;
+            err = TTObjectBaseInstantiate(value[0], TTObjectBaseHandle(&timeEvent), kTTValNONE);
+            
+            if (!err) {
+                
+                // set the new start event
+                formerStartEvent = TimeEventPtr(mStartEvent);
+                err = setStartEvent(TTObjectBasePtr(timeEvent));
+                
+                // if the time process is handled by a scenario
+                if (mScenario) {
+                    
+                    // prepare argument
+                    v = TTValue(TTObjectBasePtr(formerStartEvent));
+                    v.append(TTObjectBasePtr(timeEvent));
+                    
+                    err = mScenario->sendMessage(TTSymbol("TimeEventReplace"), v, kTTValNONE);
+                }
+                
+                // if the replacement success
+                if (!err) {
+                    
+                    // realase the former start event
+                    TTObjectBaseRelease(TTObjectBaseHandle(&formerStartEvent));
+                }
+                else {
+                    
+                    // cancel the operation
+                    setStartEvent(TTObjectBasePtr(formerStartEvent));
+                    
+                    // realase the new event
+                    TTObjectBaseRelease(TTObjectBaseHandle(&timeEvent));
+                }
+            }
+            
+            return err;
+        }
+    }
+
+    return kTTErrGeneric;
+}
+
+TTErr TimeProcess::StartEventRelease()
 {
     if (!mStartEvent)
         return kTTErrGeneric;
@@ -507,7 +574,7 @@ TTErr TimeProcess::ReleaseStartEvent()
     return kTTErrNone;
 }
 
-TTErr TimeProcess::CreateEndEvent(const TTValue& value)
+TTErr TimeProcess::EndEventCreate(const TTValue& value)
 {
     TimeEventPtr timeEvent;
     TTErr err;
@@ -545,7 +612,12 @@ TTErr TimeProcess::CreateEndEvent(const TTValue& value)
     return kTTErrGeneric;
 }
 
-TTErr TimeProcess::ReleaseEndEvent()
+TTErr TimeProcess::EndEventReplace(const TTValue& value)
+{
+    return kTTErrGeneric;
+}
+
+TTErr TimeProcess::EndEventRelease()
 {
     if (!mEndEvent)
         return kTTErrGeneric;

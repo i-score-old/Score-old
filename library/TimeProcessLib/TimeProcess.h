@@ -97,7 +97,7 @@ public:
 	
 	/** Destructor
         The events are not destroyed here but their destruction can 
-        be managed using ReleaseStartEvent or ReleaseEndEvent message   */
+        be managed using StartEventRelease or EndEventRelease message   */
 	virtual ~TimeProcess();
 	
 	/** Get parameters names needed by this time process 
@@ -212,20 +212,32 @@ private :
     /** Create a start event for the time process
      @param	value           event type, a date (optional)
      @return                an error code if the event can't be created */
-    TTErr	CreateStartEvent(const TTValue& value);
+    TTErr	StartEventCreate(const TTValue& value);
+    
+    /** Replace a start event by a new one at the same date.
+        This will release the former event.
+     @param	value           event type
+     @return                an error code if the event can't be replaced */
+    TTErr	StartEventReplace(const TTValue& value);
     
     /** Release the start event of the time process
      @return                an error code if the event can't be destroyed */
-    TTErr	ReleaseStartEvent();
+    TTErr	StartEventRelease();
     
     /** Create a end event for the time process
      @param	value           event type, a date (optional)
      @return                an error code if the event can't be created */
-    TTErr	CreateEndEvent(const TTValue& value);
+    TTErr	EndEventCreate(const TTValue& value);
+    
+    /** Replace a end event by a new one at the same date.
+        This will release the former event.
+     @param	value           event type
+     @return                an error code if the event can't be replaced */
+    TTErr	EndEventReplace(const TTValue& value);
     
     /** Release the end event of the time process
      @return                an error code if the event can't be destroyed */
-    TTErr	ReleaseEndEvent();
+    TTErr	EndEventRelease();
     
     /** Move the time process
      this method eases the setting of the start and end event dates

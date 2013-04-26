@@ -120,10 +120,15 @@ private :
      @return                an error code if the movement fails */
     TTErr   TimeEventMove(const TTValue& inputValue, TTValue& outputValue);
     
+    /** Replace a time event by another one (copying date and active attribute)
+     @inputValue            a former time event object, a new time event object 
+     @outputvalue           kTTValNONE
+     @return                an error code if the replacement fails */
+    TTErr   TimeEventReplace(const TTValue& inputValue, TTValue& outputValue);
+    
     /** Change a time process active state into the scenario
-     note : this method doesn't update the time process internal acive state
+     note : this method doesn't update the time process internal active state
      but it can change attribute of other time processes or time events connected to this one.
-     
      @inputvalue            a time process object, a new active state
      @outputvalue           kTTValNONE
      @return                an error code if the active state change fails */
