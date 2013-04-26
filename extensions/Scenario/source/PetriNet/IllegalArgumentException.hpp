@@ -46,6 +46,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 #include <stdexcept>
+#include <string>
 
 /*!
  * \class IllegalArgumentException
@@ -55,8 +56,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
 class IllegalArgumentException : public std::runtime_error
 {
 public:
-	IllegalArgumentException()
-        : std::runtime_error( "IllegalArgument Exception" ) {}
+	IllegalArgumentException(const std::string & msg = std::string())
+        : std::runtime_error( "Illegal Argument Exception" + ((msg.empty())?"":(" : " + msg)) ) {}
 };
 
 #endif /*ILLEGALARGUMENTEXCEPTION_H_*/

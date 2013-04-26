@@ -58,16 +58,16 @@ Arc::Arc() {
 Arc::Arc(PetriNet* petriNet, PetriNetNode* from, PetriNetNode* to, int color)
 :PetriNetItem(petriNet){
 	if (!petriNet->isColorValid(color)) {
-		throw IllegalArgumentException();
+		throw IllegalArgumentException("Arc : Invalid color");
 	}
 
 
 	if (dynamic_cast<Place*>(from) && dynamic_cast<Place*>(to)) {
-		throw IllegalArgumentException();
+		throw IllegalArgumentException("Arc from Place to Place");
 	}
 
 	if (dynamic_cast<Transition*>(from) && dynamic_cast<Transition*>(to)) {
-		throw IllegalArgumentException();
+		throw IllegalArgumentException("Arc from Transition to Transition");
 	}
 
 	m_color = color;
@@ -88,7 +88,8 @@ Arc::Arc(PetriNet* petriNet, PetriNetNode* from, PetriNetNode* to, int color)
 	m_number = NO_NUMBER;
 
 	if (dynamic_cast<Transition*>(m_nodeTo)) {
-		((Transition*)m_nodeTo)->createBitArray();
+		((Transition*)m_nodeTo)->createBitArray(); // TODO : numbers should remain the same for all arcs, unless you have multiple colors
+
 	}
 }
 
@@ -102,7 +103,7 @@ PetriNetNode* Arc::getTo() {
 
 void Arc::changeRelativeMinTime(ExtendedInt minTime) {
 	if (minTime >= m_relativeMaxValue) {
-		throw IllegalArgumentException();
+		throw IllegalArgumentException("Arc : relativeMin > relativeMax");
 	}
 
 	m_relativeMinValue = minTime;
@@ -110,7 +111,7 @@ void Arc::changeRelativeMinTime(ExtendedInt minTime) {
 
 void Arc::changeRelativeMaxTime(ExtendedInt maxTime) {
 	if (maxTime <= m_relativeMinValue) {
-		throw IllegalArgumentException();
+		throw IllegalArgumentException("Arc : relativeMax < relativeMin");
 	}
 
 	m_relativeMaxValue = maxTime;
@@ -118,7 +119,7 @@ void Arc::changeRelativeMaxTime(ExtendedInt maxTime) {
 
 void Arc::changeRelativeTime(ExtendedInt minTime, ExtendedInt maxTime) {
 	if (maxTime <= minTime) {
-		throw IllegalArgumentException();
+		throw IllegalArgumentException("Arc : relativeMin > relativeMax (both)");
 	}
 
 	m_relativeMinValue = minTime;
@@ -127,7 +128,7 @@ void Arc::changeRelativeTime(ExtendedInt minTime, ExtendedInt maxTime) {
 
 void Arc::changeAbsoluteMinTime(ExtendedInt minTime) {
 	if (minTime >= m_absoluteMaxValue) {
-		throw IllegalArgumentException();
+		throw IllegalArgumentException("Arc : absoluteMin > absoluteMax");
 	}
 
 	m_absoluteMinValue = minTime;
@@ -135,7 +136,7 @@ void Arc::changeAbsoluteMinTime(ExtendedInt minTime) {
 
 void Arc::changeAbsoluteMaxTime(ExtendedInt maxTime) {
 	if (maxTime <= m_absoluteMinValue) {
-		throw IllegalArgumentException();
+		throw IllegalArgumentException("Arc : absoluteMax < absoluteMin");
 	}
 
 	m_absoluteMaxValue = maxTime;
@@ -143,7 +144,7 @@ void Arc::changeAbsoluteMaxTime(ExtendedInt maxTime) {
 
 void Arc::changeAbsoluteTime(ExtendedInt minTime, ExtendedInt maxTime) {
 	if (maxTime <= minTime) {
-		throw IllegalArgumentException();
+		throw IllegalArgumentException("Arc : absoluteMin > absoluteMax (both)");
 	}
 
 	m_absoluteMinValue = minTime;
@@ -164,7 +165,7 @@ void Arc::changeAbsoluteTime(ExtendedInt minTime, ExtendedInt maxTime) {
 
 int Arc::nbOfArcColorLabelTokensInFrom() {
 	if (!dynamic_cast<Place*>(m_nodeFrom)) {
-		throw IllegalArgumentException();
+		throw IllegalArgumentException("Can only count Tokens from Places");
 	}
 
 	return ((Place*)m_nodeFrom)->getNbOfTokens(getColor());
@@ -172,7 +173,7 @@ int Arc::nbOfArcColorLabelTokensInFrom() {
 
 unsigned int Arc::consumeTokenInFrom() {
 	if (!dynamic_cast<Place*>(m_nodeFrom)) {
-		throw IllegalArgumentException();
+		throw IllegalArgumentException("Can only consume Tokens from Places");
 	}
 
 	return ((Place*)m_nodeFrom)->consumeTokens(NB_OF_TOKEN_TO_CONSUME, getColor());
@@ -180,7 +181,7 @@ unsigned int Arc::consumeTokenInFrom() {
 
 void Arc::produceTokenInTo(unsigned int tokenValue) {
 	if (!dynamic_cast<Place*>(m_nodeTo)) {
-		throw IllegalArgumentException();
+		throw IllegalArgumentException("Can only produce Tokens to Places");
 	}
 
 	((Place*)m_nodeTo)->produceTokens(NB_OF_TOKEN_TO_PRODUCE, getColor(), tokenValue);
@@ -229,6 +230,6 @@ int Arc::getNumber() {
 
 Arc::~Arc() {
 	if (dynamic_cast<Transition*>(m_nodeTo)) {
-		((Transition*)m_nodeTo)->createBitArray();
+		((Transition*)m_nodeTo)->createBitArray(); // TODO : Doesn't really update the Transition bit array because the arc isn't removed from the transition's InGoingArcs
 	}
 }

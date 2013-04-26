@@ -53,7 +53,7 @@ using namespace std;
 
 Transition::Transition(PetriNet* petriNet)
 :PetriNetNode(petriNet), m_activeArcsBitArray(NULL), m_startDate(MINUS_INFINITY),
-m_endDate(PLUS_INFINITY), m_startAction(NULL), m_endAction(NULL)
+m_endDate(PLUS_INFINITY), m_startAction(NULL), m_endAction(NULL) // TODO : initialisation to NULL is implicit
 {
 	m_events.push_back(STATIC_EVENT);
 	m_mustWaitThePetriNetToEnd = false;
@@ -76,7 +76,7 @@ void Transition::setEvent(std::string s)
 	m_events.push_back(s);
 }
 
-void Transition::createBitArray()
+void Transition::createBitArray() // TODO : Should be called in addInGoingArcs
 {
 	if (m_activeArcsBitArray != NULL) {
 		delete m_activeArcsBitArray;
@@ -89,15 +89,14 @@ void Transition::createBitArray()
 		m_activeArcsBitArray = new TransitionBitArray(inGoingArcs.size());
 
 		for (unsigned int i = 0; i < inGoingArcs.size(); ++i) {
-			inGoingArcs[i]->setNumber(i);
-		}
+			inGoingArcs[i]->setNumber(i);		}
 	}
 }
 
 void Transition::resetBitArray()
 {
 	for (unsigned int i = 0 ; i < m_activeArcsBitArray->getSize() ; ++i) {
-		m_activeArcsBitArray->setToZero(i);
+		m_activeArcsBitArray->setToZero(i); // TODO : eraseArray() do that
 	}
 
 	if (m_startAction != NULL) {
@@ -149,7 +148,7 @@ void Transition::merge(Transition* transitionToMerge)
 		newArc->changeAbsoluteTime(absoluteMinValue, absoluteMaxValue);
 		newArc->changeRelativeTime(relativeMinValue, relativeMaxValue);
 
-		getPetriNet()->deleteArc(inGoingPlace, transitionToMerge);
+		getPetriNet()->deleteArc(inGoingPlace, transitionToMerge); // TODO : Arc::setTo ?
 	}
 
 	createBitArray();

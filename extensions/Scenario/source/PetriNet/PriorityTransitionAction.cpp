@@ -47,14 +47,14 @@ knowledge of the CeCILL-C license and that you accept its terms.
 #include "Transition.hpp"
 
 PriorityTransitionAction::PriorityTransitionAction(Transition* transition, short type, ExtendedInt date)
-:m_linkedTransition(transition), m_type(type), m_date(date), m_isEnable(true)
+:m_linkedTransition(transition), m_type(type), m_date(date), m_isEnable(true) // TODO : check construction of m_date (should pass INTEGER type)
 {
 	if (type != START && type != END) {
-		throw IllegalArgumentException();
+		throw IllegalArgumentException("PriorityTransitionAction : Invalid type");
 	}
 
 	if (transition == NULL) {
-		throw IllegalArgumentException();
+		throw IllegalArgumentException("PriorityTransitionAction : Invalid Transition");
 	}
 }
 

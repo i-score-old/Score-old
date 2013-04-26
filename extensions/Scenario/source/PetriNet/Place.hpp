@@ -65,7 +65,7 @@ public:
 	 *
 	 * \return the number of token (all colors taken together).
 	 */
-	int nbOfTokens();
+	int nbOfTokens(); // TODO : Refactor : getNbOfTokens (XCode won't for some reason
 
 	/*!
 	 * Gets the number of tokens in the place matching the given color.
@@ -106,7 +106,7 @@ public:
 private :
 	PetriNet* m_childPetriNet;
 
-	std::vector<std::vector<Token> > m_tokenByColor; // tokens by color.
+	std::vector<std::vector<Token>> m_tokenByColor; // tokens by color.
 
 	/*!
 	 * Default constructor.

@@ -37,7 +37,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 */
 
 #include "TransitionBitArray.hpp"
-#include <math.h>
+#include <cmath>
 
 /*!
  * \file BitArray.cpp
@@ -60,7 +60,7 @@ TransitionBitArray::TransitionBitArray(unsigned int size)
 		m_bitArray[i] = allBitToOne;
 	}
 
-	eraseArray();
+	eraseArray(); // TODO : inutile de mettre tout à un, puis un par un à zéro !!!
 }
 
 void TransitionBitArray::setToOne(unsigned int index)
@@ -95,7 +95,7 @@ void TransitionBitArray::setToZero(unsigned int index)
 void TransitionBitArray::eraseArray()
 {
 	for (unsigned int i = 0; i < getSize() ; ++i) {
-		setToZero(i);
+		setToZero(i); // TODO : inefficace d'utiliser setToZero qui ne met qu'un bit à 0 si c'est pour tout mettre à 0 ...
 	}
 }
 
