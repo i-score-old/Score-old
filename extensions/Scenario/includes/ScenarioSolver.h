@@ -79,7 +79,10 @@ public:
     
     ~SolverVariable();
     
-    /** Update the variable from the solver */
+    /** Get the variable value from the solver */
+    SolverValue get();
+    
+    /** Update the variable value from the solver */
     void update();
 };
 typedef SolverVariable* SolverVariablePtr;

@@ -410,8 +410,6 @@ TTErr TimeProcess::setStartEvent(const TTValue& value)
     if (mStartEvent) {
         mStartEvent->sendMessage(TTSymbol("Unsubscribe"), mStartEventCallback, kTTValNONE);
         mStartEvent = NULL;
-        
-        // TODO : if (mScenario) tell the scenario there is a new start event
     }
     
     if (value.size() == 1) {
@@ -423,8 +421,6 @@ TTErr TimeProcess::setStartEvent(const TTValue& value)
             // subscribe to the new start event
             if (mStartEvent)
                 return mStartEvent->sendMessage(TTSymbol("Subscribe"), mStartEventCallback, kTTValNONE);
-            
-            // TODO : if (mScenario) tell the scenario there is a new start event
         
         }
     }
@@ -445,8 +441,6 @@ TTErr TimeProcess::setEndEvent(const TTValue& value)
     if (mEndEvent) {
         mEndEvent->sendMessage(TTSymbol("Unsubscribe"), mEndEventCallback, kTTValNONE);
         mEndEvent = NULL;
-        
-        // TODO : if (mScenario) tell to the scenario there is a new end event
     }
     
     if (value.size() == 1) {
@@ -458,8 +452,7 @@ TTErr TimeProcess::setEndEvent(const TTValue& value)
             // subscribe to the new end event
             if (mEndEvent)
                 return mEndEvent->sendMessage(TTSymbol("Subscribe"), mEndEventCallback, kTTValNONE);
-            
-            // TODO : if (mScenario) tell to the scenario there is a new end event
+
         }
     }
     

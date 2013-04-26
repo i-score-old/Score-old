@@ -18,10 +18,12 @@ event(anEvent), solver(aSolver)
     // add a variable for date's event in solver
     dateID = solver->addIntVar(1, max, TTUInt32(v[0]), DATE_VARIABLE);
     
+    /* TO : this seems useless
     // add a variable for date's event range in solver
     if (range)
         rangeID = solver->addIntVar(10, max, range, RANGE_VARIABLE);    // typically for start event in our case
     else
+     */
         rangeID = solver->addIntVar(0, max, 0, RANGE_VARIABLE);         // typically for end event in our case
 }
 
@@ -32,6 +34,11 @@ SolverVariable::~SolverVariable()
     
     // remove variable for date's event from solver
     solver->removeIntVar(rangeID);
+}
+
+SolverValue SolverVariable::get()
+{
+    return solver->getVariableValue(dateID);
 }
 
 void SolverVariable::update()
