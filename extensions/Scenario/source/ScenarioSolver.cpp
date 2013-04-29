@@ -81,7 +81,7 @@ solver(aSolver)
     int IDs[4] = {startVariable->dateID, startVariable->rangeID, endVariable->dateID, endVariable->rangeID};
     int coefs[4] = {1,1,-1,-1};
     
-    ID = solver->addConstraint(IDs, coefs, 4, EQ_RELATION, 0, false);
+    ID = solver->addConstraint(IDs, coefs, 4, EQ_RELATION, 0);
 }
 
 SolverConstraint::~SolverConstraint()
@@ -126,26 +126,34 @@ SolverRelation::SolverRelation(SolverPtr aSolver, SolverVariablePtr variableA, S
 solver(aSolver), minBoundID(0), maxBoundID(0)
 {
     TTValue     vA, vB, v;
-    TTBoolean   mustCallSolver = NO;
+    TTBoolean   ordered;
     
     // check duration bounds
     if (durationMin > durationMax)
         return;
     
-    startVariable = variableA;
-    endVariable = variableB;
+    // we need to know the time order of the variables
+    variableA->event->getAttributeValue(TTSymbol("date"), vA);
+    variableB->event->getAttributeValue(TTSymbol("date"), vB);
     
-    mustCallSolver = vA >= vB;
-
+    ordered = vA < vB;
+    
+    startVariable = ordered ? variableA : variableB;
+    endVariable = ordered ? variableB : variableA;
+    
     // add ANTPOST_ANTERIORITY relation
     // (see in : CSPold addAntPostRelation and addConstraint)
     int IDs[2] = {endVariable->dateID, startVariable->dateID};
     int coefs[2] = {1,-1};
     
-    if (durationMax)
-        maxBoundID = solver->addConstraint(IDs, coefs, 2, GQ_RELATION, durationMax, NO);
+    minBoundID = solver->addConstraint(IDs, coefs, 2, GQ_RELATION, durationMin);
     
-     minBoundID = solver->addConstraint(IDs, coefs, 2, LQ_RELATION, durationMin, mustCallSolver);
+    if (durationMax)
+        maxBoundID = solver->addConstraint(IDs, coefs, 2, LQ_RELATION, durationMax);
+    
+    // update the solver in case of reversed relation
+    if (!ordered)
+        solver->updateVariablesValues();
 }
 
 SolverRelation::~SolverRelation()
@@ -187,21 +195,28 @@ SolverError SolverRelation::move(SolverValue newStart, SolverValue newEnd)
 SolverError SolverRelation::limit(SolverValue newDurationMin, SolverValue newDurationMax)
 {
     // remove former constraints
-    if (minBoundID)
+    if (minBoundID) {
         solver->removeConstraint(minBoundID);
+        minBoundID = 0;
+    }
     
-    if (maxBoundID)
+    if (maxBoundID) {
         solver->removeConstraint(maxBoundID);
+        maxBoundID = 0;
+    }
     
     // add new ANTPOST_ANTERIORITY relation
     // (see in : CSPold addAntPostRelation and addConstraint)
     int IDs[2] = {endVariable->dateID, startVariable->dateID};
     int coefs[2] = {1,-1};
     
-    minBoundID = solver->addConstraint(IDs, coefs, 2, GQ_RELATION, newDurationMin, true);
+    minBoundID = solver->addConstraint(IDs, coefs, 2, GQ_RELATION, newDurationMin);
     
     if (newDurationMax)
-        maxBoundID = solver->addConstraint(IDs, coefs, 2, LQ_RELATION, newDurationMax, true);
+        maxBoundID = solver->addConstraint(IDs, coefs, 2, LQ_RELATION, newDurationMax);
+    
+    // update the solver in any case
+    solver->updateVariablesValues();
     
     return SolverErrorNone;
 }

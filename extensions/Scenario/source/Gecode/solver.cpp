@@ -216,7 +216,7 @@ Solver::removeIntVar(int varID)
 }
 
 int
-Solver::addConstraint(int *varsIDs, int *varsCoeffs, int nbVars, int relType, int val, bool mustCallSolver)
+Solver::addConstraint(int *varsIDs, int *varsCoeffs, int nbVars, int relType, int val)
 {
 	vector<int> *ids = new vector<int>;
 	vector<int> *coeffs = new vector<int>;
@@ -236,16 +236,8 @@ Solver::addConstraint(int *varsIDs, int *varsCoeffs, int nbVars, int relType, in
 
 	// insert the constraint in the map
 	_constraintsMap->insert(pair<int, LinearConstraint*>(newID, newCst));
-
-	if (!mustCallSolver) {
-		return newID;
-	}
-
-	if (updateVariablesValues())
-		return newID;
-
-	removeConstraint(newID);
-	return -1;
+    
+    return newID;
 }
 
 bool

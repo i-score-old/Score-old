@@ -16,6 +16,8 @@
 TimeProcess::TimeProcess(TTValue& arguments) :
 TTObjectBase(arguments),
 mScenario(NULL),
+mDurationMin(0),
+mDurationMax(0),
 mActive(YES),
 mStartEvent(NULL),
 mStartEventCallback(NULL),
@@ -384,7 +386,7 @@ TTErr TimeProcess::getDuration(TTValue& value)
         mStartEvent->getAttributeValue(TTSymbol("date"), start);
         mEndEvent->getAttributeValue(TTSymbol("date"), end);
         
-        duration = TTUInt32(end[0]) - TTUInt32(start[0]);
+        duration = abs ( TTUInt32(end[0]) - TTUInt32(start[0]) );
         value = TTValue(duration);
         
         return kTTErrNone;

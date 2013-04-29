@@ -117,7 +117,7 @@ public :
 	bool removeIntVar(int varID);
 
 	// inserts a new entry in the relations map and return the constraint ID
-	int addConstraint(int *varsIDs, int *varsCoeffs, int nbVars, int relType, int val, bool mustCallSolver = true);
+	int addConstraint(int *varsIDs, int *varsCoeffs, int nbVars, int relType, int val);
 
 	// remove a constraint from the solver
 	bool removeConstraint(int constID); 
