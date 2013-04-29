@@ -29,3 +29,6 @@ project.xcworkspace
 # Git conflict files
 *.orig
 *.o
+
+#Doxygen generated files
+doxygen/html
