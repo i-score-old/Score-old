@@ -221,14 +221,15 @@ TTErr TimeProcess::setRigid(const TTValue& value)
         
         if (value[0].type() == kTypeBoolean) {
             
-            getDuration(v);
+            if (!getDuration(v)) {
             
-            if (TTBoolean(value[0]))
-                v.append(TTUInt32(v[0]));   // Limit(duration, duration)
-            else
-                v.prepend(TTUInt32(0));     // Limit(0, duration)
+                if (TTBoolean(value[0]))
+                    v.append(TTUInt32(v[0]));   // Limit(duration, duration)
+                else
+                    v.prepend(TTUInt32(0));     // Limit(0, duration)
             
-            return Limit(v, kTTValNONE);
+                return Limit(v, kTTValNONE);
+            }
         }
     }
     
@@ -386,10 +387,14 @@ TTErr TimeProcess::getDuration(TTValue& value)
         mStartEvent->getAttributeValue(TTSymbol("date"), start);
         mEndEvent->getAttributeValue(TTSymbol("date"), end);
         
-        duration = abs ( TTUInt32(end[0]) - TTUInt32(start[0]) );
-        value = TTValue(duration);
+        // the end must be after the start
+        if (TTUInt32(end[0]) >= TTUInt32(start[0])) {
+            
+            duration = abs ( TTUInt32(end[0]) - TTUInt32(start[0]) );
+            value = TTValue(duration);
         
-        return kTTErrNone;
+            return kTTErrNone;
+        }
     }
     
     return kTTErrGeneric;

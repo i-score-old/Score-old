@@ -26,6 +26,7 @@ sources:
   
   - source/Scenario.cpp
   - source/ScenarioSolver.cpp
+  - source/ScenarioGraph.cpp
   
 includes:
   - "."

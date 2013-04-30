@@ -97,8 +97,10 @@ mExecutionGraph(NULL)
     // Create the edition solver
     mEditionSolver = new Solver();
     
-    // Create the execution graph
-    mExecutionGraph = new PetriNet();
+    // Create extended int
+    plusInfinity = ExtendedInt(PLUS_INFINITY, 0);
+    minusInfinity = ExtendedInt(MINUS_INFINITY, 0);
+    integer0 = ExtendedInt(INTEGER, 0);
 }
 
 Scenario::~Scenario()
@@ -140,8 +142,8 @@ TTErr Scenario::getParameterNames(TTValue& value)
 TTErr Scenario::ProcessStart()
 {
     
-    // TODO : compile the PetriNet to prepare scenario execution
-    // cf : ECOMachine::compilePetriNet
+    // compile the mExecutionGraph to prepare scenario execution
+    compileScenario(0);
     
     // Trigger the first event
     mFirstEvent->sendMessage(TTSymbol("Trigger"), kTTValNONE, kTTValNONE);
@@ -160,7 +162,7 @@ TTErr Scenario::ProcessEnd()
     // Notify the end event subscribers
     mEndEvent->sendMessage(TTSymbol("Notify"));
     
-    // TODO : clear PetriNet as we don't need it until the next execution
+    // TODO : clear mExecutionGraph as we don't need it until the next execution
     
     return kTTErrNone;
 }
@@ -175,23 +177,23 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
             
             progression = inputValue[0];
             
-            // TODO : we need to update the PetriNet to process the scenario
+            // TODO : we need to update the mExecutionGraph to process the scenario
             
-            /* ADD : from PetriNet::mainThreadFunction
+            /* ADD : from mExecutionGraph::mainThreadFunction
              
-            petriNet->m_startPlace->produceTokens(1);
-            petriNet->m_endPlace->consumeTokens(petriNet->m_endPlace->nbOfTokens());
+            mExecutionGraph->m_startPlace->produceTokens(1);
+            mExecutionGraph->m_endPlace->consumeTokens(mExecutionGraph->m_endPlace->nbOfTokens());
             
-            petriNet->addTime(petriNet->getTimeOffset() * 1000);
-            //petriNet->makeOneStep();
+            mExecutionGraph->addTime(mExecutionGraph->getTimeOffset() * 1000);
+            //mExecutionGraph->makeOneStep();
             
-            while (petriNet->m_endPlace->nbOfTokens() == 0 && !petriNet->m_mustStop) {
-                petriNet->update();
+            while (mExecutionGraph->m_endPlace->nbOfTokens() == 0 && !mExecutionGraph->m_mustStop) {
+                mExecutionGraph->update();
                 
-                cout << "PetriNet::mainThreadFunction -- " << petriNet->m_currentTime << endl;
+                cout << "mExecutionGraph::mainThreadFunction -- " << mExecutionGraph->m_currentTime << endl;
             }
             
-            petriNet->m_isRunning = false;
+            mExecutionGraph->m_isRunning = false;
             */
             
             return kTTErrNone;
@@ -640,7 +642,6 @@ TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue
                     aTimeProcess->setAttributeValue(TTSymbol("endEvent"), TTObjectBasePtr(aNewTimeEvent));
                     
                     // a time process with a none static end event cannot be rigid
-                    // TODO : lookat i-score Relation::updateFlexibility() to make the same behaviour
                     v = TTBoolean(isStatic);
                     aTimeProcess->setAttributeValue(TTSymbol("rigid"), v);
                 }
@@ -683,8 +684,8 @@ TTErr Scenario::TimeProcessActiveChange(const TTValue& inputValue, TTValue& outp
             // get new active value
             active = inputValue[1];
             
-            // TODO : warn Solver (or PetriNet ?) that this time process active state have changed
-            // TODO : update all Solver (or PetriNet ?) consequences by setting time processes attributes that are affected by the consequence
+            // TODO : warn Solver (or mExecutionGraph ?) that this time process active state have changed
+            // TODO : update all Solver (or mExecutionGraph ?) consequences by setting time processes attributes that are affected by the consequence
         }
     }
     
@@ -1005,3 +1006,54 @@ TTErr ScenarioSchedulerProgressionAttributeCallback(TTPtr baton, TTValue& data)
     
     return kTTErrGeneric;
 }
+
+void ScenarioGraphTransitionTimeProcessCallBack(void* arg)
+{
+    // cf ECOProcess : processCallBack function
+    
+    TimeProcessPtr  aTimeProcess = (TimeProcessPtr) arg;
+    TTValue         v;
+    TTObjectBasePtr aScheduler;
+    TTFloat64       duration;
+    
+    // get the scheduler object of the time process
+    aTimeProcess->getAttributeValue(TTSymbol("scheduler"), v);
+    aScheduler = TTObjectBasePtr(v[0]);
+    
+    // set scheduler duration equal to the time process duration
+    aTimeProcess->getAttributeValue(TTSymbol("duration"), v);
+    
+    duration = TTUInt32(v[0]);
+    aScheduler->setAttributeValue(TTSymbol("duration"), duration);
+    
+    aScheduler->sendMessage(TTSymbol("Go"));
+}
+
+void ScenarioGraphTransitionTimeEventCallBack(void* arg)
+{
+    // cf ECOMachine : crossAControlPointCallBack function
+
+    TimeEventPtr aTimeEvent = (TimeEventPtr) arg;
+    
+	aTimeEvent->sendMessage(TTSymbol("Notify"));
+}
+/*
+void waitedTriggerPointMessageCallBack(void* arg, bool isWaited, TransitionPtr transition)
+{
+	ECOMachine* currentECOMachine = (ECOMachine*) arg;
+    
+	if (currentECOMachine->hasTriggerPointInformations(transition)) {
+		TriggerPointInformations currentTriggerPointInformations = currentECOMachine->getTriggerPointInformations(transition);
+        
+		if (currentTriggerPointInformations.m_waitedTriggerPointMessageAction != NULL) {
+			currentTriggerPointInformations.m_waitedTriggerPointMessageAction(currentECOMachine->m_waitedTriggerPointMessageArg,
+																			  isWaited,
+																			  currentTriggerPointInformations.m_triggerId,
+																			  currentTriggerPointInformations.m_boxId,
+																			  currentTriggerPointInformations.m_controlPointIndex,
+																			  currentTriggerPointInformations.m_waitedString);
+            
+		}
+	}
+}
+*/

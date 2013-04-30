@@ -18,7 +18,7 @@
 
 #include "TimeProcess.h"
 #include "ScenarioSolver.h"
-#include "PetriNet.hpp"
+#include "ScenarioGraph.h"
 
 class Scenario : public TimeProcess
 {
@@ -39,7 +39,15 @@ private :
     SolverObjectMap             mConstraintsMap;                ///< a map to store and retreive SolverConstraintPtr using TimeProcessPtr
     SolverObjectMap             mRelationsMap;                  ///< a map to store and retreive SolverRelationPtr using TimeProcessPtr
     
-    PetriNet*                   mExecutionGraph;                ///< an internal petri net to execute the scenario according time event relations
+    GraphPtr                    mExecutionGraph;                ///< an internal petri net to execute the scenario according time event relations
+    
+    GraphObjectMap              mTransitionsMap;                ///< a map to store and retreive TransitionPtr using TimeEventPtr
+	GraphObjectMap              mArcsMap;                       ///< a map to store and retreive Arc* using TimeProcessPtr
+    GraphObjectMap              mMergedTransitionsMap;          ///< a map to store and retreive TransitionPtr using another TransitionPtr
+    
+    ExtendedInt                 plusInfinity;
+	ExtendedInt                 minusInfinity;
+	ExtendedInt                 integer0;
 	
     /** Get parameters names needed by this time process
      @param	value           the returned parameter names
@@ -146,8 +154,18 @@ private :
     /** an internal method used to delete all time event attribute observers */
     void deleteTimeEventCacheElement(const TTValue& oldCacheElement);
     
+    /** an internal methods used to compile the execution graph */
+    void    compileScenario(TTUInt32 timeOffset);
+    void    compileTimeProcess(TimeProcessPtr aTimeProcess, TransitionPtr *previousTransition, TransitionPtr endTransition, TTUInt32 timeOffset);
+    void    compileInterval(TimeProcessPtr aTimeProcess);
+    void    compileTimeEvent(TimeEventPtr aTimeEvent, TTUInt32 time, TransitionPtr previousTransition, TransitionPtr currentTransition, Place* currentPlace);
+    void    compileInteractiveEvent(TimeEventPtr aTimeEvent, TTUInt32 timeOffset);
+    //void    cleanGraph(TransitionPtr endTransition);
+    
     friend TTErr TT_EXTENSION_EXPORT ScenarioSchedulerRunningAttributeCallback(TTPtr baton, TTValue& data);
     friend TTErr TT_EXTENSION_EXPORT ScenarioSchedulerProgressionAttributeCallback(TTPtr baton, TTValue& data);
+    friend void  TT_EXTENSION_EXPORT ScenarioGraphTransitionTimeProcessCallBack(void* arg);
+    friend void  TT_EXTENSION_EXPORT ScenarioGraphTransitionTimeEventCallBack(void* arg);
 };
 
 typedef Scenario* ScenarioPtr;
@@ -173,5 +191,13 @@ TTErr TT_EXTENSION_EXPORT ScenarioSchedulerRunningAttributeCallback(TTPtr baton,
  @param	data						a new progression value
  @return							an error code */
 TTErr TT_EXTENSION_EXPORT ScenarioSchedulerProgressionAttributeCallback(TTPtr baton, TTValue& data);
+
+/** The callback method used by the execution graph when a time process should start 
+ @param	arg                         a time process instance */
+void  TT_EXTENSION_EXPORT ScenarioGraphTransitionTimeProcessCallBack(void* arg);
+
+/** The callback method used by the execution graph when ...
+ @param	arg                         a time process instance */
+void  TT_EXTENSION_EXPORT ScenarioGraphTransitionTimeEventCallBack(void* arg);
 
 #endif // __SCENARIO_H__

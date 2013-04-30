@@ -15,6 +15,8 @@
 		4687769C172577FF0096DA35 /* TimeEvent.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TimeEvent.cpp; path = ../../library/TimeEventLib/TimeEvent.cpp; sourceTree = "<group>"; };
 		4687769F17258C960096DA35 /* ScenarioSolver.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScenarioSolver.h; sourceTree = "<group>"; };
 		468776A017258DFB0096DA35 /* ScenarioSolver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ScenarioSolver.cpp; sourceTree = "<group>"; };
+		46AD407017302EA400DE5F1D /* ScenarioGraph.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ScenarioGraph.cpp; sourceTree = "<group>"; };
+		46CB6ADE172F1A360082755B /* ScenarioGraph.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScenarioGraph.h; sourceTree = "<group>"; };
 		46F4622A16F13E9B0092840F /* Arc.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Arc.cpp; sourceTree = "<group>"; };
 		46F4622B16F13E9B0092840F /* Arc.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Arc.hpp; sourceTree = "<group>"; };
 		46F4622D16F13E9B0092840F /* ArithmeticException.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ArithmeticException.hpp; sourceTree = "<group>"; };
@@ -103,6 +105,7 @@
 			children = (
 				4617A80E16ECF937007A6E44 /* Scenario.h */,
 				4687769F17258C960096DA35 /* ScenarioSolver.h */,
+				46CB6ADE172F1A360082755B /* ScenarioGraph.h */,
 			);
 			path = includes;
 			sourceTree = "<group>";
@@ -112,6 +115,7 @@
 			children = (
 				4617A81016ECF93D007A6E44 /* Scenario.cpp */,
 				468776A017258DFB0096DA35 /* ScenarioSolver.cpp */,
+				46AD407017302EA400DE5F1D /* ScenarioGraph.cpp */,
 				46F4624716F149130092840F /* CSP */,
 				46F4626316F14AD20092840F /* Gecode */,
 				46F4622916F13E9B0092840F /* PetriNet */,
