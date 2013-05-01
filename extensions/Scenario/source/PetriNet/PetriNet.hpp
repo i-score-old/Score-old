@@ -69,15 +69,15 @@ struct priorityTransitionActionComparison {
   }
 };
 
-typedef std::vector<Transition*> transitionList;
-typedef std::vector<Place*> placeList;
-typedef std::list<std::string> stringList;
+typedef std::vector<Transition*>    transitionList;
+typedef std::vector<Place*>         placeList;
+typedef std::list<std::string>      stringList;
 
 typedef std::priority_queue<PriorityTransitionAction*,
 	 						std::vector<PriorityTransitionAction *,
-	 								    std::allocator<PriorityTransitionAction*> >,
+                            std::allocator<PriorityTransitionAction*> >,
 	 					    priorityTransitionActionComparison >
-		priorityTransitionActionQueue;
+        priorityTransitionActionQueue;
 
 /*!
  * \class PetriNet
@@ -113,27 +113,29 @@ public:
 	 * Destructor.
 	 */
 	~PetriNet();
+    
+    /*!
+	 * Start the petriNet
+     */
+	void start();
 
 	/*!
-	 * Modifies the PetriNet according to the current time.
+	 * Modifies the PetriNet according to the current time in ms
+     * \return true if the step have been processed, false if there is not more step
 	 */
-	void makeOneStep();
+	bool makeOneStep(unsigned int currentTime);
 
 	friend void externLaunch(void* arg);
-
-    /*!
-	 * Set the PetriNet current time.
-	 *
-	 * \param a new current time in millisecond
-	 */
-    void setCurrentTimeInMs(double currentTimeInMs);
     
-	/*!
-	 * Get the PetriNet current time.
-	 *
-	 * \return the PetriNet current time.
-	 */
-	unsigned int getCurrentTimeInMs();
+    /*
+     *  Get the current time stored when the mekeOneStep is called
+     */
+    unsigned int getCurrentTimeInMs();
+    
+    /*
+     *  Get the running state
+     */
+    bool isRunning();
 
 	/*!
 	 * Tests the validity of a color (>1 and <= number of colors)
@@ -174,7 +176,6 @@ public:
 	 * \param event : event to add.
 	 */
 	void putAnEvent(std::string event);
-
 
 	/*!
 	 * Tests if an particular event was received by this Petri Network.
@@ -257,8 +258,7 @@ public:
 	 * \param t : transition to set as sensitized.
 	 */
 	void turnIntoSensitized(Transition* t);
-//
-//
+
 //	/*!
 //	 * Specifies the given transition as unsensitized.
 //	 * If it still has token in one of its predecessors,
@@ -281,7 +281,6 @@ public:
 	void setEndPlace(Place* place);
 	Place* getEndPlace();
 
-	bool isRunning();
 	void mustStop();
 
 	friend void externMustStop(void* arg);
@@ -349,9 +348,6 @@ public:
 	void setUpdateFactor(float updateFactor);
 	float getUpdateFactor();
 
-	void setTimeOffset(unsigned int timeOffset);
-	unsigned int getTimeOffset();
-
 	void ignoreEventsForOneStep();
 
 	void addWaitedTriggerPointMessageAction(void* arg, void(*pt2Func)(void *, bool, Transition*));
@@ -363,14 +359,13 @@ public:
 
 	void print();
 
-	friend void* mainThreadFunction(void* theadArg);
-
 private:
 	PetriNet* m_parentPetriNet;
 	std::map<PetriNet*, PetriNet*> m_childrenPetriNet;
 	std::map<PetriNet*, PetriNet*> m_activeChildPetriNet;
-
-	unsigned int m_currentTime; // current time of this petriNet in microsecondes.
+    
+    unsigned int m_currentTime; // we need to store it because transitions ask for
+    unsigned int m_isRunning;   // we need to store it because transitions ask for
 
 	unsigned int m_nbColors; // number of colors.
 
@@ -384,11 +379,8 @@ private:
 
 	pthread_t m_thread;
 	bool m_mustStop;
-	bool m_isRunning;
 
 	ThreadSafeList m_incomingEvents; // list of events (strings).
-
-	long long m_previousCallOfMakeOneStepInMs;
 
 //	/*
 //	 * A transition is active when it has at least one predecessor with
@@ -409,8 +401,6 @@ private:
 
 	void (*m_waitedTriggerPointMessageAction)(void*, bool, Transition*);
 	void* m_waitedTriggerPointMessageArgument;
-
-	unsigned int m_timeOffset;
 
 	// Private function only used to factorize the program.
 	Arc* newArc(PetriNetNode* from, PetriNetNode* to, int color);

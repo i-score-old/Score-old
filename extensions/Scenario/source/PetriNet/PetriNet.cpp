@@ -54,9 +54,9 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 using namespace std;
 
-PetriNet::PetriNet(unsigned int nbColors)
-: m_currentTime(0), m_nbColors((nbColors > 0)?nbColors:1), m_previousCallOfMakeOneStepInMs(0)
-,m_mustCrossAllTransitionWithoutWaitingEvent(false)
+PetriNet::PetriNet(unsigned int nbColors):
+m_nbColors((nbColors > 0)?nbColors:1),
+m_mustCrossAllTransitionWithoutWaitingEvent(false)
 {
 	m_parentPetriNet = NULL;
 
@@ -65,124 +65,140 @@ PetriNet::PetriNet(unsigned int nbColors)
 	m_waitedTriggerPointMessageArgument = NULL;
 
 	m_mustStop = false;
-	m_isRunning = false;
-
-	m_timeOffset = 0;
-
-	resetEvents();
-}
-
-void PetriNet::makeOneStep()
-{
-    // NOTE : the scenario have to set the current time before to call makeOneStep() using PetriNet::setCurrentTimeInMs
     
-	bool stop = false;
-
-	while (!stop) {
-		if (m_priorityTransitionsActionQueue.size() == 0) {
-			stop = true;
-		} else {
-			PriorityTransitionAction* topAction = getTopActionOnPriorityQueue();
-
-			if (!topAction->isEnable()) {
-				removeTopActionOnPriorityQueue();
-			} else if ((unsigned int) topAction->getDate().getValue() > getCurrentTimeInMs()) {
-				stop = true;
-			} else {
-				Transition* topTransition = topAction->getTransition();
-
-				if (topAction->getType() == START) {
-					if (topTransition->couldBeSensitize()) {
-						turnIntoSensitized(topTransition);
-
-						if (m_waitedTriggerPointMessageAction != NULL) {
-							m_waitedTriggerPointMessageAction(m_waitedTriggerPointMessageArgument, true, topTransition);
-						}
-
-						removeTopActionOnPriorityQueue();
-					} else {
-						topAction->setDate(getCurrentTimeInMs() + 1);
-						removeTopActionOnPriorityQueue();
-						m_priorityTransitionsActionQueue.push(topAction);
-					}
-
-					//stop = true;
-				} else {
-					if (topTransition->areAllInGoingArcsActive()) {
-						topTransition->crossTransition(true, getCurrentTimeInMs() - topAction->getDate().getValue());
-						removeTopActionOnPriorityQueue();
-					} else {
-						removeTopActionOnPriorityQueue();
-						throw IncoherentStateException();
-					}
-				}
-			}
-		}
-	}
-
-    // among all sensitized transitions
-	for (unsigned int i = 0 ; i < m_sensitizedTransitions.size() ; ++i) {
-        
-		Transition* sensitizedTransitionToTestTheEvent;
-		sensitizedTransitionToTestTheEvent = m_sensitizedTransitions[i];
-
-        // if all the going arc are not active
-		if (!sensitizedTransitionToTestTheEvent->areAllInGoingArcsActive()) {
-
-            //remove the sensitized transition
-			m_sensitizedTransitions.erase(m_sensitizedTransitions.begin() + i);
-			--i;
-
-            // ?
-			if (m_waitedTriggerPointMessageAction != NULL) {
-				m_waitedTriggerPointMessageAction(m_waitedTriggerPointMessageArgument, false, sensitizedTransitionToTestTheEvent);
-			}
-
-		}
-        
-        // cf triggerpoint : else check if the transition event is part of the recent incomming events (or if all transition have to pass)
-        else if (isAnEvent(sensitizedTransitionToTestTheEvent->getEvent()) || m_mustCrossAllTransitionWithoutWaitingEvent){
-
-			if (sensitizedTransitionToTestTheEvent->isStatic()) {
-				sensitizedTransitionToTestTheEvent->crossTransition(true, getCurrentTimeInMs() - sensitizedTransitionToTestTheEvent->getStartDate().getValue());
-			} else {
-				sensitizedTransitionToTestTheEvent->crossTransition(true,0);
-			}
-
-			m_sensitizedTransitions.erase(m_sensitizedTransitions.begin() + i);
-			--i;
-
-			if (m_waitedTriggerPointMessageAction != NULL) {
-				m_waitedTriggerPointMessageAction(m_waitedTriggerPointMessageArgument, false, sensitizedTransitionToTestTheEvent);
-			}
-		}
-	}
+    m_currentTime = 0;
+    m_isRunning = false;
 
 	resetEvents();
-
-	while(!m_transitionsToCrossWhenAcceleration.empty()) {
-		Transition* currentTransition = m_transitionsToCrossWhenAcceleration.back();
-
-		if (currentTransition->areAllInGoingArcsActive()) {
-			currentTransition->crossTransition(false, 0);
-		} else {
-			throw IncoherentStateException();
-		}
-
-		m_transitionsToCrossWhenAcceleration.pop_back();
-	}
-
-	m_transitionsToCrossWhenAcceleration.clear();
 }
 
-void PetriNet::setCurrentTimeInMs(double currentTimeInMs)
+void PetriNet::start()
 {
-    m_currentTime = currentTimeInMs * 1000;
+    m_startPlace->produceTokens(1);
+    m_endPlace->consumeTokens(m_endPlace->nbOfTokens());
+    
+    m_isRunning = true;
+}
+
+bool PetriNet::makeOneStep(unsigned int currentTime)
+{
+    m_currentTime = currentTime;
+    
+    if (m_endPlace->nbOfTokens() == 0 && !m_mustStop) {
+        
+        bool stop = false;
+        
+        while (!stop) {
+            if (m_priorityTransitionsActionQueue.size() == 0) {
+                stop = true;
+            } else {
+                PriorityTransitionAction* topAction = getTopActionOnPriorityQueue();
+                
+                if (!topAction->isEnable()) {
+                    removeTopActionOnPriorityQueue();
+                } else if ((unsigned int) topAction->getDate().getValue() > currentTime) {
+                    stop = true;
+                } else {
+                    Transition* topTransition = topAction->getTransition();
+                    
+                    if (topAction->getType() == START) {
+                        if (topTransition->couldBeSensitize()) {
+                            turnIntoSensitized(topTransition);
+                            
+                            if (m_waitedTriggerPointMessageAction != NULL) {
+                                m_waitedTriggerPointMessageAction(m_waitedTriggerPointMessageArgument, true, topTransition);
+                            }
+                            
+                            removeTopActionOnPriorityQueue();
+                        } else {
+                            topAction->setDate(currentTime + 1);
+                            removeTopActionOnPriorityQueue();
+                            m_priorityTransitionsActionQueue.push(topAction);
+                        }
+                        
+                        //stop = true;
+                    } else {
+                        if (topTransition->areAllInGoingArcsActive()) {
+                            topTransition->crossTransition(true, currentTime - topAction->getDate().getValue());
+                            removeTopActionOnPriorityQueue();
+                        } else {
+                            removeTopActionOnPriorityQueue();
+                            throw IncoherentStateException();
+                        }
+                    }
+                }
+            }
+        }
+        
+        // among all sensitized transitions
+        for (unsigned int i = 0 ; i < m_sensitizedTransitions.size() ; ++i) {
+            
+            Transition* sensitizedTransitionToTestTheEvent;
+            sensitizedTransitionToTestTheEvent = m_sensitizedTransitions[i];
+            
+            // if all the going arc are not active
+            if (!sensitizedTransitionToTestTheEvent->areAllInGoingArcsActive()) {
+                
+                //remove the sensitized transition
+                m_sensitizedTransitions.erase(m_sensitizedTransitions.begin() + i);
+                --i;
+                
+                // ?
+                if (m_waitedTriggerPointMessageAction != NULL) {
+                    m_waitedTriggerPointMessageAction(m_waitedTriggerPointMessageArgument, false, sensitizedTransitionToTestTheEvent);
+                }
+                
+            }
+            
+            // cf triggerpoint : else check if the transition event is part of the recent incomming events (or if all transition have to pass)
+            else if (isAnEvent(sensitizedTransitionToTestTheEvent->getEvent()) || m_mustCrossAllTransitionWithoutWaitingEvent){
+                
+                if (sensitizedTransitionToTestTheEvent->isStatic()) {
+                    sensitizedTransitionToTestTheEvent->crossTransition(true, currentTime - sensitizedTransitionToTestTheEvent->getStartDate().getValue());
+                } else {
+                    sensitizedTransitionToTestTheEvent->crossTransition(true,0);
+                }
+                
+                m_sensitizedTransitions.erase(m_sensitizedTransitions.begin() + i);
+                --i;
+                
+                if (m_waitedTriggerPointMessageAction != NULL) {
+                    m_waitedTriggerPointMessageAction(m_waitedTriggerPointMessageArgument, false, sensitizedTransitionToTestTheEvent);
+                }
+            }
+        }
+        
+        resetEvents();
+        
+        while(!m_transitionsToCrossWhenAcceleration.empty()) {
+            Transition* currentTransition = m_transitionsToCrossWhenAcceleration.back();
+            
+            if (currentTransition->areAllInGoingArcsActive()) {
+                currentTransition->crossTransition(false, 0);
+            } else {
+                throw IncoherentStateException();
+            }
+            
+            m_transitionsToCrossWhenAcceleration.pop_back();
+        }
+        
+        m_transitionsToCrossWhenAcceleration.clear();
+        
+        return true;
+    }
+    
+    m_isRunning = false;
+    return false;
 }
 
 unsigned int PetriNet::getCurrentTimeInMs()
 {
-	return m_currentTime / 1000;
+    return m_currentTime;
+}
+
+bool PetriNet::isRunning()
+{
+    return m_isRunning;
 }
 
 bool PetriNet::isColorValid(unsigned int color)
@@ -439,11 +455,6 @@ stringList PetriNet::getEvents()
 	return m_incomingEvents.getList();
 }
 
-bool PetriNet::isRunning()
-{
-	return m_isRunning;
-}
-
 void PetriNet::mustStop()
 {
 	m_mustStop = true;
@@ -496,16 +507,6 @@ void PetriNet::setUpdateFactor(float updateFactor)
 float PetriNet::getUpdateFactor()
 {
 	return m_updateFactor;
-}
-
-void PetriNet::setTimeOffset(unsigned int timeOffset)
-{
-	m_timeOffset = timeOffset;
-}
-
-unsigned int PetriNet::getTimeOffset()
-{
-	return m_timeOffset;
 }
 
 void PetriNet::ignoreEventsForOneStep()
