@@ -851,7 +851,7 @@ void Scenario::makeTimeEventCacheElement(TimeEventPtr aTimeEvent, TTValue& newCa
     TTValuePtr		triggerBaton;
     TTErr           err;
 	
-	// 0 : cache time process object
+	// 0 : cache time event object
 	newCacheElement.append((TTObjectBasePtr)aTimeEvent);
     
     // 1 : create and cache event trigger message observer on this time event
