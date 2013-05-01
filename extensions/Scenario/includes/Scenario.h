@@ -70,7 +70,7 @@ private :
     
     /** Compile the scenario to prepare the petri net before execution
      @return                an error code returned by the compile method */
-    //TTErr   Compile();
+    TTErr   Compile();
     
     /**  needed to be handled by a TTXmlHandler
      @param	inputValue      ..

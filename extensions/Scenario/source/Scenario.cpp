@@ -42,6 +42,8 @@ mExecutionGraph(NULL)
     
 	TT_ASSERT("Correct number of args to create Scenario", arguments.size() == 0);
     
+    addMessage(Compile);
+    
     addMessageWithArguments(TimeProcessAdd);
     addMessageProperty(TimeProcessAdd, hidden, YES);
     
@@ -141,9 +143,13 @@ TTErr Scenario::getParameterNames(TTValue& value)
 
 TTErr Scenario::ProcessStart()
 {
+    // start the execution graph
+    mExecutionGraph->start();
     
-    // compile the mExecutionGraph to prepare scenario execution
-    compileScenario(0);
+    // TODO : deal with the timeOffset
+    // problem : if we offset the scheduler time it will never call ProcessStart method (called when progression == 0)
+    // idea : add the offset afterward ? for any time process or is this specific to a scenario ?
+    //mExecutionGraph->addTime(mExecutionGraph->getTimeOffset() * 1000);
     
     // Trigger the first event
     mFirstEvent->sendMessage(TTSymbol("Trigger"), kTTValNONE, kTTValNONE);
@@ -162,14 +168,13 @@ TTErr Scenario::ProcessEnd()
     // Notify the end event subscribers
     mEndEvent->sendMessage(TTSymbol("Notify"));
     
-    // TODO : clear mExecutionGraph as we don't need it until the next execution
-    
     return kTTErrNone;
 }
 
 TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTFloat64 progression;
+    TTFloat64   progression, realTime;
+    TTValue     v;
     
     if (inputValue.size() == 1) {
         
@@ -177,30 +182,31 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
             
             progression = inputValue[0];
             
-            // TODO : we need to update the mExecutionGraph to process the scenario
+            // TODO : the SchedulerLib should also returns the realtime
+            mScheduler->getAttributeValue(TTSymbol("realTime"), v);
+            realTime = v[0];
             
-            /* ADD : from mExecutionGraph::mainThreadFunction
-             
-            mExecutionGraph->m_startPlace->produceTokens(1);
-            mExecutionGraph->m_endPlace->consumeTokens(mExecutionGraph->m_endPlace->nbOfTokens());
+            // update the mExecutionGraph to process the scenario
+            if (mExecutionGraph->makeOneStep(realTime))
+                return kTTErrNone;
             
-            mExecutionGraph->addTime(mExecutionGraph->getTimeOffset() * 1000);
-            //mExecutionGraph->makeOneStep();
+            else
+                // stop the scenario
+                return this->sendMessage(TTSymbol("Stop"));
             
-            while (mExecutionGraph->m_endPlace->nbOfTokens() == 0 && !mExecutionGraph->m_mustStop) {
-                mExecutionGraph->update();
-                
-                cout << "mExecutionGraph::mainThreadFunction -- " << mExecutionGraph->m_currentTime << endl;
-            }
-            
-            mExecutionGraph->m_isRunning = false;
-            */
-            
-            return kTTErrNone;
         }
     }
     
     return kTTErrGeneric;
+}
+
+TTErr Scenario::Compile()
+{
+    // compile the mExecutionGraph to prepare scenario execution
+    // TODO : pass a time offset
+    compileScenario(0);
+    
+    return kTTErrNone;
 }
 
 TTErr Scenario::TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue)

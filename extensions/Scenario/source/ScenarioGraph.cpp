@@ -34,13 +34,13 @@ void Scenario::compileScenario(TTUInt32 timeOffset)
 	//mExecutionGraph->addWaitedTriggerPointMessageAction(this, triggerAction);
     
 	// start the graph
-	Place*      startPlace = mExecutionGraph->createPlace();
-	TransitionPtr startTransition = mExecutionGraph->createTransition();
-	Arc*        startArc = mExecutionGraph->createArc(startPlace, startTransition);
+	Place*          startPlace = mExecutionGraph->createPlace();
+	TransitionPtr   startTransition = mExecutionGraph->createTransition();
+	Arc*            startArc = mExecutionGraph->createArc(startPlace, startTransition);
     
-	Place*      endPlace = mExecutionGraph->createPlace();
-	TransitionPtr endTransition = mExecutionGraph->createTransition();
-	Arc*        endArc = mExecutionGraph->createArc(endTransition, endPlace);
+	Place*          endPlace = mExecutionGraph->createPlace();
+	TransitionPtr   endTransition = mExecutionGraph->createTransition();
+	Arc*            endArc = mExecutionGraph->createArc(endTransition, endPlace);
     
 	mExecutionGraph->setStartPlace(startPlace);
 	mExecutionGraph->setEndPlace(endPlace);
@@ -50,7 +50,7 @@ void Scenario::compileScenario(TTUInt32 timeOffset)
     
     // TODO : sort the time process to order them in time (?)
     
-    // compile all time processes except the interval process
+    // compile all time processes except the interval processes
     TransitionPtr previousTransition = startTransition;
     for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
         
@@ -60,7 +60,7 @@ void Scenario::compileScenario(TTUInt32 timeOffset)
             compileTimeProcess(aTimeProcess, &previousTransition, endTransition, timeOffset);
 	}
     
-	// compile intervals
+	// compile intervals processes
     for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
         
         aTimeProcess = TimeProcessPtr(TTObjectBasePtr(mTimeProcessList.current()[0]));
@@ -77,11 +77,9 @@ void Scenario::compileScenario(TTUInt32 timeOffset)
         
         aTimeEvent = TimeEventPtr(TTObjectBasePtr(mTimeEventList.current()[0]));
         
-        if (aTimeProcess->getName() != TTSymbol("Static"))
+        if (aTimeEvent->getName() != TTSymbol("StaticEvent"))
             compileInteractiveEvent(aTimeEvent, timeOffset);
 	}
-    
-	mExecutionGraph->setTimeOffset(timeOffset);
 }
 
 void Scenario::compileTimeProcess(TimeProcessPtr aTimeProcess, TransitionPtr* previousTransition, TransitionPtr endTransition, TTUInt32 timeOffset)
@@ -106,11 +104,11 @@ void Scenario::compileTimeProcess(TimeProcessPtr aTimeProcess, TransitionPtr* pr
     endEvent = TimeEventPtr(TTObjectBasePtr(v[0]));
     
     // get start event date
-    aTimeProcess->getAttributeValue(TTSymbol("startEventDate"), v);
+    aTimeProcess->getAttributeValue(TTSymbol("startDate"), v);
     startDate = TTUInt32(v[0]);
     
     // get end event date
-    aTimeProcess->getAttributeValue(TTSymbol("endEventDate"), v);
+    aTimeProcess->getAttributeValue(TTSymbol("endDate"), v);
     endDate = TTUInt32(v[0]);
     
     // if the date to start is in the middle of a time process
