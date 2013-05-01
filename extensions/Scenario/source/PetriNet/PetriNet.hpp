@@ -74,8 +74,7 @@ typedef std::vector<Place*>         placeList;
 typedef std::list<std::string>      stringList;
 
 typedef std::priority_queue<PriorityTransitionAction*,
-	 						std::vector<PriorityTransitionAction *,
-                            std::allocator<PriorityTransitionAction*> >,
+	 						std::vector<PriorityTransitionAction *, std::allocator<PriorityTransitionAction*> >,
 	 					    priorityTransitionActionComparison >
         priorityTransitionActionQueue;
 
