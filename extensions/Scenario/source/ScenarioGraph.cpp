@@ -419,54 +419,234 @@ void Scenario::compileInteractiveEvent(TimeEventPtr aTimeEvent, TTUInt32 timeOff
     }
 }
 /*
- void Scenario::cleanGraph(TransitionPtr endTransition)
- {
- if (mExecutionGraph == NULL)
- return;
- 
- map<TransitionPtr, set<TransitionPtr> >* transitionsSets = new map<TransitionPtr, set<TransitionPtr> >;
- 
- if (endTransition == NULL)
- computeTransitionsSet(endTransition, transitionsSets);
- 
- map<TransitionPtr, set<TransitionPtr> >::iterator it  = transitionsSets->begin();
- while (it != transitionsSets->end())
- {
- TransitionPtr                 currentTransition = it->first;
- set<TransitionPtr>            currentSet = it->second;
- set<Place*>                 successorsOfNDepth;
- set<Place*>                 currentTransitionPredecessors;
- set<Place*>                 placesToDelete;
- set <TransitionPtr>::iterator transitionSetIterator;
- set <Place*>::iterator      placeSetIterator;
- 
- for (transitionSetIterator = currentSet.begin(); transitionSetIterator != currentSet.end(); transitionSetIterator++) {
- 
- petriNetNodeList    successors = (*transitionSetIterator)->returnSuccessors();
- set<Place*>         successorsOfNDepthTemp;
- 
- for (unsigned int i = 0; i < successors.size() ; ++i)
- successorsOfNDepthTemp.insert((Place*) successors[i]);
- 
- successorsOfNDepth.insert(successorsOfNDepthTemp.begin(), successorsOfNDepthTemp.end());
- }
- 
- petriNetNodeList predecessors = currentTransition->returnPredecessors();
- 
- for (unsigned int i = 0; i < predecessors.size() ; ++i)
- currentTransitionPredecessors.insert((Place*) predecessors[i]);
- 
- set_intersection(successorsOfNDepth.begin(),successorsOfNDepth.end(),
- currentTransitionPredecessors.begin(),currentTransitionPredecessors.end(),
- std::inserter( placesToDelete, placesToDelete.end() ) );
- 
- for (placeSetIterator = placesToDelete.begin(); placeSetIterator != placesToDelete.end(); placeSetIterator++) {
- Place* currentPlaceToDelete = *placeSetIterator;
- mExecutionGraph->deleteItem(currentPlaceToDelete);
- }
- 
- ++it;
- }
- }
- */
+void Scenario::cleanGraph(TransitionPtr endTransition)
+{
+    if (mExecutionGraph == NULL)
+        return;
+    
+    map<TransitionPtr, set<TransitionPtr> >* transitionsSets = new map<TransitionPtr, set<TransitionPtr> >;
+    
+    if (endTransition == NULL)
+        computeTransitionsSet(endTransition, transitionsSets);
+    
+    map<TransitionPtr, set<TransitionPtr> >::iterator it  = transitionsSets->begin();
+    while (it != transitionsSets->end())
+    {
+        TransitionPtr                 currentTransition = it->first;
+        set<TransitionPtr>            currentSet = it->second;
+        set<Place*>                 successorsOfNDepth;
+        set<Place*>                 currentTransitionPredecessors;
+        set<Place*>                 placesToDelete;
+        set <TransitionPtr>::iterator transitionSetIterator;
+        set <Place*>::iterator      placeSetIterator;
+        
+        for (transitionSetIterator = currentSet.begin(); transitionSetIterator != currentSet.end(); transitionSetIterator++) {
+            
+            petriNetNodeList    successors = (*transitionSetIterator)->returnSuccessors();
+            set<Place*>         successorsOfNDepthTemp;
+            
+            for (unsigned int i = 0; i < successors.size() ; ++i)
+                successorsOfNDepthTemp.insert((Place*) successors[i]);
+            
+            successorsOfNDepth.insert(successorsOfNDepthTemp.begin(), successorsOfNDepthTemp.end());
+        }
+        
+        petriNetNodeList predecessors = currentTransition->returnPredecessors();
+        
+        for (unsigned int i = 0; i < predecessors.size() ; ++i)
+            currentTransitionPredecessors.insert((Place*) predecessors[i]);
+        
+        set_intersection(successorsOfNDepth.begin(),successorsOfNDepth.end(),
+                         currentTransitionPredecessors.begin(),currentTransitionPredecessors.end(),
+                         std::inserter( placesToDelete, placesToDelete.end() ) );
+        
+        for (placeSetIterator = placesToDelete.begin(); placeSetIterator != placesToDelete.end(); placeSetIterator++) {
+            Place* currentPlaceToDelete = *placeSetIterator;
+            mExecutionGraph->deleteItem(currentPlaceToDelete);
+        }
+        
+        ++it;
+    }
+}
+*/
 
+#ifdef NEW_GRAPH
+// Trying to rewrite PetriNet::makeOneStep method with the TimeEventLib and TimeProcessLib formalism
+
+/* About TimeEvent :
+    
+    we will certainly need to have :
+        - the date attribute (choosen during edition time)
+        - the execution date attribute (being incremented during the execution)
+    or we could memorize all time event dates during compilation and then set those dates back when the scenario stops ?
+ 
+    we will also need to know if the time event is a start event of a time process (but not to an interval !)
+    how to do that ?
+ 
+    we will also need a way to status about what they call "waited" : one more attribute or a combination of several boolean state ?
+ 
+*/ 
+
+/* About m_priorityTransitionsActionQueue :
+ 
+    The m_priorityTransitionsActionQueue is filled in Transition::setArcAsActive method which is called in :
+ 
+        - a Transition::crossTransition which is only called in :
+            - PetriNet::makeOneStep             => could a Scenario observes the Notify method of a TimeEvent ?
+ 
+        - a Place::produceTokens which is called in :
+            - PetriNet::start                   => could it be done in Scenario::ProcessStart in other way ?
+ 
+            - Arc::produceTokenInTo which is only called in :
+                - Transition::crossTransition   => same question as above
+    
+    So is the mTimeEventList and the mTimeProcessList can provide us enough information to fill a timeEventQueue in the same way ?
+ 
+*/
+
+/* About sensitize notion :
+ 
+    A transition couldBeSensitize if it haven't to wait another petri net to end (certainly relative to hierachy managment ...).
+    
+    Sensitize a transition means to move the transition from the m_priorityTransitionsActionQueue to the m_sensitizedTransitions list.
+    If a transition cannot be sensitize, the transition is move to the tail of the list and his "execution" date is incremented.
+ 
+    So maybe we could have a timeEventReadyList
+*/
+
+bool Scenario::step(TTUInt32 currentTimeInMs)
+{
+    TTBoolean stop = NO;
+    
+    if (NO) // TODO : check there is one more step to do
+        return NO;
+    
+    // process events in the timeEventQueue
+    while (!stop) {
+        
+        // TODO : if there is no more event in the timeEventQueue : stop
+        if (m_priorityTransitionsActionQueue.size() == 0) {
+            
+            stop = true;
+        }
+        else {
+            
+            // TODO : get the event in a timeEventQueue
+            PriorityTransitionAction* topAction = getTopActionOnPriorityQueue();
+            
+            // TODO : if the event is not active
+            if (!topAction->isEnable()) {
+                
+                removeTopActionOnPriorityQueue();
+            }
+            // TODO : or if the event have to append later
+            else if ((unsigned int) topAction->getDate().getValue() > currentTime) {
+                
+                stop = true;
+            }
+            else {
+                
+                Transition* topTransition = topAction->getTransition();
+                
+                // TODO : is the event a start event of a time process (but not to an interval process) ?
+                if (topAction->getType() == START) {
+                    
+                    // NOTE : this should be always true ...
+                    if (topTransition->couldBeSensitize()) {
+                        
+                        // TODO : append the event to the timeEventReadyList
+                        turnIntoSensitized(topTransition);
+                        
+                        // TODO : set "waited" state of the event
+                        if (m_waitedTriggerPointMessageAction != NULL)
+                            m_waitedTriggerPointMessageAction(m_waitedTriggerPointMessageArgument, true, topTransition);
+                        
+                        // TODO : remove the event from the timeEventQueue
+                        removeTopActionOnPriorityQueue();
+                        
+                    }
+                    // NOTE : this should never append ...
+                    else {
+                        topAction->setDate(currentTime + 1);
+                        removeTopActionOnPriorityQueue();
+                        m_priorityTransitionsActionQueue.push(topAction);
+                    }
+                    
+                }
+                else {
+                    
+                    // TODO : err = timeEvent->sendMessage(TTSymbol("Notify"));
+                    
+                    // if (!err)
+                    if (topTransition->areAllInGoingArcsActive()) {
+                        
+                        // NOTE : this should be done inside the Notify method (which is observed by the Scenario to see if it succeed or not)
+                        topTransition->crossTransition(true, currentTime - topAction->getDate().getValue());
+                        
+                        // TODO : remove the event from the timeEventQueue
+                        removeTopActionOnPriorityQueue();
+                    }
+                    else {
+                        
+                        // TODO : remove the event from the timeEventQueue
+                        removeTopActionOnPriorityQueue();
+                        
+                        // TODO : return kTTGraphErrorGeneric;
+                        throw IncoherentStateException();
+                    }
+                    
+                }
+            }
+        }
+    }
+    
+    // process events in the timeEventReadyList
+    for (unsigned int i = 0 ; i < m_sensitizedTransitions.size() ; ++i) {
+        
+        // TODO : get the event in a timeEventReadyList
+        Transition* sensitizedTransitionToTestTheEvent;
+        sensitizedTransitionToTestTheEvent = m_sensitizedTransitions[i];
+        
+        // TODO : err = timeEvent->sendMessage(TTSymbol("Notify"));
+        
+        // NOTE : if the Notify method fails (because all triggers haven't triggered)
+        if (err) {
+        // if (!sensitizedTransitionToTestTheEvent->areAllInGoingArcsActive()) {
+            
+            // TODO : set "waited" state of the event
+            if (m_waitedTriggerPointMessageAction != NULL)
+                m_waitedTriggerPointMessageAction(m_waitedTriggerPointMessageArgument, false, sensitizedTransitionToTestTheEvent);
+            
+            // TODO : remove the event from the timeEventReadyList
+            m_sensitizedTransitions.erase(m_sensitizedTransitions.begin() + i);
+            --i;
+            
+        }
+        
+        /* NOTE : this is useless here. it should be moved inside the Notify method
+         
+        else if (isAnEvent(sensitizedTransitionToTestTheEvent->getEvent()) || m_mustCrossAllTransitionWithoutWaitingEvent){
+            
+            if (sensitizedTransitionToTestTheEvent->isStatic())
+                sensitizedTransitionToTestTheEvent->crossTransition(true, currentTime - sensitizedTransitionToTestTheEvent->getStartDate().getValue());
+            else
+                sensitizedTransitionToTestTheEvent->crossTransition(true,0);
+            
+            // TODO : set "waited" state of the event
+            if (m_waitedTriggerPointMessageAction != NULL)
+                m_waitedTriggerPointMessageAction(m_waitedTriggerPointMessageArgument, false, sensitizedTransitionToTestTheEvent);
+            
+            // TODO : remove the event from the timeEventReadyList
+            m_sensitizedTransitions.erase(m_sensitizedTransitions.begin() + i);
+            --i;
+            
+        }
+         */
+    }
+    
+    // NOTE : this is useless
+    //resetEvents();
+    
+    return YES;
+}
+#endif
