@@ -76,6 +76,11 @@ mScheduler(NULL)
     addMessageWithArguments(Move);
     addMessageWithArguments(Limit);
     
+    addMessage(Play);
+    addMessage(Stop);
+    addMessage(Pause);
+    addMessage(Resume);
+    
 	// needed to be handled by a TTXmlHandler
 	addMessageWithArguments(WriteAsXml);
 	addMessageProperty(WriteAsXml, hidden, YES);
@@ -689,6 +694,42 @@ TTErr TimeProcess::Limit(const TTValue& inputValue, TTValue& outputValue)
     }
     
     return kTTErrGeneric;
+}
+
+TTErr TimeProcess::Play()
+{
+    TTFloat64       duration;
+    TTValue         v;
+    TTErr           err;
+    
+    // compile the PetriNet
+    
+    // set scheduler duration equal to the scenario duration
+    err = this->getAttributeValue(TTSymbol("duration"), v);
+    
+    if (!err) {
+        duration = TTUInt32(v[0]);
+        mScheduler->setAttributeValue(TTSymbol("duration"), duration);
+    
+        err = mScheduler->sendMessage(TTSymbol("Go"));
+    }
+    
+    return err;
+}
+
+TTErr TimeProcess::Stop()
+{
+    return mScheduler->sendMessage(TTSymbol("Stop"));
+}
+
+TTErr TimeProcess::Pause()
+{
+    return mScheduler->sendMessage(TTSymbol("Pause"));
+}
+
+TTErr TimeProcess::Resume()
+{
+    return mScheduler->sendMessage(TTSymbol("Resume"));
 }
 
 #if 0

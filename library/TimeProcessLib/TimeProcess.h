@@ -251,6 +251,26 @@ private :
      @return                an error code if the limitation fails */
     TTErr	Limit(const TTValue& inputValue, TTValue& outputValue);
     
+    /** Play the time process
+        this method eases the managment of the scheduler object
+     @return                an error code if the play fails */
+    TTErr	Play();
+    
+    /** Stop the time process
+     this method eases the managment of the scheduler object
+     @return                an error code if the stop fails */
+    TTErr	Stop();
+    
+    /** Pause the time process
+        this method eases the managment of the scheduler object
+     @return                an error code if the pause fails */
+    TTErr	Pause();
+    
+    /** Resume the time process
+        this method eases the managment of the scheduler object
+     @return                an error code if the resume fails */
+    TTErr	Resume();
+    
     friend TTErr TT_EXTENSION_EXPORT TimeProcessStartEventCallback(TTPtr baton, TTValue& data);
     friend TTErr TT_EXTENSION_EXPORT TimeProcessEndEventCallback(TTPtr baton, TTValue& data);
     friend void TT_EXTENSION_EXPORT TimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression);
