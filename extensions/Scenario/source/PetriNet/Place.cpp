@@ -91,7 +91,8 @@ unsigned int Place::consumeTokens(unsigned int nbOfTokens, unsigned int colorLab
 	return time;
 }
 
-void Place::produceTokens(unsigned int nbOfTokens, unsigned int colorLabel, unsigned int tokensTime) {
+void Place::produceTokens(unsigned int nbOfTokens, unsigned int colorLabel, unsigned int tokensTime)
+{
 	unsigned int oldNumberOfTokens = getNbOfTokens(colorLabel);
 
 	for (unsigned int i = 0; i < nbOfTokens; ++i) {
@@ -134,6 +135,26 @@ void Place::changeNbOfColors(int newNbColors) {
 	PetriNetNode::changeNbOfColors(newNbColors);
 
 	m_tokenByColor.resize(newNbColors);
+}
+
+void Place::merge(Place* placeToMerge) // CB copie améliorée de Transition::merge, à descendre dans PetriNetNode ?
+{
+    arcList mergeInGoingArcs = placeToMerge->inGoingArcsOf(); // CB vector
+    arcList mergeOutGoingArcs = placeToMerge->outGoingArcsOf(); // CB vector
+    
+    for (arcList::iterator it = mergeInGoingArcs.begin() ; it != mergeInGoingArcs.end() ; it++) {
+        Arc* newArc = getPetriNet()->createArc(it->getFrom(), this); // CB Que faire de newArc ?!?
+        newArc->changeAbsoluteTime(it->getAbsoluteMinValue, it->getAbsoluteMaxValue);
+        newArc->changeRelativeTime(it->getRelativeMinValue, it->getRelativeMaxValue);
+        getPetriNet()->deleteArc(it->getFrom(), placeToMerge);
+    }
+    
+    for (arcList::iterator it = mergeOutGoingArcs.begin() ; it != mergeOutGoingArcs.end() ; it++) {
+        Arc* newArc = getPetriNet()->createArc(this, it->getTo()); // CB Que faire de newArc ?!?
+        newArc->changeAbsoluteTime(it->getAbsoluteMinValue, it->getAbsoluteMaxValue);
+        newArc->changeRelativeTime(it->getRelativeMinValue, it->getRelativeMaxValue);
+        getPetriNet()->deleteArc(placeToMerge, it->getTo());
+    }
 }
 
 void Place::print() {

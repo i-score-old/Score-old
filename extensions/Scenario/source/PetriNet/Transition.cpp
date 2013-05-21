@@ -125,7 +125,7 @@ void Transition::resetIncomingArcsState()
 	}
 }
 
-void Transition::merge(Transition* transitionToMerge)
+void Transition::merge(Transition* transitionToMerge) // CB Attention, copie de ce code dans Place::merge
 {
 	for (unsigned int i = 0 ; i < transitionToMerge->m_externActions.size() ; ++i) {
 		m_externActions.push_back(transitionToMerge->m_externActions[i]);
@@ -134,7 +134,7 @@ void Transition::merge(Transition* transitionToMerge)
 	arcList mergeInGoingArcs = transitionToMerge->inGoingArcsOf();
 	arcList mergeOutGoingArcs = transitionToMerge->outGoingArcsOf();
 
-	for (unsigned int i = 0; i < mergeInGoingArcs.size() ; ++i) {
+	for (unsigned int i = 0; i < mergeInGoingArcs.size() ; ++i) { // CB WTF : à quel moment le nouvel arc est-il ajouté à la liste des inGoingArcs ?!?
 		Arc* currentArc = mergeInGoingArcs[i];
 
 		ExtendedInt relativeMinValue = currentArc->getRelativeMinValue();
@@ -148,12 +148,12 @@ void Transition::merge(Transition* transitionToMerge)
 		newArc->changeAbsoluteTime(absoluteMinValue, absoluteMaxValue);
 		newArc->changeRelativeTime(relativeMinValue, relativeMaxValue);
 
-		getPetriNet()->deleteArc(inGoingPlace, transitionToMerge); // TODO : Arc::setTo ?
+		getPetriNet()->deleteArc(inGoingPlace, transitionToMerge); // TODO : Arc::setTo ? +1 CB
 	}
 
 	createBitArray();
 
-	for (unsigned int i = 0; i < mergeOutGoingArcs.size() ; ++i) {
+	for (unsigned int i = 0; i < mergeOutGoingArcs.size() ; ++i) { // CB TODO : Il faudrait aussi recopier les éventuelles valeurs associées à l'arc, comme ci-dessus.
 		Arc* currentArc = mergeOutGoingArcs[i];
 
 		Place* outGoingPlace = (Place*) currentArc->getTo();

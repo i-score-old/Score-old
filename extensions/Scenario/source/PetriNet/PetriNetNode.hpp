@@ -52,7 +52,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 #include <vector>
 
-typedef std::vector<Arc*> arcList; // TODO : refactor, because later we don't know what is an arcList !
+typedef std::vector<Arc*> arcList; // TODO : refactor, because later we don't know what is an arcList ! +1 CB
 typedef std::vector<arcList> arcListByColor;
 typedef std::vector<PetriNetNode*> petriNetNodeList;
 

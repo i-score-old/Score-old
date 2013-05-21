@@ -95,6 +95,8 @@ public:
 	 * \param colorLabel : (optional) color of the tokens to produce (1 if not provided).
 	 */
 	void produceTokens(unsigned int nbOfTokens, unsigned int colorLabel = 1, unsigned int tokensTime = 0);
+    
+    void merge(Place* placeToMerge); // TODO double emploi avec le merge des transition, pourrait être descendu dans PetriNetNode
 
 	void print();
 
