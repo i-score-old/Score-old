@@ -134,7 +134,7 @@ void Transition::merge(Transition* transitionToMerge) // CB Attention, copie de 
 	arcList mergeInGoingArcs = transitionToMerge->inGoingArcsOf();
 	arcList mergeOutGoingArcs = transitionToMerge->outGoingArcsOf();
 
-	for (unsigned int i = 0; i < mergeInGoingArcs.size() ; ++i) { // CB WTF : à quel moment le nouvel arc est-il ajouté à la liste des inGoingArcs ?!?
+	for (unsigned int i = 0; i < mergeInGoingArcs.size() ; ++i) {
 		Arc* currentArc = mergeInGoingArcs[i];
 
 		ExtendedInt relativeMinValue = currentArc->getRelativeMinValue();
@@ -144,7 +144,7 @@ void Transition::merge(Transition* transitionToMerge) // CB Attention, copie de 
 
 		Place* inGoingPlace = (Place*) currentArc->getFrom();
 
-		Arc* newArc = getPetriNet()->createArc(inGoingPlace, this);
+		Arc* newArc = getPetriNet()->createArc(inGoingPlace, this); // CB calls Arc::Arc which add the Arc in the nodes' lists
 		newArc->changeAbsoluteTime(absoluteMinValue, absoluteMaxValue);
 		newArc->changeRelativeTime(relativeMinValue, relativeMaxValue);
 

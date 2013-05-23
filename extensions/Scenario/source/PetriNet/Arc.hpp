@@ -76,7 +76,7 @@ class Place;
  * An arc from a transition to a place could produce a token
  * in its color.
  */
-class Arc : public PetriNetItem
+class Arc : public PetriNetItem // CB TODO : setFrom et setTo, pour ne pas avoir à tout recopier lors des merges
 {
 public:
 	friend class PetriNet;
