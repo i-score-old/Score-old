@@ -67,7 +67,6 @@ protected:
     TTUInt32                        mDate;                          ///< ATTRIBUTE : the date of the event
     
     TTObjectBasePtr                 mState;                         ///< ATTRIBUTE : a state handled by the event
-    TTAddressItemPtr                mNamespace;
     
     TTBoolean                       mActive;                        ///< ATTRIBUTE : is the time event active ?
     

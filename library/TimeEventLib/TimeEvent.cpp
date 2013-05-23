@@ -51,6 +51,8 @@ mSubscriberOperator(NULL)
     // cache some attributes for high speed notification feedbacks
     this->findAttribute(TTSymbol("date"), &dateAttribute);
     this->findAttribute(TTSymbol("active"), &activeAttribute);
+    
+    TTObjectBaseInstantiate(kTTSym_Script, TTObjectBaseHandle(&mState), kTTValNONE);
 }
 
 TimeEvent::~TimeEvent()
@@ -58,11 +60,6 @@ TimeEvent::~TimeEvent()
     if (mState) {
         TTObjectBaseRelease(TTObjectBaseHandle(&mState));
         mState = NULL;
-    }
-    
-    if (mNamespace) {
-        delete mNamespace;
-        mNamespace = NULL;
     }
 }
 

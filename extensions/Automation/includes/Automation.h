@@ -24,26 +24,31 @@ class Automation : public TimeProcess
 	
 private :
     
-    TTObjectBasePtr				mCurves;						///< ATTRIBUTE : the curve function parameter of all rampable parameters
+    TTHash                      mCurves;						///< a table of freehand function units stored by address
 	
     /** Get parameters names needed by this time process
      @param	value           the returned parameter names
      @return                kTTErrNone */
-	TTErr getParameterNames(TTValue& value);
+	TTErr   getParameterNames(TTValue& value);
+    
+    /** Get curve addresses
+     @param	value           the returned curve addresses
+     @return                kTTErrNone */
+	TTErr   getCurveAddresses(TTValue& value);
     
     /** Specific process method on start
      @return                an error code returned by the process end method */
-    TTErr ProcessStart();
+    TTErr   ProcessStart();
     
     /** Specific process method on end
      @return                an error code returned by the process end method */
-    TTErr ProcessEnd();
+    TTErr   ProcessEnd();
     
     /** Specific process method
      @param	inputValue      progression of the scheduler
      @param	outputValue     return an error of the processing
      @return                an error code returned by the process method */
-    TTErr Process(const TTValue& inputValue, TTValue& outputValue);
+    TTErr   Process(const TTValue& inputValue, TTValue& outputValue);
     
 	/**  needed to be handled by a TTXmlHandler
      @param	inputValue      ..
@@ -58,6 +63,34 @@ private :
      @return                .. */
 	TTErr	WriteAsText(const TTValue& inputValue, TTValue& outputValue);
 	TTErr	ReadFromText(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Add a curve at an address
+     @inputvalue            address
+     @outputvalue           kTTValNONE
+     @return                an error code if the operation fails */
+    TTErr   CurveAdd(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Set curve's parameters at an address
+     @inputvalue            address x1 y1 b1 x2 y2 b2 ... 
+     @outputvalue           kTTValNONE
+     @return                an error code if the operation fails */
+    TTErr   CurveSet(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Get curve's values at an address
+     @inputvalue            address
+     @outputvalue           all x y point of the curve
+     @return                an error code if the operation fails */
+    TTErr   CurveValues(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Remove a curve at an address
+     @inputValue            address
+     @outputvalue           kTTValNONE
+     @return                an error code if the operation fails */
+    TTErr   CurveRemove(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Clear all curves
+     @return                an error code if the operation fails */
+    TTErr   Clear();
 };
 
 typedef Automation* AutomationPtr;
