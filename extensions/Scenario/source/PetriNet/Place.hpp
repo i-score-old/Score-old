@@ -95,6 +95,8 @@ public:
 	 * \param colorLabel : (optional) color of the tokens to produce (1 if not provided).
 	 */
 	void produceTokens(unsigned int nbOfTokens, unsigned int colorLabel = 1, unsigned int tokensTime = 0);
+    
+    void merge(Place* placeToMerge); // TODO double emploi avec le merge des transition, pourrait être descendu dans PetriNetNode
 
 	void print();
 
@@ -107,6 +109,10 @@ private :
 	PetriNet* m_childPetriNet;
 
 	std::vector<std::vector<Token>> m_tokenByColor; // tokens by color.
+    
+    // Functions that tells wether or not the arc can be activated.
+    std::vector<bool> m_arcConditions; // CB Devrait être un prédicat, pour l'instant, un simple booléen
+    // CB Ce vecteur est ordonné tel que l'arc et sa condition sont au même indice, peut-être envisager une map, mais difficilement compatible avec l'arcList des inGoingArcs issue de PetriNetNode
 
 	/*!
 	 * Default constructor.
