@@ -72,7 +72,7 @@ void Scenario::compileScenario(TTUInt32 timeOffset)
 	// clean the graph
 	//cleanGraph(endTransition);
     
-	// comppile interactive events
+	// compile interactive events
 	for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next()) {
         
         aTimeEvent = TimeEventPtr(TTObjectBasePtr(mTimeEventList.current()[0]));
@@ -301,10 +301,10 @@ void Scenario::compileInterval(TimeProcessPtr aTimeProcess)
 void Scenario::compileTimeEvent(TimeEventPtr aTimeEvent, TTUInt32 time, TransitionPtr previousTransition, TransitionPtr currentTransition, Place* currentPlace)
 {
     ExtendedInt timeValue;
-    Arc*        arcFromPreviousTransitionToCurrentPlace = mExecutionGraph->createArc(previousTransition, currentPlace);
     Arc*        arcFromCurrentPlaceToCurrentTransition = mExecutionGraph->createArc(currentPlace, currentTransition);
     
-    (void) arcFromPreviousTransitionToCurrentPlace;
+    // create arc from previous transition to current place
+    mExecutionGraph->createArc(previousTransition, currentPlace);
     
     timeValue.setAsInteger(time);
     arcFromCurrentPlaceToCurrentTransition->changeRelativeTime(timeValue, plusInfinity);
@@ -347,6 +347,7 @@ void Scenario::compileInteractiveEvent(TimeEventPtr aTimeEvent, TTUInt32 timeOff
         
         // prepare transition
         // TODO : we don't want to centralize the reception of network message ...
+        // idea : passer une fonction de test plutot que le message
         //currentTransition->setEvent(addNetworkMessage(aTimeEvent->getTriggerMessage()));
         currentTransition->setMustWaitThePetriNetToEnd(false);
         
