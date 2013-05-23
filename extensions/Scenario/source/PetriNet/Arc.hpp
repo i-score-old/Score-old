@@ -276,7 +276,10 @@ public:
 	 * \return arc number.
 	 */
 	int getNumber();
-
+    
+    bool getCondition(){return m_condition;} // CB TODO : should be a functionl pointer
+    
+    void setCondition(bool newCondition){m_condition = newCondition;} // CB TODO : should be a functionl pointer
 
 	// Destructor.
 	~Arc();
@@ -308,6 +311,9 @@ private:
 
 	// Number of this Arc if it goes into a transition.
 	int m_number;
+    
+    // Function that tells wether or not the arc can be activated.
+    bool m_condition; // CB TODO : Devrait être un prédicat, pour l'instant, un simple booléen
 
 	/*!
 	 * Constructor using the two nodes and a color.

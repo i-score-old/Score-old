@@ -106,7 +106,7 @@ void Place::produceTokens(unsigned int nbOfTokens, unsigned int colorLabel, unsi
 		for (unsigned int i = 0 ; i < outGoingArcs.size() ; ++i) {
 			Arc* arc = outGoingArcs[i];
             
-            if (!m_arcConditions[i]) { // CB check if the arc can be activated
+            if (!arc->getCondition()) { // CB check if the arc can be activated
                 continue;
             }
 
