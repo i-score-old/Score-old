@@ -29,21 +29,12 @@ extern "C" TT_EXTENSION_EXPORT TTErr TTLoadJamomaExtension_Automation(void)
 	return kTTErrNone;
 }
 
-TIME_PROCESS_CONSTRUCTOR,
-mStartCue(NULL),
-mEndCue(NULL),
-mNamespace(NULL)
+TIME_PROCESS_CONSTRUCTOR
 {
     TIME_PROCESS_INITIALIZE
     
 	TT_ASSERT("Correct number of args to create Automation", arguments.size() == 0);
     
-    addAttribute(StartCue, kTypeObject);
-    addAttributeProperty(StartCue, hidden, YES);
-    
-    addAttribute(EndCue, kTypeObject);
-    addAttributeProperty(StartCue, hidden, YES);
-	
 	// needed to be handled by a TTXmlHandler
 	addMessageWithArguments(WriteAsXml);
 	addMessageProperty(WriteAsXml, hidden, YES);
@@ -59,20 +50,7 @@ mNamespace(NULL)
 
 Automation::~Automation()
 {
-    if (mStartCue) {
-        TTObjectBaseRelease(TTObjectBaseHandle(&mStartCue));
-        mStartCue = NULL;
-    }
-    
-    if (mEndCue) {
-        TTObjectBaseRelease(TTObjectBaseHandle(&mEndCue));
-        mEndCue = NULL;
-    }
-    
-    if (mNamespace) {
-        delete mNamespace;
-        mNamespace = NULL;
-    }
+    ;
 }
 
 TTErr Automation::getParameterNames(TTValue& value)
@@ -86,13 +64,15 @@ TTErr Automation::getParameterNames(TTValue& value)
 TTErr Automation::ProcessStart()
 {
     // recall the start state
-    return mStartCue->sendMessage(TTSymbol("Recall"), kTTValNONE, kTTValNONE);
+    //return mStartCue->sendMessage(TTSymbol("Recall"), kTTValNONE, kTTValNONE);
+    return kTTErrGeneric;
 }
 
 TTErr Automation::ProcessEnd()
 {
     // recall the end state
-    return mEndCue->sendMessage(TTSymbol("Recall"), kTTValNONE, kTTValNONE);
+    //return mEndCue->sendMessage(TTSymbol("Recall"), kTTValNONE, kTTValNONE);
+    return kTTErrGeneric;
 }
 
 TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
@@ -106,7 +86,8 @@ TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
             progression = inputValue[0];
             
             // process the interpolation between the start state and the end state
-            return TTCueInterpolate(TTCuePtr(mStartCue), TTCuePtr(mEndCue), progression);
+            //return TTCueInterpolate(TTCuePtr(mStartCue), TTCuePtr(mEndCue), progression);
+            return kTTErrGeneric;
         }
     }
     

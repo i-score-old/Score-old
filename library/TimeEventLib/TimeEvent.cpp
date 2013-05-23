@@ -15,6 +15,7 @@
 TimeEvent::TimeEvent(TTValue& arguments) :
 TTObjectBase(arguments),
 mDate(0),
+mState(NULL),
 mActive(YES),
 mTriggerOperator(NULL),
 mSubscriberOperator(NULL)
@@ -22,6 +23,8 @@ mSubscriberOperator(NULL)
     TT_ASSERT("Correct number of args to create TimeEvent", arguments.size() == 0);
     
    	addAttributeWithSetter(Date, kTypeUInt32);
+    
+    addAttribute(State, kTypeObject);
     
     addAttributeWithSetter(Active, kTypeBoolean);
     
@@ -52,7 +55,15 @@ mSubscriberOperator(NULL)
 
 TimeEvent::~TimeEvent()
 {
-    ;
+    if (mState) {
+        TTObjectBaseRelease(TTObjectBaseHandle(&mState));
+        mState = NULL;
+    }
+    
+    if (mNamespace) {
+        delete mNamespace;
+        mNamespace = NULL;
+    }
 }
 
 TTErr TimeEvent::getParameterNames(TTValue& value)

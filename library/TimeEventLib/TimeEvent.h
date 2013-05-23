@@ -58,13 +58,16 @@ typedef TimeEventMap::const_iterator	TimeEventMapIterator;
 class TimeEvent : public TTObjectBase {
     
 public:
-	TTSymbol                        mName;                          ///< ATTRIBUTE : the name of the time process
-	TTSymbol                        mVersion;                       ///< ATTRIBUTE : the version of the time process
-	TTSymbol                        mAuthor;                        ///< ATTRIBUTE : the author of the time process
+	TTSymbol                        mName;                          ///< ATTRIBUTE : the name of the time event
+	TTSymbol                        mVersion;                       ///< ATTRIBUTE : the version of the time event
+	TTSymbol                        mAuthor;                        ///< ATTRIBUTE : the author of the time event
     
 protected:
     
     TTUInt32                        mDate;                          ///< ATTRIBUTE : the date of the event
+    
+    TTObjectBasePtr                 mState;                         ///< ATTRIBUTE : a state handled by the event
+    TTAddressItemPtr                mNamespace;
     
     TTBoolean                       mActive;                        ///< ATTRIBUTE : is the time event active ?
     

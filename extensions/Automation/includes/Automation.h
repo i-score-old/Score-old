@@ -9,7 +9,7 @@
 /*!
  * \class Automation
  *
- *  Automation time process class manage 2 states and their interpolation depending on the scheduler progression
+ *  Automation time process class manage interpolation between the start event state and end event state depending on the scheduler progression
  *
  */
 
@@ -24,12 +24,7 @@ class Automation : public TimeProcess
 	
 private :
     
-    // Clément n'est pas convaincu pas le nom Cue (cf pratique théatrale) : choisir State ?
-	TTObjectBasePtr				mStartCue;						///< ATTRIBUTE : the beginning state handled by the time process
-    TTObjectBasePtr				mCurveCue;						///< ATTRIBUTE : the curve function parameter of all rampable parameters
-    TTObjectBasePtr				mEndCue;						///< ATTRIBUTE : the final state handled by the time process
-    
-    TTAddressItemPtr            mNamespace;                     ///< ATTRIBUTE : the namespace workspace to use for state storage
+    TTObjectBasePtr				mCurves;						///< ATTRIBUTE : the curve function parameter of all rampable parameters
 	
     /** Get parameters names needed by this time process
      @param	value           the returned parameter names
