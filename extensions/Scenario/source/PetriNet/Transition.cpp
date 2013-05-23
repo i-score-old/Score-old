@@ -142,7 +142,7 @@ void Transition::merge(Transition* transitionToMerge) // CB Attention, copie de 
 		ExtendedInt absoluteMinValue = currentArc->getAbsoluteMinValue();
 		ExtendedInt absoluteMaxValue = currentArc->getAbsoluteMaxValue();
 
-		Place* inGoingPlace = (Place*) currentArc->getFrom();
+		Place* inGoingPlace = (Place*) currentArc->getFrom(); // CB TODO : check the cast
 
 		Arc* newArc = getPetriNet()->createArc(inGoingPlace, this); // CB calls Arc::Arc which add the Arc in the nodes' lists
 		newArc->changeAbsoluteTime(absoluteMinValue, absoluteMaxValue);
@@ -156,7 +156,7 @@ void Transition::merge(Transition* transitionToMerge) // CB Attention, copie de 
 	for (unsigned int i = 0; i < mergeOutGoingArcs.size() ; ++i) { // CB TODO : Il faudrait aussi recopier les éventuelles valeurs associées à l'arc, comme ci-dessus.
 		Arc* currentArc = mergeOutGoingArcs[i];
 
-		Place* outGoingPlace = (Place*) currentArc->getTo();
+		Place* outGoingPlace = (Place*) currentArc->getTo(); // CB TODO : check the cast
 		getPetriNet()->createArc(this, outGoingPlace);
 
 		getPetriNet()->deleteArc(transitionToMerge, outGoingPlace);

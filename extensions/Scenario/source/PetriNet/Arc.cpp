@@ -56,7 +56,7 @@ Arc::Arc() {
 }
 
 Arc::Arc(PetriNet* petriNet, PetriNetNode* from, PetriNetNode* to, int color)
-:PetriNetItem(petriNet){
+:PetriNetItem(petriNet), m_condition(NULL){
 	if (!petriNet->isColorValid(color)) {
 		throw IllegalArgumentException("Arc : Invalid color");
 	}

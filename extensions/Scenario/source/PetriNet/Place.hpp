@@ -109,10 +109,6 @@ private :
 	PetriNet* m_childPetriNet;
 
 	std::vector<std::vector<Token>> m_tokenByColor; // tokens by color.
-    
-    // Functions that tells wether or not the arc can be activated.
-    std::vector<bool> m_arcConditions; // CB Devrait être un prédicat, pour l'instant, un simple booléen
-    // CB Ce vecteur est ordonné tel que l'arc et sa condition sont au même indice, peut-être envisager une map, mais difficilement compatible avec l'arcList des inGoingArcs issue de PetriNetNode
 
 	/*!
 	 * Default constructor.
