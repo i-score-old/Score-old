@@ -143,18 +143,18 @@ void Place::merge(Place* placeToMerge) // CB copie améliorée de Transition::me
     arcList mergeOutGoingArcs = placeToMerge->outGoingArcsOf(); // CB vector
     
     for (arcList::iterator it = mergeInGoingArcs.begin() ; it != mergeInGoingArcs.end() ; it++) {
-        Arc* newArc = getPetriNet()->createArc(it->getFrom(), this); // CB Arc::Arc adds the arc in the nodes' lists
-        newArc->changeAbsoluteTime(it->getAbsoluteMinValue, it->getAbsoluteMaxValue);
-        newArc->changeRelativeTime(it->getRelativeMinValue, it->getRelativeMaxValue);
-        getPetriNet()->deleteArc(it->getFrom(), placeToMerge);
-    }
+        Arc* newArc = getPetriNet()->createArc(dynamic_cast<Transition*>((*it)->getFrom()), this); // CB uncheck cast
+        newArc->changeAbsoluteTime((*it)->getAbsoluteMinValue(), (*it)->getAbsoluteMaxValue());
+        newArc->changeRelativeTime((*it)->getRelativeMinValue(), (*it)->getRelativeMaxValue());
+        getPetriNet()->deleteArc((*it)->getFrom(), placeToMerge);
+    } // CB Arc::Arc adds the arc in the nodes' lists
     
     for (arcList::iterator it = mergeOutGoingArcs.begin() ; it != mergeOutGoingArcs.end() ; it++) {
-        Arc* newArc = getPetriNet()->createArc(this, it->getTo()); // CB Arc::Arc adds the arc in the nodes' lists
-        newArc->changeAbsoluteTime(it->getAbsoluteMinValue, it->getAbsoluteMaxValue);
-        newArc->changeRelativeTime(it->getRelativeMinValue, it->getRelativeMaxValue);
-        getPetriNet()->deleteArc(placeToMerge, it->getTo());
-    }
+        Arc* newArc = getPetriNet()->createArc(this, dynamic_cast<Transition*>((*it)->getTo()));
+        newArc->changeAbsoluteTime((*it)->getAbsoluteMinValue(), (*it)->getAbsoluteMaxValue());
+        newArc->changeRelativeTime((*it)->getRelativeMinValue(), (*it)->getRelativeMaxValue());
+        getPetriNet()->deleteArc(placeToMerge, (*it)->getTo());
+    } // CB Arc::Arc adds the arc in the nodes' lists
 }
 
 void Place::print() {
