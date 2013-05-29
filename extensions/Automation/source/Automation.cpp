@@ -39,7 +39,8 @@ TIME_PROCESS_CONSTRUCTOR
     
     addMessageWithArguments(CurveAdd);
     addMessageWithArguments(CurveSet);
-    addMessageWithArguments(CurveValues);
+    addMessageWithArguments(CurveGet);
+    addMessageWithArguments(CurveSample);
     addMessageWithArguments(CurveRemove);
     addMessage(Clear);
     
@@ -171,9 +172,12 @@ TTErr Automation::ReadFromText(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr Automation::CurveAdd(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTValue         v;
+    TTValue         v, vStart, vEnd, curveList;
     TTAddress       address;
     TTObjectBasePtr function = NULL;
+    TTObjectBasePtr state;
+    TTListPtr       lines;
+    TTDictionaryPtr aLine;
     TTErr           err;
     
     if (inputValue.size() == 1) {
@@ -190,6 +194,61 @@ TTErr Automation::CurveAdd(const TTValue& inputValue, TTValue& outputValue)
                 
                 if (!err) {
                     
+                    // get the start event state for this address
+                    mStartEvent->getAttributeValue(TTSymbol("state"), v);
+                    state = v[0];
+                    
+                    // get the lines of the start state
+                    state->getAttributeValue(TTSymbol("lines"), v);
+                    lines = TTListPtr(TTPtr(v[0]));
+                    
+                    // find the line at address
+                    err = lines->find(&TTScriptFindAddress, (TTPtr)&address, v);
+                    
+                    if (err)
+                        return err;
+                    
+                    aLine = TTDictionaryPtr((TTPtr)v[0]);
+                        
+                    // get the start value
+                    aLine->getValue(vStart);
+
+                    
+                    // get the end event state for this address
+                    mEndEvent->getAttributeValue(TTSymbol("state"), v);
+                    state = v[0];
+                    
+                    // get the lines of the end state
+                    state->getAttributeValue(TTSymbol("lines"), v);
+                    lines = TTListPtr(TTPtr(v[0]));
+                    
+                    // find the line at address
+                    err = lines->find(&TTScriptFindAddress, (TTPtr)&address, v);
+                    
+                    if (err)
+                        return err;
+
+                    aLine = TTDictionaryPtr((TTPtr)v[0]);
+                        
+                    // get the start value
+                    aLine->getValue(vEnd);
+
+                    // set the start and end values
+                    curveList.resize(10);
+                    curveList[0] = TTFloat64(0.);
+                    curveList[1] = TTFloat64(vStart[0]);
+                    curveList[2] = TTSymbol("exponential");
+                    curveList[3] = TTSymbol("base");
+                    curveList[4] = TTFloat64(1);
+                    
+                    curveList[5] = TTFloat64(1.);
+                    curveList[6] = TTFloat64(vEnd[0]);
+                    curveList[7] = TTSymbol("exponential");
+                    curveList[8] = TTSymbol("base");
+                    curveList[9] = TTFloat64(1);
+                    
+                    function->setAttributeValue(TTSymbol("curveList"), curveList);
+
                     // register the function unit at address
                     return mCurves.append(address, function);
                 }
@@ -205,7 +264,7 @@ TTErr Automation::CurveSet(const TTValue& inputValue, TTValue& outputValue)
     TTValue         v, curveList;
     TTAddress       address;
     TTObjectBasePtr function;
-    TTUInt32        i;
+    TTUInt32        i, j;
     
     if (inputValue.size() > 0) {
         
@@ -228,17 +287,20 @@ TTErr Automation::CurveSet(const TTValue& inputValue, TTValue& outputValue)
                 if ( ((curveList.size() / 5) * 3) + 1 != inputValue.size())
                     return kTTErrGeneric;
                 
+                j = 0;
                 for (i = 1; i < inputValue.size(); i = i+3) {
                     
                     if (inputValue[i].type() == kTypeFloat64 &&
                         inputValue[i+1].type() == kTypeFloat64 &&
                         inputValue[i+2].type() == kTypeFloat64) {
                     
-                        curveList[i] = inputValue[i];
-                        curveList[i+1] = inputValue[i+1];
-                        curveList[i+2] = TTSymbol("exponential");
-                        curveList[i+3] = TTSymbol("base");
-                        curveList[i+4] = inputValue[i+2];
+                        curveList[j] = inputValue[i];
+                        curveList[j+1] = inputValue[i+1];
+                        curveList[j+2] = TTSymbol("exponential");
+                        curveList[j+3] = TTSymbol("base");
+                        curveList[j+4] = inputValue[i+2];
+                        
+                        j = j+5;
                     }
                     else
                         return kTTErrGeneric;
@@ -253,13 +315,58 @@ TTErr Automation::CurveSet(const TTValue& inputValue, TTValue& outputValue)
     return kTTErrGeneric;
 }
 
-TTErr Automation::CurveValues(const TTValue& inputValue, TTValue& outputValue)
+TTErr Automation::CurveGet(const TTValue& inputValue, TTValue& outputValue)
+{
+    TTValue         v, curveList;
+    TTAddress       address;
+    TTObjectBasePtr function;
+    TTUInt32        i, j;
+    
+    if (inputValue.size() == 1) {
+        
+        if (inputValue[0].type() == kTypeSymbol) {
+            
+            address = inputValue[0];
+            
+            // if there is a curve at the address
+            if (!mCurves.lookup(address, v)) {
+                
+                function = v[0];
+                
+                if (!function->getAttributeValue(TTSymbol("curveList"), curveList)) {
+                    
+                    // edit function curve list
+                    // curveList    : x1 y1 exponential base b1 x2 y2 exponential base b2 . . . . .
+                    // outputValue   : x1 y1 b1 x2 y2 b2 . . .
+                    
+                    outputValue.resize((curveList.size() / 5) * 3);
+                    
+                    j = 0;
+                    for (i = 0; i < curveList.size(); i = i+5) {
+                        
+                        outputValue[j] = curveList[i];
+                        outputValue[j+1] = curveList[i+1];
+                        outputValue[j+2] = curveList[i+4];
+                        
+                        j = j+3;
+                    }
+                    
+                    return kTTErrNone;
+                }
+            }
+        }
+    }
+    
+    return kTTErrGeneric;
+}
+
+TTErr Automation::CurveSample(const TTValue& inputValue, TTValue& outputValue)
 {
     TTValue         v;
     TTAddress       address;
     TTObjectBasePtr function;
     TTUInt32        i, granularity, duration, nbPoints;
-    TTFloat64       mapped;
+    TTFloat64       x, y;
     
     if (inputValue.size() == 1) {
         
@@ -285,9 +392,10 @@ TTErr Automation::CurveValues(const TTValue& inputValue, TTValue& outputValue)
                 outputValue.clear();
                 for (i = 0; i < nbPoints; i++) {
                     
-                    TTAudioObjectBasePtr(function)->calculate(TTFloat64(i/nbPoints), mapped);
+                    x = TTFloat64(i) / TTFloat64(nbPoints);
+                    TTAudioObjectBasePtr(function)->calculate(x, y);
                     
-                    outputValue.append(mapped);
+                    outputValue.append(y);
                 }
                 
                 return kTTErrNone;

@@ -71,16 +71,22 @@ private :
     TTErr   CurveAdd(const TTValue& inputValue, TTValue& outputValue);
     
     /** Set curve's parameters at an address
-     @inputvalue            address x1 y1 b1 x2 y2 b2 ... 
+     @inputvalue            address x1 y1 b1 x2 y2 b2 ... with x[0. :: 1.], y[min, max], b[-1. :: 1.]
      @outputvalue           kTTValNONE
      @return                an error code if the operation fails */
     TTErr   CurveSet(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Get curve's parameters at an address
+     @inputvalue            address
+     @outputvalue           x1 y1 b1 x2 y2 b2 ... with x[0. :: 1.], y[min, max], b[-1. :: 1.]
+     @return                an error code if the operation fails */
+    TTErr   CurveGet(const TTValue& inputValue, TTValue& outputValue);
     
     /** Get curve's values at an address
      @inputvalue            address
      @outputvalue           all x y point of the curve
      @return                an error code if the operation fails */
-    TTErr   CurveValues(const TTValue& inputValue, TTValue& outputValue);
+    TTErr   CurveSample(const TTValue& inputValue, TTValue& outputValue);
     
     /** Remove a curve at an address
      @inputValue            address
