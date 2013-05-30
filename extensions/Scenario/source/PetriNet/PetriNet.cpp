@@ -234,10 +234,10 @@ void PetriNet::resetEvents()
 {
 	m_mustCrossAllTransitionWithoutWaitingEvent = false;
 	m_incomingEvents.clear();
-	m_incomingEvents.push_back(std::string(STATIC_EVENT));
+    m_incomingEvents.push_back(STATIC_EVENT);
 }
 
-void PetriNet::putAnEvent(std::string event)
+void PetriNet::putAnEvent(void* event)
 {
 	m_incomingEvents.push_back(event);
 
@@ -248,10 +248,10 @@ void PetriNet::putAnEvent(std::string event)
 
 }
 
-bool PetriNet::isAnEvent(std::string event)
+bool PetriNet::isAnEvent(void* event)
 {
-	std::list<std::string> tempList = m_incomingEvents.getList();
-	std::list<std::string>::iterator it  = tempList.begin();
+	eventList tempList = m_incomingEvents.getList();
+	std::list<void*>::iterator it  = tempList.begin();
 
 	while (it != tempList.end()) {
 		if (*it == event) {
@@ -450,7 +450,7 @@ transitionList PetriNet::getSensitizedTransitions()
 	return m_sensitizedTransitions;
 }
 
-stringList PetriNet::getEvents()
+eventList PetriNet::getEvents()
 {
 	return m_incomingEvents.getList();
 }

@@ -60,7 +60,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 #include <string>
 #include <pthread.h>
 
-#define STATIC_EVENT "event0"
+#define STATIC_EVENT NULL
 #define MY_MIN_STEP_TIME_IN_MS 100
 
 struct priorityTransitionActionComparison {
@@ -71,7 +71,7 @@ struct priorityTransitionActionComparison {
 
 typedef std::vector<Transition*>    transitionList;
 typedef std::vector<Place*>         placeList;
-typedef std::list<std::string>      stringList;
+typedef std::list<void*>            eventList;
 
 typedef std::priority_queue<PriorityTransitionAction*,
 	 						std::vector<PriorityTransitionAction *, std::allocator<PriorityTransitionAction*> >,
@@ -174,7 +174,7 @@ public:
 	 *
 	 * \param event : event to add.
 	 */
-	void putAnEvent(std::string event);
+	void putAnEvent(void* event);
 
 	/*!
 	 * Tests if an particular event was received by this Petri Network.
@@ -182,7 +182,7 @@ public:
 	 * \param event : event to test the reception.
 	 * \return true if the event was received by this PetriNetwork
 	 */
-	bool isAnEvent(std::string event);
+	bool isAnEvent(void* event);
 
 	/*!
 	 * Creates a new place.
@@ -296,7 +296,7 @@ public:
 	 *
 	 * \return the Petri Net Events
 	 */
-	stringList getEvents();
+	eventList getEvents();
 
 //	/*!
 //	 * Gets the active transitions in this PetriNet
@@ -379,7 +379,7 @@ private:
 	pthread_t m_thread;
 	bool m_mustStop;
 
-	ThreadSafeList m_incomingEvents; // list of events (strings).
+	ThreadSafeList m_incomingEvents; // list of events (pointer).
 
 //	/*
 //	 * A transition is active when it has at least one predecessor with

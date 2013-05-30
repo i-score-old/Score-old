@@ -318,13 +318,13 @@ void Scenario::compileTimeEvent(TimeEventPtr aTimeEvent, TTUInt32 time, Transiti
 
 void Scenario::compileInteractiveEvent(TimeEventPtr aTimeEvent, TTUInt32 timeOffset)
 {
-    TransitionPtr             currentTransition;
-    Arc*                    currentArc;
+    TransitionPtr currentTransition;
+    Arc*          currentArc;
     
-    TTBoolean               active;
-    TTUInt32                date;
-    TTUInt32                durationMin, durationMax;
-    TTValue                 v;
+    TTBoolean     active;
+    TTUInt32      date;
+    TTUInt32      durationMin, durationMax;
+    TTValue       v;
     
     GraphObjectMapIterator  mergeIterator;
     
@@ -346,9 +346,7 @@ void Scenario::compileInteractiveEvent(TimeEventPtr aTimeEvent, TTUInt32 timeOff
             currentTransition = TransitionPtr(mergeIterator->second);
         
         // prepare transition
-        // TODO : we don't want to centralize the reception of network message ...
-        // idea : passer une fonction de test plutot que le message
-        //currentTransition->setEvent(addNetworkMessage(aTimeEvent->getTriggerMessage()));
+        currentTransition->setEvent(aTimeEvent);
         currentTransition->setMustWaitThePetriNetToEnd(false);
         
         // prepare time event informations

@@ -1060,3 +1060,20 @@ void waitedTriggerPointMessageCallBack(void* arg, bool isWaited, TransitionPtr t
 	}
 }
 */
+
+/*
+bool ECOMachine::receiveNetworkMessage(std::string netMessage)
+{
+	map<string, string>::iterator iter = m_fromNetworkMessagesToPetriMessages.find(netMessage);
+    
+	if(iter == m_fromNetworkMessagesToPetriMessages.end()) {
+		return false;
+	} else {
+		if (getPetriNet()->getUpdateFactor() != 0) {
+			m_petriNet->putAnEvent(m_fromNetworkMessagesToPetriMessages[netMessage]);
+		}
+		return true;
+	}
+    
+}
+*/

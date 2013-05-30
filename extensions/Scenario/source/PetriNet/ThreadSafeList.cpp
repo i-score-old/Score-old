@@ -56,16 +56,16 @@ ThreadSafeList::~ThreadSafeList()
 	delete m_mutex;
 }
 
-std::list<std::string> ThreadSafeList::getList()
+std::list<void*> ThreadSafeList::getList()
 {
 	pthread_mutex_lock(m_mutex);
-	std::list<std::string> tempList = m_list;
+	std::list<void*> tempList = m_list;
 	pthread_mutex_unlock(m_mutex);
 
 	return tempList;
 }
 
-void ThreadSafeList::push_back(std::string elementToAdd)
+void ThreadSafeList::push_back(void* elementToAdd)
 {
 	pthread_mutex_lock(m_mutex);
 	m_list.push_back(elementToAdd);

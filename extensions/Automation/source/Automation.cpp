@@ -37,6 +37,7 @@ TIME_PROCESS_CONSTRUCTOR
     
     addMessageWithArguments(CurveAdd);
     addMessageWithArguments(CurveGet);
+    addMessageWithArguments(CurveUpdate);
     addMessageWithArguments(CurveRemove);
     addMessage(Clear);
     
@@ -187,13 +188,13 @@ TTErr Automation::CurveAdd(const TTValue& inputValue, TTValue& outputValue)
                 
                 if (!err) {
                     
-                    // get the start event state for this address
+                    // get the start event state value for this address
                     mStartEvent->sendMessage(TTSymbol("StateAddressGetValue"), address, vStart);
 
-                    // get the end event state for this address
+                    // get the end event state value for this address
                     mEndEvent->sendMessage(TTSymbol("StateAddressGetValue"), address, vEnd);
                     
-                    // set the start and end values
+                    // prepare curve parameters
                     parameters.resize(6);
                     parameters[0] = TTFloat64(0.);
                     parameters[1] = TTFloat64(vStart[0]);
@@ -232,13 +233,76 @@ TTErr Automation::CurveGet(const TTValue& inputValue, TTValue& outputValue)
     return kTTErrGeneric;
 }
 
+TTErr Automation::CurveUpdate(const TTValue& inputValue, TTValue& outputValue)
+{
+    TTValue         v, vStart, vEnd, parameters;
+    TTAddress       address;
+    TTObjectBasePtr curve;
+    
+    // update all curves
+    if (inputValue.size() == 0) {
+        
+        TTValue         keys;
+        TTSymbol        key;
+        TTUInt32        i;
+        
+        // update all curves
+        mCurves.getKeys(keys);
+        for (i = 0; i < keys.size(); i++) {
+            
+            key = keys[i];
+            CurveUpdate(key, kTTValNONE);
+        }
+        
+        return kTTErrNone;
+    }
+    
+    if (inputValue.size() == 1) {
+        
+        if (inputValue[0].type() == kTypeSymbol) {
+            
+            address = inputValue[0];
+            
+            // if there is a curve at the address
+            if (!mCurves.lookup(address, v)) {
+                
+                curve = v[0];
+                
+                // get the start event state value for this address
+                mStartEvent->sendMessage(TTSymbol("StateAddressGetValue"), address, vStart);
+                
+                // get the end event state value for this address
+                mEndEvent->sendMessage(TTSymbol("StateAddressGetValue"), address, vEnd);
+                
+                // get current curve parameters
+                curve->getAttributeValue(TTSymbol("parameters"), parameters);
+                
+                // change the first point y value : x1 y1 b1 ...
+                parameters[1] = TTFloat64(vStart[0]);
+                
+                // TODO : scale the other y points value ?
+                
+                // change the last point y value : ... xn yn bn
+                parameters[parameters.size() - 3] = TTFloat64(vStart[0]);
+                
+                // set current curve parameters
+                curve->setAttributeValue(TTSymbol("parameters"), parameters);
+                
+                return kTTErrNone;
+            }
+        }
+    }
+    
+    return kTTErrGeneric;
+}
+
 TTErr Automation::CurveRemove(const TTValue& inputValue, TTValue& outputValue)
 {
     TTValue         v;
     TTAddress       address;
     TTObjectBasePtr curve;
     
-    if (inputValue.size() > 0) {
+    if (inputValue.size() == 1) {
         
         if (inputValue[0].type() == kTypeSymbol) {
             

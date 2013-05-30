@@ -56,7 +56,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 #include <vector>
 #include <string>
 
-typedef std::vector<std::string> stringVector;
+typedef std::vector<void*> eventVector;
 typedef std::vector<TransitionAction*> transitionActionList;
 
 /*!
@@ -72,9 +72,9 @@ public:
 	/*!
 	 * Sets the event to cross the transition.
 	 *
-	 * \param s : string representing the waited event to cross the transition.
+	 * \param s : pointer representing the waited event to cross the transition.
 	 */
-	void setEvent(std::string s);
+	void setEvent(void* event);
 
 	/*!
 	 * Correctly creates the BitArray (representing actives arcs).
@@ -158,9 +158,9 @@ public:
 	/*!
 	 * Gets the event to cross the transition.
 	 *
-	 * \return string representing the waited event to cross the transition.
+	 * \return pointer representing the waited event to cross the transition.
 	 */
-	std::string getEvent();
+	void* getEvent();
 
 	/*!
 	 * Tests if the transition is static (crossable without external event).
@@ -245,7 +245,7 @@ private:
 
 	TransitionBitArray* m_activeArcsBitArray;
 
-	stringVector m_events; // Waited event to cross the transition (STATIC_EVENT if no external event is waited).
+	eventVector m_events; // Waited event to cross the transition (STATIC_EVENT if no external event is waited).
 
 //	void (*m_externAction)(void*);
 //	void* m_externActionArgument;

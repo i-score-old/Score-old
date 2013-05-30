@@ -55,12 +55,12 @@ public:
 	ThreadSafeList();
 	virtual ~ThreadSafeList();
 
-	std::list<std::string> getList();
-	void push_back(std::string elementToAdd);
+	std::list<void*> getList();
+	void push_back(void* elementToAdd);
 	void clear();
 
 private:
-	std::list<std::string> m_list;
+	std::list<void*> m_list;
 
 	pthread_mutex_t* m_mutex;
 };

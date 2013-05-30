@@ -77,6 +77,12 @@ private :
      @return                an error code if the operation fails */
     TTErr   CurveGet(const TTValue& inputValue, TTValue& outputValue);
     
+    /** Update a curve at an address (when start or end state has changed)
+     @inputValue            address
+     @outputvalue           kTTValNONE
+     @return                an error code if the operation fails */
+    TTErr   CurveUpdate(const TTValue& inputValue, TTValue& outputValue);
+    
     /** Remove a curve at an address
      @inputValue            address
      @outputvalue           kTTValNONE

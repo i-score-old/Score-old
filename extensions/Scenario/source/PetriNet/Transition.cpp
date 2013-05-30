@@ -69,11 +69,11 @@ bool Transition::isStatic()
 	return ((m_events.size() > 0) && (m_events.back() == STATIC_EVENT));
 }
 
-// cf triggerpoint : register an unique petri message key as event for this transition
-void Transition::setEvent(std::string s)
+// cf triggerpoint : register an unique pointer as event for this transition
+void Transition::setEvent(void* event)
 {
 	m_events.clear();
-	m_events.push_back(s);
+	m_events.push_back(event);
 }
 
 void Transition::createBitArray() // TODO : Should be called in addInGoingArcs
@@ -245,7 +245,7 @@ bool Transition::areAllInGoingArcsActive()
 }
 
 // cf triggerpoint : get the unique petri message key registered as event for this transition
-string Transition::getEvent()
+void* Transition::getEvent()
 {
 	return m_events.back();
 }
