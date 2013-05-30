@@ -36,6 +36,8 @@ mSubscriberOperator(NULL)
     addMessageWithArguments(Unsubscribe);
     addMessage(Notify);
     
+    addMessageWithArguments(StateAddressGetValue);
+    
 	// needed to be handled by a TTXmlHandler
 	addMessageWithArguments(WriteAsXml);
 	addMessageProperty(WriteAsXml, hidden, YES);
@@ -134,6 +136,42 @@ TTErr TimeEvent::Unsubscribe(const TTValue& inputValue, TTValue& outputValue)
         if (inputValue[0].type() == kTypeObject) {
             
             mSubscriberList.remove(inputValue);
+        }
+    }
+    
+    return kTTErrGeneric;
+}
+
+TTErr TimeEvent::StateAddressGetValue(const TTValue& inputValue, TTValue& outputValue)
+{
+    TTValue         v;
+    TTAddress       address;
+    TTListPtr       lines;
+    TTDictionaryPtr aLine;
+    TTErr           err;
+    
+    if (inputValue.size() == 1) {
+        
+        if (inputValue[0].type() == kTypeSymbol) {
+            
+            address = inputValue[0];
+            
+            // get the lines of the state
+            mState->getAttributeValue(TTSymbol("lines"), v);
+            lines = TTListPtr(TTPtr(v[0]));
+            
+            // find the line at address
+            err = lines->find(&TTScriptFindAddress, (TTPtr)&address, v);
+            
+            if (err)
+                return err;
+            
+            aLine = TTDictionaryPtr((TTPtr)v[0]);
+            
+            // get the start value
+            aLine->getValue(outputValue);
+            
+            return  kTTErrNone;
         }
     }
     

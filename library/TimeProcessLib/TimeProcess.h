@@ -22,9 +22,6 @@ extern "C" void thisTTClass :: registerClass () {TTClassRegister( TTSymbol(thisT
 thisTTClass :: thisTTClass (TTValue& arguments) : TimeProcess(arguments)
 
 #define TIME_PROCESS_INITIALIZE \
-mName = TTSymbol(thisTTClassName); \
-mVersion = TTSymbol(thisTimeProcessVersion); \
-mAuthor = TTSymbol(thisTimeProcessAuthor); \
 registerAttribute(TTSymbol("ParameterNames"), kTypeLocalValue, NULL, (TTGetterMethod)& thisTTClass::getParameterNames); \
 /*addAttributeProperty(ParameterNames, readOnly, YES); \ */
 
@@ -60,11 +57,6 @@ typedef TimeProcessMap::const_iterator	TimeProcessMapIterator;
  It still has knowledge and support for ...
  */
 class TimeProcess : public TTObjectBase {
-    
-public:
-	TTSymbol                        mName;                          ///< ATTRIBUTE : the name of the time process
-	TTSymbol                        mVersion;                       ///< ATTRIBUTE : the version of the time process
-	TTSymbol                        mAuthor;                        ///< ATTRIBUTE : the author of the time process
     
 protected:
 

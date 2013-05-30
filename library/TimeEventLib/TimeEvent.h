@@ -135,12 +135,19 @@ private :
     /** Set the date of the time event
      @param	value           a date
      @return                an error code if the date is wrong */
-    TTErr	setDate(const TTValue& value);
+    TTErr           setDate(const TTValue& value);
     
     /** Set enable or disable the time event
      @param	value           an activation state
      @return                kTTErrNone */
-    TTErr   setActive(const TTValue& value);
+    TTErr           setActive(const TTValue& value);
+    
+    /** Get a line value of the state at an address
+        this method eases the access of a line value
+     @param	inputValue      an address
+     @param	outputValue     the value of the line
+     @return                kTTErrNone */
+    TTErr           StateAddressGetValue(const TTValue& inputValue, TTValue& outputValue);
 };
 
 typedef TimeEvent* TimeEventPtr;
