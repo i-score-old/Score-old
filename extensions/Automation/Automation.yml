@@ -4,6 +4,7 @@
 sources:
   - ../../library/TimeProcessLib/TimeProcess.cpp	
   - source/Automation.cpp
+  - source/Curve.cpp
   
 includes:
   - "."

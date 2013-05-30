@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		464A8888175748160089B27A /* Curve.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Curve.h; sourceTree = "<group>"; };
+		464A88891757481E0089B27A /* Curve.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Curve.cpp; sourceTree = "<group>"; };
 		468776AD1725DB430096DA35 /* Automation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Automation.cpp; sourceTree = "<group>"; };
 		468776B11725DB4B0096DA35 /* Automation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Automation.h; sourceTree = "<group>"; };
 		468776B31725DB610096DA35 /* TimeProcess.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TimeProcess.cpp; sourceTree = "<group>"; };
@@ -27,6 +29,7 @@
 			isa = PBXGroup;
 			children = (
 				468776AD1725DB430096DA35 /* Automation.cpp */,
+				464A88891757481E0089B27A /* Curve.cpp */,
 			);
 			path = source;
 			sourceTree = "<group>";
@@ -35,6 +38,7 @@
 			isa = PBXGroup;
 			children = (
 				468776B11725DB4B0096DA35 /* Automation.h */,
+				464A8888175748160089B27A /* Curve.h */,
 			);
 			path = includes;
 			sourceTree = "<group>";

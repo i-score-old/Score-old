@@ -1,6 +1,6 @@
 /*
  * Automation time process
- * Copyright © 2013, Théo de la Hogue, Clément Bossut
+ * Copyright © 2013, Théo de la Hogue
  *
  * License: This code is licensed under the terms of the "New BSD License"
  * http://creativecommons.org/licenses/BSD/
@@ -17,6 +17,7 @@
 #define __AUTOMATION_H__
 
 #include "TimeProcess.h"
+#include "Curve.h"
 
 class Automation : public TimeProcess
 {
@@ -66,27 +67,15 @@ private :
     
     /** Add a curve at an address
      @inputvalue            address
-     @outputvalue           kTTValNONE
+     @outputvalue           a curve object
      @return                an error code if the operation fails */
     TTErr   CurveAdd(const TTValue& inputValue, TTValue& outputValue);
     
-    /** Set curve's parameters at an address
-     @inputvalue            address x1 y1 b1 x2 y2 b2 ... with x[0. :: 1.], y[min, max], b[-1. :: 1.]
-     @outputvalue           kTTValNONE
-     @return                an error code if the operation fails */
-    TTErr   CurveSet(const TTValue& inputValue, TTValue& outputValue);
-    
     /** Get curve's parameters at an address
      @inputvalue            address
-     @outputvalue           x1 y1 b1 x2 y2 b2 ... with x[0. :: 1.], y[min, max], b[-1. :: 1.]
+     @outputvalue           a curve object
      @return                an error code if the operation fails */
     TTErr   CurveGet(const TTValue& inputValue, TTValue& outputValue);
-    
-    /** Get curve's values at an address
-     @inputvalue            address
-     @outputvalue           all x y point of the curve
-     @return                an error code if the operation fails */
-    TTErr   CurveSample(const TTValue& inputValue, TTValue& outputValue);
     
     /** Remove a curve at an address
      @inputValue            address
