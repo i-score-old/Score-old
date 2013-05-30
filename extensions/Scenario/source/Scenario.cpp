@@ -19,9 +19,6 @@
 #define thisTTClassName             "Scenario"
 #define thisTTClassTags             "time, process, scenario"
 
-#define thisTimeProcessVersion		"0.1"
-#define thisTimeProcessAuthor        "Theo de la Hogue"
-
 extern "C" TT_EXTENSION_EXPORT TTErr TTLoadJamomaExtension_Scenario(void)
 {
 	TTFoundationInit();

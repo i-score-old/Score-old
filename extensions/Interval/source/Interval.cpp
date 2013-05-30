@@ -19,9 +19,6 @@
 #define thisTTClassName             "Interval"
 #define thisTTClassTags             "time, process, Interval"
 
-#define thisTimeProcessVersion		"0.1"
-#define thisTimeProcessAuthor        "Theo de la Hogue"
-
 extern "C" TT_EXTENSION_EXPORT TTErr TTLoadJamomaExtension_Interval(void)
 {
 	TTFoundationInit();
