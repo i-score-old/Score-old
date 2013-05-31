@@ -86,6 +86,8 @@ Arc::Arc(PetriNet* petriNet, PetriNetNode* from, PetriNetNode* to, int color)
 	m_absoluteMinValue.setAsMinusInfinity();
 
 	m_number = NO_NUMBER;
+    
+    m_condition = true; // théo : I've added to pass the test in Transition::produceToken
 
 	if (dynamic_cast<Transition*>(m_nodeTo)) {
 		((Transition*)m_nodeTo)->createBitArray(); // TODO : numbers should remain the same for all arcs, unless you have multiple colors

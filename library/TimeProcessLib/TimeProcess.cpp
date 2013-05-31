@@ -418,9 +418,9 @@ TTErr TimeProcess::setActive(const TTValue& value)
 
 TTErr TimeProcess::setStartEvent(const TTValue& value)
 {
-    // unsubscribe to the old start event
+    // stop old start event happenning observation
     if (mStartEvent) {
-        mStartEvent->sendMessage(TTSymbol("Unsubscribe"), mStartEventCallback, kTTValNONE);
+        mStartEvent->unregisterObserverForMessage(*mStartEventCallback, TTSymbol("Happen"));
         mStartEvent = NULL;
     }
     
@@ -430,9 +430,9 @@ TTErr TimeProcess::setStartEvent(const TTValue& value)
             
             mStartEvent = value[0];
             
-            // subscribe to the new start event
+            // observe event happening
             if (mStartEvent)
-                return mStartEvent->sendMessage(TTSymbol("Subscribe"), mStartEventCallback, kTTValNONE);
+                return mStartEvent->registerObserverForMessage(*mStartEventCallback, TTSymbol("Happen"));
         
         }
     }
@@ -449,9 +449,9 @@ TTErr TimeProcess::getIntermediateEvents(TTValue& value)
 
 TTErr TimeProcess::setEndEvent(const TTValue& value)
 {
-    // unsubscribe to the old end event
+     // stop old start event happenning observation
     if (mEndEvent) {
-        mEndEvent->sendMessage(TTSymbol("Unsubscribe"), mEndEventCallback, kTTValNONE);
+        mEndEvent->unregisterObserverForMessage(*mEndEventCallback, TTSymbol("Happen"));
         mEndEvent = NULL;
     }
     
@@ -461,9 +461,9 @@ TTErr TimeProcess::setEndEvent(const TTValue& value)
             
             mEndEvent = value[0];
             
-            // subscribe to the new end event
+            // observe event happening
             if (mEndEvent)
-                return mEndEvent->sendMessage(TTSymbol("Subscribe"), mEndEventCallback, kTTValNONE);
+                return mEndEvent->registerObserverForMessage(*mEndEventCallback, TTSymbol("Happen"));
 
         }
     }

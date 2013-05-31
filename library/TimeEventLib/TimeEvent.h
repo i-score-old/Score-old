@@ -21,9 +21,6 @@ extern "C" void thisTTClass :: registerClass () {TTClassRegister( TTSymbol(thisT
 thisTTClass :: thisTTClass (TTValue& arguments) : TimeEvent(arguments)
 
 #define TIME_EVENT_INITIALIZE \
-mName = TTSymbol(thisTTClassName); \
-mVersion = TTSymbol(thisTimeEventVersion); \
-mAuthor = TTSymbol(thisTimeEventAuthor); \
 registerAttribute(TTSymbol("ParameterNames"), kTypeLocalValue, NULL, (TTGetterMethod)& thisTTClass::getParameterNames); \
 /*addAttributeProperty(ParameterNames, readOnly, YES); \ */
 
@@ -57,12 +54,9 @@ typedef TimeEventMap::const_iterator	TimeEventMapIterator;
  */
 class TimeEvent : public TTObjectBase {
     
-public:
-	TTSymbol                        mName;                          ///< ATTRIBUTE : the name of the time event
-	TTSymbol                        mVersion;                       ///< ATTRIBUTE : the version of the time event
-	TTSymbol                        mAuthor;                        ///< ATTRIBUTE : the author of the time event
-    
 protected:
+    
+    TTObjectBasePtr                 mScenario;                      ///< ATTRIBUTE : the parent scenario which constrains the time event
     
     TTUInt32                        mDate;                          ///< ATTRIBUTE : the date of the event
     
@@ -70,11 +64,7 @@ protected:
     
     TTBoolean                       mActive;                        ///< ATTRIBUTE : is the time event active ?
     
-    TTList                          mTriggerList;                   ///< ATTRIBUTE : all the triggered values to evaluate in Notify method
-    TTList                          mSubscriberList;                ///< ATTRIBUTE : all the callbacks to use in Notify method
-    
-    TTObjectBasePtr                 mTriggerOperator;               ///< ATTRIBUTE : a optionnal operator to dynamically change trigger reception strategy
-    TTObjectBasePtr                 mSubscriberOperator;            ///< ATTRIBUTE : a optionnal operator to dynamically change subscriber notification strategy
+    TTMessagePtr                    happenMessage;                  ///< cache happen message for observer notification
     
 private:
     
@@ -94,15 +84,13 @@ public:
      @return                kTTErrNone */
 	virtual TTErr   getParameterNames(TTValue& value) = 0;
 
-    /** Specific triggering method : append the triggered value to the trigger list depending on a specific strategy
-     @param	inputValue      a value to pass thru the TimeEventTriggerCallback
-     @param	outputValue     kTTValNone
+    /** Specific triggering method : try to make the event happen (possibility to use the scenario to check event validity)
      @return                an error code returned by the trigger method */
-    virtual TTErr   Trigger(const TTValue& inputValue, TTValue& outputValue) = 0;
+    virtual TTErr   Trigger() = 0;
     
-    /** Specific notification method : evaluate the trigger list to notify the subscriber's depending on a specific strategy
-     @return                an error code returned by the notify method */
-    virtual TTErr   Notify() = 0;
+    /** Specific happening method : make the event happen
+     @return                an error code returned by the happen method */
+    virtual TTErr   Happen() = 0;
     
     /**  needed to be handled by a TTXmlHandler
      @param	inputValue      ..
@@ -117,18 +105,6 @@ public:
      @return                .. */
 	virtual TTErr	WriteAsText(const TTValue& inputValue, TTValue& outputValue) = 0;
 	virtual TTErr	ReadFromText(const TTValue& inputValue, TTValue& outputValue) = 0;
-    
-    /** Subscribe for event triggering
-     @param	inputValue      a TTCallbackPtr to notify
-     @param	outputValue     kTTValNone
-     @return                kTTErrNone */
-    TTErr           Subscribe(const TTValue& inputValue, TTValue& outputValue);
-    
-    /** Unsubscribe for event triggering
-     @param	inputValue      a TTCallbackPtr to don't notify anymore
-     @param	outputValue     kTTValNone
-     @return                kTTErrNone */
-    TTErr           Unsubscribe(const TTValue& inputValue, TTValue& outputValue);
 
 private :
     
@@ -142,10 +118,10 @@ private :
      @return                kTTErrNone */
     TTErr           setActive(const TTValue& value);
     
-    /** Get a line value of the state at an address
-        this method eases the access of a line value
+    /** Get a line value of the state for an address
+        this method eases the access of one state value
      @param	inputValue      an address
-     @param	outputValue     the value of the line
+     @param	outputValue     the value of the state for an address
      @return                kTTErrNone */
     TTErr           StateAddressGetValue(const TTValue& inputValue, TTValue& outputValue);
 };

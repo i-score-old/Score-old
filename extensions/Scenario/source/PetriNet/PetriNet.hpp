@@ -60,7 +60,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 #include <string>
 #include <pthread.h>
 
-#define STATIC_EVENT NULL
+#define STATIC_EVENT (void*)NULL
 #define MY_MIN_STEP_TIME_IN_MS 100
 
 struct priorityTransitionActionComparison {

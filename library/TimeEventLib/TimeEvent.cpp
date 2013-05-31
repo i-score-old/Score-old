@@ -14,28 +14,20 @@
 
 TimeEvent::TimeEvent(TTValue& arguments) :
 TTObjectBase(arguments),
+mScenario(NULL),
 mDate(0),
 mState(NULL),
-mActive(YES),
-mTriggerOperator(NULL),
-mSubscriberOperator(NULL)
+mActive(YES)
 {
     TT_ASSERT("Correct number of args to create TimeEvent", arguments.size() == 0);
     
+    addAttribute(Scenario, kTypeObject);
    	addAttributeWithSetter(Date, kTypeUInt32);
-    
     addAttribute(State, kTypeObject);
-    
     addAttributeWithSetter(Active, kTypeBoolean);
     
-    addAttribute(TriggerOperator, kTypeObject);
-    addAttribute(SubscriberOperator, kTypeObject);
-    
-    addMessageWithArguments(Trigger);
-    addMessageWithArguments(Subscribe);
-    addMessageWithArguments(Unsubscribe);
-    addMessage(Notify);
-    
+    addMessage(Trigger);
+    addMessage(Happen);
     addMessageWithArguments(StateAddressGetValue);
     
 	// needed to be handled by a TTXmlHandler
@@ -50,7 +42,8 @@ mSubscriberOperator(NULL)
 	addMessageWithArguments(ReadFromText);
 	addMessageProperty(ReadFromText, hidden, YES);
     
-    // cache some attributes for high speed notification feedbacks
+    // cache some messages and attributes for high speed notification feedbacks
+    this->findMessage(TTSymbol("Happen"), &happenMessage);
     this->findAttribute(TTSymbol("date"), &dateAttribute);
     this->findAttribute(TTSymbol("active"), &activeAttribute);
     
@@ -59,6 +52,17 @@ mSubscriberOperator(NULL)
 
 TimeEvent::~TimeEvent()
 {
+    /* if the time event is managed by a scenario
+    if (mScenario) {
+        
+        v = TTValue((TTObjectBasePtr)this);
+        
+        // remove the time event from the scenario
+        //(even if it can be done by the creator but it is safe to remove our self)
+        mScenario->sendMessage(TTSymbol("TimeEventRemove"), v, kTTValNONE);
+    }
+    */
+    
     if (mState) {
         TTObjectBaseRelease(TTObjectBaseHandle(&mState));
         mState = NULL;
@@ -112,34 +116,6 @@ TTErr TimeEvent::setActive(const TTValue& value)
     activeAttribute->sendNotification(kTTSym_notify, mActive);             // we use kTTSym_notify because we know that observers are TTCallback
     
     return kTTErrNone;
-}
-
-TTErr TimeEvent::Subscribe(const TTValue& inputValue, TTValue& outputValue)
-{
-    if (inputValue.size() == 1) {
-        
-        if (inputValue[0].type() == kTypeObject) {
-            
-            // TODO : check the type of the object : callback
-            
-            mSubscriberList.append(inputValue);
-        }
-    }
-    
-    return kTTErrGeneric;
-}
-
-TTErr TimeEvent::Unsubscribe(const TTValue& inputValue, TTValue& outputValue)
-{
-    if (inputValue.size() == 1) {
-        
-        if (inputValue[0].type() == kTypeObject) {
-            
-            mSubscriberList.remove(inputValue);
-        }
-    }
-    
-    return kTTErrGeneric;
 }
 
 TTErr TimeEvent::StateAddressGetValue(const TTValue& inputValue, TTValue& outputValue)

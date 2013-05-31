@@ -19,9 +19,6 @@
 #define thisTTClassName             "InteractiveEvent"
 #define thisTTClassTags             "time, event, interactive"
 
-#define thisTimeEventVersion		"0.1"
-#define thisTimeEventAuthor        "Theo de la Hogue"
-
 extern "C" TT_EXTENSION_EXPORT TTErr TTLoadJamomaExtension_InteractiveEvent(void)
 {
 	TTFoundationInit();
@@ -38,18 +35,6 @@ mReceiver(NULL)
 	TT_ASSERT("Correct number of args to create InteractiveEvent", arguments.size() == 0);
     
     addAttributeWithSetter(Address, kTypeSymbol);
-	
-	// needed to be handled by a TTXmlHandler
-	addMessageWithArguments(WriteAsXml);
-	addMessageProperty(WriteAsXml, hidden, YES);
-	addMessageWithArguments(ReadFromXml);
-	addMessageProperty(ReadFromXml, hidden, YES);
-	
-	// needed to be handled by a TTTextHandler
-	addMessageWithArguments(WriteAsText);
-	addMessageProperty(WriteAsText, hidden, YES);
-	addMessageWithArguments(ReadFromText);
-	addMessageProperty(ReadFromText, hidden, YES);
     
     // Create a TTReceiver to listen any address
     TTValue			args;
@@ -59,7 +44,7 @@ mReceiver(NULL)
     // we don't need the address back
     args.append(NULL);
     
-    // but we need the value back to test it (using the InteractiveEventReceiverCallback function)
+    // but we need the value back to trigger it (using the InteractiveEventReceiverCallback function)
     returnValueCallback = NULL;
     TTObjectBaseInstantiate(TTSymbol("callback"), &returnValueCallback, kTTValNONE);
     returnValueBaton = new TTValue(TTObjectBasePtr(this));
@@ -87,32 +72,29 @@ TTErr InteractiveEvent::getParameterNames(TTValue& value)
 	return kTTErrNone;
 }
 
-TTErr InteractiveEvent::Trigger(const TTValue& inputValue, TTValue& outputValue)
+TTErr InteractiveEvent::Trigger()
 {
-    // append the triggered value to the trigger list
-    mTriggerList.append(inputValue);
+    // inside a scenario
+    if (mScenario)
+        
+        // use scenario to make the event happen
+        mScenario->sendMessage(TTSymbol("TimeEventTrigger"), TTObjectBasePtr(this), kTTValNONE);
+    
+    else
+        
+        // otherwise make it happens now
+        Happen();
     
     return kTTErrNone;
 }
 
-TTErr InteractiveEvent::Notify()
+TTErr InteractiveEvent::Happen()
 {    
-    // if there is no triggered value : don't notify any subscriber
-    if (mTriggerList.isEmpty())
-        return kTTErrGeneric;
+    // recall the state
+    mState->sendMessage(TTSymbol("Run"));
     
-    TTObjectBasePtr aCallback;
-    
-    // notify all subscriber using the first triggered value
-    for (mSubscriberList.begin(); mSubscriberList.end(); mSubscriberList.next()) {
-        
-        aCallback = mSubscriberList.current()[0];
-        
-        aCallback->sendMessage(kTTSym_notify, mTriggerList.getHead(), kTTValNONE);
-    }
-    
-    // clear the trigger list
-    mTriggerList.clear();
+    // notify observers
+    happenMessage->sendNotification(kTTSym_notify, kTTValNONE);	// we use kTTSym_notify because we know that observers are TTCallback
     
     return kTTErrNone;
 }
@@ -193,6 +175,6 @@ TTErr InteractiveEventReceiverCallback(TTPtr baton, TTValue& data)
 	b = (TTValuePtr)baton;
 	aTimeEvent = TimeEventPtr((TTObjectBasePtr)(*b)[0]);
     
-    // trigger the event and pass the data
-    aTimeEvent->Trigger(data, kTTValNONE);
+    // trigger the event
+    return aTimeEvent->Trigger();
 }

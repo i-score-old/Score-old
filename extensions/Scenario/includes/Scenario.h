@@ -134,6 +134,12 @@ private :
      @return                an error code if the replacement fails */
     TTErr   TimeEventReplace(const TTValue& inputValue, TTValue& outputValue);
     
+    /** Trigger a time event to make it happens
+     @inputValue            a time event object
+     @outputvalue           kTTValNONE
+     @return                an error code if the triggering fails */
+    TTErr   TimeEventTrigger(const TTValue& inputValue, TTValue& outputValue);
+    
     /** Change a time process active state into the scenario
      note : this method doesn't update the time process internal active state
      but it can change attribute of other time processes or time events connected to this one.

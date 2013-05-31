@@ -40,18 +40,6 @@ TIME_PROCESS_CONSTRUCTOR
     addMessageWithArguments(CurveUpdate);
     addMessageWithArguments(CurveRemove);
     addMessage(Clear);
-    
-	// needed to be handled by a TTXmlHandler
-	addMessageWithArguments(WriteAsXml);
-	addMessageProperty(WriteAsXml, hidden, YES);
-	addMessageWithArguments(ReadFromXml);
-	addMessageProperty(ReadFromXml, hidden, YES);
-	
-	// needed to be handled by a TTTextHandler
-	addMessageWithArguments(WriteAsText);
-	addMessageProperty(WriteAsText, hidden, YES);
-	addMessageWithArguments(ReadFromText);
-	addMessageProperty(ReadFromText, hidden, YES);    
 }
 
 Automation::~Automation()

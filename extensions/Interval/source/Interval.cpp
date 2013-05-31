@@ -31,18 +31,6 @@ TIME_PROCESS_CONSTRUCTOR
     TIME_PROCESS_INITIALIZE
     
 	TT_ASSERT("Correct number of args to create Interval", arguments.size() == 0);
-    
-	// needed to be handled by a TTXmlHandler
-	addMessageWithArguments(WriteAsXml);
-	addMessageProperty(WriteAsXml, hidden, YES);
-	addMessageWithArguments(ReadFromXml);
-	addMessageProperty(ReadFromXml, hidden, YES);
-	
-	// needed to be handled by a TTTextHandler
-	addMessageWithArguments(WriteAsText);
-	addMessageProperty(WriteAsText, hidden, YES);
-	addMessageWithArguments(ReadFromText);
-	addMessageProperty(ReadFromText, hidden, YES);
 }
 
 Interval::~Interval()

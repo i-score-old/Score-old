@@ -27,19 +27,19 @@ private :
     /** Get parameters names needed by this time process
      @param	value           the returned parameter names
      @return                kTTErrNone */
-	TTErr getParameterNames(TTValue& value);
+	TTErr   getParameterNames(TTValue& value);
     
     /** Specific process method on start
      @return                an error code returned by the process end method */
-    TTErr ProcessStart();
+    TTErr   ProcessStart();
     
     /** Specific process method on end
      @return                an error code returned by the process end method */
-    TTErr ProcessEnd();
+    TTErr   ProcessEnd();
     
     /** Specific process method
      @return                an error code returned by the process method */
-    TTErr Process(const TTValue& inputValue, TTValue& outputValue);
+    TTErr   Process(const TTValue& inputValue, TTValue& outputValue);
     
 	/**  needed to be handled by a TTXmlHandler
      @param	inputValue      ..

@@ -19,9 +19,6 @@
 #define thisTTClassName             "StaticEvent"
 #define thisTTClassTags             "time, event, static"
 
-#define thisTimeEventVersion		"0.1"
-#define thisTimeEventAuthor        "Theo de la Hogue"
-
 extern "C" TT_EXTENSION_EXPORT TTErr TTLoadJamomaExtension_StaticEvent(void)
 {
 	TTFoundationInit();
@@ -34,18 +31,6 @@ TIME_EVENT_CONSTRUCTOR
     TIME_EVENT_INITIALIZE
     
 	TT_ASSERT("Correct number of args to create StaticEvent", arguments.size() == 0);
-	
-	// needed to be handled by a TTXmlHandler
-	addMessageWithArguments(WriteAsXml);
-	addMessageProperty(WriteAsXml, hidden, YES);
-	addMessageWithArguments(ReadFromXml);
-	addMessageProperty(ReadFromXml, hidden, YES);
-	
-	// needed to be handled by a TTTextHandler
-	addMessageWithArguments(WriteAsText);
-	addMessageProperty(WriteAsText, hidden, YES);
-	addMessageWithArguments(ReadFromText);
-	addMessageProperty(ReadFromText, hidden, YES);
 }
 
 StaticEvent::~StaticEvent()
@@ -61,36 +46,22 @@ TTErr StaticEvent::getParameterNames(TTValue& value)
 	return kTTErrNone;
 }
 
-TTErr StaticEvent::Trigger(const TTValue& inputValue, TTValue& outputValue)
+TTErr StaticEvent::Trigger()
 {
-    // append the triggered value to the trigger list
-    mTriggerList.append(inputValue);
+    // do nothing : a static event can't be triggered
+    return kTTErrGeneric;
+}
+
+TTErr StaticEvent::Happen()
+{
+    // recall the state
+    mState->sendMessage(TTSymbol("Run"));
+    
+    // notify observers
+    happenMessage->sendNotification(kTTSym_notify, kTTValNONE);	// we use kTTSym_notify because we know that observers are TTCallback
     
     return kTTErrNone;
 }
-
-TTErr StaticEvent::Notify()
-{
-    // if there is no triggered value : don't notify any subscriber
-    if (mTriggerList.isEmpty())
-        return kTTErrGeneric;
-    
-    TTObjectBasePtr aCallback;
-    
-    // notify all subscriber using the first triggered value
-    for (mSubscriberList.begin(); mSubscriberList.end(); mSubscriberList.next()) {
-        
-        aCallback = mSubscriberList.current()[0];
-        
-        aCallback->sendMessage(kTTSym_notify, mTriggerList.getHead(), kTTValNONE);
-    }
-    
-    // clear the trigger list
-    mTriggerList.clear();
-    
-    return kTTErrNone;
-}
-
 
 TTErr StaticEvent::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 {

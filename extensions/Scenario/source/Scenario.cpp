@@ -57,22 +57,11 @@ mExecutionGraph(NULL)
     addMessageWithArguments(TimeEventRemove);
     addMessageWithArguments(TimeEventMove);
     addMessageWithArguments(TimeEventReplace);
+    addMessageWithArguments(TimeEventTrigger);
     
     // all messages below are hidden because they are for internal use
     addMessageWithArguments(TimeProcessActiveChange);
     addMessageProperty(TimeProcessActiveChange, hidden, YES);
-	
-	// needed to be handled by a TTXmlHandler
-	addMessageWithArguments(WriteAsXml);
-	addMessageProperty(WriteAsXml, hidden, YES);
-	addMessageWithArguments(ReadFromXml);
-	addMessageProperty(ReadFromXml, hidden, YES);
-	
-	// needed to be handled by a TTTextHandler
-	addMessageWithArguments(WriteAsText);
-	addMessageProperty(WriteAsText, hidden, YES);
-	addMessageWithArguments(ReadFromText);
-	addMessageProperty(ReadFromText, hidden, YES);
     
     // Creation of the first static event of the scenario (but don't subscribe to it)
     err = TTObjectBaseInstantiate(TTSymbol("StaticEvent"), TTObjectBaseHandle(&mFirstEvent), kTTValNONE);
@@ -695,6 +684,33 @@ TTErr Scenario::TimeProcessActiveChange(const TTValue& inputValue, TTValue& outp
     return kTTErrGeneric;
 }
 
+TTErr Scenario::TimeEventTrigger(const TTValue& inputValue, TTValue& outputValue)
+{
+    TimeEventPtr aTimeEvent;
+    
+    if (inputValue.size() == 1) {
+        
+        if (inputValue[0].type() == kTypeObject ) {
+            
+            // get time event to trigger
+            aTimeEvent = TimeEventPtr((TTObjectBasePtr)inputValue[0]);
+            
+            // cf ECOMachine::receiveNetworkMessage(std::string netMessage)
+
+            // if the excecution graph is running
+            if (mExecutionGraph->getUpdateFactor() != 0) {
+                
+                // append the event to the event queue to process its triggering
+                mExecutionGraph->putAnEvent(TTPtr(aTimeEvent));
+                
+                return kTTErrNone;
+            }
+        }
+    }
+
+    return kTTErrGeneric;
+}
+
 TTErr Scenario::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 {
 	TTXmlHandlerPtr	aXmlHandler = NULL;
@@ -1038,8 +1054,9 @@ void ScenarioGraphTransitionTimeEventCallBack(void* arg)
 
     TimeEventPtr aTimeEvent = (TimeEventPtr) arg;
     
-	aTimeEvent->sendMessage(TTSymbol("Notify"));
+	aTimeEvent->sendMessage(TTSymbol("Happen"));
 }
+
 /*
 void waitedTriggerPointMessageCallBack(void* arg, bool isWaited, TransitionPtr transition)
 {
@@ -1058,22 +1075,5 @@ void waitedTriggerPointMessageCallBack(void* arg, bool isWaited, TransitionPtr t
             
 		}
 	}
-}
-*/
-
-/*
-bool ECOMachine::receiveNetworkMessage(std::string netMessage)
-{
-	map<string, string>::iterator iter = m_fromNetworkMessagesToPetriMessages.find(netMessage);
-    
-	if(iter == m_fromNetworkMessagesToPetriMessages.end()) {
-		return false;
-	} else {
-		if (getPetriNet()->getUpdateFactor() != 0) {
-			m_petriNet->putAnEvent(m_fromNetworkMessagesToPetriMessages[netMessage]);
-		}
-		return true;
-	}
-    
 }
 */
