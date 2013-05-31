@@ -10,6 +10,11 @@ Makefile
 # Ignore emacs backup files
 *~
 
+# Eclipse files
+.project
+.cproject
+.settings
+
 # XCode files to be ignored
 xcuserdata
 *.mode1v3
