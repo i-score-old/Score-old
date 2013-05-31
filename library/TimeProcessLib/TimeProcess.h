@@ -263,22 +263,22 @@ private :
      @return                an error code if the resume fails */
     TTErr	Resume();
     
-    friend TTErr TT_EXTENSION_EXPORT TimeProcessStartEventCallback(TTPtr baton, TTValue& data);
-    friend TTErr TT_EXTENSION_EXPORT TimeProcessEndEventCallback(TTPtr baton, TTValue& data);
+    friend TTErr TT_EXTENSION_EXPORT TimeProcessStartEventHappenCallback(TTPtr baton, TTValue& data);
+    friend TTErr TT_EXTENSION_EXPORT TimeProcessEndEventHappenCallback(TTPtr baton, TTValue& data);
     friend void TT_EXTENSION_EXPORT TimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression);
 };
 
-/** The start event callback to start the time process execution
+/** The start event happen callback to start the time process execution
  @param	baton               a time process instance
  @param	data                a value relative to the event
  @return					an error code */
-TTErr TT_EXTENSION_EXPORT TimeProcessStartEventCallback(TTPtr baton, TTValue& data);
+TTErr TT_EXTENSION_EXPORT TimeProcessStartEventHappenCallback(TTPtr baton, TTValue& data);
 
-/** The end event callback to end the time process execution
+/** The end event happen callback to end the time process execution
  @param	baton               a time process instance
  @param	data                a value relative to the event
  @return					an error code */
-TTErr TT_EXTENSION_EXPORT TimeProcessEndEventCallback(TTPtr baton, TTValue& data);
+TTErr TT_EXTENSION_EXPORT TimeProcessEndEventHappenCallback(TTPtr baton, TTValue& data);
 
 /** The scheduler time progression callback
  @param	object				a time process instance

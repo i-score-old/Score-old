@@ -62,26 +62,14 @@ TTErr Automation::getCurveAddresses(TTValue& value)
 
 TTErr Automation::ProcessStart()
 {
-    TTObjectBasePtr state;
-    TTValue         v;
-    
-    mStartEvent->getAttributeValue(TTSymbol("state"), v);
-    state = v[0];
-    
-    // recall the start state
-    return state->sendMessage(kTTSym_Run);
+    // do nothing
+    return kTTErrNone;
 }
 
 TTErr Automation::ProcessEnd()
 {
-    TTObjectBasePtr state;
-    TTValue         v;
-    
-    mEndEvent->getAttributeValue(TTSymbol("state"), v);
-    state = v[0];
-    
-    // recall the start state
-    return state->sendMessage(kTTSym_Run);
+    // do nothing
+    return kTTErrNone;
 }
 
 TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)

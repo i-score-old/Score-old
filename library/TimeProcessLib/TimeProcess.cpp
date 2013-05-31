@@ -100,7 +100,7 @@ mScheduler(NULL)
     startEventBaton = new TTValue(TTObjectBasePtr(this));
     
     mStartEventCallback->setAttributeValue(kTTSym_baton, TTPtr(startEventBaton));
-    mStartEventCallback->setAttributeValue(kTTSym_function, TTPtr(&TimeProcessStartEventCallback));
+    mStartEventCallback->setAttributeValue(kTTSym_function, TTPtr(&TimeProcessStartEventHappenCallback));
     
     // Create a end event callback to be notified and end the process execution
     mEndEventCallback = NULL;
@@ -109,7 +109,7 @@ mScheduler(NULL)
     endEventBaton = new TTValue(TTObjectBasePtr(this));
     
     mEndEventCallback->setAttributeValue(kTTSym_baton, TTPtr(endEventBaton));
-    mEndEventCallback->setAttributeValue(kTTSym_function, TTPtr(&TimeProcessEndEventCallback));
+    mEndEventCallback->setAttributeValue(kTTSym_function, TTPtr(&TimeProcessEndEventHappenCallback));
     
     // Creation of a scheduler based on the System scheduler plugin
     // Prepare callback argument to be notified of :
@@ -418,10 +418,19 @@ TTErr TimeProcess::setActive(const TTValue& value)
 
 TTErr TimeProcess::setStartEvent(const TTValue& value)
 {
+    TTMessagePtr aMessage = NULL;
+    TTErr err;
+    
     // stop old start event happenning observation
     if (mStartEvent) {
-        mStartEvent->unregisterObserverForMessage(*mStartEventCallback, TTSymbol("Happen"));
-        mStartEvent = NULL;
+        
+        err = mStartEvent->findMessage(TTSymbol("Happen"), &aMessage);
+        
+        if(!err) {
+            
+            aMessage->unregisterObserverForNotifications(*mStartEventCallback);
+            mStartEvent = NULL;
+        }
     }
     
     if (value.size() == 1) {
@@ -431,8 +440,13 @@ TTErr TimeProcess::setStartEvent(const TTValue& value)
             mStartEvent = value[0];
             
             // observe event happening
-            if (mStartEvent)
-                return mStartEvent->registerObserverForMessage(*mStartEventCallback, TTSymbol("Happen"));
+            if (mStartEvent) {
+                
+                err = mStartEvent->findMessage(TTSymbol("Happen"), &aMessage);
+                
+                if(!err)
+                    return aMessage->registerObserverForNotifications(*mStartEventCallback);
+            }
         
         }
     }
@@ -449,10 +463,19 @@ TTErr TimeProcess::getIntermediateEvents(TTValue& value)
 
 TTErr TimeProcess::setEndEvent(const TTValue& value)
 {
-     // stop old start event happenning observation
+    TTMessagePtr aMessage = NULL;
+    TTErr err;
+    
+    // stop old start event happenning observation
     if (mEndEvent) {
-        mEndEvent->unregisterObserverForMessage(*mEndEventCallback, TTSymbol("Happen"));
-        mEndEvent = NULL;
+        
+        err = mEndEvent->findMessage(TTSymbol("Happen"), &aMessage);
+        
+        if(!err) {
+            
+            aMessage->unregisterObserverForNotifications(*mEndEventCallback);
+            mEndEvent = NULL;
+        }
     }
     
     if (value.size() == 1) {
@@ -462,9 +485,13 @@ TTErr TimeProcess::setEndEvent(const TTValue& value)
             mEndEvent = value[0];
             
             // observe event happening
-            if (mEndEvent)
-                return mEndEvent->registerObserverForMessage(*mEndEventCallback, TTSymbol("Happen"));
-
+            if (mEndEvent) {
+                
+                err = mEndEvent->findMessage(TTSymbol("Happen"), &aMessage);
+                
+                if(!err)
+                    return aMessage->registerObserverForNotifications(*mEndEventCallback);
+            }
         }
     }
     
@@ -737,7 +764,7 @@ TTErr TimeProcess::Resume()
 #pragma mark Some Methods
 #endif
 
-TTErr TimeProcessStartEventCallback(TTPtr baton, TTValue& data)
+TTErr TimeProcessStartEventHappenCallback(TTPtr baton, TTValue& data)
 {
     TimeProcessPtr  aTimeProcess;
     TTValuePtr      b;
@@ -748,10 +775,16 @@ TTErr TimeProcessStartEventCallback(TTPtr baton, TTValue& data)
 	b = (TTValuePtr)baton;
 	aTimeProcess = TimeProcessPtr((TTObjectBasePtr)(*b)[0]);
     
-    // if the time process active, launch the scheduler
-    // note : the ProcessStart method is called inside TimeProcessSchedulerCallback
+    // if the time process active
 	if (aTimeProcess->mActive) {
         
+        // close start event listening
+        aTimeProcess->mStartEvent->setAttributeValue(kTTSym_active, NO);
+        
+        // use the specific start process method of the time process
+        aTimeProcess->ProcessStart();
+        
+        // launch the scheduler
         aTimeProcess->mStartEvent->getAttributeValue(TTSymbol("date"), v);
         start = v[0];
         
@@ -763,14 +796,16 @@ TTErr TimeProcessStartEventCallback(TTPtr baton, TTValue& data)
             v = TTValue(end - start);
             
             aTimeProcess->mScheduler->setAttributeValue(TTSymbol("duration"), v);
-            return aTimeProcess->mScheduler->sendMessage(TTSymbol("Go"));
+            aTimeProcess->mScheduler->sendMessage(TTSymbol("Go"));
+            
+            return kTTErrNone;
         }
     }
     
     return kTTErrGeneric;
 }
 
-TTErr TimeProcessEndEventCallback(TTPtr baton, TTValue& data)
+TTErr TimeProcessEndEventHappenCallback(TTPtr baton, TTValue& data)
 {
     TimeProcessPtr  aTimeProcess;
     TTValuePtr      b;
@@ -781,8 +816,18 @@ TTErr TimeProcessEndEventCallback(TTPtr baton, TTValue& data)
     
     // if the time process active, stop the scheduler
     // note : the ProcessStart method is called inside TimeProcessSchedulerCallback
-	if (aTimeProcess->mActive)
-        return aTimeProcess->mScheduler->sendMessage(TTSymbol("Stop"));
+	if (aTimeProcess->mActive) {
+        
+        aTimeProcess->mScheduler->sendMessage(TTSymbol("Stop"));
+        
+        // close end trigger listening
+        aTimeProcess->mEndEvent->setAttributeValue(kTTSym_active, NO);
+        
+        // use the specific process end method of the time process
+        aTimeProcess->ProcessEnd();
+        
+        return kTTErrNone;
+    }
     
     return kTTErrGeneric;
 }
@@ -791,31 +836,7 @@ void TimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression)
 {
 	TimeProcessPtr	aTimeProcess = (TimeProcessPtr)object;
     
-    // Case 0 : recall the start state
-    if (progression == 0.) {
-        
-        // close start event listening
-        aTimeProcess->mStartEvent->setAttributeValue(kTTSym_active, NO);
-        
-        // use the specific start process method of the time process
-        aTimeProcess->ProcessStart();
-        
-        return;
-    }
-    
-    // Case 1 : recall the end state
-    else if (progression == 1.) {
-        
-        // close end trigger listening
-        aTimeProcess->mEndEvent->setAttributeValue(kTTSym_active, NO);
-        
-        // use the specific process end method of the time process
-        aTimeProcess->ProcessEnd();
-        
-        return;
-    }
-    
-    // Case ]0 :: 1[ : use the specific process method
+    // use the specific process method
     aTimeProcess->Process(progression, kTTValNONE);
 }
 
