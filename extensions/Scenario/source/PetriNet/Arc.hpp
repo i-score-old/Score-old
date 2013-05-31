@@ -277,9 +277,9 @@ public:
 	 */
 	int getNumber();
     
-    bool getCondition(){return m_condition;} // CB TODO : should be a functionl pointer
+    bool getCondition(){return m_condition;} // CB TODO : should be a function pointer
     
-    void setCondition(bool newCondition){m_condition = newCondition;} // CB TODO : should be a functionl pointer
+    void setCondition(bool newCondition){m_condition = newCondition;} // CB TODO : should be a function pointer
 
 	// Destructor.
 	~Arc();
