@@ -1,11 +1,18 @@
-/* 
- * TTObjectBase to handle any signal output
+/** @file
  *
- * Copyright © 2010, Théo de la Hogue
- * 
- * License: This code is licensed under the terms of the "New BSD License"
+ * @ingroup modularLibrary
+ *
+ * @brief TTObjectBase to handle any signal output
+ *
+ * @details
+ *
+ * @authors Théo de la Hogue
+ *
+ * @copyright © 2010, Théo de la Hogue @n
+ * This code is licensed under the terms of the "New BSD License" @n
  * http://creativecommons.org/licenses/BSD/
  */
+
 
 #ifndef __TT_OUTPUT_H__
 #define __TT_OUTPUT_H__
@@ -37,21 +44,21 @@ public:	// use public for quick acces during signal processing
 	TTBoolean					mFreeze;					///< ATTRIBUTE : to freeze signal output (ex : for video signal)
 	TTBoolean					mPreview;					///< ??? : this attribute should not be here (it is relative to view part)
 	
-	TTObjectBasePtr					mSignalIn;					///< any data structure to receive complex signal
-	TTObjectBasePtr					mSignalOut;					///< any data structure to send complex signal
+	TTObjectBasePtr				mSignalIn;					///< any data structure to receive complex signal
+	TTObjectBasePtr				mSignalOut;					///< any data structure to send complex signal
 	
-	TTObjectBasePtr					mSignalTemp;				///< a temporary signal
-	TTObjectBasePtr					mSignalZero;				///< a zero signal
+	TTObjectBasePtr				mSignalTemp;				///< a temporary signal
+	TTObjectBasePtr				mSignalZero;				///< a zero signal
 	
-	TTObjectBasePtr					mMixUnit;					///< the unit used to mix the signal
-	TTObjectBasePtr					mGainUnit;					///< the unit used to apply the gain value on the signal
+	TTObjectBasePtr				mMixUnit;					///< the unit used to mix the signal
+	TTObjectBasePtr				mGainUnit;					///< the unit used to apply the gain value on the signal
 	
-	TTObjectBasePtr					mRampMixUnit;				///< the unit used to ramp the mix value
-	TTObjectBasePtr					mRampGainUnit;				///< the unit used to ramp the gain value
+	TTObjectBasePtr				mRampMixUnit;				///< the unit used to ramp the mix value
+	TTObjectBasePtr				mRampGainUnit;				///< the unit used to ramp the gain value
 	
 	TTInputPtr					mInputObject;				///< TTInput object to get a signal passing through
 	
-private:
+protected:
 	
 	TTCallbackPtr				mReturnSignalCallback;		///< a way to return back signal to the owner of this output
 	TTCallbackPtr				mReturnLinkCallback;		///< a way to return back the input link status to the owner of this output

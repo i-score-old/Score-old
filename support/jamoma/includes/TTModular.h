@@ -1,8 +1,15 @@
-/* 
- * TTModular Library
- * Copyright © 2010, Théo de la Hogue
- * 
- * License: This code is licensed under the terms of the "New BSD License"
+/** @file
+ *
+ * @ingroup modularLibrary
+ *
+ * @brief TTModular Library
+ *
+ * @details
+ *
+ * @authors Théo de la Hogue
+ *
+ * @copyright Copyright © 2010, Théo de la Hogue @n
+ * This code is licensed under the terms of the "New BSD License" @n
  * http://creativecommons.org/licenses/BSD/
  */
 
@@ -58,11 +65,9 @@
 #include "TTCueManager.h"
 #include "TTData.h"
 #include "TTExplorer.h"
-#include "TTInput.h"
 #include "TTMapper.h"
 #include "TTMapperManager.h"
 #include "TTMirror.h"
-#include "TTOutput.h"
 #include "TTPreset.h"
 #include "TTPresetManager.h"
 #include "TTRamp.h"

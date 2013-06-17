@@ -61,6 +61,7 @@ private:
 	TTHashPtr		aliases;				///< a pointer to a global hashtab which reference all aliases of the tree
 	TTHashPtr		observers;				///< a pointer to a hashtab which register all life cycle observers below that node
 											///< (address/relative/to/this/node, TTList of all observers below that address)
+											///< e.g. so that you can receive notifications of changes to the tree of TTNodes
 	TTMutexPtr		mutex;					///< a Mutex to protect the mObservers hash table.
 	
 public:
@@ -147,13 +148,13 @@ public:
 	 @param	returnedTTNode			A pointer to the TTNode at the given address 
 	 @param	nodeCreated				A boolean : true if a TTNode have been created, else false
 	 @return						An error code. */
-	TTErr			TTNodeCreate(TTAddress anAddress, TTObjectBasePtr newObject, void *aContext, TTNodePtr *returnedTTNode, TTBoolean *nodeCreated);
+	TTErr			TTNodeCreate(TTAddress& anAddress, TTObjectBasePtr newObject, void *aContext, TTNodePtr *returnedTTNode, TTBoolean *nodeCreated);
 	
 	/**	Remove a TTNodefrom the directory.
 	 @param	anAddress				The address for which you wish to remove the TTNode.
 									The address may (optionally) include an instance name or number in the address of the terminal TTNode.
 	 @return						An error code. */
-	TTErr			TTNodeRemove(TTAddress anAddress);
+	TTErr			TTNodeRemove(TTAddress& anAddress);
 	
 	/**	Create an alias address
 	 @param	alias					The alias address (absolute)

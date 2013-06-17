@@ -1,8 +1,15 @@
-/* 
- * TTBlue Class for caching common symbols for speed
- * Copyright © 2010, Théo de la Hogue
- * 
- * License: This code is licensed under the terms of the "New BSD License"
+/** @file
+ *
+ * @ingroup modularLibrary
+ *
+ * @brief TTBlue Class for caching common symbols for speed
+ *
+ * @details
+ *
+ * @authors Théo de la Hogue
+ *
+ * @copyright Copyright © 2010, Théo de la Hogue @n
+ * This code is licensed under the terms of the "New BSD License" @n
  * http://creativecommons.org/licenses/BSD/
  */
 
@@ -140,8 +147,6 @@ extern TTMODULAR_EXPORT TTSymbol	kTTSym_signal;
 extern TTMODULAR_EXPORT TTSymbol	kTTSym_start;
 extern TTMODULAR_EXPORT TTSymbol	kTTSym_stop;
 extern TTMODULAR_EXPORT TTSymbol	kTTSym_Subscribe;
-
-extern TTMODULAR_EXPORT TTSymbol	kTTSym_string;
 
 extern TTMODULAR_EXPORT TTSymbol	kTTSym_tag;
 extern TTMODULAR_EXPORT TTSymbol	kTTSym_target;
