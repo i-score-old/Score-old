@@ -724,29 +724,13 @@ TTErr TimeProcess::Limit(const TTValue& inputValue, TTValue& outputValue)
 }
 
 TTErr TimeProcess::Play()
-{
-    TTFloat64       duration;
-    TTValue         v;
-    TTErr           err;
-    
-    // compile the PetriNet
-    
-    // set scheduler duration equal to the scenario duration
-    err = this->getAttributeValue(TTSymbol("duration"), v);
-    
-    if (!err) {
-        duration = TTUInt32(v[0]);
-        mScheduler->setAttributeValue(TTSymbol("duration"), duration);
-    
-        err = mScheduler->sendMessage(TTSymbol("Go"));
-    }
-    
-    return err;
+{    
+    return mStartEvent->sendMessage(TTSymbol("Happen"));
 }
 
 TTErr TimeProcess::Stop()
 {
-    return mScheduler->sendMessage(TTSymbol("Stop"));
+    return mEndEvent->sendMessage(TTSymbol("Happen"));
 }
 
 TTErr TimeProcess::Pause()
@@ -793,7 +777,7 @@ TTErr TimeProcessStartEventHappenCallback(TTPtr baton, TTValue& data)
         
         if (end > start) {
             
-            v = TTValue(end - start);
+            v = TTFloat64(end - start);
             
             aTimeProcess->mScheduler->setAttributeValue(TTSymbol("duration"), v);
             aTimeProcess->mScheduler->sendMessage(TTSymbol("Go"));
