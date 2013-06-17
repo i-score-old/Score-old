@@ -219,7 +219,7 @@ void Scenario::compileInterval(TimeProcessPtr aTimeProcess)
     TTUInt32                startDate, endDate;
     TTValue                 v;
     
-    GraphObjectMapIterator  mergeIterator;
+//    GraphObjectMapIterator  mergeIterator; // CB now unused
     
     // get start event
     aTimeProcess->getAttributeValue(TTSymbol("startEvent"), v);
@@ -242,23 +242,30 @@ void Scenario::compileInterval(TimeProcessPtr aTimeProcess)
     
     // retreive start transition
     startTransition = TransitionPtr(mTransitionsMap[startEvent]);
-    mergeIterator = mMergedTransitionsMap.find(startTransition);
     
-    if (mergeIterator != mMergedTransitionsMap.end())
-        startTransition = TransitionPtr(mergeIterator->second);
+    // CB Now stored directly in mTransitionsMap
+//    mergeIterator = mMergedTransitionsMap.find(startTransition);
+//    
+//    if (mergeIterator != mMergedTransitionsMap.end())
+//        startTransition = TransitionPtr(mergeIterator->second);
     
     // retreive end transition
     endTransition = TransitionPtr(mTransitionsMap[endEvent]);
-    mergeIterator = mMergedTransitionsMap.find(endTransition);
     
-    if (mergeIterator != mMergedTransitionsMap.end())
-        endTransition = TransitionPtr(mergeIterator->second);
+    // CB Now stored directly in mTransitionsMap
+//    mergeIterator = mMergedTransitionsMap.find(endTransition);
+//    
+//    if (mergeIterator != mMergedTransitionsMap.end())
+//        endTransition = TransitionPtr(mergeIterator->second);
     
     // if the interval have no duration
     if (endDate - startDate <= 0) {
         
         startTransition->merge(endTransition);
-        mMergedTransitionsMap[endTransition] = startTransition;
+        mTransitionsMap[endEvent] = startTransition;
+        
+        // CB Now stored directly in mTransitionsMap
+//        mMergedTransitionsMap[endTransition] = startTransition;
     }
     else {
         
