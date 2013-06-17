@@ -28,8 +28,6 @@ extern "C" TT_EXTENSION_EXPORT TTErr TTLoadJamomaExtension_Scenario(void)
 
 TIME_PROCESS_CONSTRUCTOR,
 mNamespace(NULL),
-mFirstEvent(NULL),
-mLastEvent(NULL),
 mEditionSolver(NULL),
 mExecutionGraph(NULL)
 {
@@ -63,25 +61,6 @@ mExecutionGraph(NULL)
     addMessageWithArguments(TimeProcessActiveChange);
     addMessageProperty(TimeProcessActiveChange, hidden, YES);
     
-    // Creation of the first static event of the scenario (but don't subscribe to it)
-    err = TTObjectBaseInstantiate(TTSymbol("StaticEvent"), TTObjectBaseHandle(&mFirstEvent), kTTValNONE);
-    
-	if (err) {
-        mFirstEvent = NULL;
-		logError("Scenario failed to load the first static event");
-    }
-    
-    // Creation of the last static event of the scenario and subscribe to it
-    err = TTObjectBaseInstantiate(TTSymbol("StaticEvent"), TTObjectBaseHandle(&mLastEvent), kTTValNONE);
-    
-	if (err) {
-        mLastEvent = NULL;
-		logError("Scenario failed to load the last static event");
-    }
-    
-    // Subscribe to the last event using the mEndEventCallback (see in ProcessEnd why)
-    mLastEvent->sendMessage(TTSymbol("Subscribe"), mEndEventCallback, kTTValNONE);
-    
     // Create the edition solver
     mEditionSolver = new Solver();
     
@@ -96,16 +75,6 @@ Scenario::~Scenario()
     if (mNamespace) {
         delete mNamespace;
         mNamespace = NULL;
-    }
-    
-    if (mFirstEvent) {
-        TTObjectBaseRelease(TTObjectBaseHandle(&mFirstEvent));
-        mFirstEvent = NULL;
-    }
-    
-    if (mLastEvent) {
-        TTObjectBaseRelease(TTObjectBaseHandle(&mLastEvent));
-        mLastEvent = NULL;
     }
     
     if (mEditionSolver) {
@@ -136,12 +105,6 @@ TTErr Scenario::ProcessStart()
     // problem : if we offset the scheduler time it will never call ProcessStart method (called when progression == 0)
     // idea : add the offset afterward ? for any time process or is this specific to a scenario ?
     //mExecutionGraph->addTime(mExecutionGraph->getTimeOffset() * 1000);
-    
-    // Trigger the first event
-    mFirstEvent->sendMessage(TTSymbol("Trigger"), kTTValNONE, kTTValNONE);
-    
-    // Notify the first event subscribers
-    mFirstEvent->sendMessage(TTSymbol("Notify"));
     
     return kTTErrNone;
 }

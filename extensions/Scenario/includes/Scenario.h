@@ -31,9 +31,6 @@ private :
     
     TTAddressItemPtr            mNamespace;                     ///< ATTRIBUTE : the namespace workspace of the scenario
     
-    TTObjectBasePtr             mFirstEvent;                    ///< the first event of the scenario (which is not the start event)
-    TTObjectBasePtr             mLastEvent;                     ///< the last event of the scenario (which is not the end event)
-    
     SolverPtr                   mEditionSolver;                 ///< an internal gecode solver to assist scenario edition
     SolverObjectMap             mVariablesMap;                  ///< a map to store and retreive SolverVariablePtr using TimeEventPtr
     SolverObjectMap             mConstraintsMap;                ///< a map to store and retreive SolverConstraintPtr using TimeProcessPtr
