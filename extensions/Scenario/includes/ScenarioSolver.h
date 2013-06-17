@@ -48,9 +48,6 @@ enum SolverError {
     SolverErrorOutOfBounds		///< ...
 };
 
-#define DATE_VARIABLE_TYPE 1
-#define RANGE_VARIABLE_TYPE 100
-
 /**	\ingroup enums
  Solver Relation Types  */
 enum SolverVariableType { DATE_VARIABLE = 1, RANGE_VARIABLE = 100 };
@@ -75,12 +72,15 @@ public:
     int             dateID;
     int             rangeID;
     
-    SolverVariable(SolverPtr aSolver, TimeEventPtr anEvent, SolverValue range, SolverValue max);
+    SolverVariable(SolverPtr aSolver, TimeEventPtr anEvent, SolverValue max);
     
     ~SolverVariable();
     
     /** Get the variable value from the solver */
     SolverValue get();
+    
+    /** Set the range bounds of the variable */
+    void limit(SolverValue min, SolverValue max);
     
     /** Update the variable value from the solver */
     void update();

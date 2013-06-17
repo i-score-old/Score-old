@@ -221,6 +221,10 @@ TTErr Scenario::TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue)
                     }
                     else {
                         
+                        // limit the start variable to the process duration
+                        // this avoid time crushing when a time process moves while it is connected to other process
+                        startVariable->limit(duration, duration);
+                        
                         // add a constraint between the 2 variables to the solver
                         SolverConstraintPtr constraint = new SolverConstraint(mEditionSolver, startVariable, endVariable, TTUInt32(durationMin[0]), TTUInt32(durationMax[0]), TTUInt32(scenarioDuration[0]));
                         
@@ -306,6 +310,7 @@ TTErr Scenario::TimeProcessMove(const TTValue& inputValue, TTValue& outputValue)
     TimeProcessPtr          aTimeProcess;
     TTValue                 v;
     TTValue                 startEvent, endEvent;
+    TTValue                 duration, scenarioDuration;
     TTSymbol                timeProcessType;
     SolverObjectMapIterator it;
     SolverError             sErr;
@@ -319,6 +324,12 @@ TTErr Scenario::TimeProcessMove(const TTValue& inputValue, TTValue& outputValue)
             // get time process events
             aTimeProcess->getAttributeValue(TTSymbol("startEvent"), startEvent);
             aTimeProcess->getAttributeValue(TTSymbol("endEvent"), endEvent);
+            
+            // get time process duration
+            aTimeProcess->getAttributeValue(TTSymbol("duration"), duration);
+            
+            // get scenario duration
+            this->getAttributeValue(TTSymbol("duration"), scenarioDuration);
             
             // update the Solver depending on the type of the time process
             timeProcessType = aTimeProcess->getName();
@@ -337,7 +348,14 @@ TTErr Scenario::TimeProcessMove(const TTValue& inputValue, TTValue& outputValue)
                 it = mConstraintsMap.find(aTimeProcess);
                 SolverConstraintPtr constraint = SolverConstraintPtr(it->second);
                 
+                // extend the limit of the start variable
+                constraint->startVariable->limit(0, TTUInt32(scenarioDuration[0]));
+                
                 sErr = constraint->move(inputValue[1], inputValue[2]);
+                
+                // set the start variable limit back
+                // this avoid time crushing when a time process moves while it is connected to other process
+                constraint->startVariable->limit(TTUInt32(duration[0]), TTUInt32(duration[0]));
             }
             
             if (!sErr) {
@@ -431,7 +449,7 @@ TTErr Scenario::TimeEventAdd(const TTValue& inputValue, TTValue& outputValue)
                 this->getAttributeValue(TTSymbol("duration"), scenarioDuration);
                 
                 // add variable to the solver
-                SolverVariablePtr variable = new SolverVariable(mEditionSolver, aTimeEvent, 0, TTUInt32(scenarioDuration[0]));
+                SolverVariablePtr variable = new SolverVariable(mEditionSolver, aTimeEvent, TTUInt32(scenarioDuration[0]));
                 
                 // store the variables relative to those time events
                 mVariablesMap.emplace(TTObjectBasePtr(aTimeEvent), variable);

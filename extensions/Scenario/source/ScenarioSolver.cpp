@@ -8,7 +8,7 @@
 
 #include "ScenarioSolver.h"
 
-SolverVariable::SolverVariable(SolverPtr aSolver, TimeEventPtr anEvent, SolverValue range, SolverValue max):
+SolverVariable::SolverVariable(SolverPtr aSolver, TimeEventPtr anEvent, SolverValue max):
 event(anEvent), solver(aSolver)
 {
     TTValue v;
@@ -18,13 +18,8 @@ event(anEvent), solver(aSolver)
     // add a variable for date's event in solver
     dateID = solver->addIntVar(1, max, TTUInt32(v[0]), DATE_VARIABLE);
     
-    /* TO : this seems useless
-    // add a variable for date's event range in solver
-    if (range)
-        rangeID = solver->addIntVar(10, max, range, RANGE_VARIABLE);    // typically for start event in our case
-    else
-     */
-        rangeID = solver->addIntVar(0, max, 0, RANGE_VARIABLE);         // typically for end event in our case
+    // add a variable to set the date only limited by the max value (see in limit method)
+    rangeID = solver->addIntVar(0, max, 0, RANGE_VARIABLE);
 }
 
 SolverVariable::~SolverVariable()
@@ -39,6 +34,19 @@ SolverVariable::~SolverVariable()
 SolverValue SolverVariable::get()
 {
     return solver->getVariableValue(dateID);
+}
+
+void SolverVariable::limit(SolverValue min, SolverValue max)
+{
+    TTUInt32 value = solver->getVariableValue(dateID);
+    
+    if (value < min)
+        value = min;
+    
+    if (value > max)
+        value = max;
+    
+    solver->setIntVar(rangeID, min, max, value, RANGE_VARIABLE);
 }
 
 void SolverVariable::update()
