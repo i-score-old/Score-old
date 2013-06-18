@@ -51,7 +51,9 @@ void SolverVariable::limit(SolverValue min, SolverValue max)
 
 void SolverVariable::update()
 {
-    event->setAttributeValue(TTSymbol("date"), TTUInt32(solver->getVariableValue(dateID)));
+    TTUInt32 value = solver->getVariableValue(dateID);
+    
+    event->setAttributeValue(TTSymbol("date"), value);
 }
 
 SolverConstraint::SolverConstraint(SolverPtr aSolver, SolverVariablePtr variableA, SolverVariablePtr variableB, SolverValue durationMin, SolverValue durationMax, SolverValue max):

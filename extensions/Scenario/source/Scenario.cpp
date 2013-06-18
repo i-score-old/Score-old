@@ -33,8 +33,6 @@ mExecutionGraph(NULL)
 {
     TIME_PROCESS_INITIALIZE
     
-    TTErr err;
-    
 	TT_ASSERT("Correct number of args to create Scenario", arguments.size() == 0);
     
     addMessage(Compile);
@@ -738,160 +736,25 @@ TTErr Scenario::ReadFromText(const TTValue& inputValue, TTValue& outputValue)
 }
 
 void Scenario::makeTimeProcessCacheElement(TimeProcessPtr aTimeProcess, TTValue& newCacheElement)
-{
-    TTValue			v;
-    TTAttributePtr	anAttribute;
-	TTObjectBasePtr	aScheduler, runningObserver, progressionObserver;
-    TTValuePtr		runningBaton, progressionBaton;
-    TTErr           err;
-	
+{	
 	// 0 : cache time process object
 	newCacheElement.append((TTObjectBasePtr)aTimeProcess);
-    
-    // get the scheduler
-    aTimeProcess->getAttributeValue(TTSymbol("scheduler"), v);
-    aScheduler = v[0];
-    
-    // 1 : create and cache scheduler running attribute observer on this time process
-    err = aScheduler->findAttribute(TTSymbol("running"), &anAttribute);
-    
-    if (!err) {
-        
-        runningObserver = NULL;
-        TTObjectBaseInstantiate(TTSymbol("callback"), &runningObserver, kTTValNONE);
-        
-        runningBaton = new TTValue(TTObjectBasePtr(this));
-        runningBaton->append(TTObjectBasePtr(aTimeProcess));
-        
-        runningObserver->setAttributeValue(kTTSym_baton, TTPtr(runningBaton));
-        runningObserver->setAttributeValue(kTTSym_function, TTPtr(&ScenarioSchedulerRunningAttributeCallback));
-        
-        anAttribute->registerObserverForNotifications(*runningObserver);
-    }
-    
-    newCacheElement.append(runningObserver);
-    
-    // 2 : create and cache scheduler progression attribute observer on this time process
-    err = aScheduler->findAttribute(TTSymbol("progression"), &anAttribute);
-    
-    if (!err) {
-        
-        progressionObserver = NULL;
-        TTObjectBaseInstantiate(TTSymbol("callback"), &progressionObserver, kTTValNONE);
-        
-        progressionBaton = new TTValue(TTObjectBasePtr(this));
-        progressionBaton->append(TTObjectBasePtr(aTimeProcess));
-        
-        progressionObserver->setAttributeValue(kTTSym_baton, TTPtr(progressionBaton));
-        progressionObserver->setAttributeValue(kTTSym_function, TTPtr(&ScenarioSchedulerProgressionAttributeCallback));
-        
-        anAttribute->registerObserverForNotifications(*progressionObserver);
-    }
-    
-    newCacheElement.append(progressionObserver);
 }
 
 void Scenario::deleteTimeProcessCacheElement(const TTValue& oldCacheElement)
 {
-	TTValue			v;
-    TimeProcessPtr	aTimeProcess;
-    TTObjectBasePtr aScheduler, anObserver;
-	TTAttributePtr	anAttribute;
-	TTErr			err;
-    
-    // 0 : get cached time process
-    aTimeProcess = TimeProcessPtr((TTObjectBasePtr)oldCacheElement[0]);
-    
-    // get the scheduler
-    aTimeProcess->getAttributeValue(TTSymbol("scheduler"), v);
-    aScheduler = v[0];
-    
-    // 1 : delete scheduler running attribute observer
-    anObserver = NULL;
-    anObserver = oldCacheElement[1];
-    
-    anAttribute = NULL;
-    err = aScheduler->findAttribute(TTSymbol("running"), &anAttribute);
-    
-    if (!err) {
-        
-        err = anAttribute->unregisterObserverForNotifications(*anObserver);
-        
-        if (!err)
-            TTObjectBaseRelease(&anObserver);
-    }
-    
-    // 2 : delete scheduler progression attribute observer
-    anObserver = NULL;
-    anObserver = oldCacheElement[2];
-    
-    anAttribute = NULL;
-    err = aScheduler->findAttribute(TTSymbol("progression"), &anAttribute);
-    
-    if (!err) {
-        
-        err = anAttribute->unregisterObserverForNotifications(*anObserver);
-        
-        if (!err)
-            TTObjectBaseRelease(&anObserver);
-    }    
+    ;
 }
 
 void Scenario::makeTimeEventCacheElement(TimeEventPtr aTimeEvent, TTValue& newCacheElement)
-{
-    TTValue			v;
-    TTMessagePtr	aMessage;
-	TTObjectBasePtr	triggerObserver;
-    TTValuePtr		triggerBaton;
-    TTErr           err;
-	
+{	
 	// 0 : cache time event object
 	newCacheElement.append((TTObjectBasePtr)aTimeEvent);
-    
-    // 1 : create and cache event trigger message observer on this time event
-    err = aTimeEvent->findMessage(TTSymbol("Trigger"), &aMessage);
-    
-    if (!err) {
-        triggerObserver = NULL;
-        TTObjectBaseInstantiate(TTSymbol("callback"), &triggerObserver, kTTValNONE);
-        
-        triggerBaton = new TTValue(TTObjectBasePtr(this));
-        triggerBaton->append(TTObjectBasePtr(aTimeEvent));
-        
-        triggerObserver->setAttributeValue(kTTSym_baton, TTPtr(triggerBaton));
-        triggerObserver->setAttributeValue(kTTSym_function, TTPtr(&ScenarioSchedulerRunningAttributeCallback));
-        
-        aMessage->registerObserverForNotifications(*triggerObserver);
-    }
-    
-    newCacheElement.append(triggerObserver);
 }
 
 void Scenario::deleteTimeEventCacheElement(const TTValue& oldCacheElement)
 {
-    TTValue			v;
-    TimeEventPtr	aTimeEvent;
-    TTObjectBasePtr anObserver;
-	TTMessagePtr	aMessage;
-	TTErr			err;
-    
-    // 0 : get cached time event
-    aTimeEvent = TimeEventPtr((TTObjectBasePtr)oldCacheElement[0]);
-    
-    // 1 : delete event trigger message observer observer
-    anObserver = NULL;
-    anObserver = oldCacheElement[1];
-    
-    aMessage = NULL;
-    err = aTimeEvent->findMessage(TTSymbol("Trigger"), &aMessage);
-    
-    if (!err) {
-        
-        err = aMessage->unregisterObserverForNotifications(*anObserver);
-        
-        if (!err)
-            TTObjectBaseRelease(&anObserver);
-    }
+    ;
 }
 
 #if 0
@@ -930,81 +793,6 @@ void ScenarioFindTimeProcessWithTimeEvent(const TTValue& aValue, TTPtr timeEvent
 void ScenarioFindTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found)
 {
     found = (TTObjectBasePtr)aValue[0] == (TTObjectBasePtr)timeEventPtrToMatch;
-}
-
-TTErr ScenarioSchedulerRunningAttributeCallback(TTPtr baton, TTValue& data)
-{
-    TimeProcessPtr  aScenario, aTimeProcess;
-	TTValuePtr      b;
-    TTSymbol        timeProcessType;
-    TTBoolean       running;
-	
-	// unpack baton (a scenario and a time process)
-	b = (TTValuePtr)baton;
-	aScenario = TimeProcessPtr((TTObjectBasePtr)(*b)[0]);
-    aTimeProcess = TimeProcessPtr((TTObjectBasePtr)(*b)[1]);
-    
-    // get new running value
-    running = data[0];
-    
-    timeProcessType = aTimeProcess->getName();
-    
-    if (timeProcessType == TTSymbol("Automation")) {
-        
-        // TODO : update scenario's ECOMachine scheduler in Automation case
-        return kTTErrGeneric;
-    }
-    else if (timeProcessType == TTSymbol("Scenario")) {
-        
-        // TODO : update scenario's ECOMachine scheduler in Scenario case
-        return kTTErrGeneric;
-    }
-    else if (timeProcessType == TTSymbol("Interval")) {
-        
-        // TODO : update scenario's ECOMachine scheduler in Interval case
-        return kTTErrGeneric;
-    }
-    // else if ...
-    
-    return kTTErrGeneric;
-}
-
-TTErr ScenarioSchedulerProgressionAttributeCallback(TTPtr baton, TTValue& data)
-{
-    TimeProcessPtr  aScenario, aTimeProcess;
-	TTValuePtr      b;
-    TTSymbol        timeProcessType;
-    TTFloat64       progression;
-	
-	// unpack baton (a scenario and a time process)
-	b = (TTValuePtr)baton;
-	aScenario = TimeProcessPtr((TTObjectBasePtr)(*b)[0]);
-    aTimeProcess = TimeProcessPtr((TTObjectBasePtr)(*b)[1]);
-    
-    // get new progression value
-    progression = data[0];
-    
-    // TODO : warn Scheduler that this time process progression have changed (?)
-    timeProcessType = aTimeProcess->getName();
-    
-    if (timeProcessType == TTSymbol("Automation")) {
-        
-        // TODO : update scenario's ECOMachine scheduler in Automation case
-        return kTTErrGeneric;
-    }
-    else if (timeProcessType == TTSymbol("Scenario")) {
-        
-        // TODO : update scenario's ECOMachine scheduler in Scenario case
-        return kTTErrGeneric;
-    }
-    else if (timeProcessType == TTSymbol("Interval")) {
-        
-        // TODO : update scenario's ECOMachine scheduler in Interval case
-        return kTTErrGeneric;
-    }
-    // else if ...
-    
-    return kTTErrGeneric;
 }
 
 void ScenarioGraphTransitionTimeProcessCallBack(void* arg)

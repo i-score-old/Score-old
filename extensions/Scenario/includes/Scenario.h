@@ -165,8 +165,6 @@ private :
     void    compileInteractiveEvent(TimeEventPtr aTimeEvent, TTUInt32 timeOffset);
     //void    cleanGraph(TransitionPtr endTransition);
     
-    friend TTErr TT_EXTENSION_EXPORT ScenarioSchedulerRunningAttributeCallback(TTPtr baton, TTValue& data);
-    friend TTErr TT_EXTENSION_EXPORT ScenarioSchedulerProgressionAttributeCallback(TTPtr baton, TTValue& data);
     friend void  TT_EXTENSION_EXPORT ScenarioGraphTransitionTimeProcessCallBack(void* arg);
     friend void  TT_EXTENSION_EXPORT ScenarioGraphTransitionTimeEventCallBack(void* arg);
 };
@@ -182,18 +180,6 @@ void TT_EXTENSION_EXPORT ScenarioFindTimeProcessWithTimeEvent(const TTValue& aVa
 
 /* a TTFunctionMatch to find a time event and all his observers in the scenario depending on the time event object him self */
 void TT_EXTENSION_EXPORT ScenarioFindTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found);
-
-/** The callback method used to observe time processes scheduler running attribute change
- @param	baton						a time process instance
- @param	data						a new running value
- @return							an error code */
-TTErr TT_EXTENSION_EXPORT ScenarioSchedulerRunningAttributeCallback(TTPtr baton, TTValue& data);
-
-/** The callback method used to observe time processes scheduler progression attribute change
- @param	baton						a time process instance
- @param	data						a new progression value
- @return							an error code */
-TTErr TT_EXTENSION_EXPORT ScenarioSchedulerProgressionAttributeCallback(TTPtr baton, TTValue& data);
 
 /** The callback method used by the execution graph when a time process should start 
  @param	arg                         a time process instance */
