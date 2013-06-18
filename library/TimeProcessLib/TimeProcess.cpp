@@ -333,7 +333,7 @@ TTErr TimeProcess::setStartDate(const TTValue& value)
                     return mScenario->sendMessage(TTSymbol("TimeProcessMove"), v, kTTValNONE);
                 }
                 else
-                    return mStartEvent->setAttributeValue(TTSymbol("date"), TTUInt32(value[0]));
+                    return mStartEvent->setAttributeValue(TTSymbol("date"), value[0]);
                 
             }
         }
@@ -373,7 +373,7 @@ TTErr TimeProcess::setEndDate(const TTValue& value)
                     return mScenario->sendMessage(TTSymbol("TimeProcessMove"), v, kTTValNONE);
                 }
                 else
-                    return mEndEvent->setAttributeValue(TTSymbol("date"), TTUInt32(value[0]));
+                    return mEndEvent->setAttributeValue(TTSymbol("date"), value[0]);
                 
             }
         }
@@ -524,7 +524,7 @@ TTErr TimeProcess::StartEventCreate(const TTValue& value)
                     if (value[1].type() == kTypeUInt32) {
                         
                         // Set the start date
-                        timeEvent->setAttributeValue(TTSymbol("date"), TTUInt32(value[1]));
+                        timeEvent->setAttributeValue(TTSymbol("date"), value[1]);
                     }
                 }
             }
@@ -632,7 +632,7 @@ TTErr TimeProcess::EndEventCreate(const TTValue& value)
                     if (value[1].type() == kTypeUInt32) {
                         
                         // Set the end date
-                        timeEvent->setAttributeValue(TTSymbol("date"), TTUInt32(value[1]));
+                        timeEvent->setAttributeValue(TTSymbol("date"), value[1]);
                     }
                 }
             }
