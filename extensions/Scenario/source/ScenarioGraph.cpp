@@ -29,9 +29,9 @@ void Scenario::compileScenario(TTUInt32 timeOffset)
 	mArcsMap.clear();
     mMergedTransitionsMap.clear();
     
-    // TODO : set the callback used to get expected interactive event state back
-    // TODO : the best would be to pass a callback to each transition in order the transition call back with a TimeEventPtr argument
-	//mExecutionGraph->addWaitedTriggerPointMessageAction(this, triggerAction);
+// TODO : set the callback used to get expected interactive event state back
+// TODO : the best would be to pass a callback to each transition in order the transition call back with a TimeEventPtr argument
+//  mExecutionGraph->addWaitedTriggerPointMessageAction(this, triggerAction);
     
 	// start the graph
 	Place*          startPlace = mExecutionGraph->createPlace();
@@ -48,7 +48,7 @@ void Scenario::compileScenario(TTUInt32 timeOffset)
 	startArc->changeRelativeTime(integer0, plusInfinity);
 	endArc->changeRelativeTime(integer0, plusInfinity);
     
-    // TODO : sort the time process to order them in time (?)
+// TODO : sort the time process to order them in time (?)
     
     // compile all time processes except the interval processes
     TransitionPtr previousTransition = startTransition;
@@ -70,7 +70,7 @@ void Scenario::compileScenario(TTUInt32 timeOffset)
 	}
     
 	// clean the graph
-	//cleanGraph(endTransition);
+//  cleanGraph(endTransition);
     
 	// compile interactive events
 	for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next()) {
@@ -114,8 +114,9 @@ void Scenario::compileTimeProcess(TimeProcessPtr aTimeProcess, TransitionPtr* pr
     // if the date to start is in the middle of a time process
     if (startDate < timeOffset && endDate > timeOffset)
         
-        // TODO : prepare the scheduler to start in the middle of his process
-        ;//aTimeProcess->setTimeOffsetInMs(timeOffset - startDate);
+// TODO : prepare the scheduler to start in the middle of his process
+//      aTimeProcess->setTimeOffsetInMs(timeOffset - startDate);
+        ;
     
     // compile start event
     currentTransition = mExecutionGraph->createTransition();
@@ -128,7 +129,7 @@ void Scenario::compileTimeProcess(TimeProcessPtr aTimeProcess, TransitionPtr* pr
     *previousTransition = currentTransition;
     
     // compile intermediate events
-    /*
+/*
     currentTransition = mExecutionGraph->createTransition();
     currentPlace = mExecutionGraph->createPlace();
     
@@ -139,7 +140,7 @@ void Scenario::compileTimeProcess(TimeProcessPtr aTimeProcess, TransitionPtr* pr
     
     mTransitionsMap[intermediateEvent] = currentTransition;
     previousTransition = currentTransition;
-    */
+*/
     
     // compile end event
     currentTransition = mExecutionGraph->createTransition();
@@ -151,39 +152,39 @@ void Scenario::compileTimeProcess(TimeProcessPtr aTimeProcess, TransitionPtr* pr
     mTransitionsMap[endEvent] = currentTransition;
     *previousTransition = currentTransition;
     
-    /* IS THIS RELATIVE TO COMPILATION OF SUB SCENARIO ?
-     note : it was in compileEvent
+/* IS THIS RELATIVE TO COMPILATION OF SUB SCENARIO ?
+note : it was in compileEvent
      
      // after compiling the end event
      // if this is not the last time process
      if (mTimeProcessList.end()) {
      
-     std::vector<unsigned int> aTimeProcessIdToStop;
+        std::vector<unsigned int> aTimeProcessIdToStop;
      
-     unsigned int currentTime = timeOffset > startDate ? timeOffset - startDate : 0;
-     PetriNet* currentPetriNet = compileScenario(hierarchyStoryLine[aTimeProcessId], hierarchyStoryLine, aTimeProcessIdToStop, currentTime, triggerAction);
+        unsigned int currentTime = timeOffset > startDate ? timeOffset - startDate : 0;
+        PetriNet* currentPetriNet = compileScenario(hierarchyStoryLine[aTimeProcessId], hierarchyStoryLine, aTimeProcessIdToStop, currentTime, triggerAction);
      
-     mExecutionGraph->addInternPetriNet(startTransition, lastTransition, currentPetriNet);
+        mExecutionGraph->addInternPetriNet(startTransition, lastTransition, currentPetriNet);
      
-     lastTransition->setmExecutionGraphToEnd(currentPetriNet);
+        lastTransition->setmExecutionGraphToEnd(currentPetriNet);
      
-     if (endDate - startDate >= timeOffset) {
+        if (endDate - startDate >= timeOffset) {
      
-     lastTransition->setMustWaitThePetriNetToEnd(true);
+            lastTransition->setMustWaitThePetriNetToEnd(true);
      
-     arcList incomingArcs = currentTransition->inGoingArcsOf();
-     for (unsigned int k = 0; k < incomingArcs.size(); ++k) {
-     incomingArcs[k]->changeRelativeTime(incomingArcs[k]->getRelativeMinValue(), plusInfinity);
+            arcList incomingArcs = currentTransition->inGoingArcsOf();
+            for (unsigned int k = 0; k < incomingArcs.size(); ++k) {
+                incomingArcs[k]->changeRelativeTime(incomingArcs[k]->getRelativeMinValue(), plusInfinity);
+            }
+        }
+     
+        currentControlPointInformations->m_processIdToStop = aTimeProcessIdToStop;
+     
+        for (unsigned int k = 0; k < aTimeProcessIdToStop.size(); ++k)
+            processIdToStop.push_back(aTimeProcessIdToStop[k]);
+     
      }
-     }
-     
-     currentControlPointInformations->m_processIdToStop = aTimeProcessIdToStop;
-     
-     for (unsigned int k = 0; k < aTimeProcessIdToStop.size(); ++k) {
-     processIdToStop.push_back(aTimeProcessIdToStop[k]);
-     }
-     }
-     */
+*/
     
     // close the compilation of the process
     currentPlace = mExecutionGraph->createPlace();
@@ -193,11 +194,11 @@ void Scenario::compileTimeProcess(TimeProcessPtr aTimeProcess, TransitionPtr* pr
     arcFromCurrentPlaceToTheEnd = mExecutionGraph->createArc(currentPlace, endTransition);
     arcFromCurrentPlaceToTheEnd->changeRelativeTime(integer0, plusInfinity);
     
-    // note : this is useless as we can find it by asking the duration
-    //aTimeProcess->setWrittenTime(aTimeProcess->lengthValue());
+// note : this is useless as we can find it by asking the duration
+//  aTimeProcess->setWrittenTime(aTimeProcess->lengthValue());
     
-    // note : this seems useless because the vector is unused afterward
-    //processIdToStop.push_back(aTimeProcessId);
+// note : this seems useless because the vector is unused afterward
+//  processIdToStop.push_back(aTimeProcessId);
     
     // Special case : Automation process
     // note : is this needed ?
@@ -218,8 +219,9 @@ void Scenario::compileInterval(TimeProcessPtr aTimeProcess)
     TimeEventPtr            startEvent, endEvent;
     TTUInt32                startDate, endDate;
     TTValue                 v;
-    
-//    GraphObjectMapIterator  mergeIterator; // CB now unused
+
+// CB now unused    
+//  GraphObjectMapIterator  mergeIterator; 
     
     // get start event
     aTimeProcess->getAttributeValue(TTSymbol("startEvent"), v);
@@ -237,26 +239,28 @@ void Scenario::compileInterval(TimeProcessPtr aTimeProcess)
     aTimeProcess->getAttributeValue(TTSymbol("endEventDate"), v);
     endDate = TTUInt32(v[0]);
     
-    // note : this is useless because it is checked during edition
-    //if (startEvent->getContainingBoxId() != endEvent->getContainingBoxId()) {
+// note : this is useless because it is checked during edition
+//  if (startEvent->getContainingBoxId() != endEvent->getContainingBoxId()) {
     
     // retreive start transition
     startTransition = TransitionPtr(mTransitionsMap[startEvent]);
     
-    // CB Now stored directly in mTransitionsMap
-//    mergeIterator = mMergedTransitionsMap.find(startTransition);
-//    
-//    if (mergeIterator != mMergedTransitionsMap.end())
-//        startTransition = TransitionPtr(mergeIterator->second);
+/* CB Now stored directly in mTransitionsMap
+    mergeIterator = mMergedTransitionsMap.find(startTransition);
+    
+    if (mergeIterator != mMergedTransitionsMap.end())
+     startTransition = TransitionPtr(mergeIterator->second);
+*/
     
     // retreive end transition
     endTransition = TransitionPtr(mTransitionsMap[endEvent]);
     
-    // CB Now stored directly in mTransitionsMap
-//    mergeIterator = mMergedTransitionsMap.find(endTransition);
-//    
-//    if (mergeIterator != mMergedTransitionsMap.end())
-//        endTransition = TransitionPtr(mergeIterator->second);
+/* CB Now stored directly in mTransitionsMap
+    mergeIterator = mMergedTransitionsMap.find(endTransition);
+    
+    if (mergeIterator != mMergedTransitionsMap.end())
+        endTransition = TransitionPtr(mergeIterator->second);
+*/
     
     // if the interval have no duration
     if (endDate - startDate <= 0) {
@@ -264,8 +268,8 @@ void Scenario::compileInterval(TimeProcessPtr aTimeProcess)
         startTransition->merge(endTransition);
         mTransitionsMap[endEvent] = startTransition;
         
-        // CB Now stored directly in mTransitionsMap
-//        mMergedTransitionsMap[endTransition] = startTransition;
+// CB Now stored directly in mTransitionsMap
+//      mMergedTransitionsMap[endTransition] = startTransition;
     }
     else {
         
@@ -319,8 +323,8 @@ void Scenario::compileTimeEvent(TimeEventPtr aTimeEvent, TTUInt32 time, Transiti
     // prepare transition
     currentTransition->addExternAction(&ScenarioGraphTransitionTimeEventCallBack, aTimeEvent);
     
-    // note : this extern action will be redondant
-    //currentTransition->addExternAction(&ScenarioGraphTransitionTimeProcessCallBack, aTimeProcess);
+// note : this extern action will be redondant
+//  currentTransition->addExternAction(&ScenarioGraphTransitionTimeProcessCallBack, aTimeProcess);
 }
 
 void Scenario::compileInteractiveEvent(TimeEventPtr aTimeEvent, TTUInt32 timeOffset)
@@ -357,7 +361,7 @@ void Scenario::compileInteractiveEvent(TimeEventPtr aTimeEvent, TTUInt32 timeOff
         currentTransition->setMustWaitThePetriNetToEnd(false);
         
         // prepare time event informations
-        /* THIS IS USELESS OR CAN BE RETREIVED USING INFO INSIDE THE INTERACTIVE EVENT (m_waitedString)
+/* THIS IS USELESS OR CAN BE RETREIVED USING INFO INSIDE THE INTERACTIVE EVENT (m_waitedString)
          
          aTimeEventInformations.m_triggerId = aTimeEvent->getTriggerId();
          aTimeEventInformations.m_waitedString = aTimeEvent->getTriggerMessage();
@@ -366,29 +370,29 @@ void Scenario::compileInteractiveEvent(TimeEventPtr aTimeEvent, TTUInt32 timeOff
          aTimeEventInformations.m_waitedTriggerPointMessageAction = m_waitedTriggerPointMessageAction;
          
          m_transitionToTriggerPointInformations[currentTransition] = aTimeEventInformations;
-         */
+*/
         
-        /* IS THIS USEFULL ?
+/* IS THIS USEFULL ?
          if (aTimeEvent->getType() == TRIGGER_END_TEMPO_CHANGE) {
          
-         unsigned int tempoChangeLastValue = aTimeEvent->beginValue();
+            unsigned int tempoChangeLastValue = aTimeEvent->beginValue();
          
-         unsigned int previousTriggerId = aTimeEvent->getPreviousTriggerId();
-         TriggerPoint* previousTriggerPoint = storyLineToCompile.m_triggerPoints[previousTriggerId];
+            unsigned int previousTriggerId = aTimeEvent->getPreviousTriggerId();
+            TriggerPoint* previousTriggerPoint = storyLineToCompile.m_triggerPoints[previousTriggerId];
          
-         ControlPoint* previousRelatedTrigerPoint = previousTriggerPoint->getaTimeEvent();
-         TransitionPtr previousTransition = mTransitionsMap[previousRelatedTrigerPoint];
+            ControlPoint* previousRelatedTrigerPoint = previousTriggerPoint->getaTimeEvent();
+            TransitionPtr previousTransition = mTransitionsMap[previousRelatedTrigerPoint];
          
-         unsigned int tempoChangeFirstValue = previousRelatedTrigerPoint->beginValue();
+            unsigned int tempoChangeFirstValue = previousRelatedTrigerPoint->beginValue();
          
-         ChangeTempo* tempo = new ChangeTempo(this);
-         tempo->m_writtenTime = tempoChangeLastValue - tempoChangeFirstValue;
+            ChangeTempo* tempo = new ChangeTempo(this);
+            tempo->m_writtenTime = tempoChangeLastValue - tempoChangeFirstValue;
          
-         currentTransition->addExternAction(&lastTriggerReception, tempo);
-         previousTransition->addExternAction(&firstTriggerReception, tempo);
+            currentTransition->addExternAction(&lastTriggerReception, tempo);
+            previousTransition->addExternAction(&firstTriggerReception, tempo);
          
          }
-         */
+*/
         
         // prepare transition for incoming ranged interval
         arcList incomingArcs = currentTransition->inGoingArcsOf();
