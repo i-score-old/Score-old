@@ -795,28 +795,6 @@ void ScenarioFindTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTB
     found = (TTObjectBasePtr)aValue[0] == (TTObjectBasePtr)timeEventPtrToMatch;
 }
 
-void ScenarioGraphTransitionTimeProcessCallBack(void* arg)
-{
-    // cf ECOProcess : processCallBack function
-    
-    TimeProcessPtr  aTimeProcess = (TimeProcessPtr) arg;
-    TTValue         v;
-    TTObjectBasePtr aScheduler;
-    TTFloat64       duration;
-    
-    // get the scheduler object of the time process
-    aTimeProcess->getAttributeValue(TTSymbol("scheduler"), v);
-    aScheduler = TTObjectBasePtr(v[0]);
-    
-    // set scheduler duration equal to the time process duration
-    aTimeProcess->getAttributeValue(TTSymbol("duration"), v);
-    
-    duration = TTUInt32(v[0]);
-    aScheduler->setAttributeValue(TTSymbol("duration"), duration);
-    
-    aScheduler->sendMessage(TTSymbol("Go"));
-}
-
 void ScenarioGraphTransitionTimeEventCallBack(void* arg)
 {
     // cf ECOMachine : crossAControlPointCallBack function

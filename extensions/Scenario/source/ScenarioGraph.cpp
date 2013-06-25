@@ -84,9 +84,9 @@ void Scenario::compileScenario(TTUInt32 timeOffset)
 
 void Scenario::compileTimeProcess(TimeProcessPtr aTimeProcess, TransitionPtr* previousTransition, TransitionPtr endTransition, TTUInt32 timeOffset)
 {
-    TransitionPtr     currentTransition;
-    TransitionPtr     startTransition = NULL;
-    TransitionPtr     lastTransition = NULL;
+    TransitionPtr   currentTransition;
+    TransitionPtr   startTransition = NULL;
+    TransitionPtr   lastTransition = NULL;
     Place*          currentPlace;
     Arc*            arcFromPreviousTransitionToCurrentPlace;
     Arc*            arcFromCurrentPlaceToTheEnd;
@@ -323,8 +323,7 @@ void Scenario::compileTimeEvent(TimeEventPtr aTimeEvent, TTUInt32 time, Transiti
     // prepare transition
     currentTransition->addExternAction(&ScenarioGraphTransitionTimeEventCallBack, aTimeEvent);
     
-// note : this extern action will be redondant
-//  currentTransition->addExternAction(&ScenarioGraphTransitionTimeProcessCallBack, aTimeProcess);
+    TTLogMessage("Scenario::compileTimeEvent at %ld ms\n", time);
 }
 
 void Scenario::compileInteractiveEvent(TimeEventPtr aTimeEvent, TTUInt32 timeOffset)
