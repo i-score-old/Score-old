@@ -1,34 +1,39 @@
-/*
- * Curve object
- * Copyright © 2013, Théo de la Hogue
+/** @file
  *
- * License: This code is licensed under the terms of the "New BSD License"
- * http://creativecommons.org/licenses/BSD/
- */
-
-/*!
- * \class Curve
+ * @ingroup scoreExtension
  *
- *  a curve handles a function unit and some other features to avoid redundency, sample rate, ... 
+ * @brief a curve handles a function unit and some other features to avoid redundency, sample rate, ...
  *
+ * @details The Curve class allows to ... @n@n
+ *
+ * @see Automation
+ *
+ * @authors Théo de la Hogue & Clément Bossut
+ *
+ * @copyright Copyright © 2013, Théo de la Hogue & Clément Bossut @n
+ * This code is licensed under the terms of the "CeCILL-C" @n
+ * http://www.cecill.info
  */
 
 #ifndef __CURVE_H__
 #define __CURVE_H__
 
-#include "TTFoundationAPI.h"
-#include "TTModular.h"
+#include "TimeProcessLib.h"
 
+/**	The Curve class allows to ...
+ 
+ @see Automation
+ */
 class Curve : public TTDataObjectBase
 {
 	TTCLASS_SETUP(Curve)
 	
 private :
     
-    TTBoolean                           mActive;                        ///< ATTRIBUTE : is the curve ready to run ?
-    TTBoolean                           mRedundancy;                    ///< ATTRIBUTE : is the curve allow repetitions ?
-    TTUInt32                            mSampleRate;                    ///< ATTRIBUTE : time precision of the curve
-    TTObjectBasePtr                     mFunction;						///< ATTRIBUTE : a freehand function unit
+    TTBoolean                           mActive;                        ///< is the curve ready to run ?
+    TTBoolean                           mRedundancy;                    ///< is the curve allow repetitions ?
+    TTUInt32                            mSampleRate;                    ///< time precision of the curve
+    TTObjectBasePtr                     mFunction;						///< a freehand function unit
 
     /** Set curve's parameters at an address
      @value                 address x1 y1 b1 x2 y2 b2 ... with x[0. :: 1.], y[min, max], b[-1. :: 1.]

@@ -11,15 +11,17 @@
 		464A88891757481E0089B27A /* Curve.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Curve.cpp; sourceTree = "<group>"; };
 		468776AD1725DB430096DA35 /* Automation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Automation.cpp; sourceTree = "<group>"; };
 		468776B11725DB4B0096DA35 /* Automation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Automation.h; sourceTree = "<group>"; };
-		468776B31725DB610096DA35 /* TimeProcess.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TimeProcess.cpp; sourceTree = "<group>"; };
-		468776B41725DB610096DA35 /* TimeProcess.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TimeProcess.h; sourceTree = "<group>"; };
+		46B55545177B276A00F50D89 /* Automation.yml */ = {isa = PBXFileReference; lastKnownFileType = text; path = Automation.yml; sourceTree = "<group>"; };
+		46B55547177B27F500F50D89 /* TimeProcessLib.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TimeProcessLib.cpp; path = ../TimeProcessLib.cpp; sourceTree = "<group>"; };
+		46B55548177B27F500F50D89 /* TimeProcessLib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TimeProcessLib.h; path = ../TimeProcessLib.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
 		468776A11725DAF80096DA35 = {
 			isa = PBXGroup;
 			children = (
-				468776B21725DB610096DA35 /* TimeProcessLib */,
+				46B55545177B276A00F50D89 /* Automation.yml */,
+				46B55546177B27C400F50D89 /* TimeProcessLib */,
 				468776B01725DB4B0096DA35 /* includes */,
 				468776AC1725DB430096DA35 /* source */,
 			);
@@ -43,14 +45,13 @@
 			path = includes;
 			sourceTree = "<group>";
 		};
-		468776B21725DB610096DA35 /* TimeProcessLib */ = {
+		46B55546177B27C400F50D89 /* TimeProcessLib */ = {
 			isa = PBXGroup;
 			children = (
-				468776B41725DB610096DA35 /* TimeProcess.h */,
-				468776B31725DB610096DA35 /* TimeProcess.cpp */,
+				46B55548177B27F500F50D89 /* TimeProcessLib.h */,
+				46B55547177B27F500F50D89 /* TimeProcessLib.cpp */,
 			);
 			name = TimeProcessLib;
-			path = ../../library/TimeProcessLib;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

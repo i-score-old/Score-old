@@ -1,16 +1,16 @@
-/*
- * Curve object
- * Copyright © 2013, Théo de la Hogue
+/** @file
  *
- * License: This code is licensed under the terms of the "New BSD License"
- * http://creativecommons.org/licenses/BSD/
- */
-
-/*!
- * \class Curve
+ * @ingroup scoreExtension
  *
- *  a curve handles a function unit and some other features to avoid redundency, sample rate, ...
+ * @brief a curve handles a function unit and some other features to avoid redundency, sample rate, ...
  *
+ * @see Automation
+ *
+ * @authors Théo de la Hogue & Clément Bossut
+ *
+ * @copyright Copyright © 2013, Théo de la Hogue & Clément Bossut @n
+ * This code is licensed under the terms of the "CeCILL-C" @n
+ * http://www.cecill.info
  */
 
 #include "Curve.h"
