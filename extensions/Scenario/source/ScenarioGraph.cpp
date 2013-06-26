@@ -11,8 +11,8 @@
 
 void Scenario::compileScenario(TTUInt32 timeOffset)
 {
-    TimeProcessPtr  aTimeProcess;
-    TimeEventPtr    aTimeEvent;
+    TTTimeProcessPtr  aTimeProcess;
+    TTTimeEventPtr    aTimeEvent;
     
     // cf : ECOMachine::compilePetriNet
     
@@ -30,7 +30,7 @@ void Scenario::compileScenario(TTUInt32 timeOffset)
     mMergedTransitionsMap.clear();
     
 // TODO : set the callback used to get expected interactive event state back
-// TODO : the best would be to pass a callback to each transition in order the transition call back with a TimeEventPtr argument
+// TODO : the best would be to pass a callback to each transition in order the transition call back with a TTTimeEventPtr argument
 //  mExecutionGraph->addWaitedTriggerPointMessageAction(this, triggerAction);
     
 	// start the graph
@@ -54,7 +54,7 @@ void Scenario::compileScenario(TTUInt32 timeOffset)
     TransitionPtr previousTransition = startTransition;
     for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
         
-        aTimeProcess = TimeProcessPtr(TTObjectBasePtr(mTimeProcessList.current()[0]));
+        aTimeProcess = TTTimeProcessPtr(TTObjectBasePtr(mTimeProcessList.current()[0]));
         
         if (aTimeProcess->getName() != TTSymbol("Interval"))
             compileTimeProcess(aTimeProcess, &previousTransition, endTransition, timeOffset);
@@ -63,7 +63,7 @@ void Scenario::compileScenario(TTUInt32 timeOffset)
 	// compile intervals processes
     for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
         
-        aTimeProcess = TimeProcessPtr(TTObjectBasePtr(mTimeProcessList.current()[0]));
+        aTimeProcess = TTTimeProcessPtr(TTObjectBasePtr(mTimeProcessList.current()[0]));
         
         if (aTimeProcess->getName() == TTSymbol("Interval"))
             compileInterval(aTimeProcess);
@@ -75,14 +75,14 @@ void Scenario::compileScenario(TTUInt32 timeOffset)
 	// compile interactive events
 	for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next()) {
         
-        aTimeEvent = TimeEventPtr(TTObjectBasePtr(mTimeEventList.current()[0]));
+        aTimeEvent = TTTimeEventPtr(TTObjectBasePtr(mTimeEventList.current()[0]));
         
         if (aTimeEvent->getName() != TTSymbol("StaticEvent"))
             compileInteractiveEvent(aTimeEvent, timeOffset);
 	}
 }
 
-void Scenario::compileTimeProcess(TimeProcessPtr aTimeProcess, TransitionPtr* previousTransition, TransitionPtr endTransition, TTUInt32 timeOffset)
+void Scenario::compileTimeProcess(TTTimeProcessPtr aTimeProcess, TransitionPtr* previousTransition, TransitionPtr endTransition, TTUInt32 timeOffset)
 {
     TransitionPtr   currentTransition;
     TransitionPtr   startTransition = NULL;
@@ -91,17 +91,17 @@ void Scenario::compileTimeProcess(TimeProcessPtr aTimeProcess, TransitionPtr* pr
     Arc*            arcFromPreviousTransitionToCurrentPlace;
     Arc*            arcFromCurrentPlaceToTheEnd;
     
-    TimeEventPtr    startEvent, endEvent;
+    TTTimeEventPtr    startEvent, endEvent;
     TTUInt32        startDate, endDate;
     TTValue         v;
     
     // get start event
     aTimeProcess->getAttributeValue(TTSymbol("startEvent"), v);
-    startEvent = TimeEventPtr(TTObjectBasePtr(v[0]));
+    startEvent = TTTimeEventPtr(TTObjectBasePtr(v[0]));
     
     // get end event
     aTimeProcess->getAttributeValue(TTSymbol("endEvent"), v);
-    endEvent = TimeEventPtr(TTObjectBasePtr(v[0]));
+    endEvent = TTTimeEventPtr(TTObjectBasePtr(v[0]));
     
     // get start event date
     aTimeProcess->getAttributeValue(TTSymbol("startDate"), v);
@@ -206,7 +206,7 @@ note : it was in compileEvent
         ;// TODO : aTimeProcess->computeCurves(endDate - startDate);
 }
 
-void Scenario::compileInterval(TimeProcessPtr aTimeProcess)
+void Scenario::compileInterval(TTTimeProcessPtr aTimeProcess)
 {
     TransitionPtr             startTransition;
     TransitionPtr             endTransition;
@@ -216,7 +216,7 @@ void Scenario::compileInterval(TimeProcessPtr aTimeProcess)
     
     ExtendedInt             intervalValue;
     
-    TimeEventPtr            startEvent, endEvent;
+    TTTimeEventPtr            startEvent, endEvent;
     TTUInt32                startDate, endDate;
     TTValue                 v;
 
@@ -225,11 +225,11 @@ void Scenario::compileInterval(TimeProcessPtr aTimeProcess)
     
     // get start event
     aTimeProcess->getAttributeValue(TTSymbol("startEvent"), v);
-    startEvent = TimeEventPtr(TTObjectBasePtr(v[0]));
+    startEvent = TTTimeEventPtr(TTObjectBasePtr(v[0]));
     
     // get end event
     aTimeProcess->getAttributeValue(TTSymbol("endEvent"), v);
-    endEvent = TimeEventPtr(TTObjectBasePtr(v[0]));
+    endEvent = TTTimeEventPtr(TTObjectBasePtr(v[0]));
     
     // get start event date
     aTimeProcess->getAttributeValue(TTSymbol("startEventDate"), v);
@@ -309,7 +309,7 @@ void Scenario::compileInterval(TimeProcessPtr aTimeProcess)
     }
 }
 
-void Scenario::compileTimeEvent(TimeEventPtr aTimeEvent, TTUInt32 time, TransitionPtr previousTransition, TransitionPtr currentTransition, Place* currentPlace)
+void Scenario::compileTimeEvent(TTTimeEventPtr aTimeEvent, TTUInt32 time, TransitionPtr previousTransition, TransitionPtr currentTransition, Place* currentPlace)
 {
     ExtendedInt timeValue;
     Arc*        arcFromCurrentPlaceToCurrentTransition = mExecutionGraph->createArc(currentPlace, currentTransition);
@@ -326,7 +326,7 @@ void Scenario::compileTimeEvent(TimeEventPtr aTimeEvent, TTUInt32 time, Transiti
     TTLogMessage("Scenario::compileTimeEvent at %ld ms\n", time);
 }
 
-void Scenario::compileInteractiveEvent(TimeEventPtr aTimeEvent, TTUInt32 timeOffset)
+void Scenario::compileInteractiveEvent(TTTimeEventPtr aTimeEvent, TTUInt32 timeOffset)
 {
     TransitionPtr currentTransition;
     Arc*          currentArc;
@@ -406,7 +406,7 @@ void Scenario::compileInteractiveEvent(TimeEventPtr aTimeEvent, TTUInt32 timeOff
             
             if (mArcsMap.find(currentArc) != mArcsMap.end()) {
                 
-                TimeProcessPtr aTimeProcess = TimeProcessPtr(mArcsMap[currentArc]);
+                TTTimeProcessPtr aTimeProcess = TTTimeProcessPtr(mArcsMap[currentArc]);
                 
                 // get start event date
                 aTimeProcess->getAttributeValue(TTSymbol("durationMin"), v);

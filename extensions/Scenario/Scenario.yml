@@ -2,7 +2,7 @@
 #  - TIME_PROCESS_DEBUG
 
 sources:
-  - ../../library/TimeProcessLib/TimeProcess.cpp
+  - ../TimeProcessLib.cpp	
   
   - source/Gecode/customSpace.cpp
   - source/Gecode/integerVariable.cpp
@@ -27,12 +27,13 @@ sources:
   - source/Scenario.cpp
   - source/ScenarioSolver.cpp
   - source/ScenarioGraph.cpp
-  
+
 includes:
   - "."
+  - ".."
   - "includes"
-  - "../../library/TimeProcessLib"
-  - "../../library/TimeEventLib"
+  - "../../library/includes"
+  - "../../library/tests"
   
   - "source/Gecode"
   - "source/PetriNet"
@@ -50,9 +51,10 @@ libraries:
   - FOUNDATION
   - DSP
   - MODULAR
+  - ../../library/build/JamomaScore.dylib
   
   # to include gecode solver library
   - /Library/Frameworks/gecode.framework/gecode
-  
+
 # This project is not available for most architectures (cause of the Gecode 64-bit only dependency)
 arch: "x86_64"

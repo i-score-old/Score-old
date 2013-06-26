@@ -10,7 +10,7 @@
 #define __SCENARIO_SOLVER_H__
 
 #include "Solver.hpp"
-#include "TimeEvent.h"
+#include "TTTimeEvent.h"
 
 typedef Solver* SolverPtr;
 
@@ -66,13 +66,13 @@ class SolverVariable
 {
 public:
     
-    TimeEventPtr    event;
+    TTTimeEventPtr    event;
     
     SolverPtr       solver;
     int             dateID;
     int             rangeID;
     
-    SolverVariable(SolverPtr aSolver, TimeEventPtr anEvent, SolverValue max);
+    SolverVariable(SolverPtr aSolver, TTTimeEventPtr anEvent, SolverValue max);
     
     ~SolverVariable();
     

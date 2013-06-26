@@ -8,7 +8,7 @@
 
 #include "ScenarioSolver.h"
 
-SolverVariable::SolverVariable(SolverPtr aSolver, TimeEventPtr anEvent, SolverValue max):
+SolverVariable::SolverVariable(SolverPtr aSolver, TTTimeEventPtr anEvent, SolverValue max):
 event(anEvent), solver(aSolver)
 {
     TTValue v;

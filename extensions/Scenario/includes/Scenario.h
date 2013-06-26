@@ -1,46 +1,52 @@
-/*
- * Scenario time process
- * Copyright © 2013, Théo de la Hogue, Clément Bossut
+/** @file
  *
- * License: This code is licensed under the terms of the "New BSD License"
- * http://creativecommons.org/licenses/BSD/
- */
-
-/*!
- * \class Scenario
+ * @ingroup scoreExtension
  *
- *  Scenario time process class is a container class to manage other time processes instances in the time
+ * @brief Scenario time process class is a container class to manage other time processes instances in the time
  *
+ * @details The Scenario class allows to ... @n@n
+ *
+ * @see TimeProcessLib, TTTimeProcess
+ *
+ * @authors Théo de la Hogue & Clément Bossut
+ *
+ * @copyright Copyright © 2013, Théo de la Hogue & Clément Bossut @n
+ * This code is licensed under the terms of the "CeCILL-C" @n
+ * http://www.cecill.info
  */
 
 #ifndef __SCENARIO_H__
 #define __SCENARIO_H__
 
-#include "TimeProcess.h"
+#include "TimeProcessLib.h"
 #include "ScenarioSolver.h"
 #include "ScenarioGraph.h"
 
+/**	The Scenario class allows to ...
+ 
+ @see TimeProcessLib, TTTimeProcess
+ */
 class Scenario : public TimeProcess
 {
 	TTCLASS_SETUP(Scenario)
 	
 private :
     
-    TTList                      mTimeProcessList;               ///< ATTRIBUTE : all registered time processes and their observers
-    TTList                      mTimeEventList;                 ///< ATTRIBUTE : all registered time events and their observers
+    TTList                      mTimeProcessList;               ///< all registered time processes and their observers
+    TTList                      mTimeEventList;                 ///< all registered time events and their observers
     
-    TTAddressItemPtr            mNamespace;                     ///< ATTRIBUTE : the namespace workspace of the scenario
+    TTAddressItemPtr            mNamespace;                     ///< the namespace workspace of the scenario
     
     SolverPtr                   mEditionSolver;                 ///< an internal gecode solver to assist scenario edition
-    SolverObjectMap             mVariablesMap;                  ///< a map to store and retreive SolverVariablePtr using TimeEventPtr
-    SolverObjectMap             mConstraintsMap;                ///< a map to store and retreive SolverConstraintPtr using TimeProcessPtr
-    SolverObjectMap             mRelationsMap;                  ///< a map to store and retreive SolverRelationPtr using TimeProcessPtr
+    SolverObjectMap             mVariablesMap;                  ///< an internal map to store and retreive SolverVariablePtr using TTTimeEventPtr
+    SolverObjectMap             mConstraintsMap;                ///< an internal map to store and retreive SolverConstraintPtr using TTTimeProcessPtr
+    SolverObjectMap             mRelationsMap;                  ///< an internal map to store and retreive SolverRelationPtr using TTTimeProcessPtr
     
     GraphPtr                    mExecutionGraph;                ///< an internal petri net to execute the scenario according time event relations
     
-    GraphObjectMap              mTransitionsMap;                ///< a map to store and retreive TransitionPtr using TimeEventPtr
-	GraphObjectMap              mArcsMap;                       ///< a map to store and retreive Arc* using TimeProcessPtr
-    GraphObjectMap              mMergedTransitionsMap;          ///< a map to store and retreive TransitionPtr using another TransitionPtr
+    GraphObjectMap              mTransitionsMap;                ///< an internal map to store and retreive TransitionPtr using TTTimeEventPtr
+	GraphObjectMap              mArcsMap;                       ///< an internal map to store and retreive Arc* using TTTimeProcessPtr
+    GraphObjectMap              mMergedTransitionsMap;          ///< an internal map to store and retreive TransitionPtr using another TransitionPtr
     
     ExtendedInt                 plusInfinity;
 	ExtendedInt                 minusInfinity;
@@ -146,23 +152,23 @@ private :
     TTErr   TimeProcessActiveChange(const TTValue& inputValue, TTValue& outputValue);
     
     /** an internal method used to create all time process attribute observers */
-    void makeTimeProcessCacheElement(TimeProcessPtr aTimeProcess, TTValue& newCacheElement);
+    void makeTimeProcessCacheElement(TTTimeProcessPtr aTimeProcess, TTValue& newCacheElement);
     
     /** an internal method used to delete all time process attribute observers */
     void deleteTimeProcessCacheElement(const TTValue& oldCacheElement);
     
     /** an internal method used to create all time event attribute observers */
-    void makeTimeEventCacheElement(TimeEventPtr aTimeEvent, TTValue& newCacheElement);
+    void makeTimeEventCacheElement(TTTimeEventPtr aTimeEvent, TTValue& newCacheElement);
     
     /** an internal method used to delete all time event attribute observers */
     void deleteTimeEventCacheElement(const TTValue& oldCacheElement);
     
     /** an internal methods used to compile the execution graph */
     void    compileScenario(TTUInt32 timeOffset);
-    void    compileTimeProcess(TimeProcessPtr aTimeProcess, TransitionPtr *previousTransition, TransitionPtr endTransition, TTUInt32 timeOffset);
-    void    compileInterval(TimeProcessPtr aTimeProcess);
-    void    compileTimeEvent(TimeEventPtr aTimeEvent, TTUInt32 time, TransitionPtr previousTransition, TransitionPtr currentTransition, Place* currentPlace);
-    void    compileInteractiveEvent(TimeEventPtr aTimeEvent, TTUInt32 timeOffset);
+    void    compileTimeProcess(TTTimeProcessPtr aTimeProcess, TransitionPtr *previousTransition, TransitionPtr endTransition, TTUInt32 timeOffset);
+    void    compileInterval(TTTimeProcessPtr aTimeProcess);
+    void    compileTimeEvent(TTTimeEventPtr aTimeEvent, TTUInt32 time, TransitionPtr previousTransition, TransitionPtr currentTransition, Place* currentPlace);
+    void    compileInteractiveEvent(TTTimeEventPtr aTimeEvent, TTUInt32 timeOffset);
     //void    cleanGraph(TransitionPtr endTransition);
     
     friend void  TT_EXTENSION_EXPORT ScenarioGraphTransitionTimeEventCallBack(void* arg);
