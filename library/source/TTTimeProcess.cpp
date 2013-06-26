@@ -1,20 +1,27 @@
-/*
- * A Time Process interface
- * Copyright © 2013, Théo de la Hogue, Clément Bossut
+/** @file
  *
- * License: This code is licensed under the terms of the "New BSD License"
- * http://creativecommons.org/licenses/BSD/
+ * @ingroup scoreLibrary
+ *
+ * @brief a class to define a process
+ *
+ * @see TTTimeEvent
+ *
+ * @authors Théo de la Hogue & Clément Bossut
+ *
+ * @copyright Copyright © 2013, Théo de la Hogue & Clément Bossut @n
+ * This code is licensed under the terms of the "CeCILL-C" @n
+ * http://www.cecill.info
  */
 
-#include "TimeProcess.h"
+#include "TTTimeProcess.h"
 
-#define thisTTClass		TimeProcess
-
+#define thisTTClass         TTTimeProcess
+#define thisTTClassName     "TimeProcess"
+#define thisTTClassTags     "time, process"
 
 /****************************************************************************************************/
 
-TimeProcess::TimeProcess(TTValue& arguments) :
-TTObjectBase(arguments),
+TT_OBJECT_CONSTRUCTOR,
 mScenario(NULL),
 mDurationMin(0),
 mDurationMax(0),
@@ -25,7 +32,7 @@ mEndEvent(NULL),
 mEndEventCallback(NULL),
 mScheduler(NULL)
 {
-    TT_ASSERT("Correct number of args to create TimeProcess", arguments.size() == 0);
+    TT_ASSERT("Correct number of args to create TTTimeProcess", arguments.size() == 0);
     
     TTValue    args;
     TTErr      err;
@@ -34,7 +41,7 @@ mScheduler(NULL)
     addAttributeWithSetter(Scenario, kTypeObject);
     
     // the rigid state handles the DurationMin and DurationMax attribute
-    registerAttribute(TTSymbol("rigid"), kTypeBoolean, NULL, (TTGetterMethod)& TimeProcess::getRigid, (TTSetterMethod)& TimeProcess::setRigid);
+    registerAttribute(TTSymbol("rigid"), kTypeBoolean, NULL, (TTGetterMethod)& TTTimeProcess::getRigid, (TTSetterMethod)& TTTimeProcess::setRigid);
     
     addAttributeWithSetter(DurationMin, kTypeUInt32);
     addAttributeWithSetter(DurationMax, kTypeUInt32);
@@ -55,11 +62,11 @@ mScheduler(NULL)
     addAttributeProperty(Scheduler, readOnly, YES);
     addAttributeProperty(Scheduler, hidden, YES);
     
-    // the attributes below are not related to any TimeProcess member
+    // the attributes below are not related to any TTTimeProcess member
     // but we need to declare them as attribute to ease the use of the class
-    registerAttribute(TTSymbol("startDate"), kTypeUInt32, NULL, (TTGetterMethod)& TimeProcess::getStartDate, (TTSetterMethod)& TimeProcess::setStartDate);
-    registerAttribute(TTSymbol("endDate"), kTypeUInt32, NULL, (TTGetterMethod)& TimeProcess::getEndDate, (TTSetterMethod)& TimeProcess::setEndDate);
-    registerAttribute(TTSymbol("duration"), kTypeUInt32, NULL, (TTGetterMethod)& TimeProcess::getDuration);
+    registerAttribute(TTSymbol("startDate"), kTypeUInt32, NULL, (TTGetterMethod)& TTTimeProcess::getStartDate, (TTSetterMethod)& TTTimeProcess::setStartDate);
+    registerAttribute(TTSymbol("endDate"), kTypeUInt32, NULL, (TTGetterMethod)& TTTimeProcess::getEndDate, (TTSetterMethod)& TTTimeProcess::setEndDate);
+    registerAttribute(TTSymbol("duration"), kTypeUInt32, NULL, (TTGetterMethod)& TTTimeProcess::getDuration);
     
     addMessage(ProcessStart);
     addMessage(ProcessEnd);
@@ -100,7 +107,7 @@ mScheduler(NULL)
     startEventBaton = new TTValue(TTObjectBasePtr(this));
     
     mStartEventCallback->setAttributeValue(kTTSym_baton, TTPtr(startEventBaton));
-    mStartEventCallback->setAttributeValue(kTTSym_function, TTPtr(&TimeProcessStartEventHappenCallback));
+    mStartEventCallback->setAttributeValue(kTTSym_function, TTPtr(&TTTimeProcessStartEventHappenCallback));
     
     // Create a end event callback to be notified and end the process execution
     mEndEventCallback = NULL;
@@ -109,12 +116,12 @@ mScheduler(NULL)
     endEventBaton = new TTValue(TTObjectBasePtr(this));
     
     mEndEventCallback->setAttributeValue(kTTSym_baton, TTPtr(endEventBaton));
-    mEndEventCallback->setAttributeValue(kTTSym_function, TTPtr(&TimeProcessEndEventHappenCallback));
+    mEndEventCallback->setAttributeValue(kTTSym_function, TTPtr(&TTTimeProcessEndEventHappenCallback));
     
     // Creation of a scheduler based on the System scheduler plugin
     // Prepare callback argument to be notified of :
     //      - the progression
-    args = TTValue((TTPtr)&TimeProcessSchedulerCallback);
+    args = TTValue((TTPtr)&TTTimeProcessSchedulerCallback);
     args.append((TTPtr)this);   // we have to store this as a pointer for Scheduler
     
     err = TTObjectBaseInstantiate(TTSymbol("System"), TTObjectBaseHandle(&mScheduler), args);
@@ -128,7 +135,7 @@ mScheduler(NULL)
     this->findAttribute(TTSymbol("active"), &activeAttribute);
 }
 
-TimeProcess::~TimeProcess()
+TTTimeProcess::~TTTimeProcess()
 {
     TTValue v;
     
@@ -160,35 +167,7 @@ TimeProcess::~TimeProcess()
     }
 }
 
-TTErr TimeProcess::getParameterNames(TTValue& value)
-{
-	TTValue		attributeNames;
-	TTSymbol	attributeName;
-	
-	// filter all default attributes (Name, Version, Author, ...)
-	this->getAttributeNames(attributeNames);
-	
-	value.clear();
-	for (TTUInt8 i = 0; i < attributeNames.size(); i++) {
-		attributeName = attributeNames[0];
-		
-		if (attributeName == TTSymbol("name")           ||
-			attributeName == TTSymbol("version")        ||
-			attributeName == TTSymbol("author")         ||
-            attributeName == TTSymbol("active")         ||
-            attributeName == TTSymbol("running")        ||
-            attributeName == TTSymbol("progression")    ||
-            attributeName == TTSymbol("start")          ||
-            attributeName == TTSymbol("end"))
-			continue;
-		
-		value.append(attributeName);
-	}
-	
-	return kTTErrNone;
-}
-
-TTErr TimeProcess::setScenario(const TTValue& value)
+TTErr TTTimeProcess::setScenario(const TTValue& value)
 {
     // remove to from the old scenario
     if (mScenario) {
@@ -211,14 +190,14 @@ TTErr TimeProcess::setScenario(const TTValue& value)
     return kTTErrNone;
 }
 
-TTErr TimeProcess::getRigid(TTValue& value)
+TTErr TTTimeProcess::getRigid(TTValue& value)
 {
     value = mDurationMin && mDurationMin && mDurationMin == mDurationMax;
     
     return kTTErrNone;
 }
 
-TTErr TimeProcess::setRigid(const TTValue& value)
+TTErr TTTimeProcess::setRigid(const TTValue& value)
 {
     TTValue v;
     
@@ -241,7 +220,7 @@ TTErr TimeProcess::setRigid(const TTValue& value)
     return kTTErrGeneric;
 }
 
-TTErr TimeProcess::setDurationMin(const TTValue& value)
+TTErr TTTimeProcess::setDurationMin(const TTValue& value)
 {
     TTValue v;
     
@@ -272,7 +251,7 @@ TTErr TimeProcess::setDurationMin(const TTValue& value)
     return kTTErrGeneric;
 }
 
-TTErr TimeProcess::setDurationMax(const TTValue& value)
+TTErr TTTimeProcess::setDurationMax(const TTValue& value)
 {
     TTValue v;
     
@@ -303,7 +282,7 @@ TTErr TimeProcess::setDurationMax(const TTValue& value)
     return kTTErrGeneric;
 }
 
-TTErr TimeProcess::getStartDate(TTValue& value)
+TTErr TTTimeProcess::getStartDate(TTValue& value)
 {
     if (mStartEvent)
         return mStartEvent->getAttributeValue(TTSymbol("date"), value);
@@ -311,7 +290,7 @@ TTErr TimeProcess::getStartDate(TTValue& value)
     return kTTErrGeneric;
 }
 
-TTErr TimeProcess::setStartDate(const TTValue& value)
+TTErr TTTimeProcess::setStartDate(const TTValue& value)
 {
     TTValue v, endDate;
     
@@ -342,7 +321,7 @@ TTErr TimeProcess::setStartDate(const TTValue& value)
     return kTTErrGeneric;
 }
 
-TTErr TimeProcess::getEndDate(TTValue& value)
+TTErr TTTimeProcess::getEndDate(TTValue& value)
 {
     if (mEndEvent)
         return mEndEvent->getAttributeValue(TTSymbol("date"), value);
@@ -350,7 +329,7 @@ TTErr TimeProcess::getEndDate(TTValue& value)
     return kTTErrGeneric;
 }
 
-TTErr TimeProcess::setEndDate(const TTValue& value)
+TTErr TTTimeProcess::setEndDate(const TTValue& value)
 {
     TTValue v, startDate;
     
@@ -382,7 +361,7 @@ TTErr TimeProcess::setEndDate(const TTValue& value)
     return kTTErrGeneric;
 }
 
-TTErr TimeProcess::getDuration(TTValue& value)
+TTErr TTTimeProcess::getDuration(TTValue& value)
 {
     TTValue     start, end;
     TTUInt32    duration;
@@ -405,7 +384,7 @@ TTErr TimeProcess::getDuration(TTValue& value)
     return kTTErrGeneric;
 }
 
-TTErr TimeProcess::setActive(const TTValue& value)
+TTErr TTTimeProcess::setActive(const TTValue& value)
 {
     // set the internal active value
     mActive = value[0];
@@ -416,7 +395,7 @@ TTErr TimeProcess::setActive(const TTValue& value)
     return kTTErrNone;
 }
 
-TTErr TimeProcess::setStartEvent(const TTValue& value)
+TTErr TTTimeProcess::setStartEvent(const TTValue& value)
 {
     TTMessagePtr aMessage = NULL;
     TTErr err;
@@ -456,14 +435,14 @@ TTErr TimeProcess::setStartEvent(const TTValue& value)
     return kTTErrNone;
 }
 
-TTErr TimeProcess::getIntermediateEvents(TTValue& value)
+TTErr TTTimeProcess::getIntermediateEvents(TTValue& value)
 {
     mIntermediateEvents.assignToValue(value);
     
     return kTTErrNone;
 }
 
-TTErr TimeProcess::setEndEvent(const TTValue& value)
+TTErr TTTimeProcess::setEndEvent(const TTValue& value)
 {
     TTMessagePtr aMessage = NULL;
     TTErr err;
@@ -503,9 +482,9 @@ TTErr TimeProcess::setEndEvent(const TTValue& value)
     return kTTErrNone;
 }
 
-TTErr TimeProcess::StartEventCreate(const TTValue& value)
+TTErr TTTimeProcess::StartEventCreate(const TTValue& value)
 {
-    TimeEventPtr timeEvent;
+    TTTimeEventPtr timeEvent;
     TTErr err;
     
     // the start event needs to be released before
@@ -541,9 +520,9 @@ TTErr TimeProcess::StartEventCreate(const TTValue& value)
     return kTTErrGeneric;
 }
 
-TTErr TimeProcess::StartEventReplace(const TTValue& value)
+TTErr TTTimeProcess::StartEventReplace(const TTValue& value)
 {
-    TimeEventPtr    formerStartEvent, timeEvent;
+    TTTimeEventPtr    formerStartEvent, timeEvent;
     TTValue         v, args;
     TTErr           err;
     
@@ -562,7 +541,7 @@ TTErr TimeProcess::StartEventReplace(const TTValue& value)
             if (!err) {
                 
                 // set the new start event
-                formerStartEvent = TimeEventPtr(mStartEvent);
+                formerStartEvent = TTTimeEventPtr(mStartEvent);
                 err = setStartEvent(TTObjectBasePtr(timeEvent));
                 
                 // if the time process is handled by a scenario
@@ -572,7 +551,7 @@ TTErr TimeProcess::StartEventReplace(const TTValue& value)
                     v = TTValue(TTObjectBasePtr(formerStartEvent));
                     v.append(TTObjectBasePtr(timeEvent));
                     
-                    err = mScenario->sendMessage(TTSymbol("TimeEventReplace"), v, kTTValNONE);
+                    err = mScenario->sendMessage(TTSymbol("TTTimeEventReplace"), v, kTTValNONE);
                 }
                 
                 // if the replacement success
@@ -598,7 +577,7 @@ TTErr TimeProcess::StartEventReplace(const TTValue& value)
     return kTTErrGeneric;
 }
 
-TTErr TimeProcess::StartEventRelease()
+TTErr TTTimeProcess::StartEventRelease()
 {
     if (!mStartEvent)
         return kTTErrGeneric;
@@ -611,9 +590,9 @@ TTErr TimeProcess::StartEventRelease()
     return kTTErrNone;
 }
 
-TTErr TimeProcess::EndEventCreate(const TTValue& value)
+TTErr TTTimeProcess::EndEventCreate(const TTValue& value)
 {
-    TimeEventPtr timeEvent;
+    TTTimeEventPtr timeEvent;
     TTErr err;
     
     // the end event needs to be released before
@@ -649,12 +628,12 @@ TTErr TimeProcess::EndEventCreate(const TTValue& value)
     return kTTErrGeneric;
 }
 
-TTErr TimeProcess::EndEventReplace(const TTValue& value)
+TTErr TTTimeProcess::EndEventReplace(const TTValue& value)
 {
     return kTTErrGeneric;
 }
 
-TTErr TimeProcess::EndEventRelease()
+TTErr TTTimeProcess::EndEventRelease()
 {
     if (!mEndEvent)
         return kTTErrGeneric;
@@ -667,7 +646,7 @@ TTErr TimeProcess::EndEventRelease()
     return kTTErrNone;
 }
 
-TTErr TimeProcess::Move(const TTValue& inputValue, TTValue& outputValue)
+TTErr TTTimeProcess::Move(const TTValue& inputValue, TTValue& outputValue)
 {
     TTValue v;
     
@@ -696,7 +675,7 @@ TTErr TimeProcess::Move(const TTValue& inputValue, TTValue& outputValue)
 
 }
 
-TTErr TimeProcess::Limit(const TTValue& inputValue, TTValue& outputValue)
+TTErr TTTimeProcess::Limit(const TTValue& inputValue, TTValue& outputValue)
 {
     TTValue v;
     
@@ -728,22 +707,22 @@ TTErr TimeProcess::Limit(const TTValue& inputValue, TTValue& outputValue)
     return kTTErrGeneric;
 }
 
-TTErr TimeProcess::Play()
+TTErr TTTimeProcess::Play()
 {    
     return mStartEvent->sendMessage(TTSymbol("Happen"));
 }
 
-TTErr TimeProcess::Stop()
+TTErr TTTimeProcess::Stop()
 {
     return mEndEvent->sendMessage(TTSymbol("Happen"));
 }
 
-TTErr TimeProcess::Pause()
+TTErr TTTimeProcess::Pause()
 {
     return mScheduler->sendMessage(TTSymbol("Pause"));
 }
 
-TTErr TimeProcess::Resume()
+TTErr TTTimeProcess::Resume()
 {
     return mScheduler->sendMessage(TTSymbol("Resume"));
 }
@@ -753,16 +732,16 @@ TTErr TimeProcess::Resume()
 #pragma mark Some Methods
 #endif
 
-TTErr TimeProcessStartEventHappenCallback(TTPtr baton, TTValue& data)
+TTErr TTTimeProcessStartEventHappenCallback(TTPtr baton, TTValue& data)
 {
-    TimeProcessPtr  aTimeProcess;
+    TTTimeProcessPtr  aTimeProcess;
     TTValuePtr      b;
     TTValue         v;
     TTUInt32        start, end;
     
 	// unpack baton (a time process)
 	b = (TTValuePtr)baton;
-	aTimeProcess = TimeProcessPtr((TTObjectBasePtr)(*b)[0]);
+	aTimeProcess = TTTimeProcessPtr((TTObjectBasePtr)(*b)[0]);
     
     // if the time process active
 	if (aTimeProcess->mActive) {
@@ -794,17 +773,17 @@ TTErr TimeProcessStartEventHappenCallback(TTPtr baton, TTValue& data)
     return kTTErrGeneric;
 }
 
-TTErr TimeProcessEndEventHappenCallback(TTPtr baton, TTValue& data)
+TTErr TTTimeProcessEndEventHappenCallback(TTPtr baton, TTValue& data)
 {
-    TimeProcessPtr  aTimeProcess;
+    TTTimeProcessPtr  aTimeProcess;
     TTValuePtr      b;
     
 	// unpack baton (a time process)
 	b = (TTValuePtr)baton;
-	aTimeProcess = TimeProcessPtr((TTObjectBasePtr)(*b)[0]);
+	aTimeProcess = TTTimeProcessPtr((TTObjectBasePtr)(*b)[0]);
     
     // if the time process active, stop the scheduler
-    // note : the ProcessStart method is called inside TimeProcessSchedulerCallback
+    // note : the ProcessStart method is called inside TTTimeProcessSchedulerCallback
 	if (aTimeProcess->mActive) {
         
         aTimeProcess->mScheduler->sendMessage(TTSymbol("Stop"));
@@ -821,25 +800,10 @@ TTErr TimeProcessEndEventHappenCallback(TTPtr baton, TTValue& data)
     return kTTErrGeneric;
 }
 
-void TimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression)
+void TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression)
 {
-	TimeProcessPtr	aTimeProcess = (TimeProcessPtr)object;
+	TTTimeProcessPtr	aTimeProcess = (TTTimeProcessPtr)object;
     
     // use the specific process method
     aTimeProcess->Process(progression, kTTValNONE);
 }
-
-/***************************************************************************
- 
- TimeProcessLib
- 
- ***************************************************************************/
-
-void TimeProcessLib::getTimeProcessNames(TTValue& timeProcessNames)
-{
-	timeProcessNames.clear();
-	timeProcessNames.append(TTSymbol("Automation"));
-    timeProcessNames.append(TTSymbol("Scenario"));
-    timeProcessNames.append(TTSymbol("Interval"));
-}
-

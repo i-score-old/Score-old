@@ -1,11 +1,17 @@
-/*
- * TTScore Library
- * Copyright © 2012, Théo de la Hogue
+/** @file
  *
- * License: This code is licensed under the terms of the "CeCILL-C"
+ * @ingroup scoreLibrary
+ *
+ * @brief the Score library
+ *
+ * @see TTTimeEvent, TTTimeProcess
+ *
+ * @authors Théo de la Hogue & Clément Bossut
+ *
+ * @copyright Copyright © 2013, Théo de la Hogue & Clément Bossut @n
+ * This code is licensed under the terms of the "CeCILL-C" @n
  * http://www.cecill.info
  */
-
 
 #include "TTScore.h"
 
@@ -24,8 +30,10 @@ void TTScoreInit()
 		TTScoreHasInitialized = true;
 		
 		// register classes -- both internal and external
+        TTTimeEvent::registerClass();
+        TTTimeProcess::registerClass();
+        
 		TTScoreTest::registerClass();
-		
 
 #ifdef TT_DEBUG
 		TTLogMessage("Score -- Version %s -- Debugging Enabled\n", TTSCORE_VERSION_STRING);

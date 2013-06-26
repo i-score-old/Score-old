@@ -1,9 +1,16 @@
-/* 
- * Unit tests for the Score framework
- * Copyright © 2013, Théo de la Hogue
- * 
- * License: This code is licensed under the terms of the "New BSD License"
- * http://creativecommons.org/licenses/BSD/
+/** @file
+ *
+ * @ingroup scoreLibrary
+ *
+ * @brief Unit test for Score library
+ *
+ * @see TTImeEvent, TTTimeProcess
+ *
+ * @authors Théo de la Hogue & Clément Bossut
+ *
+ * @copyright Copyright © 2013, Théo de la Hogue & Clément Bossut @n
+ * This code is licensed under the terms of the "CeCILL-C" @n
+ * http://www.cecill.info
  */
 
 #include "TTScore.test.h"

@@ -1,8 +1,17 @@
-/* 
- * TTScore Library
- * Copyright © 2012, Théo de la Hogue
- * 
- * License: This code is licensed under the terms of the "CeCILL-C"
+/** @file
+ *
+ * @ingroup scoreLibrary
+ *
+ * @brief the Score library
+ *
+ * @details The Score library allows to ... @n@n
+ *
+ * @see TTTimeEvent, TTTimeProcess
+ *
+ * @authors Théo de la Hogue & Clément Bossut
+ *
+ * @copyright Copyright © 2013, Théo de la Hogue & Clément Bossut @n
+ * This code is licensed under the terms of the "CeCILL-C" @n
  * http://www.cecill.info
  */
 
@@ -34,43 +43,17 @@
 
 #include <math.h>
 #include <unistd.h>
+#include <map>
 
 #include "TTFoundationAPI.h"
+#include "TTModular.h"
 
 #include "TTScoreSymbolCache.h"
 
-#include "TimeProcess.h"
-#include "TimeEvent.h"
+#include "TTTimeEvent.h"
+#include "TTTimeProcess.h"
 
 #include "TTScore.test.h"
-
-// Macros
-
-#define TT_SCORE_CONSTRUCTOR \
-TTObjectBasePtr thisTTClass :: instantiate (TTSymbol& name, TTValue& arguments) {return new thisTTClass (arguments);} \
-\
-extern "C" void thisTTClass :: registerClass () {TTClassRegister( TTSymbol(thisTTClassName), thisTTClassTags, thisTTClass :: instantiate );} \
-\
-thisTTClass :: thisTTClass (TTValue& arguments) : TTDataObjectBase(arguments)
-
-
-
-#define TT_SCORE_CONSTRUCTOR_EXPORT \
-	\
-	extern "C" TT_EXTENSION_EXPORT TTErr loadTTExtension(void);\
-	TTErr loadTTExtension(void)\
-	{\
-		TTSCOREInit();\
-		thisTTClass :: registerClass(); \
-		return kTTErrNone;\
-	}\
-	\
-	TT_SCORE_CONSTRUCTOR
-
-// Global
-
-/** The main objects of TTScore */
-
 
 // Prototypes
 
