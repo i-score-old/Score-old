@@ -576,7 +576,7 @@ TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue
     TimeEventPtr            aFormerTimeEvent, aNewTimeEvent, timeEvent;
     TimeProcessPtr          aTimeProcess;
     TTBoolean               isStatic;
-    TTValue                 v;
+    TTValue                 v, aCacheElement;
     SolverObjectMapIterator it;
     
     if (inputValue.size() == 2) {
@@ -585,6 +585,27 @@ TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue
             
             aFormerTimeEvent = TimeEventPtr((TTObjectBasePtr)inputValue[0]);
             aNewTimeEvent = TimeEventPtr((TTObjectBasePtr)inputValue[1]);
+            
+            // try to find the former time event
+            mTimeEventList.find(&ScenarioFindTimeEvent, (TTPtr)aFormerTimeEvent, aCacheElement);
+            
+            // couldn't find the former time event in the scenario
+            if (aCacheElement == kTTValNONE)
+                return kTTErrValueNotFound;
+            else {
+                
+                // remove the former time event object and observers
+                mTimeEventList.remove(aCacheElement);
+                
+                // delete all observers on the former time event
+                deleteTimeEventCacheElement(aCacheElement);
+                
+                // create all observers on the new time event
+                makeTimeEventCacheElement(aNewTimeEvent, aCacheElement);
+                
+                // store the new time event object and observers
+                mTimeEventList.append(aCacheElement);
+            }
             
             // is the new event static ?
             isStatic = aNewTimeEvent->getName() == TTSymbol("Static");
@@ -669,20 +690,24 @@ TTErr Scenario::TimeEventTrigger(const TTValue& inputValue, TTValue& outputValue
     
     if (inputValue.size() == 1) {
         
-        if (inputValue[0].type() == kTypeObject ) {
+        if (inputValue[0].type() == kTypeObject) {
             
             // get time event to trigger
             aTimeEvent = TimeEventPtr((TTObjectBasePtr)inputValue[0]);
             
             // cf ECOMachine::receiveNetworkMessage(std::string netMessage)
+            
+            if (mExecutionGraph) {
 
-            // if the excecution graph is running
-            if (mExecutionGraph->getUpdateFactor() != 0) {
+                // if the excecution graph is running
+                if (mExecutionGraph->getUpdateFactor() != 0) {
                 
-                // append the event to the event queue to process its triggering
-                mExecutionGraph->putAnEvent(TTPtr(aTimeEvent));
+                    // append the event to the event queue to process its triggering
+                    TTLogMessage("Scenario::TimeEventTrigger : %p\n", TTPtr(aTimeEvent));
+                    mExecutionGraph->putAnEvent(TTPtr(aTimeEvent));
                 
-                return kTTErrNone;
+                    return kTTErrNone;
+                }
             }
         }
     }
@@ -736,7 +761,9 @@ TTErr Scenario::ReadFromText(const TTValue& inputValue, TTValue& outputValue)
 }
 
 void Scenario::makeTimeProcessCacheElement(TimeProcessPtr aTimeProcess, TTValue& newCacheElement)
-{	
+{
+    newCacheElement.clear();
+    
 	// 0 : cache time process object
 	newCacheElement.append((TTObjectBasePtr)aTimeProcess);
 }
@@ -747,7 +774,9 @@ void Scenario::deleteTimeProcessCacheElement(const TTValue& oldCacheElement)
 }
 
 void Scenario::makeTimeEventCacheElement(TimeEventPtr aTimeEvent, TTValue& newCacheElement)
-{	
+{
+    newCacheElement.clear();
+    
 	// 0 : cache time event object
 	newCacheElement.append((TTObjectBasePtr)aTimeEvent);
 }

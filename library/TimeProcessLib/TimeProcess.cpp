@@ -439,15 +439,17 @@ TTErr TimeProcess::setStartEvent(const TTValue& value)
             
             mStartEvent = value[0];
             
-            // observe event happening
             if (mStartEvent) {
                 
+                // pass the same scenario object to the event
+                mStartEvent->setAttributeValue(TTSymbol("scenario"), mScenario);
+                
+                // observe event happening
                 err = mStartEvent->findMessage(TTSymbol("Happen"), &aMessage);
                 
                 if(!err)
                     return aMessage->registerObserverForNotifications(*mStartEventCallback);
             }
-        
         }
     }
     
@@ -484,9 +486,12 @@ TTErr TimeProcess::setEndEvent(const TTValue& value)
             
             mEndEvent = value[0];
             
-            // observe event happening
             if (mEndEvent) {
                 
+                // pass the same scenario object to the event
+                mEndEvent->setAttributeValue(TTSymbol("scenario"), mScenario);
+                
+                // observe event happening
                 err = mEndEvent->findMessage(TTSymbol("Happen"), &aMessage);
                 
                 if(!err)

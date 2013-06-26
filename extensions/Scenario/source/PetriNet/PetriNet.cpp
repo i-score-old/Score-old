@@ -82,6 +82,8 @@ void PetriNet::start()
 
 bool PetriNet::makeOneStep(unsigned int currentTime)
 {
+    std::cout << "PetriNet::makeOneStep at " << currentTime << " ms"<< std::endl;
+    
     m_currentTime = currentTime;
     
     if (m_endPlace->nbOfTokens() == 0 && !m_mustStop) {
@@ -103,6 +105,8 @@ bool PetriNet::makeOneStep(unsigned int currentTime)
                     
                     if (topAction->getType() == START) {
                         if (topTransition->couldBeSensitize()) {
+                            
+                            std::cout << "PetriNet::makeOneStep : sensitize event" << topTransition->getEvent() << std::endl;
                             turnIntoSensitized(topTransition);
                             
                             if (m_waitedTriggerPointMessageAction != NULL) {
@@ -135,6 +139,8 @@ bool PetriNet::makeOneStep(unsigned int currentTime)
             
             Transition* sensitizedTransitionToTestTheEvent;
             sensitizedTransitionToTestTheEvent = m_sensitizedTransitions[i];
+            
+            std::cout << "PetriNet::makeOneStep : event to test " << sensitizedTransitionToTestTheEvent->getEvent() << std::endl;
             
             // if all the going arc are not active
             if (!sensitizedTransitionToTestTheEvent->areAllInGoingArcsActive()) {
@@ -251,14 +257,16 @@ void PetriNet::putAnEvent(void* event)
 bool PetriNet::isAnEvent(void* event)
 {
 	eventList tempList = m_incomingEvents.getList();
-	std::list<void*>::iterator it  = tempList.begin();
+	std::list<void*>::iterator it = tempList.begin();
 
 	while (it != tempList.end()) {
-		if (*it == event) {
+        
+		if (*it == event)
 			return true;
-		}
+        
 		++it;
 	}
+    
 	return false;
 }
 

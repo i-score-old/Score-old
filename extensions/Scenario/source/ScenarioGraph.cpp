@@ -501,7 +501,7 @@ void Scenario::cleanGraph(TransitionPtr endTransition)
     The m_priorityTransitionsActionQueue is filled in Transition::setArcAsActive method which is called in :
  
         - a Transition::crossTransition which is only called in :
-            - PetriNet::makeOneStep             => could a Scenario observes the Notify method of a TimeEvent ?
+            - PetriNet::makeOneStep             => could a Scenario observes the Trigger method of a TimeEvent ?
  
         - a Place::produceTokens which is called in :
             - PetriNet::start                   => could it be done in Scenario::ProcessStart in other way ?
