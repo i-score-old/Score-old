@@ -2,14 +2,15 @@
 #  - TIME_PROCESS_DEBUG
 
 sources:
-  - ../../library/TimeProcessLib/TimeProcess.cpp	
+  - ../TimeProcessLib.cpp	
   - source/Condition.cpp
   
 includes:
   - "."
+  - ".."
   - "includes"
-  - "../../library/TimeProcessLib"
-  - "../../library/TimeEventLib"
+  - "../../library/includes"
+  - "../../library/tests"
   
   # to build without having the whole jamoma repository
   - ../../support/jamoma/includes
@@ -18,6 +19,7 @@ libraries:
   - FOUNDATION
   - DSP
   - MODULAR
+  - ../../library/build/JamomaScore.dylib
 
 # This project is not available for most architectures (cause of the Gecode 64-bit only dependency)
 arch: "x86_64"

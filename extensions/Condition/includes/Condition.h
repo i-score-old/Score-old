@@ -16,7 +16,7 @@
 #ifndef __CONDITION_H__
 #define __CONDITION_H__
 
-#include "TimeProcess.h"
+#include "TimeProcessLib.h"
 
 class Condition : public TimeProcess
 {
