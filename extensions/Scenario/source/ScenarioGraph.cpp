@@ -51,8 +51,9 @@ void Scenario::compileScenario(TTUInt32 timeOffset)
 // TODO : sort the time process to order them in time (?)
     
     // compile all time processes except the interval processes
-    TransitionPtr previousTransition = startTransition;
     for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
+        
+        TransitionPtr previousTransition = startTransition;
         
         aTimeProcess = TimeProcessPtr(TTObjectBasePtr(mTimeProcessList.current()[0]));
         
