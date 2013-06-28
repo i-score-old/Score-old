@@ -1,16 +1,16 @@
-/*
- * Scenario time Process
- * Copyright © 2013, Théo de la Hogue, Clément Bossut
+/** @file
  *
- * License: This code is licensed under the terms of the "New BSD License"
- * http://creativecommons.org/licenses/BSD/
- */
-
-/*!
- * \class Scenario
+ * @ingroup scoreExtension
  *
- *  Scenario time process class is a container class to manage other time processes instances in the time
+ * @brief Scenario time process class is a container class to manage other time processes instances in the time
  *
+ * @see TimeProcessLib, TTTimeProcess
+ *
+ * @authors Théo de la Hogue & Clément Bossut
+ *
+ * @copyright Copyright © 2013, Théo de la Hogue & Clément Bossut @n
+ * This code is licensed under the terms of the "CeCILL-C" @n
+ * http://www.cecill.info
  */
 
 #include "Scenario.h"
