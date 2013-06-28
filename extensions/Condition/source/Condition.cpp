@@ -1,16 +1,16 @@
-/*
- * Condition time process
- * Copyright © 2013, Clément Bossut
+/** @file
  *
- * License: This code is licensed under the terms of the "New BSD License"
- * http://creativecommons.org/licenses/BSD/
- */
-
-/*!
- * \class Condition
+ * @ingroup scoreExtension
  *
- *  Condition time process class manage ...
+ * @brief Condition time process class is a container class to manage alternative execution
  *
+ * @see TimeProcessLib, TTTimeProcess
+ *
+ * @authors Théo de la Hogue & Clément Bossut
+ *
+ * @copyright Copyright © 2013, Théo de la Hogue & Clément Bossut @n
+ * This code is licensed under the terms of the "CeCILL-C" @n
+ * http://www.cecill.info
  */
 
 #include "Condition.h"
