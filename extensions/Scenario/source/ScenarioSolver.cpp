@@ -1,14 +1,21 @@
-/*
- * Scenario Solver Features
- * Copyright © 2013, Théo de la Hogue, Clément Bossut
+/** @file
  *
- * License: This code is licensed under the terms of the "New BSD License"
- * http://creativecommons.org/licenses/BSD/
+ * @ingroup scoreExtension
+ *
+ * @brief Scenario Solver file defines data structure to interface a Gecode constrain solver
+ *
+ * @see Scenario, Solver
+ *
+ * @authors Théo de la Hogue & Clément Bossut
+ *
+ * @copyright Copyright © 2013, Théo de la Hogue & Clément Bossut @n
+ * This code is licensed under the terms of the "CeCILL-C" @n
+ * http://www.cecill.info
  */
 
 #include "ScenarioSolver.h"
 
-SolverVariable::SolverVariable(SolverPtr aSolver, TimeEventPtr anEvent, SolverValue max):
+SolverVariable::SolverVariable(SolverPtr aSolver, TTTimeEventPtr anEvent, SolverValue max):
 event(anEvent), solver(aSolver)
 {
     TTValue v;

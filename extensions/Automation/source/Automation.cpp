@@ -1,23 +1,23 @@
-/*
- * Automation time Process
- * Copyright © 2013, Théo de la Hogue
+/** @file
  *
- * License: This code is licensed under the terms of the "New BSD License"
- * http://creativecommons.org/licenses/BSD/
- */
-
-/*!
- * \class Automation
+ * @ingroup scoreExtension
  *
- *  Automation time Process class
+ * @brief Automation time process class manage interpolation between the start event state and end event state depending on the scheduler progression
  *
+ * @see TimeProcessLib, TTTimeProcess
+ *
+ * @authors Théo de la Hogue & Clément Bossut
+ *
+ * @copyright Copyright © 2013, Théo de la Hogue & Clément Bossut @n
+ * This code is licensed under the terms of the "CeCILL-C" @n
+ * http://www.cecill.info
  */
 
 #include "Automation.h"
 
-#define thisTTClass                 Automation
-#define thisTTClassName             "Automation"
-#define thisTTClassTags             "time, process, automation"
+#define thisTTClass          Automation
+#define thisTTClassName      "Automation"
+#define thisTTClassTags      "time, process, automation"
 
 extern "C" TT_EXTENSION_EXPORT TTErr TTLoadJamomaExtension_Automation(void)
 {

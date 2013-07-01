@@ -39,16 +39,14 @@ elsif mac?
     
     # Copy Score headers to include them into other application
     # (except the includes folder because it is done by the support/build.rb script)
-    `cp "#{glibdir}"/library/TimeProcessLib/*.h /usr/local/jamoma/includes`
-    `cp "#{glibdir}"/library/TimeEventLib/*.h /usr/local/jamoma/includes`
     `cp "#{glibdir}"/library/tests/*.h /usr/local/jamoma/includes`
+    `cp "#{glibdir}"/extensions/TimeProcessLib.h /usr/local/jamoma/includes`
     
     # Create alias
     `sudo ln -s /usr/local/jamoma/extensions/Automation.ttdylib /usr/local/lib/Automation.ttdylib`
-    `sudo ln -s /usr/local/jamoma/extensions/InteractiveEvent.ttdylib /usr/local/lib/InteractiveEvent.ttdylib`
+    `sudo ln -s /usr/local/jamoma/extensions/Condition.ttdylib /usr/local/lib/Condition.ttdylib`
     `sudo ln -s /usr/local/jamoma/extensions/Interval.ttdylib /usr/local/lib/Interval.ttdylib`
     `sudo ln -s /usr/local/jamoma/extensions/Scenario.ttdylib /usr/local/lib/Scenario.ttdylib`
-    `sudo ln -s /usr/local/jamoma/extensions/StaticEvent.ttdylib /usr/local/lib/StaticEvent.ttdylib`
     
 end
 

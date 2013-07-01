@@ -1,23 +1,29 @@
-/*
- * Interval time process
- * Copyright © 2013, Théo de la Hogue, Clément Bossut
+/** @file
  *
- * License: This code is licensed under the terms of the "New BSD License"
- * http://creativecommons.org/licenses/BSD/
- */
-
-/*!
- * \class Interval
+ * @ingroup scoreExtension
  *
- *  Interval time process class
+ * @brief a simple amount of time process
  *
+ * @details The Interval class allows to ... @n@n
+ *
+ * @see TimeProcessLib, TTTimeProcess
+ *
+ * @authors Théo de la Hogue & Clément Bossut
+ *
+ * @copyright Copyright © 2013, Théo de la Hogue & Clément Bossut @n
+ * This code is licensed under the terms of the "CeCILL-C" @n
+ * http://www.cecill.info
  */
 
 #ifndef __INTERVAL_H__
 #define __INTERVAL_H__
 
-#include "TimeProcess.h"
+#include "TimeProcessLib.h"
 
+/**	The Interval class allows to ...
+ 
+ @see TimeProcessLib, TTTimeProcess
+ */
 class Interval : public TimeProcess
 {
 	TTCLASS_SETUP(Interval)

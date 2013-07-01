@@ -4,18 +4,14 @@ sources:
     
   - source/TTScore.cpp
   - source/TTScoreSymbolCache.cpp
-  
-  - TimeProcessLib/TimeProcess.cpp
-  - TimeEventLib/TimeEvent.cpp
-  
+  - source/TTTimeEvent.cpp
+  - source/TTTimeProcess.cpp
+
   - tests/TTScore.test.cpp
 
 includes:
 
   - includes
-
-  - TimeProcessLib
-  - TimeEventLib
   
   - tests
   

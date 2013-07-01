@@ -6,18 +6,11 @@
  * http://creativecommons.org/licenses/BSD/
  */
 
-/*!
- * \class Interval
- *
- *  Interval time process class
- *
- */
-
 #include "Interval.h"
 
-#define thisTTClass                 Interval
-#define thisTTClassName             "Interval"
-#define thisTTClassTags             "time, process, Interval"
+#define thisTTClass         Interval
+#define thisTTClassName     "Interval"
+#define thisTTClassTags     "time, process, interval"
 
 extern "C" TT_EXTENSION_EXPORT TTErr TTLoadJamomaExtension_Interval(void)
 {
@@ -105,8 +98,3 @@ TTErr Interval::ReadFromText(const TTValue& inputValue, TTValue& outputValue)
 	
 	return kTTErrGeneric;
 }
-
-#if 0
-#pragma mark -
-#pragma mark Some Methods
-#endif

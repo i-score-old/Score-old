@@ -1,9 +1,18 @@
-/*
- * Scenario Graph Features
- * Copyright © 2013, Théo de la Hogue, Clément Bossut
+/** @file
  *
- * License: This code is licensed under the terms of the "New BSD License"
- * http://creativecommons.org/licenses/BSD/
+ * @ingroup scoreExtension
+ *
+ * @brief Scenario Graph file defines specific methods to handle the PetriNet execution engine
+ *
+ * @details The Scenario Graph allows to ... @n@n
+ *
+ * @see Scenario, PetriNet
+ *
+ * @authors Théo de la Hogue & Clément Bossut
+ *
+ * @copyright Copyright © 2013, Théo de la Hogue & Clément Bossut @n
+ * This code is licensed under the terms of the "CeCILL-C" @n
+ * http://www.cecill.info
  */
 
 #ifndef __SCENARIO_GRAPH_H__
