@@ -62,7 +62,7 @@ void Scenario::compileScenario(TTUInt32 timeOffset)
         
         TransitionPtr previousTransition = startTransition;
         
-        aTimeProcess = TimeProcessPtr(TTObjectBasePtr(mTimeProcessList.current()[0]));
+        aTimeProcess = TTTimeProcessPtr(TTObjectBasePtr(mTimeProcessList.current()[0]));
         
         if (aTimeProcess->getName() != TTSymbol("Interval"))
             compileTimeProcess(aTimeProcess, &previousTransition, endTransition, timeOffset);
