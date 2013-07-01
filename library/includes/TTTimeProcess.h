@@ -48,7 +48,7 @@ protected:
     TTObjectBasePtr                 mEndEventCallback;              ///< a callback to subscribe for end event notification
     
     TTObjectBasePtr                 mScheduler;                     ///< the scheduler object which handles the time process execution
-
+    
 private:
     
     TTAttributePtr                  activeAttribute;                ///< cache active attribute for observer notification
