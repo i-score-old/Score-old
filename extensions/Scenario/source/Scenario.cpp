@@ -573,9 +573,9 @@ TTErr Scenario::TimeEventMove(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTTimeEventPtr            aFormerTimeEvent, aNewTimeEvent, timeEvent;
-    TTTimeProcessPtr          aTimeProcess;
-    TTBoolean               isStatic;
+    TTTimeEventPtr          aFormerTimeEvent, aNewTimeEvent, timeEvent;
+    TTTimeProcessPtr        aTimeProcess;
+    TTBoolean               isInteractive;
     TTValue                 v, aCacheElement;
     SolverObjectMapIterator it;
     
@@ -592,6 +592,7 @@ TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue
             // couldn't find the former time event in the scenario
             if (aCacheElement == kTTValNONE)
                 return kTTErrValueNotFound;
+            
             else {
                 
                 // remove the former time event object and observers
@@ -607,8 +608,9 @@ TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue
                 mTimeEventList.append(aCacheElement);
             }
             
-            // is the new event static ?
-            isStatic = aNewTimeEvent->getName() == TTSymbol("Static");
+            // is the new event interactive ?
+            aNewTimeEvent->getAttributeValue(TTSymbol("interactive"), v);
+            isInteractive = v[0];
                         
             // replace the former time event in all time process which binds on it
             for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
@@ -633,8 +635,8 @@ TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue
                     aTimeProcess->sendMessage(TTSymbol("EndEventRelease"));
                     aTimeProcess->setAttributeValue(TTSymbol("endEvent"), TTObjectBasePtr(aNewTimeEvent));
                     
-                    // a time process with a none static end event cannot be rigid
-                    v = TTBoolean(isStatic);
+                    // a time process with an interactive end event cannot be rigid
+                    v = TTBoolean(!isInteractive);
                     aTimeProcess->setAttributeValue(TTSymbol("rigid"), v);
                 }
             }
