@@ -154,7 +154,7 @@ TTErr TTTimeEvent::Trigger()
     if (mScenario)
         
         // use scenario to make the event happen
-        return mScenario->sendMessage(TTSymbol("TTTimeEventTrigger"), TTObjectBasePtr(this), kTTValNONE);
+        return mScenario->sendMessage(TTSymbol("TimeEventTrigger"), TTObjectBasePtr(this), kTTValNONE);
     
     else
         

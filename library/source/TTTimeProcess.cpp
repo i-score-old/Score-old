@@ -73,11 +73,11 @@ mScheduler(NULL)
     addMessageWithArguments(Process);
     
     addMessageWithArguments(StartEventCreate);
-    addMessageWithArguments(StartEventReplace);
+    addMessageWithArguments(StartEventInteractive);
     addMessage(StartEventRelease);
     
     addMessageWithArguments(EndEventCreate);
-    addMessageWithArguments(EndEventReplace);
+    addMessageWithArguments(EndEventInteractive);
     addMessage(EndEventRelease);
     
     addMessageWithArguments(Move);
@@ -491,86 +491,39 @@ TTErr TTTimeProcess::StartEventCreate(const TTValue& value)
     if (mStartEvent)
         return kTTErrGeneric;
     
-    if (value.size() >= 1) {
+    // Create a time event for the start
+    timeEvent = NULL;
+    err = TTObjectBaseInstantiate(TTSymbol("TimeEvent"), TTObjectBaseHandle(&timeEvent), kTTValNONE);
+    
+    if (!err) {
         
-        if (value[0].type() == kTypeSymbol) {
+        setStartEvent(TTObjectBasePtr(timeEvent));
+        
+        if (value.size() == 1) {
             
-            // Create a time event for the start
-            timeEvent = NULL;
-            err = TTObjectBaseInstantiate(value[0], TTObjectBaseHandle(&timeEvent), kTTValNONE);
-            
-            if (!err) {
+            if (value[0].type() == kTypeUInt32) {
                 
-                setStartEvent(TTObjectBasePtr(timeEvent));
-                
-                if (value.size() == 2) {
-                    
-                    if (value[1].type() == kTypeUInt32) {
-                        
-                        // Set the start date
-                        timeEvent->setAttributeValue(TTSymbol("date"), value[1]);
-                    }
-                }
+                // Set the start date
+                timeEvent->setAttributeValue(TTSymbol("date"), value[0]);
             }
-            
-            return err;
         }
     }
     
-    return kTTErrGeneric;
+    return err;
 }
 
-TTErr TTTimeProcess::StartEventReplace(const TTValue& value)
+TTErr TTTimeProcess::StartEventInteractive(const TTValue& value)
 {
-    TTTimeEventPtr    formerStartEvent, timeEvent;
-    TTValue         v, args;
-    TTErr           err;
-    
-    // it needs a start event to replace
+    // it needs a start event
     if (!mStartEvent)
         return kTTErrGeneric;
     
-    if (value.size() >= 1) {
+    if (value.size() == 1) {
         
-        if (value[0].type() == kTypeSymbol) {
+        if (value[0].type() == kTypeBoolean) {
             
-            // create a time event for the start
-            timeEvent = NULL;
-            err = TTObjectBaseInstantiate(value[0], TTObjectBaseHandle(&timeEvent), kTTValNONE);
-            
-            if (!err) {
-                
-                // set the new start event
-                formerStartEvent = TTTimeEventPtr(mStartEvent);
-                err = setStartEvent(TTObjectBasePtr(timeEvent));
-                
-                // if the time process is handled by a scenario
-                if (mScenario) {
-                    
-                    // prepare argument
-                    v = TTValue(TTObjectBasePtr(formerStartEvent));
-                    v.append(TTObjectBasePtr(timeEvent));
-                    
-                    err = mScenario->sendMessage(TTSymbol("TTTimeEventReplace"), v, kTTValNONE);
-                }
-                
-                // if the replacement success
-                if (!err) {
-                    
-                    // realase the former start event
-                    TTObjectBaseRelease(TTObjectBaseHandle(&formerStartEvent));
-                }
-                else {
-                    
-                    // cancel the operation
-                    setStartEvent(TTObjectBasePtr(formerStartEvent));
-                    
-                    // realase the new event
-                    TTObjectBaseRelease(TTObjectBaseHandle(&timeEvent));
-                }
-            }
-            
-            return err;
+            // Set the interactive attribute of the start event
+            return mStartEvent->setAttributeValue(TTSymbol("interactive"), value);
         }
     }
 
@@ -599,37 +552,42 @@ TTErr TTTimeProcess::EndEventCreate(const TTValue& value)
     if (mEndEvent)
         return kTTErrGeneric;
     
-    if (value.size() >= 1) {
+    // Create a time event for the end
+    timeEvent = NULL;
+    err = TTObjectBaseInstantiate(TTSymbol("TimeEvent"), TTObjectBaseHandle(&timeEvent), kTTValNONE);
+    
+    if (!err) {
         
-        if (value[0].type() == kTypeSymbol) {
+        setEndEvent(TTObjectBasePtr(timeEvent));
+        
+        if (value.size() == 1) {
             
-            // Create a time event for the end
-            timeEvent = NULL;
-            err = TTObjectBaseInstantiate(value[0], TTObjectBaseHandle(&timeEvent), kTTValNONE);
-            
-            if (!err) {
+            if (value[0].type() == kTypeUInt32) {
                 
-                setEndEvent(TTObjectBasePtr(timeEvent));
-                
-                if (value.size() == 2) {
-                    
-                    if (value[1].type() == kTypeUInt32) {
-                        
-                        // Set the end date
-                        timeEvent->setAttributeValue(TTSymbol("date"), value[1]);
-                    }
-                }
+                // Set the end date
+                timeEvent->setAttributeValue(TTSymbol("date"), value[0]);
             }
-            
-            return err;
         }
     }
     
-    return kTTErrGeneric;
+    return err;
 }
 
-TTErr TTTimeProcess::EndEventReplace(const TTValue& value)
+TTErr TTTimeProcess::EndEventInteractive(const TTValue& value)
 {
+    // it needs a end event
+    if (!mEndEvent)
+        return kTTErrGeneric;
+    
+    if (value.size() == 1) {
+        
+        if (value[0].type() == kTypeBoolean) {
+            
+            // Set interactive attribute of the end event
+            return mEndEvent->setAttributeValue(TTSymbol("interactive"), value);
+        }
+    }
+    
     return kTTErrGeneric;
 }
 

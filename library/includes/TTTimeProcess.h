@@ -160,30 +160,28 @@ private :
     TTErr           setEndEvent(const TTValue& value);
     
     /** Create a start event for the time process
-     @param	value           event type, a date (optional)
+     @param	value           a date (optional)
      @return                an error code if the event can't be created */
     TTErr           StartEventCreate(const TTValue& value);
     
-    /** Replace a start event by a new one at the same date.
-        This will release the former event.
-     @param	value           event type
+    /** Set start event interactive or not.
+     @param	value           boolean
      @return                an error code if the event can't be replaced */
-    TTErr           StartEventReplace(const TTValue& value);
+    TTErr           StartEventInteractive(const TTValue& value);
     
     /** Release the start event of the time process
      @return                an error code if the event can't be destroyed */
     TTErr           StartEventRelease();
     
     /** Create a end event for the time process
-     @param	value           event type, a date (optional)
+     @param	value           a date (optional)
      @return                an error code if the event can't be created */
     TTErr           EndEventCreate(const TTValue& value);
     
-    /** Replace a end event by a new one at the same date.
-        This will release the former event.
-     @param	value           event type
+    /** Set end event interactive or not
+     @param	value           boolean
      @return                an error code if the event can't be replaced */
-    TTErr           EndEventReplace(const TTValue& value);
+    TTErr           EndEventInteractive(const TTValue& value);
     
     /** Release the end event of the time process
      @return                an error code if the event can't be destroyed */

@@ -18,8 +18,9 @@
 
 void Scenario::compileScenario(TTUInt32 timeOffset)
 {
-    TTTimeProcessPtr  aTimeProcess;
-    TTTimeEventPtr    aTimeEvent;
+    TTTimeProcessPtr    aTimeProcess;
+    TTTimeEventPtr      aTimeEvent;
+    TTValue             v;
     
     // cf : ECOMachine::compilePetriNet
     
@@ -85,7 +86,9 @@ void Scenario::compileScenario(TTUInt32 timeOffset)
         
         aTimeEvent = TTTimeEventPtr(TTObjectBasePtr(mTimeEventList.current()[0]));
         
-        if (aTimeEvent->getName() != TTSymbol("StaticEvent"))
+        aTimeEvent->getAttributeValue(TTSymbol("interactive"), v);
+        
+        if (v[0] == YES)
             compileInteractiveEvent(aTimeEvent, timeOffset);
 	}
 }
@@ -99,7 +102,7 @@ void Scenario::compileTimeProcess(TTTimeProcessPtr aTimeProcess, TransitionPtr* 
     Arc*            arcFromPreviousTransitionToCurrentPlace;
     Arc*            arcFromCurrentPlaceToTheEnd;
     
-    TTTimeEventPtr    startEvent, endEvent;
+    TTTimeEventPtr  startEvent, endEvent;
     TTUInt32        startDate, endDate;
     TTValue         v;
     
@@ -216,8 +219,8 @@ note : it was in compileEvent
 
 void Scenario::compileInterval(TTTimeProcessPtr aTimeProcess)
 {
-    TransitionPtr             startTransition;
-    TransitionPtr             endTransition;
+    TransitionPtr           startTransition;
+    TransitionPtr           endTransition;
     Place*                  currentPlace;
     Arc*                    arcFromstartTransitionToCurrentPlace;
     Arc*                    arcFromCurrentPlaceToendTransition;
@@ -346,9 +349,8 @@ void Scenario::compileInteractiveEvent(TTTimeEventPtr aTimeEvent, TTUInt32 timeO
     
     GraphObjectMapIterator  mergeIterator;
     
-    // get event active state
-    aTimeEvent->getAttributeValue(TTSymbol("active"), v);
-    active = TTBoolean(v[0]);
+    // TODO : get event active state
+    active = YES;
     
     // get event date
     aTimeEvent->getAttributeValue(TTSymbol("date"), v);

@@ -158,7 +158,7 @@ TTErr Scenario::Compile()
 
 TTErr Scenario::TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTTimeProcessPtr          aTimeProcess;
+    TTTimeProcessPtr        aTimeProcess;
     TTValue                 aCacheElement, v;
     TTValue                 startEvent, endEvent;
     TTValue                 duration, durationMin, durationMax, scenarioDuration;
@@ -242,7 +242,7 @@ TTErr Scenario::TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr Scenario::TimeProcessRemove(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTTimeProcessPtr          aTimeProcess;
+    TTTimeProcessPtr        aTimeProcess;
     TTValue                 aCacheElement;
     TTValue                 startEvent, endEvent;
     SolverObjectMapIterator it;
@@ -305,7 +305,7 @@ TTErr Scenario::TimeProcessRemove(const TTValue& inputValue, TTValue& outputValu
 
 TTErr Scenario::TimeProcessMove(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTTimeProcessPtr          aTimeProcess;
+    TTTimeProcessPtr        aTimeProcess;
     TTValue                 v;
     TTValue                 startEvent, endEvent;
     TTValue                 duration, scenarioDuration;
@@ -373,7 +373,7 @@ TTErr Scenario::TimeProcessMove(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr Scenario::TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTTimeProcessPtr          aTimeProcess;
+    TTTimeProcessPtr        aTimeProcess;
     TTValue                 durationMin, durationMax;
     TTSymbol                timeProcessType;
     SolverObjectMapIterator it;
@@ -422,7 +422,7 @@ TTErr Scenario::TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue
 
 TTErr Scenario::TimeEventAdd(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTTimeEventPtr    aTimeEvent;
+    TTTimeEventPtr  aTimeEvent;
     TTValue         aCacheElement, scenarioDuration;
     
     if (inputValue.size() == 1) {
@@ -462,7 +462,7 @@ TTErr Scenario::TimeEventAdd(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr Scenario::TimeEventRemove(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTTimeEventPtr            aTimeEvent;
+    TTTimeEventPtr          aTimeEvent;
     TTValue                 aCacheElement;
     TTBoolean               found;
     SolverVariablePtr       variable;
@@ -526,7 +526,7 @@ TTErr Scenario::TimeEventRemove(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr Scenario::TimeEventMove(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTTimeEventPtr            aTimeEvent;
+    TTTimeEventPtr          aTimeEvent;
     TTValue                 v;
     TTSymbol                timeEventType;
     SolverVariablePtr       variable;
@@ -665,8 +665,8 @@ TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue
 
 TTErr Scenario::TimeProcessActiveChange(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTTimeProcessPtr  aTimeProcess;
-    TTBoolean       active;
+    TTTimeProcessPtr    aTimeProcess;
+    TTBoolean           active;
 	
     if (inputValue.size() == 2) {
         
@@ -800,8 +800,8 @@ void ScenarioFindTimeProcess(const TTValue& aValue, TTPtr timeProcessPtrToMatch,
 
 void ScenarioFindTimeProcessWithTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found)
 {
-    TTTimeProcessPtr  timeProcess = TTTimeProcessPtr(TTObjectBasePtr(aValue[0]));
-    TTValue         v;
+    TTTimeProcessPtr    timeProcess = TTTimeProcessPtr(TTObjectBasePtr(aValue[0]));
+    TTValue             v;
     
     // ignore interval process
     if (timeProcess->getName() != TTSymbol("Interval")) {
