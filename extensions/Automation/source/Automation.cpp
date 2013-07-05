@@ -4,7 +4,7 @@
  *
  * @brief Automation time process class manage interpolation between the start event state and end event state depending on the scheduler progression
  *
- * @see TimeProcessLib, TTTimeProcess
+ * @see TimePluginLib, TTTimeProcess
  *
  * @authors Théo de la Hogue & Clément Bossut
  *
@@ -29,7 +29,7 @@ extern "C" TT_EXTENSION_EXPORT TTErr TTLoadJamomaExtension_Automation(void)
 
 TIME_PROCESS_CONSTRUCTOR
 {
-    TIME_PROCESS_INITIALIZE
+    TIME_PLUGIN_INITIALIZE
     
 	TT_ASSERT("Correct number of args to create Automation", arguments.size() == 0);
     

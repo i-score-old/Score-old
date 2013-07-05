@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		46B55542177B209E00F50D89 /* TimeProcessLib.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TimeProcessLib.cpp; path = ../../extensions/TimeProcessLib.cpp; sourceTree = "<group>"; };
-		46B55543177B209E00F50D89 /* TimeProcessLib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TimeProcessLib.h; path = ../../extensions/TimeProcessLib.h; sourceTree = "<group>"; };
+		468EBC001784BB90008BE2AC /* TimePluginLib.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TimePluginLib.cpp; path = ../../extensions/TimePluginLib.cpp; sourceTree = "<group>"; };
+		468EBC011784BB90008BE2AC /* TimePluginLib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TimePluginLib.h; path = ../../extensions/TimePluginLib.h; sourceTree = "<group>"; };
 		46B55544177B20A800F50D89 /* Interval.yml */ = {isa = PBXFileReference; lastKnownFileType = text; path = Interval.yml; sourceTree = "<group>"; };
 		46F4620A16F0D1BA0092840F /* Interval.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Interval.cpp; sourceTree = "<group>"; };
 		46F4620C16F0D1C40092840F /* Interval.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Interval.h; sourceTree = "<group>"; };
@@ -19,7 +19,7 @@
 			isa = PBXGroup;
 			children = (
 				46B55544177B20A800F50D89 /* Interval.yml */,
-				46F4620D16F0D1CE0092840F /* TimeProcessLib */,
+				46F4620D16F0D1CE0092840F /* TimePluginLib */,
 				46F4620B16F0D1C40092840F /* includes */,
 				46F4620916F0D1BA0092840F /* source */,
 			);
@@ -41,13 +41,13 @@
 			path = includes;
 			sourceTree = "<group>";
 		};
-		46F4620D16F0D1CE0092840F /* TimeProcessLib */ = {
+		46F4620D16F0D1CE0092840F /* TimePluginLib */ = {
 			isa = PBXGroup;
 			children = (
-				46B55543177B209E00F50D89 /* TimeProcessLib.h */,
-				46B55542177B209E00F50D89 /* TimeProcessLib.cpp */,
+				468EBC011784BB90008BE2AC /* TimePluginLib.h */,
+				468EBC001784BB90008BE2AC /* TimePluginLib.cpp */,
 			);
-			name = TimeProcessLib;
+			name = TimePluginLib;
 			path = ../../library/TimeProcessLib;
 			sourceTree = "<group>";
 		};

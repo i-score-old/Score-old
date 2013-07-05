@@ -2,7 +2,7 @@
 #  - TIME_PROCESS_DEBUG
 
 sources:
-  - ../TimeProcessLib.cpp	
+  - ../TimePluginLib.cpp	
   - source/Automation.cpp
   - source/Curve.cpp
   

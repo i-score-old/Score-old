@@ -2,11 +2,11 @@
  *
  * @ingroup scoreExtension
  *
- * @brief Scenario time process class is a container class to manage other time processes instances in the time
+ * @brief Scenario class is a time container class to manage time events and time processes in the time
  *
  * @details The Scenario class allows to ... @n@n
  *
- * @see TimeProcessLib, TTTimeProcess
+ * @see TimePluginLib, TTTimeContainer
  *
  * @authors Théo de la Hogue & Clément Bossut
  *
@@ -18,23 +18,18 @@
 #ifndef __SCENARIO_H__
 #define __SCENARIO_H__
 
-#include "TimeProcessLib.h"
+#include "TimePluginLib.h"
 #include "ScenarioSolver.h"
 #include "ScenarioGraph.h"
 
 /**	The Scenario class allows to ...
  
- @see TimeProcessLib, TTTimeProcess
+ @see TimePluginLib, TTTimeProcess, TTTimeContainer
  */
-class Scenario : public TimeProcess
-{
+class Scenario : public TimeContainer {
+    
 	TTCLASS_SETUP(Scenario)
 	
-private :
-    
-    TTList                      mTimeProcessList;               ///< all registered time processes and their observers
-    TTList                      mTimeEventList;                 ///< all registered time events and their observers
-    
     TTAddressItemPtr            mNamespace;                     ///< the namespace workspace of the scenario
     
     SolverPtr                   mEditionSolver;                 ///< an internal gecode solver to assist scenario edition
@@ -57,6 +52,14 @@ private :
      @return                kTTErrNone */
 	TTErr   getParameterNames(TTValue& value);
     
+    
+    
+    /** Compile the scenario to prepare the petri net before execution
+     @return                an error code returned by the compile method */
+    TTErr   Compile();
+    
+    
+    
     /** Specific process method on start
      @return                an error code returned by the process end method */
     TTErr   ProcessStart();
@@ -71,71 +74,38 @@ private :
      @return                an error code returned by the process method */
     TTErr   Process(const TTValue& inputValue, TTValue& outputValue);
     
-    /** Compile the scenario to prepare the petri net before execution
-     @return                an error code returned by the compile method */
-    TTErr   Compile();
-    
     /**  needed to be handled by a TTXmlHandler
      @param	inputValue      ..
      @param	outputValue     ..
      @return                .. */
 	TTErr	WriteAsXml(const TTValue& inputValue, TTValue& outputValue);
 	TTErr	ReadFromXml(const TTValue& inputValue, TTValue& outputValue);
-	
-	/**  needed to be handled by a TTTextHandler
-     @param	inputValue      ..
-     @param	outputValue     ..
-     @return                .. */
-	TTErr	WriteAsText(const TTValue& inputValue, TTValue& outputValue);
-	TTErr	ReadFromText(const TTValue& inputValue, TTValue& outputValue);
     
-    /** Register a time process for scenario management
-     @inputvalue            a time process object
+
+    
+    /** Create a time event
+     @inputvalue            a date
+     @outputvalue           a new time event
+     @return                an error code if the creation fails */
+    TTErr   TimeEventCreate(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Release a time event
+     @inputValue            a time event object to release
      @outputvalue           kTTValNONE
-     @return                an error code if the registration fails */
-    TTErr   TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue);
+     @return                an error code if the destruction fails */
+    TTErr   TimeEventRelease(const TTValue& inputValue, TTValue& outputValue);
     
-    /** Unregister a time process for scenario management
-     @inputValue            a time process object
-     @outputvalue           kTTValNONE
-     @return                an error code if the unregistration fails */
-    TTErr   TimeProcessRemove(const TTValue& inputValue, TTValue& outputValue);
-    
-    /** Move a time process into the scenario
-     @inputValue            a time process object, new start date, new end date
-     @outputvalue           kTTValNONE
-     @return                an error code if the movement fails */
-    TTErr   TimeProcessMove(const TTValue& inputValue, TTValue& outputValue);
-    
-    /** imit a time process duration into the scenario
-     @inputValue            a time process object, new duration min, new duration max
-     @outputvalue           kTTValNONE
-     @return                an error code if the limitation fails */
-    TTErr   TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue);
-    
-    /** Register a time event for scenario management
-     @inputvalue            a time event object
-     @outputvalue           kTTValNONE
-     @return                an error code if the registration fails */
-    TTErr   TimeEventAdd(const TTValue& inputValue, TTValue& outputValue);
-    
-    /** Unregister a time event for scenario management
-     @inputValue            a time event object
-     @outputvalue           kTTValNONE
-     @return                an error code if the unregistration fails */
-    TTErr   TimeEventRemove(const TTValue& inputValue, TTValue& outputValue);
-    
-    /** Move a time event into the scenario
+    /** Move a time event
      @inputValue            a time event object, new date
      @outputvalue           kTTValNONE
      @return                an error code if the movement fails */
     TTErr   TimeEventMove(const TTValue& inputValue, TTValue& outputValue);
     
-    /** Replace a time event by another one (copying date and active attribute)
-     @inputValue            a former time event object, a new time event object 
+    /** Make a time event interactive
+     @inputValue            a time event object, new boolean value
      @outputvalue           kTTValNONE
-     @return                an error code if the replacement fails */
-    TTErr   TimeEventReplace(const TTValue& inputValue, TTValue& outputValue);
+     @return                an error code if the setting fails */
+    TTErr   TimeEventInteractive(const TTValue& inputValue, TTValue& outputValue);
     
     /** Trigger a time event to make it happens
      @inputValue            a time event object
@@ -143,27 +113,55 @@ private :
      @return                an error code if the triggering fails */
     TTErr   TimeEventTrigger(const TTValue& inputValue, TTValue& outputValue);
     
-    /** Change a time process active state into the scenario
-     note : this method doesn't update the time process internal active state
-     but it can change attribute of other time processes or time events connected to this one.
-     @inputvalue            a time process object, a new active state
+    /** Replace a time event by another one (copying date and active attribute)
+     @inputValue            a former time event object, a new time event object
      @outputvalue           kTTValNONE
-     @return                an error code if the active state change fails */
-    TTErr   TimeProcessActiveChange(const TTValue& inputValue, TTValue& outputValue);
+     @return                an error code if the replacement fails */
+    TTErr   TimeEventReplace(const TTValue& inputValue, TTValue& outputValue);
+    
+    
+    
+    /** Create a time process
+     @inputvalue            a time process type, a start event, a end event
+     @outputvalue           a new time process
+     @return                an error code if the creation fails */
+    TTErr   TimeProcessCreate(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Release a time process
+     @inputValue            a time process object to release
+     @outputvalue           kTTValNONE
+     @return                an error code if the destruction fails */
+    TTErr   TimeProcessRelease(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Move a time process
+     @inputValue            a time process object, new start date, new end date
+     @outputvalue           kTTValNONE
+     @return                an error code if the movement fails */
+    TTErr   TimeProcessMove(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Limit a time process duration
+     @inputValue            a time process object, new duration min, new duration max
+     @outputvalue           kTTValNONE
+     @return                an error code if the limitation fails */
+    TTErr   TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue);
+    
+    
     
     /** an internal method used to create all time process attribute observers */
-    void makeTimeProcessCacheElement(TTTimeProcessPtr aTimeProcess, TTValue& newCacheElement);
+    void    makeTimeProcessCacheElement(TTTimeProcessPtr aTimeProcess, TTValue& newCacheElement);
     
     /** an internal method used to delete all time process attribute observers */
-    void deleteTimeProcessCacheElement(const TTValue& oldCacheElement);
+    void    deleteTimeProcessCacheElement(const TTValue& oldCacheElement);
     
     /** an internal method used to create all time event attribute observers */
-    void makeTimeEventCacheElement(TTTimeEventPtr aTimeEvent, TTValue& newCacheElement);
+    void    makeTimeEventCacheElement(TTTimeEventPtr aTimeEvent, TTValue& newCacheElement);
     
     /** an internal method used to delete all time event attribute observers */
-    void deleteTimeEventCacheElement(const TTValue& oldCacheElement);
+    void    deleteTimeEventCacheElement(const TTValue& oldCacheElement);
     
-    /** an internal methods used to compile the execution graph */
+    
+    
+    /** internal methods used to compile the execution graph */
     void    compileScenario(TTUInt32 timeOffset);
     void    compileTimeProcess(TTTimeProcessPtr aTimeProcess, TransitionPtr *previousTransition, TransitionPtr endTransition, TTUInt32 timeOffset);
     void    compileInterval(TTTimeProcessPtr aTimeProcess);

@@ -6,7 +6,7 @@
  *
  * @details The Interval class allows to ... @n@n
  *
- * @see TimeProcessLib, TTTimeProcess
+ * @see TimePluginLib, TTTimeProcess
  *
  * @authors Théo de la Hogue & Clément Bossut
  *
@@ -18,11 +18,11 @@
 #ifndef __INTERVAL_H__
 #define __INTERVAL_H__
 
-#include "TimeProcessLib.h"
+#include "TimePluginLib.h"
 
 /**	The Interval class allows to ...
  
- @see TimeProcessLib, TTTimeProcess
+ @see TimePluginLib, TTTimeProcess
  */
 class Interval : public TimeProcess
 {

@@ -18,7 +18,7 @@
 #ifndef __CURVE_H__
 #define __CURVE_H__
 
-#include "TimeProcessLib.h"
+#include "TimePluginLib.h"
 
 /**	The Curve class allows to ...
  

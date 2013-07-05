@@ -102,28 +102,11 @@ void Scenario::compileTimeProcess(TTTimeProcessPtr aTimeProcess, TransitionPtr* 
     Arc*            arcFromPreviousTransitionToCurrentPlace;
     Arc*            arcFromCurrentPlaceToTheEnd;
     
-    TTTimeEventPtr  startEvent, endEvent;
-    TTUInt32        startDate, endDate;
-    TTValue         v;
-    
-    // get start event
-    aTimeProcess->getAttributeValue(TTSymbol("startEvent"), v);
-    startEvent = TTTimeEventPtr(TTObjectBasePtr(v[0]));
-    
-    // get end event
-    aTimeProcess->getAttributeValue(TTSymbol("endEvent"), v);
-    endEvent = TTTimeEventPtr(TTObjectBasePtr(v[0]));
-    
-    // get start event date
-    aTimeProcess->getAttributeValue(TTSymbol("startDate"), v);
-    startDate = TTUInt32(v[0]);
-    
-    // get end event date
-    aTimeProcess->getAttributeValue(TTSymbol("endDate"), v);
-    endDate = TTUInt32(v[0]);
-    
+    TTTimeEventPtr  startEvent = TTTimeEventPtr(aTimeProcess->mStartEvent);
+    TTTimeEventPtr  endEvent = TTTimeEventPtr(aTimeProcess->mEndEvent);
+
     // if the date to start is in the middle of a time process
-    if (startDate < timeOffset && endDate > timeOffset)
+    if (startEvent->mDate < timeOffset && endEvent->mDate > timeOffset)
         
 // TODO : prepare the scheduler to start in the middle of his process
 //      aTimeProcess->setTimeOffsetInMs(timeOffset - startDate);
@@ -134,9 +117,9 @@ void Scenario::compileTimeProcess(TTTimeProcessPtr aTimeProcess, TransitionPtr* 
     currentPlace = mExecutionGraph->createPlace();
     startTransition = currentTransition;
     
-    compileTimeEvent(startEvent, startDate, *previousTransition, currentTransition, currentPlace);
+    compileTimeEvent(startEvent, startEvent->mDate, *previousTransition, currentTransition, currentPlace);
     
-    mTransitionsMap[startEvent] = currentTransition;
+    mTransitionsMap[aTimeProcess->mStartEvent] = currentTransition;
     *previousTransition = currentTransition;
     
     // compile intermediate events
@@ -158,9 +141,9 @@ void Scenario::compileTimeProcess(TTTimeProcessPtr aTimeProcess, TransitionPtr* 
     currentPlace = mExecutionGraph->createPlace();
     lastTransition = currentTransition;
     
-    compileTimeEvent(endEvent, endDate - startDate, *previousTransition, currentTransition, currentPlace);  // normally it is not the startDate but the last intermediate event date
+    compileTimeEvent(endEvent, endEvent->mDate - startEvent->mDate, *previousTransition, currentTransition, currentPlace);  // normally it is not the startDate but the last intermediate event date
     
-    mTransitionsMap[endEvent] = currentTransition;
+    mTransitionsMap[aTimeProcess->mEndEvent] = currentTransition;
     *previousTransition = currentTransition;
     
 /* IS THIS RELATIVE TO COMPILATION OF SUB SCENARIO ?
@@ -227,34 +210,18 @@ void Scenario::compileInterval(TTTimeProcessPtr aTimeProcess)
     
     ExtendedInt             intervalValue;
     
-    TTTimeEventPtr            startEvent, endEvent;
-    TTUInt32                startDate, endDate;
-    TTValue                 v;
-
+    TTTimeEventPtr  startEvent = TTTimeEventPtr(aTimeProcess->mStartEvent);
+    TTTimeEventPtr  endEvent = TTTimeEventPtr(aTimeProcess->mEndEvent);
+    
 // CB now unused    
 //  GraphObjectMapIterator  mergeIterator; 
     
-    // get start event
-    aTimeProcess->getAttributeValue(TTSymbol("startEvent"), v);
-    startEvent = TTTimeEventPtr(TTObjectBasePtr(v[0]));
-    
-    // get end event
-    aTimeProcess->getAttributeValue(TTSymbol("endEvent"), v);
-    endEvent = TTTimeEventPtr(TTObjectBasePtr(v[0]));
-    
-    // get start event date
-    aTimeProcess->getAttributeValue(TTSymbol("startEventDate"), v);
-    startDate = TTUInt32(v[0]);
-    
-    // get end event date
-    aTimeProcess->getAttributeValue(TTSymbol("endEventDate"), v);
-    endDate = TTUInt32(v[0]);
-    
+
 // note : this is useless because it is checked during edition
 //  if (startEvent->getContainingBoxId() != endEvent->getContainingBoxId()) {
     
     // retreive start transition
-    startTransition = TransitionPtr(mTransitionsMap[startEvent]);
+    startTransition = TransitionPtr(mTransitionsMap[aTimeProcess->mStartEvent]);
     
 /* CB Now stored directly in mTransitionsMap
     mergeIterator = mMergedTransitionsMap.find(startTransition);
@@ -264,7 +231,7 @@ void Scenario::compileInterval(TTTimeProcessPtr aTimeProcess)
 */
     
     // retreive end transition
-    endTransition = TransitionPtr(mTransitionsMap[endEvent]);
+    endTransition = TransitionPtr(mTransitionsMap[aTimeProcess->mEndEvent]);
     
 /* CB Now stored directly in mTransitionsMap
     mergeIterator = mMergedTransitionsMap.find(endTransition);
@@ -274,10 +241,10 @@ void Scenario::compileInterval(TTTimeProcessPtr aTimeProcess)
 */
     
     // if the interval have no duration
-    if (endDate - startDate <= 0) {
+    if (endEvent->mDate - startEvent->mDate <= 0) {
         
         startTransition->merge(endTransition);
-        mTransitionsMap[endEvent] = startTransition;
+        mTransitionsMap[aTimeProcess->mEndEvent] = startTransition;
         
 // CB Now stored directly in mTransitionsMap
 //      mMergedTransitionsMap[endTransition] = startTransition;
@@ -286,7 +253,7 @@ void Scenario::compileInterval(TTTimeProcessPtr aTimeProcess)
         
         currentPlace = mExecutionGraph->createPlace();
         
-        intervalValue.setAsInteger(endDate - startDate);
+        intervalValue.setAsInteger(endEvent->mDate - startEvent->mDate);
         
         arcFromstartTransitionToCurrentPlace = mExecutionGraph->createArc(startTransition, currentPlace);
         
@@ -343,20 +310,13 @@ void Scenario::compileInteractiveEvent(TTTimeEventPtr aTimeEvent, TTUInt32 timeO
     Arc*          currentArc;
     
     TTBoolean     active;
-    TTUInt32      date;
-    TTUInt32      durationMin, durationMax;
-    TTValue       v;
     
     GraphObjectMapIterator  mergeIterator;
     
     // TODO : get event active state
     active = YES;
     
-    // get event date
-    aTimeEvent->getAttributeValue(TTSymbol("date"), v);
-    date = TTUInt32(v[0]);
-    
-    if (active && date >= timeOffset) {
+    if (active && aTimeEvent->mDate >= timeOffset) {
         
         // retreive transition
         currentTransition = TransitionPtr(mTransitionsMap[aTimeEvent]);
@@ -418,19 +378,11 @@ void Scenario::compileInteractiveEvent(TTTimeEventPtr aTimeEvent, TTUInt32 timeO
                 
                 TTTimeProcessPtr aTimeProcess = TTTimeProcessPtr(mArcsMap[currentArc]);
                 
-                // get start event date
-                aTimeProcess->getAttributeValue(TTSymbol("durationMin"), v);
-                durationMin = TTUInt32(v[0]);
+                if (aTimeProcess->mDurationMin)
+                    minBound.setAsInteger(aTimeProcess->mDurationMin);
                 
-                // get end event date
-                aTimeProcess->getAttributeValue(TTSymbol("durationMax"), v);
-                durationMax = TTUInt32(v[0]);
-                
-                if (durationMin)
-                    minBound.setAsInteger(durationMin);
-                
-                if (durationMax)
-                    maxBound.setAsInteger(durationMax);
+                if (aTimeProcess->mDurationMax)
+                    maxBound.setAsInteger(aTimeProcess->mDurationMax);
             }
             
             currentArc->changeRelativeTime(minBound, maxBound);
@@ -490,7 +442,7 @@ void Scenario::cleanGraph(TransitionPtr endTransition)
 */
 
 #ifdef NEW_GRAPH
-// Trying to rewrite PetriNet::makeOneStep method with the TimeEventLib and TimeProcessLib formalism
+// Trying to rewrite PetriNet::makeOneStep method with the TimeEventLib and TimePluginLib formalism
 
 /* About TimeEvent :
     

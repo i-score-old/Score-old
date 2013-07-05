@@ -11,9 +11,9 @@
 		4617A81016ECF93D007A6E44 /* Scenario.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Scenario.cpp; sourceTree = "<group>"; };
 		4687769F17258C960096DA35 /* ScenarioSolver.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScenarioSolver.h; sourceTree = "<group>"; };
 		468776A017258DFB0096DA35 /* ScenarioSolver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ScenarioSolver.cpp; sourceTree = "<group>"; };
+		468EBBFC1784987D008BE2AC /* TimePluginLib.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TimePluginLib.cpp; path = ../../extensions/TimePluginLib.cpp; sourceTree = "<group>"; };
+		468EBBFD1784987D008BE2AC /* TimePluginLib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TimePluginLib.h; path = ../../extensions/TimePluginLib.h; sourceTree = "<group>"; };
 		46AD407017302EA400DE5F1D /* ScenarioGraph.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ScenarioGraph.cpp; sourceTree = "<group>"; };
-		46B55549177B29C000F50D89 /* TimeProcessLib.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TimeProcessLib.cpp; path = ../../extensions/TimeProcessLib.cpp; sourceTree = "<group>"; };
-		46B5554A177B29C000F50D89 /* TimeProcessLib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TimeProcessLib.h; path = ../../extensions/TimeProcessLib.h; sourceTree = "<group>"; };
 		46B5554B177B29E300F50D89 /* Scenario.yml */ = {isa = PBXFileReference; lastKnownFileType = text; path = Scenario.yml; sourceTree = "<group>"; };
 		46CB6ADE172F1A360082755B /* ScenarioGraph.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScenarioGraph.h; sourceTree = "<group>"; };
 		46F4622A16F13E9B0092840F /* Arc.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Arc.cpp; sourceTree = "<group>"; };
@@ -93,7 +93,7 @@
 			isa = PBXGroup;
 			children = (
 				46B5554B177B29E300F50D89 /* Scenario.yml */,
-				4617A81116ECF951007A6E44 /* TimeProcessLib */,
+				4617A81116ECF951007A6E44 /* TimePluginLib */,
 				4617A80D16ECF937007A6E44 /* includes */,
 				4617A80F16ECF93D007A6E44 /* source */,
 			);
@@ -122,13 +122,13 @@
 			path = source;
 			sourceTree = SOURCE_ROOT;
 		};
-		4617A81116ECF951007A6E44 /* TimeProcessLib */ = {
+		4617A81116ECF951007A6E44 /* TimePluginLib */ = {
 			isa = PBXGroup;
 			children = (
-				46B5554A177B29C000F50D89 /* TimeProcessLib.h */,
-				46B55549177B29C000F50D89 /* TimeProcessLib.cpp */,
+				468EBBFD1784987D008BE2AC /* TimePluginLib.h */,
+				468EBBFC1784987D008BE2AC /* TimePluginLib.cpp */,
 			);
-			name = TimeProcessLib;
+			name = TimePluginLib;
 			path = ../../library/TimeProcessLib;
 			sourceTree = "<group>";
 		};

@@ -21,7 +21,7 @@ extern "C" TT_EXTENSION_EXPORT TTErr TTLoadJamomaExtension_Interval(void)
 
 TIME_PROCESS_CONSTRUCTOR
 {
-    TIME_PROCESS_INITIALIZE
+    TIME_PLUGIN_INITIALIZE
     
 	TT_ASSERT("Correct number of args to create Interval", arguments.size() == 0);
 }

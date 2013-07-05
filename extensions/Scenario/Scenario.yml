@@ -1,8 +1,8 @@
 #defines:
-#  - TIME_PROCESS_DEBUG
+#  - TIME_PLUGIN_DEBUG
 
 sources:
-  - ../TimeProcessLib.cpp	
+  - ../TimePluginLib.cpp	
   
   - source/Gecode/customSpace.cpp
   - source/Gecode/integerVariable.cpp

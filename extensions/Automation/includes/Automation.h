@@ -6,7 +6,7 @@
  *
  * @details The Automation class allows to ... @n@n
  *
- * @see TimeProcessLib, TTTimeProcess
+ * @see TimePluginLib, TTTimeProcess
  *
  * @authors Théo de la Hogue & Clément Bossut
  *
@@ -18,12 +18,12 @@
 #ifndef __AUTOMATION_H__
 #define __AUTOMATION_H__
 
-#include "TimeProcessLib.h"
+#include "TimePluginLib.h"
 #include "Curve.h"
 
 /**	The Automation class allows to ...
  
- @see TimeProcessLib, TTTimeProcess
+ @see TimePluginLib, TTTimeProcess
  */
 class Automation : public TimeProcess
 {
