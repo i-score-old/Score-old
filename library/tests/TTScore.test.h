@@ -18,11 +18,11 @@
 #ifndef __TT_SCORETEST_H__
 #define __TT_SCORETEST_H__
 
-#include "TTDataObjectBase.h"
+#include "TTObjectBase.h"
 #include "TTUnitTest.h"
 
 /**	Provide unit tests for Score framework */
-class TTScoreTest : public TTDataObjectBase {
+class TTScoreTest : public TTObjectBase {
 	TTCLASS_SETUP(TTScoreTest)
 		
 	virtual TTErr test(TTValue& returnedTestInfo);

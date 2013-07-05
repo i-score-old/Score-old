@@ -21,16 +21,21 @@
 
 /****************************************************************************************************/
 
-TT_OBJECT_CONSTRUCTOR,
-mScenario(NULL),
+TT_BASE_OBJECT_CONSTRUCTOR,
+mContainer(NULL),
 mDate(0),
 mState(NULL),
 mInteractive(NO),
 mReady(YES)
 {
-    TT_ASSERT("Correct number of args to create TTTimeEvent", arguments.size() == 0);
+    TT_ASSERT("Correct number of args to create TTTimeEvent", arguments.size() == 1 || arguments.size() == 2);
     
-    addAttribute(Scenario, kTypeObject);
+    if (arguments.size() >= 1)
+        mDate = arguments[0];
+
+    if (arguments.size() == 2)
+        mContainer = arguments[1];
+
    	addAttributeWithSetter(Date, kTypeUInt32);
     addAttribute(State, kTypeObject);
     addAttributeWithSetter(Interactive, kTypeBoolean);
@@ -46,12 +51,6 @@ mReady(YES)
 	addMessageWithArguments(ReadFromXml);
 	addMessageProperty(ReadFromXml, hidden, YES);
 	
-	// needed to be handled by a TTTextHandler
-	addMessageWithArguments(WriteAsText);
-	addMessageProperty(WriteAsText, hidden, YES);
-	addMessageWithArguments(ReadFromText);
-	addMessageProperty(ReadFromText, hidden, YES);
-    
     // cache some messages and attributes for high speed notification feedbacks
     this->findAttribute(TTSymbol("date"), &dateAttribute);
     this->findAttribute(TTSymbol("ready"), &readyAttribute);
@@ -85,17 +84,6 @@ mReady(YES)
 
 TTTimeEvent::~TTTimeEvent()
 {
-    /* if the time event is managed by a scenario
-    if (mScenario) {
-        
-        v = TTValue((TTObjectBasePtr)this);
-        
-        // remove the time event from the scenario
-        //(even if it can be done by the creator but it is safe to remove our self)
-        mScenario->sendMessage(TTSymbol("TTTimeEventRemove"), v, kTTValNONE);
-    }
-    */
-    
     if (mState) {
         TTObjectBaseRelease(TTObjectBaseHandle(&mState));
         mState = NULL;
@@ -124,8 +112,14 @@ TTErr TTTimeEvent::setInteractive(const TTValue& value)
     // set the interactive value
     mInteractive = value[0];
     
-    // TODO : if scenario, tell the scenario the event is becoming (or not) interactive
-    
+    // tell the container the event is becoming (or not) interactive
+    if (mContainer) {
+        
+        TTValue v = TTObjectBasePtr(this);
+        v.append(mInteractive);
+        return mContainer->sendMessage(TTSymbol("TimeEventInteractive"), v, kTTValNONE);
+    }
+
     return kTTErrNone;
 }
 
@@ -150,15 +144,15 @@ TTErr TTTimeEvent::Trigger()
     if (!mInteractive)
         return kTTErrGeneric;
     
-    // inside a scenario
-    if (mScenario)
+    // use container to make the event happen
+    if (mContainer) {
         
-        // use scenario to make the event happen
-        return mScenario->sendMessage(TTSymbol("TimeEventTrigger"), TTObjectBasePtr(this), kTTValNONE);
+        TTValue v = TTObjectBasePtr(this);
+        return mContainer->sendMessage(TTSymbol("TimeEventTrigger"), v, kTTValNONE);
+    }
     
+    // otherwise make it happens now
     else
-        
-        // otherwise make it happens now
         return Happen();
 }
 
@@ -230,32 +224,3 @@ TTErr TTTimeEvent::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 	
 	return kTTErrGeneric;
 }
-
-TTErr TTTimeEvent::WriteAsText(const TTValue& inputValue, TTValue& outputValue)
-{
-	TTTextHandlerPtr	aTextHandler;
-	
-	aTextHandler = TTTextHandlerPtr((TTObjectBasePtr)inputValue[0]);
-	
-	// TODO : write the time event attributes
-	
-	return kTTErrGeneric;
-}
-
-TTErr TTTimeEvent::ReadFromText(const TTValue& inputValue, TTValue& outputValue)
-{
-	TTTextHandlerPtr aTextHandler;
-	TTValue	v;
-	
-	aTextHandler = TTTextHandlerPtr((TTObjectBasePtr)inputValue[0]);
-	
-    // TODO : parse the time event attributes
-	
-	return kTTErrGeneric;
-}
-
-#if 0
-#pragma mark -
-#pragma mark Some Methods
-#endif
-

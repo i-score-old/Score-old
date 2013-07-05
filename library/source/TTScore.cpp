@@ -14,6 +14,9 @@
  */
 
 #include "TTScore.h"
+#include "TTTimeEvent.h"
+#include "TTTimeProcess.h"
+#include "TTTimeContainer.h"
 
 // Statics and Globals
 static bool TTScoreHasInitialized = false;
@@ -32,6 +35,7 @@ void TTScoreInit()
 		// register classes -- both internal and external
         TTTimeEvent::registerClass();
         TTTimeProcess::registerClass();
+        TTTimeContainer::registerClass();
         
 		TTScoreTest::registerClass();
 

@@ -26,12 +26,14 @@
  
  @see TTTimeProcess
  */
-class TTSCORE_EXPORT TTTimeEvent : public TTDataObjectBase {
+class TTSCORE_EXPORT TTTimeEvent : public TTObjectBase {
     
     TTCLASS_SETUP(TTTimeEvent)
     
-    TTObjectBasePtr                 mScenario;                      ///< the parent scenario which constrains the time event
+    TTObjectBasePtr                 mContainer;                     ///< the container which handles the time event
     
+public :
+
     TTUInt32                        mDate;                          ///< the date of the event
     
     TTObjectBasePtr                 mState;                         ///< a state handled by the event
@@ -39,6 +41,8 @@ class TTSCORE_EXPORT TTTimeEvent : public TTDataObjectBase {
     TTBoolean                       mInteractive;                   ///< is the time event interactive ?
     
     TTBoolean                       mReady;                         ///< is the time event ready to happen ?
+ 
+private :
     
     TTAttributePtr                  dateAttribute;                  ///< cache date attribute for observer notification
     TTAttributePtr                  readyAttribute;                 ///< cache active attribute for observer notification
@@ -73,13 +77,6 @@ class TTSCORE_EXPORT TTTimeEvent : public TTDataObjectBase {
      @return                .. */
 	TTErr           WriteAsXml(const TTValue& inputValue, TTValue& outputValue);
 	TTErr           ReadFromXml(const TTValue& inputValue, TTValue& outputValue);
-	
-	/**  needed to be handled by a TTTextHandler
-     @param	inputValue      ..
-     @param	outputValue     ..
-     @return                .. */
-	TTErr           WriteAsText(const TTValue& inputValue, TTValue& outputValue);
-	TTErr           ReadFromText(const TTValue& inputValue, TTValue& outputValue);
 
     /** Get a line value of the state for an address
         this method eases the access of one state value
@@ -91,7 +88,7 @@ class TTSCORE_EXPORT TTTimeEvent : public TTDataObjectBase {
 
 typedef TTTimeEvent* TTTimeEventPtr;
 
-/** A type to define an unordered map to store and retreive a value relative to a TTTimeEventPtr */
+/** Define an unordered map to store and retreive a value relative to a TTTimeEventPtr */
 #ifdef TT_PLATFORM_WIN
     #include <hash_map>
     using namespace stdext;	// Visual Studio 2008 puts the hash_map in this namespace

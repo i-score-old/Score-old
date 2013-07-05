@@ -50,9 +50,6 @@
 
 #include "TTScoreSymbolCache.h"
 
-#include "TTTimeEvent.h"
-#include "TTTimeProcess.h"
-
 #include "TTScore.test.h"
 
 // Prototypes

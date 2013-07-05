@@ -19,6 +19,7 @@
 #define __TT_TIME_PROCESS_H__
 
 #include "TTScore.h"
+#include "TTTimeEvent.h"
 
 /**	a class to define a process
  
@@ -26,13 +27,15 @@
  
  @see TTTimeEvent
  */
-class TTSCORE_EXPORT TTTimeProcess : public TTDataObjectBase {
+class TTSCORE_EXPORT TTTimeProcess : public TTObjectBase {
     
     TTCLASS_SETUP(TTTimeProcess)
     
-protected:
+    friend TTTimeEvent;
+
+    TTObjectBasePtr                 mContainer;                     ///< the container which handles the time process
     
-    TTObjectBasePtr                 mScenario;                      ///< the parent scenario which constrains the time process
+public :
     
     TTUInt32                        mDurationMin;                   ///< the minimal duration of the time process
     TTUInt32                        mDurationMax;                   ///< the maximal duration of the time process
@@ -40,20 +43,17 @@ protected:
     TTBoolean                       mActive;                        ///< is the time process active ?
     
     TTObjectBasePtr                 mStartEvent;                    ///< the event object which handles the time process execution start
-    TTObjectBasePtr                 mStartEventCallback;            ///< a callback to subscribe for start event notification
-    
     TTList                          mIntermediateEvents;            ///< the list of all intermediate events
-    
     TTObjectBasePtr                 mEndEvent;                      ///< the event object which handles the time process execution stop
-    TTObjectBasePtr                 mEndEventCallback;              ///< a callback to subscribe for end event notification
-    
+   
     TTObjectBasePtr                 mScheduler;                     ///< the scheduler object which handles the time process execution
     
-private:
+private :
+    
+    TTObjectBasePtr                 mStartEventCallback;            ///< a callback to subscribe for start event notification
+    TTObjectBasePtr                 mEndEventCallback;              ///< a callback to subscribe for end event notification
     
     TTAttributePtr                  activeAttribute;                ///< cache active attribute for observer notification
-    
-public:
     
     /** Specific process method on start
      @return                an error code returned by the process end method */
@@ -75,20 +75,6 @@ public:
      @return                .. */
 	virtual TTErr	WriteAsXml(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
 	virtual TTErr	ReadFromXml(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
-	
-	/**  needed to be handled by a TTTextHandler
-     @param	inputValue      ..
-     @param	outputValue     ..
-     @return                .. */
-	virtual TTErr	WriteAsText(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
-	virtual TTErr	ReadFromText(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
-
-private :
-    
-    /** set the scenario object to add the time process to it
-     @param	value           a new scenario to be part of
-     @return                kTTErrNone */
-    TTErr           setScenario(const TTValue& value);
     
     /** get the time process rigidity
      @param	value           rigidity state
@@ -122,6 +108,18 @@ private :
      @return                kTTErrNone */
     TTErr           setStartDate(const TTValue& value);
     
+    /** get start event interactive value
+        this method eases the getting of the start event interactive value
+     @param	value           the returned interactive value
+     @return                an error code if the event doesn't exist */
+    TTErr           getStartInteractive(TTValue& value);
+    
+    /** set start event interactive or not
+        this method eases the setting of the start event interactive value
+     @param	value           boolean
+     @return                an error code if the event doesn't exist */
+    TTErr           setStartInteractive(const TTValue& value);
+    
     /** get the time process end date
         this method eases the getting of the end event date
      @param	value           the returned end date
@@ -134,6 +132,18 @@ private :
      @return                kTTErrNone */
     TTErr           setEndDate(const TTValue& value);
     
+    /** get end event interactive value
+        this method eases the getting of the end event interactive value
+     @param	value           the returned interactive value
+     @return                an error code if the event doesn't exist */
+    TTErr           getEndInteractive(TTValue& value);
+    
+    /** set end event interactive or not
+        this method eases the setting of the end event interactive value
+     @param	value           boolean
+     @return                an error code if the event doesn't exist */
+    TTErr           setEndInteractive(const TTValue& value);
+    
     /** get the time process duration
      @param	value           the returned duration
      @return                kTTErrNone */
@@ -144,48 +154,10 @@ private :
      @return                kTTErrNone */
     TTErr           setActive(const TTValue& value);
     
-    /** Set the start event of the time process
-     @param	value           a date
-     @return                an error code if the date is wrong */
-    TTErr           setStartEvent(const TTValue& value);
-    
     /** Get intermediate events of the time process
      @param	value           returned events
      @return                kTTErrNone */
     TTErr           getIntermediateEvents(TTValue& value);
-    
-    /** Set the end event of the time process
-     @param	value           a date
-     @return                an error code if the date is wrong */
-    TTErr           setEndEvent(const TTValue& value);
-    
-    /** Create a start event for the time process
-     @param	value           a date (optional)
-     @return                an error code if the event can't be created */
-    TTErr           StartEventCreate(const TTValue& value);
-    
-    /** Set start event interactive or not.
-     @param	value           boolean
-     @return                an error code if the event can't be replaced */
-    TTErr           StartEventInteractive(const TTValue& value);
-    
-    /** Release the start event of the time process
-     @return                an error code if the event can't be destroyed */
-    TTErr           StartEventRelease();
-    
-    /** Create a end event for the time process
-     @param	value           a date (optional)
-     @return                an error code if the event can't be created */
-    TTErr           EndEventCreate(const TTValue& value);
-    
-    /** Set end event interactive or not
-     @param	value           boolean
-     @return                an error code if the event can't be replaced */
-    TTErr           EndEventInteractive(const TTValue& value);
-    
-    /** Release the end event of the time process
-     @return                an error code if the event can't be destroyed */
-    TTErr           EndEventRelease();
     
     /** Move the time process
      this method eases the setting of the start and end event dates
@@ -219,10 +191,16 @@ private :
      @return                an error code if the resume fails */
     TTErr           Resume();
     
+    /** Release the start and end events
+        this method is usefull to not have to store events outside
+     @return                an error code if the resume fails */
+    TTErr           ReleaseEvents();
+    
     friend TTErr TTSCORE_EXPORT TTTimeProcessStartEventHappenCallback(TTPtr baton, TTValue& data);
     friend TTErr TTSCORE_EXPORT TTTimeProcessEndEventHappenCallback(TTPtr baton, TTValue& data);
     friend void TTSCORE_EXPORT TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression);
 };
+
 typedef TTTimeProcess* TTTimeProcessPtr;
 
 /** The start event happen callback to start the time process execution
@@ -243,10 +221,20 @@ TTErr TTSCORE_EXPORT TTTimeProcessEndEventHappenCallback(TTPtr baton, TTValue& d
  @return					an error code */
 void TTSCORE_EXPORT TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression);
 
+
+/** Define some macros to ease the access of events attributes */
+#define mStartDate TTTimeEventPtr(mStartEvent)->mDate
+#define mStartInteractive TTTimeEventPtr(mStartEvent)->mInteractive
+
+#define mEndDate TTTimeEventPtr(mEndEvent)->mDate
+#define mEndInteractive TTTimeEventPtr(mEndEvent)->mInteractive
+
+#define mDuration mEndDate - mStartDate
+
 /** Define callback function to get progression back from the scheduler */
 typedef void (*TTTimeProcessProgressionCallback)(TTPtr, TTFloat64);
 
-/** A type to define an unordered map to store and retreive a value relative to a TTTimeProcessPtr */
+/** Define an unordered map to store and retreive a value relative to a TTTimeProcessPtr */
 #ifdef TT_PLATFORM_WIN
     #include <hash_map>
     using namespace stdext;	// Visual Studio 2008 puts the hash_map in this namespace
