@@ -9,6 +9,21 @@ projectNameParts = glibdir.split('/')
 projectName = projectNameParts.last;
 ENV['JAMOMAPROJECT'] = projectName
 
+puts "pre-build..."
+Dir.chdir "#{glibdir}/support"
+load "jamomalib.rb"
+
+if  win32?
+    
+elsif mac?
+    
+    # Clean /usr/local/jamoma folder
+    `rm /usr/local/jamoma/extensions/*.*`
+    `rm /usr/local/jamoma/includes/*.*`
+    `rm /usr/local/jamoma/lib/*.*`
+    
+end
+
 Dir.chdir "#{glibdir}/support"
 load "build.rb"
 
@@ -40,7 +55,7 @@ elsif mac?
     # Copy Score headers to include them into other application
     # (except the includes folder because it is done by the support/build.rb script)
     `cp "#{glibdir}"/library/tests/*.h /usr/local/jamoma/includes`
-    `cp "#{glibdir}"/extensions/TimeProcessLib.h /usr/local/jamoma/includes`
+    `cp "#{glibdir}"/extensions/TimePluginLib.h /usr/local/jamoma/includes`
     
     # Create alias
     `sudo ln -s /usr/local/jamoma/extensions/Automation.ttdylib /usr/local/lib/Automation.ttdylib`
