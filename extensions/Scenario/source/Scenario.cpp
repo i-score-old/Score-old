@@ -33,7 +33,7 @@ mExecutionGraph(NULL)
 {
     TIME_PLUGIN_INITIALIZE
     
-	TT_ASSERT("Correct number of args to create Scenario", arguments.size() == 0);
+	TT_ASSERT("Correct number of args to create Scenario", arguments.size() == 0 || arguments.size() == 2);
     
     addMessage(Compile);
     
@@ -44,6 +44,16 @@ mExecutionGraph(NULL)
     plusInfinity = ExtendedInt(PLUS_INFINITY, 0);
     minusInfinity = ExtendedInt(MINUS_INFINITY, 0);
     integer0 = ExtendedInt(INTEGER, 0);
+    
+    // it is possible to pass 2 events for the root scenario (which don't need a container by definition)
+    if (arguments.size() == 2) {
+        
+        if (arguments[0].type() == kTypeObject && arguments[1].type() == kTypeObject) {
+            
+            this->setStartEvent(TTTimeEventPtr(TTObjectBasePtr(arguments[0])));
+            this->setEndEvent(TTTimeEventPtr(TTObjectBasePtr(arguments[1])));
+        }
+    }
 }
 
 Scenario::~Scenario()
@@ -96,12 +106,6 @@ TTErr Scenario::ProcessStart()
 
 TTErr Scenario::ProcessEnd()
 {
-    // Trigger the end event
-    mEndEvent->sendMessage(TTSymbol("Trigger"), kTTValNONE, kTTValNONE);
-    
-    // Notify the end event subscribers
-    mEndEvent->sendMessage(TTSymbol("Notify"));
-    
     return kTTErrNone;
 }
 
@@ -201,7 +205,7 @@ TTErr Scenario::TimeEventCreate(const TTValue& inputValue, TTValue& outputValue)
 TTErr Scenario::TimeEventRelease(const TTValue& inputValue, TTValue& outputValue)
 {
     TTTimeEventPtr          aTimeEvent;
-    TTValue                 aCacheElement;
+    TTValue                 v, aCacheElement;
     TTBoolean               found;
     SolverVariablePtr       variable;
     SolverObjectMapIterator it;
@@ -213,7 +217,7 @@ TTErr Scenario::TimeEventRelease(const TTValue& inputValue, TTValue& outputValue
             aTimeEvent = TTTimeEventPtr((TTObjectBasePtr)inputValue[0]);
             
             // try to find the time event
-            mTimeEventList.find(&ScenarioFindTimeEvent, (TTPtr)aTimeEvent, aCacheElement);
+            mTimeEventList.find(&TTTimeContainerFindTimeEvent, (TTPtr)aTimeEvent, aCacheElement);
             
             // couldn't find the same time event in the scenario
             if (aCacheElement == kTTValNONE)
@@ -221,44 +225,50 @@ TTErr Scenario::TimeEventRelease(const TTValue& inputValue, TTValue& outputValue
             
             else {
                 
-                // remove time event object and observers
-                mTimeEventList.remove(aCacheElement);
+                // if the time event is used by a time process it can't be released
+                mTimeProcessList.find(&TTTimeContainerFindTimeProcessWithTimeEvent, (TTPtr)aTimeEvent, v);
                 
-                // delete all observers
-                deleteTimeEventCacheElement(aCacheElement);
-                
-                // retreive solver variable relative to each event
-                it = mVariablesMap.find(aTimeEvent);
-                variable = SolverVariablePtr(it->second);
-                
-                // remove variable from the solver
-                // if it is still not used in a constraint
-                found = NO;
-                for (it = mConstraintsMap.begin() ; it != mConstraintsMap.end() ; it++) {
+                if (v == kTTValNONE) {
                     
-                    found = SolverConstraintPtr(it->second)->startVariable == variable || SolverConstraintPtr(it->second)->endVariable == variable;
-                    if (found) break;
-                }
-                
-                if (!found) {
+                    // remove time event object and observers
+                    mTimeEventList.remove(aCacheElement);
                     
-                    // if it is still not used in a relation
-                    for (it = mRelationsMap.begin() ; it != mRelationsMap.end() ; it++) {
+                    // delete all observers
+                    deleteTimeEventCacheElement(aCacheElement);
+                    
+                    // retreive solver variable relative to each event
+                    it = mVariablesMap.find(aTimeEvent);
+                    variable = SolverVariablePtr(it->second);
+                    
+                    // remove variable from the solver
+                    // if it is still not used in a constraint
+                    found = NO;
+                    for (it = mConstraintsMap.begin() ; it != mConstraintsMap.end() ; it++) {
                         
-                        found = SolverRelationPtr(it->second)->startVariable == variable || SolverRelationPtr(it->second)->endVariable == variable;
+                        found = SolverConstraintPtr(it->second)->startVariable == variable || SolverConstraintPtr(it->second)->endVariable == variable;
                         if (found) break;
                     }
+                    
+                    if (!found) {
+                        
+                        // if it is still not used in a relation
+                        for (it = mRelationsMap.begin() ; it != mRelationsMap.end() ; it++) {
+                            
+                            found = SolverRelationPtr(it->second)->startVariable == variable || SolverRelationPtr(it->second)->endVariable == variable;
+                            if (found) break;
+                        }
+                    }
+                    
+                    if (!found) {
+                        mVariablesMap.erase(aTimeEvent);
+                        delete variable;
+                    }
+                    
+                    // release the time event
+                    TTObjectBaseRelease(TTObjectBaseHandle(&aTimeEvent));
+                    
+                    return kTTErrNone;
                 }
-                
-                if (!found) {
-                    mVariablesMap.erase(aTimeEvent);
-                    delete variable;
-                }
-                
-                // release the time event
-                TTObjectBaseRelease(TTObjectBaseHandle(&aTimeEvent));
-                
-                return kTTErrNone;
             }
         }
     }
@@ -325,7 +335,7 @@ TTErr Scenario::TimeEventInteractive(const TTValue& inputValue, TTValue& outputV
             aTimeEvent = TTTimeEventPtr((TTObjectBasePtr)inputValue[0]);
             
             // try to find the time event
-            mTimeEventList.find(&ScenarioFindTimeEvent, (TTPtr)aTimeEvent, aCacheElement);
+            mTimeEventList.find(&TTTimeContainerFindTimeEvent, (TTPtr)aTimeEvent, aCacheElement);
             
             // couldn't find the former time event in the scenario
             if (aCacheElement == kTTValNONE)
@@ -337,10 +347,10 @@ TTErr Scenario::TimeEventInteractive(const TTValue& inputValue, TTValue& outputV
                 aTimeProcess = TTTimeProcessPtr(TTObjectBasePtr(mTimeProcessList.current()[0]));
                 
                 // if the time event is the time process end event
-                if (aTimeEvent == aTimeProcess->mEndEvent) {
+                if (aTimeEvent == getTimeProcessEndEvent(aTimeProcess)) {
                     
                     // a time process with an interactive end event cannot be rigid
-                    v = TTBoolean(!aTimeEvent->mInteractive);
+                    v = TTBoolean(!isTimeEventInteractive(aTimeEvent));
                     aTimeProcess->setAttributeValue(TTSymbol("rigid"), v);
                 }
             }
@@ -397,7 +407,7 @@ TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue
             aNewTimeEvent = TTTimeEventPtr((TTObjectBasePtr)inputValue[1]);
             
             // try to find the former time event
-            mTimeEventList.find(&ScenarioFindTimeEvent, (TTPtr)aFormerTimeEvent, aCacheElement);
+            mTimeEventList.find(&TTTimeContainerFindTimeEvent, (TTPtr)aFormerTimeEvent, aCacheElement);
             
             // couldn't find the former time event in the scenario
             if (aCacheElement == kTTValNONE)
@@ -423,18 +433,18 @@ TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue
                 
                 aTimeProcess = TTTimeProcessPtr(TTObjectBasePtr(mTimeProcessList.current()[0]));
                 
-                if (aTimeProcess->mStartEvent == aFormerTimeEvent) {
+                if (getTimeProcessStartEvent(aTimeProcess) == aFormerTimeEvent) {
                     
-                    aTimeProcess->mStartEvent = aNewTimeEvent;
+                    setTimeProcessStartEvent(aTimeProcess, aNewTimeEvent);
                     continue;
                 }
                 
-                if (aTimeProcess->mEndEvent == aFormerTimeEvent) {
+                if (getTimeProcessEndEvent(aTimeProcess) == aFormerTimeEvent) {
                     
-                    aTimeProcess->mEndEvent = aNewTimeEvent;
+                    setTimeProcessEndEvent(aTimeProcess, aNewTimeEvent);
                     
                     // a time process with an interactive end event cannot be rigid
-                    v = TTBoolean(!aNewTimeEvent->mInteractive);
+                    v = TTBoolean(!isTimeEventInteractive(aNewTimeEvent));
                     aTimeProcess->setAttributeValue(TTSymbol("rigid"), v);
                 }
             }
@@ -473,14 +483,16 @@ TTErr Scenario::TimeProcessCreate(const TTValue& inputValue, TTValue& outputValu
         
         if (inputValue[0].type() == kTypeSymbol && inputValue[1].type() == kTypeObject && inputValue[2].type() == kTypeObject) {
             
-            // prepare argument (start event, end event, container)
-            args = TTValue(inputValue[1]);
-            args.append(inputValue[2]);
-            args.append(TTObjectBasePtr(this));
+            // prepare argument (container)
+            args = TTObjectBasePtr(this);
             
             // create a time process of the given type
             if (TTObjectBaseInstantiate(inputValue[0], TTObjectBaseHandle(&aTimeProcess), args))
                 return kTTErrGeneric;
+            
+            // set the start and end events
+            setTimeProcessStartEvent(aTimeProcess, TTTimeEventPtr(TTObjectBasePtr(inputValue[1])));
+            setTimeProcessEndEvent(aTimeProcess, TTTimeEventPtr(TTObjectBasePtr(inputValue[2])));
             
             // check time process duration
             if (!aTimeProcess->getAttributeValue(TTSymbol("duration"), duration)) {
@@ -495,17 +507,17 @@ TTErr Scenario::TimeProcessCreate(const TTValue& inputValue, TTValue& outputValu
                 this->getAttributeValue(TTSymbol("duration"), scenarioDuration);
                 
                 // retreive solver variable relative to each event
-                it = mVariablesMap.find(aTimeProcess->mStartEvent);
+                it = mVariablesMap.find(getTimeProcessStartEvent(aTimeProcess));
                 startVariable = SolverVariablePtr(it->second);
                 
-                it = mVariablesMap.find(aTimeProcess->mEndEvent);
+                it = mVariablesMap.find(getTimeProcessEndEvent(aTimeProcess));
                 endVariable = SolverVariablePtr(it->second);
                 
                 // update the Solver depending on the type of the time process
                 if (aTimeProcess->getName() == TTSymbol("Interval")) {
                     
                     // add a relation between the 2 variables to the solver
-                    SolverRelationPtr relation = new SolverRelation(mEditionSolver, startVariable, endVariable, aTimeProcess->mDurationMin, aTimeProcess->mDurationMax);
+                    SolverRelationPtr relation = new SolverRelation(mEditionSolver, startVariable, endVariable, getTimeProcessDurationMin(aTimeProcess), getTimeProcessDurationMax(aTimeProcess));
                     
                     // store the relation relative to this time process
                     mRelationsMap.emplace(aTimeProcess, relation);
@@ -518,7 +530,7 @@ TTErr Scenario::TimeProcessCreate(const TTValue& inputValue, TTValue& outputValu
                     startVariable->limit(duration, duration);
                     
                     // add a constraint between the 2 variables to the solver
-                    SolverConstraintPtr constraint = new SolverConstraint(mEditionSolver, startVariable, endVariable, aTimeProcess->mDurationMin, aTimeProcess->mDurationMax, TTUInt32(scenarioDuration[0]));
+                    SolverConstraintPtr constraint = new SolverConstraint(mEditionSolver, startVariable, endVariable, getTimeProcessDurationMin(aTimeProcess), getTimeProcessDurationMax(aTimeProcess), TTUInt32(scenarioDuration[0]));
                     
                     // store the constraint relative to this time process
                     mConstraintsMap.emplace(aTimeProcess, constraint);
@@ -556,7 +568,7 @@ TTErr Scenario::TimeProcessRelease(const TTValue& inputValue, TTValue& outputVal
             aTimeProcess = TTTimeProcessPtr((TTObjectBasePtr)inputValue[0]);
             
             // try to find the time process
-            mTimeProcessList.find(&ScenarioFindTimeProcess, (TTPtr)aTimeProcess, aCacheElement);
+            mTimeProcessList.find(&TTTimeContainerFindTimeProcess, (TTPtr)aTimeProcess, aCacheElement);
             
             // couldn't find the same time process in the scenario :
             if (aCacheElement == kTTValNONE)
@@ -589,6 +601,11 @@ TTErr Scenario::TimeProcessRelease(const TTValue& inputValue, TTValue& outputVal
                     mConstraintsMap.erase(aTimeProcess);
                     delete constraint;
                 }
+                
+                // fill outputValue with start and event
+                outputValue.resize(2);
+                outputValue[0] = getTimeProcessStartEvent(aTimeProcess);
+                outputValue[1] = getTimeProcessEndEvent(aTimeProcess);
                 
                 // release the time process
                 TTObjectBaseRelease(TTObjectBaseHandle(&aTimeProcess));
@@ -768,37 +785,6 @@ void Scenario::deleteTimeEventCacheElement(const TTValue& oldCacheElement)
 #pragma mark -
 #pragma mark Some Methods
 #endif
-
-void ScenarioFindTimeProcess(const TTValue& aValue, TTPtr timeProcessPtrToMatch, TTBoolean& found)
-{
-	found = (TTObjectBasePtr)aValue[0] == (TTObjectBasePtr)timeProcessPtrToMatch;
-}
-
-void ScenarioFindTimeProcessWithTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found)
-{
-    TTTimeProcessPtr    timeProcess = TTTimeProcessPtr(TTObjectBasePtr(aValue[0]));
-    TTValue             v;
-    
-    // ignore interval process
-    if (timeProcess->getName() != TTSymbol("Interval")) {
-        
-        // check start event
-        found = timeProcess->mStartEvent == TTObjectBasePtr(timeEventPtrToMatch);
-        
-        if (found)
-            return;
-        
-        // check end event
-        found = timeProcess->mEndEvent == TTObjectBasePtr(timeEventPtrToMatch);
-        
-        return;
-    }
-}
-
-void ScenarioFindTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found)
-{
-    found = (TTObjectBasePtr)aValue[0] == (TTObjectBasePtr)timeEventPtrToMatch;
-}
 
 void ScenarioGraphTransitionTimeEventCallBack(void* arg)
 {

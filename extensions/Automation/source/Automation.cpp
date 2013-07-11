@@ -84,10 +84,10 @@ TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
             
             progression = inputValue[0];
             
-            mStartEvent->getAttributeValue(TTSymbol("state"), v);
+            getStartEvent()->getAttributeValue(TTSymbol("state"), v);
             startState = v[0];
             
-            mEndEvent->getAttributeValue(TTSymbol("state"), v);
+            getEndEvent()->getAttributeValue(TTSymbol("state"), v);
             endState = v[0];
             
             // process the interpolation between the start state and the end state
@@ -165,10 +165,10 @@ TTErr Automation::CurveAdd(const TTValue& inputValue, TTValue& outputValue)
                 if (!err) {
                     
                     // get the start event state value for this address
-                    mStartEvent->sendMessage(TTSymbol("StateAddressGetValue"), address, vStart);
+                    getStartEvent()->sendMessage(TTSymbol("StateAddressGetValue"), address, vStart);
 
                     // get the end event state value for this address
-                    mEndEvent->sendMessage(TTSymbol("StateAddressGetValue"), address, vEnd);
+                    getEndEvent()->sendMessage(TTSymbol("StateAddressGetValue"), address, vEnd);
                     
                     // prepare curve parameters
                     parameters.resize(6);
@@ -245,10 +245,10 @@ TTErr Automation::CurveUpdate(const TTValue& inputValue, TTValue& outputValue)
                 curve = v[0];
                 
                 // get the start event state value for this address
-                mStartEvent->sendMessage(TTSymbol("StateAddressGetValue"), address, vStart);
+                getStartEvent()->sendMessage(TTSymbol("StateAddressGetValue"), address, vStart);
                 
                 // get the end event state value for this address
-                mEndEvent->sendMessage(TTSymbol("StateAddressGetValue"), address, vEnd);
+                getEndEvent()->sendMessage(TTSymbol("StateAddressGetValue"), address, vEnd);
                 
                 // get current curve parameters
                 curve->getAttributeValue(TTSymbol("parameters"), parameters);

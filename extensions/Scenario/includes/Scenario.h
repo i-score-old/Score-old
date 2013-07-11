@@ -129,7 +129,7 @@ class Scenario : public TimeContainer {
     
     /** Release a time process
      @inputValue            a time process object to release
-     @outputvalue           kTTValNONE
+     @outputvalue           its the start and the end event
      @return                an error code if the destruction fails */
     TTErr   TimeProcessRelease(const TTValue& inputValue, TTValue& outputValue);
     
@@ -169,20 +169,10 @@ class Scenario : public TimeContainer {
     void    compileInteractiveEvent(TTTimeEventPtr aTimeEvent, TTUInt32 timeOffset);
     //void    cleanGraph(TransitionPtr endTransition);
     
-    friend void  TT_EXTENSION_EXPORT ScenarioGraphTransitionTimeEventCallBack(void* arg);
+    friend void TT_EXTENSION_EXPORT ScenarioGraphTransitionTimeEventCallBack(void* arg);
 };
 
 typedef Scenario* ScenarioPtr;
-
-/* a TTFunctionMatch to find a time process and all his observers in the scenario depending on the time process object him self */
-void TT_EXTENSION_EXPORT ScenarioFindTimeProcess(const TTValue& aValue, TTPtr timeProcessPtrToMatch, TTBoolean& found);
-
-/* a TTFunctionMatch to find a time process and all his observers in the scenario depending on a time event it binds.
-   This function ignores Interval process. */
-void TT_EXTENSION_EXPORT ScenarioFindTimeProcessWithTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found);
-
-/* a TTFunctionMatch to find a time event and all his observers in the scenario depending on the time event object him self */
-void TT_EXTENSION_EXPORT ScenarioFindTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found);
 
 /** The callback method used by the execution graph when ...
  @param	arg                         a time process instance */

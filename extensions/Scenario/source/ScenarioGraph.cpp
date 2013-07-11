@@ -102,11 +102,11 @@ void Scenario::compileTimeProcess(TTTimeProcessPtr aTimeProcess, TransitionPtr* 
     Arc*            arcFromPreviousTransitionToCurrentPlace;
     Arc*            arcFromCurrentPlaceToTheEnd;
     
-    TTTimeEventPtr  startEvent = TTTimeEventPtr(aTimeProcess->mStartEvent);
-    TTTimeEventPtr  endEvent = TTTimeEventPtr(aTimeProcess->mEndEvent);
+    TTTimeEventPtr  startEvent = getTimeProcessStartEvent(aTimeProcess);
+    TTTimeEventPtr  endEvent = getTimeProcessEndEvent(aTimeProcess);
 
     // if the date to start is in the middle of a time process
-    if (startEvent->mDate < timeOffset && endEvent->mDate > timeOffset)
+    if (getTimeEventDate(startEvent) < timeOffset && getTimeEventDate(endEvent) > timeOffset)
         
 // TODO : prepare the scheduler to start in the middle of his process
 //      aTimeProcess->setTimeOffsetInMs(timeOffset - startDate);
@@ -117,9 +117,9 @@ void Scenario::compileTimeProcess(TTTimeProcessPtr aTimeProcess, TransitionPtr* 
     currentPlace = mExecutionGraph->createPlace();
     startTransition = currentTransition;
     
-    compileTimeEvent(startEvent, startEvent->mDate, *previousTransition, currentTransition, currentPlace);
+    compileTimeEvent(startEvent, getTimeEventDate(startEvent), *previousTransition, currentTransition, currentPlace);
     
-    mTransitionsMap[aTimeProcess->mStartEvent] = currentTransition;
+    mTransitionsMap[startEvent] = currentTransition;
     *previousTransition = currentTransition;
     
     // compile intermediate events
@@ -141,9 +141,9 @@ void Scenario::compileTimeProcess(TTTimeProcessPtr aTimeProcess, TransitionPtr* 
     currentPlace = mExecutionGraph->createPlace();
     lastTransition = currentTransition;
     
-    compileTimeEvent(endEvent, endEvent->mDate - startEvent->mDate, *previousTransition, currentTransition, currentPlace);  // normally it is not the startDate but the last intermediate event date
+    compileTimeEvent(endEvent, getTimeEventDate(endEvent) - getTimeEventDate(startEvent), *previousTransition, currentTransition, currentPlace);  // normally it is not the startDate but the last intermediate event date
     
-    mTransitionsMap[aTimeProcess->mEndEvent] = currentTransition;
+    mTransitionsMap[endEvent] = currentTransition;
     *previousTransition = currentTransition;
     
 /* IS THIS RELATIVE TO COMPILATION OF SUB SCENARIO ?
@@ -210,8 +210,8 @@ void Scenario::compileInterval(TTTimeProcessPtr aTimeProcess)
     
     ExtendedInt             intervalValue;
     
-    TTTimeEventPtr  startEvent = TTTimeEventPtr(aTimeProcess->mStartEvent);
-    TTTimeEventPtr  endEvent = TTTimeEventPtr(aTimeProcess->mEndEvent);
+    TTTimeEventPtr  startEvent = getTimeProcessStartEvent(aTimeProcess);
+    TTTimeEventPtr  endEvent = getTimeProcessEndEvent(aTimeProcess);
     
 // CB now unused    
 //  GraphObjectMapIterator  mergeIterator; 
@@ -221,7 +221,7 @@ void Scenario::compileInterval(TTTimeProcessPtr aTimeProcess)
 //  if (startEvent->getContainingBoxId() != endEvent->getContainingBoxId()) {
     
     // retreive start transition
-    startTransition = TransitionPtr(mTransitionsMap[aTimeProcess->mStartEvent]);
+    startTransition = TransitionPtr(mTransitionsMap[startEvent]);
     
 /* CB Now stored directly in mTransitionsMap
     mergeIterator = mMergedTransitionsMap.find(startTransition);
@@ -231,7 +231,7 @@ void Scenario::compileInterval(TTTimeProcessPtr aTimeProcess)
 */
     
     // retreive end transition
-    endTransition = TransitionPtr(mTransitionsMap[aTimeProcess->mEndEvent]);
+    endTransition = TransitionPtr(mTransitionsMap[endEvent]);
     
 /* CB Now stored directly in mTransitionsMap
     mergeIterator = mMergedTransitionsMap.find(endTransition);
@@ -241,10 +241,10 @@ void Scenario::compileInterval(TTTimeProcessPtr aTimeProcess)
 */
     
     // if the interval have no duration
-    if (endEvent->mDate - startEvent->mDate <= 0) {
+    if (getTimeEventDate(endEvent) - getTimeEventDate(startEvent) <= 0) {
         
         startTransition->merge(endTransition);
-        mTransitionsMap[aTimeProcess->mEndEvent] = startTransition;
+        mTransitionsMap[endEvent] = startTransition;
         
 // CB Now stored directly in mTransitionsMap
 //      mMergedTransitionsMap[endTransition] = startTransition;
@@ -253,7 +253,7 @@ void Scenario::compileInterval(TTTimeProcessPtr aTimeProcess)
         
         currentPlace = mExecutionGraph->createPlace();
         
-        intervalValue.setAsInteger(endEvent->mDate - startEvent->mDate);
+        intervalValue.setAsInteger(getTimeEventDate(endEvent) - getTimeEventDate(startEvent));
         
         arcFromstartTransitionToCurrentPlace = mExecutionGraph->createArc(startTransition, currentPlace);
         
@@ -316,7 +316,7 @@ void Scenario::compileInteractiveEvent(TTTimeEventPtr aTimeEvent, TTUInt32 timeO
     // TODO : get event active state
     active = YES;
     
-    if (active && aTimeEvent->mDate >= timeOffset) {
+    if (active && getTimeEventDate(aTimeEvent) >= timeOffset) {
         
         // retreive transition
         currentTransition = TransitionPtr(mTransitionsMap[aTimeEvent]);
@@ -378,11 +378,11 @@ void Scenario::compileInteractiveEvent(TTTimeEventPtr aTimeEvent, TTUInt32 timeO
                 
                 TTTimeProcessPtr aTimeProcess = TTTimeProcessPtr(mArcsMap[currentArc]);
                 
-                if (aTimeProcess->mDurationMin)
-                    minBound.setAsInteger(aTimeProcess->mDurationMin);
+                if (getTimeProcessDurationMin(aTimeProcess))
+                    minBound.setAsInteger(getTimeProcessDurationMin(aTimeProcess));
                 
-                if (aTimeProcess->mDurationMax)
-                    maxBound.setAsInteger(aTimeProcess->mDurationMax);
+                if (getTimeProcessDurationMax(aTimeProcess))
+                    maxBound.setAsInteger(getTimeProcessDurationMax(aTimeProcess));
             }
             
             currentArc->changeRelativeTime(minBound, maxBound);
@@ -511,7 +511,7 @@ bool Scenario::step(TTUInt32 currentTimeInMs)
                 removeTopActionOnPriorityQueue();
             }
             // TODO : or if the event have to append later
-            else if ((unsigned int) topAction->getDate().getValue() > currentTime) {
+            else if ((unsigned int) topAction->getTimeEventDate().getValue() > currentTime) {
                 
                 stop = true;
             }
@@ -552,7 +552,7 @@ bool Scenario::step(TTUInt32 currentTimeInMs)
                     if (topTransition->areAllInGoingArcsActive()) {
                         
                         // NOTE : this should be done inside the Notify method (which is observed by the Scenario to see if it succeed or not)
-                        topTransition->crossTransition(true, currentTime - topAction->getDate().getValue());
+                        topTransition->crossTransition(true, currentTime - topAction->getTimeEventDate().getValue());
                         
                         // TODO : remove the event from the timeEventQueue
                         removeTopActionOnPriorityQueue();
