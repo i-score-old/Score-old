@@ -31,26 +31,27 @@ class TTSCORE_EXPORT TTTimeProcess : public TTObjectBase {
     
     TTCLASS_SETUP(TTTimeProcess)
     
-    friend TTTimeEvent;
+    friend class TTTimeContainer;
 
     TTObjectBasePtr                 mContainer;                     ///< the container which handles the time process
     
-public :
+protected :
     
     TTUInt32                        mDurationMin;                   ///< the minimal duration of the time process
     TTUInt32                        mDurationMax;                   ///< the maximal duration of the time process
     
     TTBoolean                       mActive;                        ///< is the time process active ?
     
-    TTObjectBasePtr                 mStartEvent;                    ///< the event object which handles the time process execution start
-    TTList                          mIntermediateEvents;            ///< the list of all intermediate events
-    TTObjectBasePtr                 mEndEvent;                      ///< the event object which handles the time process execution stop
-   
     TTObjectBasePtr                 mScheduler;                     ///< the scheduler object which handles the time process execution
     
 private :
     
+    TTObjectBasePtr                 mStartEvent;                    ///< the event object which handles the time process execution start
     TTObjectBasePtr                 mStartEventCallback;            ///< a callback to subscribe for start event notification
+    
+    TTList                          mIntermediateEvents;            ///< the list of all intermediate events
+    
+    TTObjectBasePtr                 mEndEvent;                      ///< the event object which handles the time process execution stop
     TTObjectBasePtr                 mEndEventCallback;              ///< a callback to subscribe for end event notification
     
     TTAttributePtr                  activeAttribute;                ///< cache active attribute for observer notification
@@ -190,11 +191,26 @@ private :
         this method eases the managment of the scheduler object
      @return                an error code if the resume fails */
     TTErr           Resume();
+
+protected :
     
-    /** Release the start and end events
-        this method is usefull to not have to store events outside
-     @return                an error code if the resume fails */
-    TTErr           ReleaseEvents();
+    /** get the start event
+     @return                a time event object */
+    TTTimeEventPtr  getStartEvent();
+    
+    /** set the end event
+     @return                a time event object */
+    TTTimeEventPtr  getEndEvent();
+    
+    /** set the start event
+     @param aTimeEvent      a time event object
+     @return                an error code if it fails */
+    TTErr           setStartEvent(TTTimeEventPtr aTimeEvent);
+    
+    /** set the end event
+     @param aTimeEvent      a time event object
+     @return                an error code if it fails */
+    TTErr           setEndEvent(TTTimeEventPtr aTimeProcess);
     
     friend TTErr TTSCORE_EXPORT TTTimeProcessStartEventHappenCallback(TTPtr baton, TTValue& data);
     friend TTErr TTSCORE_EXPORT TTTimeProcessEndEventHappenCallback(TTPtr baton, TTValue& data);

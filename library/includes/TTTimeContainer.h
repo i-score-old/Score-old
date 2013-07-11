@@ -27,10 +27,8 @@
 class TTSCORE_EXPORT TTTimeContainer : public TTTimeProcess {
     
     TTCLASS_SETUP(TTTimeContainer)
-	
-    friend TTTimeEvent;
     
-public :
+protected :
     
     TTList                      mTimeProcessList;               ///< all registered time processes and their observers
     TTList                      mTimeEventList;                 ///< all registered time events and their observers
@@ -83,7 +81,7 @@ private :
     
     /** Release a time process
      @inputValue            a time process object to release
-     @outputvalue           kTTValNONE
+     @outputvalue           its the start and the end event
      @return                an error code if the destruction fails */
     virtual TTErr   TimeProcessRelease(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
     
@@ -98,8 +96,63 @@ private :
      @outputvalue           kTTValNONE
      @return                an error code if the limitation fails */
     virtual TTErr   TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+    
+protected :
+    
+    /* a time container can access too the protected members of any time event or time process */
+    
+    /** Getter on date time event protected member
+     @aTimeProcess          a time event object
+     @return                a date value */
+    TTUInt32        getTimeEventDate(TTTimeEventPtr aTimeEvent);
+    
+    /** Getter on interactive time event protected member
+     @aTimeProcess          a time event object
+     @return                a boolean value */
+    TTBoolean       isTimeEventInteractive(TTTimeEventPtr aTimeEvent);
+    
+    /** Getter on start event time process protected member
+     @aTimeProcess          a time process object
+     @return                a time event object */
+    TTTimeEventPtr  getTimeProcessStartEvent(TTTimeProcessPtr aTimeProcess);
+    
+    /** Setter on start event time process protected member
+     @aTimeProcess          a time process object
+     @aTimeEvent            a time event object */
+    void            setTimeProcessStartEvent(TTTimeProcessPtr aTimeProcess, TTTimeEventPtr aTimeEvent);
+    
+    /** Getter on end event time process protected member
+     @aTimeProcess          a time process object
+     @return                a time event object */
+    TTTimeEventPtr  getTimeProcessEndEvent(TTTimeProcessPtr aTimeProcess);
+    
+    /** Setter on end event time process protected member
+     @aTimeProcess          a time process object
+     @aTimeEvent            a time event object */
+    void            setTimeProcessEndEvent(TTTimeProcessPtr aTimeProcess, TTTimeEventPtr aTimeEvent);
+    
+    /** Getter on duration min time process protected member
+     @aTimeProcess          a time process object
+     @return                a duration value */
+    TTUInt32        getTimeProcessDurationMin(TTTimeProcessPtr aTimeProcess);
+    
+    /** Getter on duration max time process protected member
+     @aTimeProcess          a time process object
+     @return                a duration value */
+    TTUInt32        getTimeProcessDurationMax(TTTimeProcessPtr aTimeProcess);
+    
+    
+    friend void TTSCORE_EXPORT TTTimeContainerFindTimeProcess(const TTValue& aValue, TTPtr timeProcessPtrToMatch, TTBoolean& found);
+    friend void TTSCORE_EXPORT TTTimeContainerFindTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found);
+    friend void TTSCORE_EXPORT TTTimeContainerFindTimeProcessWithTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found);
 };
 
 typedef TTTimeContainer* TTTimeContainerPtr;
+
+void TTSCORE_EXPORT TTTimeContainerFindTimeProcess(const TTValue& aValue, TTPtr timeProcessPtrToMatch, TTBoolean& found);
+
+void TTSCORE_EXPORT TTTimeContainerFindTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found);
+
+void TTSCORE_EXPORT TTTimeContainerFindTimeProcessWithTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found);
 
 #endif // __TT_TIME_CONTAINER_H__

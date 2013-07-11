@@ -26,26 +26,20 @@ mContainer(NULL),
 mDurationMin(0),
 mDurationMax(0),
 mActive(YES),
-mStartEvent(NULL),
-mEndEvent(NULL),
 mScheduler(NULL),
+mStartEvent(NULL),
 mStartEventCallback(NULL),
+mEndEvent(NULL),
 mEndEventCallback(NULL)
 {
-    TT_ASSERT("Correct number of args to create TTTimeProcess", arguments.size() == 2 || arguments.size() == 3);
+    TT_ASSERT("Correct number of args to create TTTimeProcess", arguments.size() == 1);
     
     TTValue         args;
     TTErr           err;
-    TTMessagePtr    aMessage = NULL;
     TTValuePtr      startEventBaton, endEventBaton;
     
-    if (arguments.size() >= 2) {
-        mStartEvent = arguments[0];
-        mEndEvent = arguments[1];
-    }
-    
-    if (arguments.size() == 3)
-        mContainer = arguments[2];
+    if (arguments.size() == 1)
+        mContainer = arguments[0];
     
     // the rigid state handles the DurationMin and DurationMax attribute
     registerAttribute(TTSymbol("rigid"), kTypeBoolean, NULL, (TTGetterMethod)& TTTimeProcess::getRigid, (TTSetterMethod)& TTTimeProcess::setRigid);
@@ -55,21 +49,17 @@ mEndEventCallback(NULL)
     
     addAttributeWithSetter(Active, kTypeBoolean);
     
+    addAttribute(Scheduler, kTypeObject);
+    addAttributeProperty(Scheduler, readOnly, YES);
+    addAttributeProperty(Scheduler, hidden, YES);
+    
     addAttribute(StartEvent, kTypeObject);
     addAttributeProperty(StartEvent, readOnly, YES);
     addAttributeProperty(StartEvent, hidden, YES);
     
-    addAttributeWithGetter(IntermediateEvents, kTypeLocalValue);
-    addAttributeProperty(IntermediateEvents, readOnly, YES);
-    addAttributeProperty(IntermediateEvents, hidden, YES);
-    
     addAttribute(EndEvent, kTypeObject);
     addAttributeProperty(EndEvent, readOnly, YES);
     addAttributeProperty(EndEvent, hidden, YES);
-    
-    addAttribute(Scheduler, kTypeObject);
-    addAttributeProperty(Scheduler, readOnly, YES);
-    addAttributeProperty(Scheduler, hidden, YES);
     
     // the attributes below are not related to any TTTimeProcess member
     // but we need to declare them as attribute to ease the use of the class
@@ -91,8 +81,6 @@ mEndEventCallback(NULL)
     addMessage(Pause);
     addMessage(Resume);
     
-    addMessage(ReleaseEvents);
-    
 	// needed to be handled by a TTXmlHandler
 	addMessageWithArguments(WriteAsXml);
 	addMessageProperty(WriteAsXml, hidden, YES);
@@ -108,12 +96,6 @@ mEndEventCallback(NULL)
     mStartEventCallback->setAttributeValue(kTTSym_baton, TTPtr(startEventBaton));
     mStartEventCallback->setAttributeValue(kTTSym_function, TTPtr(&TTTimeProcessStartEventHappenCallback));
     
-    // Observe start event happening
-    err = mStartEvent->findMessage(TTSymbol("Happen"), &aMessage);
-    
-    if(!err)
-        aMessage->registerObserverForNotifications(*mStartEventCallback);
-    
     // Create a end event callback to be notified and end the process execution
     mEndEventCallback = NULL;
     TTObjectBaseInstantiate(TTSymbol("callback"), &mEndEventCallback, kTTValNONE);
@@ -122,12 +104,6 @@ mEndEventCallback(NULL)
     
     mEndEventCallback->setAttributeValue(kTTSym_baton, TTPtr(endEventBaton));
     mEndEventCallback->setAttributeValue(kTTSym_function, TTPtr(&TTTimeProcessEndEventHappenCallback));
-    
-    // Observe end event happening
-    err = mEndEvent->findMessage(TTSymbol("Happen"), &aMessage);
-    
-    if(!err)
-        aMessage->registerObserverForNotifications(*mEndEventCallback);
     
     // Creation of a scheduler based on the System scheduler plugin
     // Prepare callback argument to be notified of :
@@ -148,20 +124,7 @@ mEndEventCallback(NULL)
 
 TTTimeProcess::~TTTimeProcess()
 {
-    TTMessagePtr    aMessage = NULL;
-    TTErr           err;
-    
-    // Stop start event happening observation
-    if (mStartEvent) {
-        
-        err = mStartEvent->findMessage(TTSymbol("Happen"), &aMessage);
-    
-        if(!err) {
-        
-            aMessage->unregisterObserverForNotifications(*mStartEventCallback);
-            mStartEvent = NULL;
-        }
-    }
+    setStartEvent(NULL);
     
     // Don't release start event here because it can be used by another time process
     
@@ -172,19 +135,9 @@ TTTimeProcess::~TTTimeProcess()
         mStartEventCallback = NULL;
     }
     
-    // Stop end event happening observation
-    if (mEndEvent) {
-        
-        err = mEndEvent->findMessage(TTSymbol("Happen"), &aMessage);
-        
-        if(!err) {
-            
-            aMessage->unregisterObserverForNotifications(*mEndEventCallback);
-            mEndEvent = NULL;
-        }
-    }
-    
     // Don't release end event here because it can be used by another time process
+    
+    setEndEvent(NULL);
     
     // Release end event callback
     if (mEndEventCallback) {
@@ -473,30 +426,70 @@ TTErr TTTimeProcess::Resume()
     return mScheduler->sendMessage(TTSymbol("Resume"));
 }
 
-TTErr TTTimeProcess::ReleaseEvents()
+TTTimeEventPtr TTTimeProcess::getStartEvent()
 {
-    TTMessagePtr    aMessage = NULL;
+    return (TTTimeEventPtr)mStartEvent;
+}
+
+TTTimeEventPtr TTTimeProcess::getEndEvent()
+{
+    return (TTTimeEventPtr)mEndEvent;
+}
+
+TTErr TTTimeProcess::setStartEvent(TTTimeEventPtr aTimeEvent)
+{
+    TTMessagePtr    aMessage;
     TTErr           err;
     
-    // Stop start event happening observation
-    err = mStartEvent->findMessage(TTSymbol("Happen"), &aMessage);
+    if (mStartEvent) {
+        
+        // Stop start event happening observation
+        err = mStartEvent->findMessage(TTSymbol("Happen"), &aMessage);
+        
+        if(!err)
+            aMessage->unregisterObserverForNotifications(*mStartEventCallback);
+    }
     
-    if(!err)
-        aMessage->unregisterObserverForNotifications(*mStartEventCallback);
+    // Replace the start event by the new one
+    mStartEvent = aTimeEvent;
     
-    // Release start event
-    TTObjectBaseRelease(TTObjectBaseHandle(&mStartEvent));
-    mStartEvent = NULL;
+    // Observe start event happening
+    if (mStartEvent) {
+        
+        err = mStartEvent->findMessage(TTSymbol("Happen"), &aMessage);
     
-    // Stop end event happening observation
-    err = mEndEvent->findMessage(TTSymbol("Happen"), &aMessage);
+        if(!err)
+            return aMessage->registerObserverForNotifications(*mStartEventCallback);
+    }
     
-    if(!err)
-        aMessage->unregisterObserverForNotifications(*mEndEventCallback);
+    return kTTErrNone;
+}
+
+TTErr TTTimeProcess::setEndEvent(TTTimeEventPtr aTimeEvent)
+{
+    TTMessagePtr    aMessage;
+    TTErr           err;
     
-    // Release end event
-    TTObjectBaseRelease(TTObjectBaseHandle(&mEndEvent));
-    mEndEvent = NULL;
+    if (mEndEvent) {
+        
+        // Stop end event happening observation
+        err = mEndEvent->findMessage(TTSymbol("Happen"), &aMessage);
+        
+        if(!err)
+            aMessage->unregisterObserverForNotifications(*mEndEventCallback);
+    }
+    
+    // Replace the end event by the new one
+    mEndEvent = aTimeEvent;
+    
+    // Observe end event happening
+    if (mEndEvent) {
+        
+        err = mEndEvent->findMessage(TTSymbol("Happen"), &aMessage);
+    
+        if(!err)
+            return aMessage->registerObserverForNotifications(*mEndEventCallback);
+    }
     
     return kTTErrNone;
 }

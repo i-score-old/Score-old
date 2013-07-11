@@ -30,9 +30,12 @@ class TTSCORE_EXPORT TTTimeEvent : public TTObjectBase {
     
     TTCLASS_SETUP(TTTimeEvent)
     
+    friend class TTTimeContainer;
+    friend class TTTimeProcess;
+    
     TTObjectBasePtr                 mContainer;                     ///< the container which handles the time event
     
-public :
+protected :
 
     TTUInt32                        mDate;                          ///< the date of the event
     

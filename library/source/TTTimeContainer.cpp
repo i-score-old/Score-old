@@ -75,3 +75,75 @@ TTTimeContainer::~TTTimeContainer()
 {
     ;
 }
+
+TTUInt32 TTTimeContainer::getTimeEventDate(TTTimeEventPtr aTimeEvent)
+{
+    return aTimeEvent->mDate;
+}
+
+TTBoolean TTTimeContainer::isTimeEventInteractive(TTTimeEventPtr aTimeEvent)
+{
+    return aTimeEvent->mInteractive;
+}
+
+TTTimeEventPtr TTTimeContainer::getTimeProcessStartEvent(TTTimeProcessPtr aTimeProcess)
+{
+    return aTimeProcess->getStartEvent();
+}
+
+void TTTimeContainer::setTimeProcessStartEvent(TTTimeProcessPtr aTimeProcess, TTTimeEventPtr aTimeEvent)
+{
+    aTimeProcess->setStartEvent(aTimeEvent);
+}
+
+TTTimeEventPtr TTTimeContainer::getTimeProcessEndEvent(TTTimeProcessPtr aTimeProcess)
+{
+    return aTimeProcess->getEndEvent();
+}
+
+void TTTimeContainer::setTimeProcessEndEvent(TTTimeProcessPtr aTimeProcess, TTTimeEventPtr aTimeEvent)
+{
+    aTimeProcess->setEndEvent(aTimeEvent);
+}
+
+TTUInt32 TTTimeContainer::getTimeProcessDurationMin(TTTimeProcessPtr aTimeProcess)
+{
+    return aTimeProcess->mDurationMin;
+}
+
+TTUInt32 TTTimeContainer::getTimeProcessDurationMax(TTTimeProcessPtr aTimeProcess)
+{
+    return aTimeProcess->mDurationMax;
+}
+
+#if 0
+#pragma mark -
+#pragma mark Some Methods
+#endif
+
+void TTTimeContainerFindTimeProcess(const TTValue& aValue, TTPtr timeProcessPtrToMatch, TTBoolean& found)
+{
+	found = (TTObjectBasePtr)aValue[0] == (TTObjectBasePtr)timeProcessPtrToMatch;
+}
+
+void TTTimeContainerFindTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found)
+{
+    found = (TTObjectBasePtr)aValue[0] == (TTObjectBasePtr)timeEventPtrToMatch;
+}
+
+void TTTimeContainerFindTimeProcessWithTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found)
+{
+    TTTimeProcessPtr    aTimeProcess = TTTimeProcessPtr(TTObjectBasePtr(aValue[0]));
+    TTValue             v;
+    
+    // check start event
+    found = aTimeProcess->getStartEvent() == TTObjectBasePtr(timeEventPtrToMatch);
+        
+    if (found)
+        return;
+        
+    // check end event
+    found = aTimeProcess->getEndEvent() == TTObjectBasePtr(timeEventPtrToMatch);
+        
+    return;
+}
