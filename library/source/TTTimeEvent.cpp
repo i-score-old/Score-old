@@ -57,29 +57,6 @@ mReady(YES)
     this->findMessage(TTSymbol("Happen"), &happenMessage);
     
     TTObjectBaseInstantiate(kTTSym_Script, TTObjectBaseHandle(&mState), kTTValNONE);
-    
-    /* TODO : move this in i-score by creating a collection of receiver which will call the Trigger method of a time event
-
-    // Create a TTReceiver to listen any address
-    TTValue			args;
-	TTObjectBasePtr	returnValueCallback;
-	TTValuePtr		returnValueBaton;
-    
-    // we don't need the address back
-    args.append(NULL);
-    
-    // but we need the value back to trigger it (using the InteractiveEventReceiverCallback function)
-    returnValueCallback = NULL;
-    TTObjectBaseInstantiate(TTSymbol("callback"), &returnValueCallback, kTTValNONE);
-    returnValueBaton = new TTValue(TTObjectBasePtr(this));
-    returnValueCallback->setAttributeValue(kTTSym_baton, TTPtr(returnValueBaton));
-    returnValueCallback->setAttributeValue(kTTSym_function, TTPtr(&InteractiveEventReceiverCallback));
-    args.append(returnValueCallback);
-    
-    mReceiver = NULL;
-    TTObjectBaseInstantiate(kTTSym_Receiver, TTObjectBaseHandle(&mReceiver), args);
-    
-    */
 }
 
 TTTimeEvent::~TTTimeEvent()
