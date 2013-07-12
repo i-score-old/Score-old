@@ -61,8 +61,7 @@ m_mustCrossAllTransitionWithoutWaitingEvent(false)
 	m_parentPetriNet = NULL;
 
 	m_updateFactor = 1;
-	m_waitedTriggerPointMessageAction = NULL;
-	m_waitedTriggerPointMessageArgument = NULL;
+	m_isEventReadyCallback = NULL;
 
 	m_mustStop = false;
     
@@ -109,11 +108,11 @@ bool PetriNet::makeOneStep(unsigned int currentTime)
                             std::cout << "PetriNet::makeOneStep : sensitize event" << topTransition->getEvent() << std::endl;
                             turnIntoSensitized(topTransition);
                             
-                            if (m_waitedTriggerPointMessageAction != NULL) {
-                                m_waitedTriggerPointMessageAction(m_waitedTriggerPointMessageArgument, true, topTransition);
-                            }
+                            if (topTransition->getEvent() != NULL && m_isEventReadyCallback != NULL)
+                                m_isEventReadyCallback(topTransition->getEvent(), true);
                             
                             removeTopActionOnPriorityQueue();
+                            
                         } else {
                             topAction->setDate(currentTime + 1);
                             removeTopActionOnPriorityQueue();
@@ -150,9 +149,8 @@ bool PetriNet::makeOneStep(unsigned int currentTime)
                 --i;
                 
                 // ?
-                if (m_waitedTriggerPointMessageAction != NULL) {
-                    m_waitedTriggerPointMessageAction(m_waitedTriggerPointMessageArgument, false, sensitizedTransitionToTestTheEvent);
-                }
+                if (sensitizedTransitionToTestTheEvent->getEvent() != NULL && m_isEventReadyCallback != NULL)
+                    m_isEventReadyCallback(sensitizedTransitionToTestTheEvent->getEvent(), false);
                 
             }
             
@@ -168,8 +166,8 @@ bool PetriNet::makeOneStep(unsigned int currentTime)
                 m_sensitizedTransitions.erase(m_sensitizedTransitions.begin() + i);
                 --i;
                 
-                if (m_waitedTriggerPointMessageAction != NULL) {
-                    m_waitedTriggerPointMessageAction(m_waitedTriggerPointMessageArgument, false, sensitizedTransitionToTestTheEvent);
+                if (sensitizedTransitionToTestTheEvent->getEvent() != NULL && m_isEventReadyCallback != NULL) {
+                    m_isEventReadyCallback(sensitizedTransitionToTestTheEvent->getEvent(), false);
                 }
             }
         }
@@ -522,16 +520,14 @@ void PetriNet::ignoreEventsForOneStep()
 	m_mustCrossAllTransitionWithoutWaitingEvent = true;
 }
 
-void PetriNet::addWaitedTriggerPointMessageAction(void* arg, void(*pt2Func)(void*, bool, Transition*))
+void PetriNet::addIsEventReadyCallback(void(*pt2Func)(void*, bool))
 {
-	m_waitedTriggerPointMessageAction = pt2Func;
-	m_waitedTriggerPointMessageArgument = arg;
+	m_isEventReadyCallback = pt2Func;
 }
 
-void PetriNet::removeWaitedTriggerPointMessageAction()
+void PetriNet::removeIsEventReadyCallback()
 {
-	m_waitedTriggerPointMessageAction = NULL;
-	m_waitedTriggerPointMessageArgument = NULL;
+	m_isEventReadyCallback = NULL;
 }
 
 void PetriNet::pushTransitionToCrossWhenAcceleration(Transition* t)
@@ -561,9 +557,8 @@ void PetriNet::addInternPetriNet(Transition* startTransition, Transition* endTra
 	startTransition->addExternAction(&externLaunch, petriNet);
 	endTransition->addExternAction(&externMustStop, petriNet);
 
-	if (m_waitedTriggerPointMessageAction != NULL) {
-		petriNet->addWaitedTriggerPointMessageAction(m_waitedTriggerPointMessageArgument, m_waitedTriggerPointMessageAction);
-	}
+	if (m_isEventReadyCallback != NULL)
+		petriNet->addIsEventReadyCallback(m_isEventReadyCallback);
 }
 
 void PetriNet::print()

@@ -786,7 +786,7 @@ void Scenario::deleteTimeEventCacheElement(const TTValue& oldCacheElement)
 #pragma mark Some Methods
 #endif
 
-void ScenarioGraphTransitionTimeEventCallBack(void* arg)
+void ScenarioGraphTimeEventCallBack(TTPtr arg)
 {
     // cf ECOMachine : crossAControlPointCallBack function
 
@@ -795,23 +795,11 @@ void ScenarioGraphTransitionTimeEventCallBack(void* arg)
 	aTimeEvent->sendMessage(TTSymbol("Happen"));
 }
 
-/*
-void waitedTriggerPointMessageCallBack(void* arg, bool isWaited, TransitionPtr transition)
+
+void ScenarioGraphIsEventReadyCallBack(TTPtr arg, TTBoolean isReady)
 {
-	ECOMachine* currentECOMachine = (ECOMachine*) arg;
+	TTTimeEventPtr aTimeEvent = (TTTimeEventPtr) arg;
     
-	if (currentECOMachine->hasTriggerPointInformations(transition)) {
-		TriggerPointInformations currentTriggerPointInformations = currentECOMachine->getTriggerPointInformations(transition);
-        
-		if (currentTriggerPointInformations.m_waitedTriggerPointMessageAction != NULL) {
-			currentTriggerPointInformations.m_waitedTriggerPointMessageAction(currentECOMachine->m_waitedTriggerPointMessageArg,
-																			  isWaited,
-																			  currentTriggerPointInformations.m_triggerId,
-																			  currentTriggerPointInformations.m_boxId,
-																			  currentTriggerPointInformations.m_controlPointIndex,
-																			  currentTriggerPointInformations.m_waitedString);
-            
-		}
-	}
+    TTValue v = isReady;
+    aTimeEvent->setAttributeValue(TTSymbol("ready"), v);
 }
-*/

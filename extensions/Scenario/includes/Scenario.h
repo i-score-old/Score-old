@@ -169,13 +169,19 @@ class Scenario : public TimeContainer {
     void    compileInteractiveEvent(TTTimeEventPtr aTimeEvent, TTUInt32 timeOffset);
     //void    cleanGraph(TransitionPtr endTransition);
     
-    friend void TT_EXTENSION_EXPORT ScenarioGraphTransitionTimeEventCallBack(void* arg);
+    friend void TT_EXTENSION_EXPORT ScenarioGraphTimeEventCallBack(TTPtr arg);
+    friend void TT_EXTENSION_EXPORT ScenarioGraphIsEventReadyCallBack(TTPtr arg, TTBoolean isReady);
 };
 
 typedef Scenario* ScenarioPtr;
 
 /** The callback method used by the execution graph when ...
- @param	arg                         a time process instance */
-void  TT_EXTENSION_EXPORT ScenarioGraphTransitionTimeEventCallBack(void* arg);
+ @param	arg                         a time event instance */
+void TT_EXTENSION_EXPORT ScenarioGraphTimeEventCallBack(TTPtr arg);
+
+/** The callback method used by the execution graph when ...
+ @param	arg                         a time event instance
+ @param	isReady                     is the time event ready to be triggered ? */
+void TT_EXTENSION_EXPORT ScenarioGraphIsEventReadyCallBack(TTPtr arg, TTBoolean isReady);
 
 #endif // __SCENARIO_H__

@@ -37,9 +37,8 @@ void Scenario::compileScenario(TTUInt32 timeOffset)
 	mArcsMap.clear();
     mMergedTransitionsMap.clear();
     
-// TODO : set the callback used to get expected interactive event state back
-// TODO : the best would be to pass a callback to each transition in order the transition call back with a TTTimeEventPtr argument
-//  mExecutionGraph->addWaitedTriggerPointMessageAction(this, triggerAction);
+    // set the callback used to get ready event state back
+    mExecutionGraph->addIsEventReadyCallback(&ScenarioGraphIsEventReadyCallBack);
     
 	// start the graph
 	Place*          startPlace = mExecutionGraph->createPlace();
@@ -86,9 +85,7 @@ void Scenario::compileScenario(TTUInt32 timeOffset)
         
         aTimeEvent = TTTimeEventPtr(TTObjectBasePtr(mTimeEventList.current()[0]));
         
-        aTimeEvent->getAttributeValue(TTSymbol("interactive"), v);
-        
-        if (v[0] == YES)
+        if (isTimeEventInteractive(aTimeEvent))
             compileInteractiveEvent(aTimeEvent, timeOffset);
 	}
 }
@@ -299,7 +296,7 @@ void Scenario::compileTimeEvent(TTTimeEventPtr aTimeEvent, TTUInt32 time, Transi
     arcFromCurrentPlaceToCurrentTransition->changeRelativeTime(timeValue, plusInfinity);
     
     // prepare transition
-    currentTransition->addExternAction(&ScenarioGraphTransitionTimeEventCallBack, aTimeEvent);
+    currentTransition->addExternAction(&ScenarioGraphTimeEventCallBack, aTimeEvent);
     
     TTLogMessage("Scenario::compileTimeEvent at %ld ms\n", time);
 }
@@ -328,18 +325,6 @@ void Scenario::compileInteractiveEvent(TTTimeEventPtr aTimeEvent, TTUInt32 timeO
         // prepare transition
         currentTransition->setEvent(aTimeEvent);
         currentTransition->setMustWaitThePetriNetToEnd(false);
-        
-        // prepare time event informations
-/* THIS IS USELESS OR CAN BE RETREIVED USING INFO INSIDE THE INTERACTIVE EVENT (m_waitedString)
-         
-         aTimeEventInformations.m_triggerId = aTimeEvent->getTriggerId();
-         aTimeEventInformations.m_waitedString = aTimeEvent->getTriggerMessage();
-         aTimeEventInformations.m_boxId = aTimeEvent->getaTimeEvent()->getContainingBoxId();
-         aTimeEventInformations.m_controlPointIndex = aTimeEvent->getaTimeEvent()->getId();
-         aTimeEventInformations.m_waitedTriggerPointMessageAction = m_waitedTriggerPointMessageAction;
-         
-         m_transitionToTriggerPointInformations[currentTransition] = aTimeEventInformations;
-*/
         
 /* IS THIS USEFULL ?
          if (aTimeEvent->getType() == TRIGGER_END_TEMPO_CHANGE) {

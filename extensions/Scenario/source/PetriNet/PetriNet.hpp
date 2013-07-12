@@ -349,8 +349,8 @@ public:
 
 	void ignoreEventsForOneStep();
 
-	void addWaitedTriggerPointMessageAction(void* arg, void(*pt2Func)(void *, bool, Transition*));
-	void removeWaitedTriggerPointMessageAction();
+	void addIsEventReadyCallback(void(*pt2Func)(void *, bool));
+	void removeIsEventReadyCallback();
 
 	void pushTransitionToCrossWhenAcceleration(Transition* t);
 
@@ -398,8 +398,7 @@ private:
 
 	bool m_mustCrossAllTransitionWithoutWaitingEvent;
 
-	void (*m_waitedTriggerPointMessageAction)(void*, bool, Transition*);
-	void* m_waitedTriggerPointMessageArgument;
+	void (*m_isEventReadyCallback)(void*, bool);
 
 	// Private function only used to factorize the program.
 	Arc* newArc(PetriNetNode* from, PetriNetNode* to, int color);
