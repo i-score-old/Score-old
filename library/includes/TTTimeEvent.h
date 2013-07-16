@@ -36,6 +36,8 @@ class TTSCORE_EXPORT TTTimeEvent : public TTObjectBase {
     TTObjectBasePtr                 mContainer;                     ///< the container which handles the time event
     
 protected :
+    
+    TTSymbol                        mName;                          ///< the name of the event
 
     TTUInt32                        mDate;                          ///< the date of the event
     

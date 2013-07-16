@@ -104,9 +104,11 @@ TTErr Automation::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
 	
-	// TODO : write the automation attributes, the cue start and end content
+    xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "automation");
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST mName.c_str());
+    xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
 	
-	return kTTErrGeneric;
+	return kTTErrNone;
 }
 
 TTErr Automation::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)

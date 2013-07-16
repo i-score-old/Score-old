@@ -60,9 +60,11 @@ TTErr Interval::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
 	
-	// TODO : write the time box attributes, the cue start and end content, start and end receiver, ...
+    xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "interval");
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST mName.c_str());
+    xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
 	
-	return kTTErrGeneric;
+	return kTTErrNone;
 }
 
 TTErr Interval::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)

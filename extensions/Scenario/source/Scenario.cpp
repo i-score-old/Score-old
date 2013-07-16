@@ -141,12 +141,41 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
 TTErr Scenario::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 {
 	TTXmlHandlerPtr	aXmlHandler = NULL;
+    TTValue         v;
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
 	
-	// TODO : pass the XmlHandlerPtr to all the time processes and their time events of the scenario to write their content into the file
+    xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "scenario");
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST mName.c_str());
+    
+    // Write all the time events
+    xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "events");
 	
-	return kTTErrGeneric;
+    for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next()) {
+        
+        v = TTObjectBasePtr(mTimeEventList.current()[0]);
+        aXmlHandler->setAttributeValue(kTTSym_object, v);
+        aXmlHandler->sendMessage(TTSymbol("Write"));
+    }
+    
+    xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
+    
+    // Write all the time processes
+    xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "processes");
+    
+    for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
+        
+        v = TTObjectBasePtr(mTimeProcessList.current()[0]);
+        aXmlHandler->setAttributeValue(kTTSym_object, v);
+        aXmlHandler->sendMessage(TTSymbol("Write"));
+    }
+    
+    xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
+    
+    
+    xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
+	
+	return kTTErrNone;
 }
 
 TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)

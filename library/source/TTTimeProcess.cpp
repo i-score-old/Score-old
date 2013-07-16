@@ -23,6 +23,7 @@
 
 TT_BASE_OBJECT_CONSTRUCTOR,
 mContainer(NULL),
+mName(kTTSymEmpty),
 mDurationMin(0),
 mDurationMax(0),
 mActive(YES),
@@ -43,6 +44,8 @@ mEndEventCallback(NULL)
     
     // the rigid state handles the DurationMin and DurationMax attribute
     registerAttribute(TTSymbol("rigid"), kTypeBoolean, NULL, (TTGetterMethod)& TTTimeProcess::getRigid, (TTSetterMethod)& TTTimeProcess::setRigid);
+    
+    addAttribute(Name, kTypeSymbol);
     
     addAttributeWithSetter(DurationMin, kTypeUInt32);
     addAttributeWithSetter(DurationMax, kTypeUInt32);
@@ -120,6 +123,9 @@ mEndEventCallback(NULL)
     
     // Cache some attributes for high speed notification feedbacks
     this->findAttribute(TTSymbol("active"), &activeAttribute);
+    
+    // generate a random name
+    mName.random();
 }
 
 TTTimeProcess::~TTTimeProcess()

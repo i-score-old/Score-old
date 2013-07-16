@@ -37,6 +37,8 @@ class TTSCORE_EXPORT TTTimeProcess : public TTObjectBase {
     
 protected :
     
+    TTSymbol                        mName;                          ///< the name of the time process
+    
     TTUInt32                        mDurationMin;                   ///< the minimal duration of the time process
     TTUInt32                        mDurationMax;                   ///< the maximal duration of the time process
     

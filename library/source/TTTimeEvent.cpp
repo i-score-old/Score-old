@@ -23,6 +23,7 @@
 
 TT_BASE_OBJECT_CONSTRUCTOR,
 mContainer(NULL),
+mName(kTTSymEmpty),
 mDate(0),
 mState(NULL),
 mInteractive(NO),
@@ -36,6 +37,7 @@ mReady(YES)
     if (arguments.size() == 2)
         mContainer = arguments[1];
 
+    addAttribute(Name, kTypeSymbol);
    	addAttributeWithSetter(Date, kTypeUInt32);
     addAttribute(State, kTypeObject);
     addAttributeWithSetter(Interactive, kTypeBoolean);
@@ -56,7 +58,11 @@ mReady(YES)
     this->findAttribute(TTSymbol("ready"), &readyAttribute);
     this->findMessage(TTSymbol("Happen"), &happenMessage);
     
+    // create a script
     TTObjectBaseInstantiate(kTTSym_Script, TTObjectBaseHandle(&mState), kTTValNONE);
+    
+    // generate a random name
+    mName.random();
 }
 
 TTTimeEvent::~TTTimeEvent()
@@ -186,9 +192,11 @@ TTErr TTTimeEvent::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
 	
-	// TODO : write the time event attributes
+    xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "event");
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST mName.c_str());
+    xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
 	
-	return kTTErrGeneric;
+	return kTTErrNone;
 }
 
 TTErr TTTimeEvent::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
