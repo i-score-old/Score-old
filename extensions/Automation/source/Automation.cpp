@@ -101,11 +101,45 @@ TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
 TTErr Automation::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 {
 	TTXmlHandlerPtr	aXmlHandler = NULL;
+    TTValue         v, keys;
+    TTSymbol        name, key;
+    TTUInt32        i;
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
 	
     xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "automation");
+    
+    // Write the name
     xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST mName.c_str());
+    
+    // Write the start event name
+    getStartEvent()->getAttributeValue(kTTSym_name, v);
+    name = v[0];
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "start", BAD_CAST name.c_str());
+    
+    // Write the end event name
+    getEndEvent()->getAttributeValue(kTTSym_name, v);
+    name = v[0];
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "end", BAD_CAST name.c_str());
+    
+    // Write the curves
+    mCurves.getKeys(keys);
+    for (i = 0; i < keys.size(); i++) {
+        
+        key = keys[i];
+        mCurves.lookup(key, v);
+        
+        xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "curve");
+        
+        // Write the curve's address
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "address", BAD_CAST key.c_str());
+        
+        aXmlHandler->setAttributeValue(kTTSym_object, v);
+        aXmlHandler->sendMessage(TTSymbol("Write"));
+        
+        xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
+    }
+    
     xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
 	
 	return kTTErrNone;

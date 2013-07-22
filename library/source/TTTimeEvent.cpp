@@ -62,7 +62,7 @@ mReady(YES)
     TTObjectBaseInstantiate(kTTSym_Script, TTObjectBaseHandle(&mState), kTTValNONE);
     
     // generate a random name
-    mName.random();
+    mName = mName.random();
 }
 
 TTTimeEvent::~TTTimeEvent()
@@ -189,11 +189,33 @@ TTErr TTTimeEvent::StateAddressGetValue(const TTValue& inputValue, TTValue& outp
 TTErr TTTimeEvent::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 {
 	TTXmlHandlerPtr	aXmlHandler = NULL;
+    TTValue         v;
+    TTString        s;
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
 	
     xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "event");
+    
+    // Write the name
     xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST mName.c_str());
+    
+    // Write the date
+    v = mDate;
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "date", BAD_CAST s.data());
+    
+    // Write if it is interactive
+    v = mInteractive;
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "interactive", BAD_CAST s.data());
+    
+    // Write the state
+    v = TTObjectBasePtr(mState);
+    aXmlHandler->setAttributeValue(kTTSym_object, v);
+    aXmlHandler->sendMessage(TTSymbol("Write"));
+    
     xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
 	
 	return kTTErrNone;

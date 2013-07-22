@@ -161,10 +161,34 @@ TTErr Curve::Sample(const TTValue& inputValue, TTValue& outputValue)
 TTErr Curve::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 {
 	TTXmlHandlerPtr	aXmlHandler = NULL;
+    TTValue         v;
+    TTString        s;
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
 	
-	// TODO : write the curve attributes
+    // Write if it is active
+    v = mActive;
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "active", BAD_CAST s.data());
+    
+    // Write the redundancy
+    v = mRedundancy;
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "redundancy", BAD_CAST s.data());
+    
+    // Write the sample rate
+    v = mSampleRate;
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "sampleRate", BAD_CAST s.data());
+    
+    // Write the function
+    getParameters(v);
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "function", BAD_CAST s.data());
 	
 	return kTTErrGeneric;
 }

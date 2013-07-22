@@ -125,7 +125,7 @@ mEndEventCallback(NULL)
     this->findAttribute(TTSymbol("active"), &activeAttribute);
     
     // generate a random name
-    mName.random();
+    mName = mName.random();
 }
 
 TTTimeProcess::~TTTimeProcess()
