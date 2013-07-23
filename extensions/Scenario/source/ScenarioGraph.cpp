@@ -16,14 +16,8 @@
 #include "Scenario.h"
 #include "ScenarioGraph.h"
 
-void Scenario::compileScenario(TTUInt32 timeOffset)
+void Scenario::clearGraph()
 {
-    TTTimeProcessPtr    aTimeProcess;
-    TTTimeEventPtr      aTimeEvent;
-    TTValue             v;
-    
-    // cf : ECOMachine::compilePetriNet
-    
     // clear the former graph
     if (mExecutionGraph != NULL) {
 		delete mExecutionGraph;
@@ -36,6 +30,17 @@ void Scenario::compileScenario(TTUInt32 timeOffset)
     mTransitionsMap.clear();
 	mArcsMap.clear();
     mMergedTransitionsMap.clear();
+}
+
+void Scenario::compileGraph(TTUInt32 timeOffset)
+{
+    TTTimeProcessPtr    aTimeProcess;
+    TTTimeEventPtr      aTimeEvent;
+    TTValue             v;
+    
+    // cf : ECOMachine::compilePetriNet
+    
+    clearGraph();
     
     // set the callback used to get ready event state back
     mExecutionGraph->addIsEventReadyCallback(&ScenarioGraphIsEventReadyCallBack);

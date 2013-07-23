@@ -86,7 +86,7 @@ TTErr Scenario::Compile()
 {
     // compile the mExecutionGraph to prepare scenario execution
     // TODO : pass a time offset
-    compileScenario(0);
+    compileGraph(0);
     
     return kTTErrNone;
 }
@@ -140,30 +140,14 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr Scenario::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 {
-	TTXmlHandlerPtr	aXmlHandler = NULL;
-    TTValue         v;
-    TTSymbol        name;
+	TTXmlHandlerPtr     aXmlHandler = NULL;
+    TTValue             v;
+    TTTimeProcessPtr    aTimeProcess;
+    TTSymbol            name;
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
-	
-    xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "scenario");
-    
-    // Write the name
-    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST mName.c_str());
-    
-    // Write the start event name
-    getStartEvent()->getAttributeValue(kTTSym_name, v);
-    name = v[0];
-    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "start", BAD_CAST name.c_str());
-    
-    // Write the end event name
-    getEndEvent()->getAttributeValue(kTTSym_name, v);
-    name = v[0];
-    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "end", BAD_CAST name.c_str());
     
     // Write all the time events
-    xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "events");
-	
     for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next()) {
         
         v = TTObjectBasePtr(mTimeEventList.current()[0]);
@@ -171,35 +155,212 @@ TTErr Scenario::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
         aXmlHandler->sendMessage(TTSymbol("Write"));
     }
     
-    xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
-    
     // Write all the time processes
-    xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "processes");
-    
     for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
         
-        v = TTObjectBasePtr(mTimeProcessList.current()[0]);
+        aTimeProcess = TTTimeProcessPtr(TTObjectBasePtr(mTimeProcessList.current()[0]));
+        
+        // start a node with the type of the process
+        name = aTimeProcess->getName();
+        xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST name.c_str());
+        
+        // Write the name
+        name = getTimeProcessName(aTimeProcess);
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST name.c_str());
+        
+        // Write the start event name
+        name = getTimeEventName(getStartEvent());
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "start", BAD_CAST name.c_str());
+        
+        // Write the end event name
+        name = getTimeEventName(getEndEvent());
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "end", BAD_CAST name.c_str());
+        
+        // pass the xml handler to the process to fill his attribute
+        v = TTObjectBasePtr(aTimeProcess);
         aXmlHandler->setAttributeValue(kTTSym_object, v);
         aXmlHandler->sendMessage(TTSymbol("Write"));
+        
+        xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
     }
-    
-    xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
-    
-    
-    xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
 	
 	return kTTErrNone;
 }
 
 TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 {
-	TTXmlHandlerPtr	aXmlHandler = NULL;
+	TTXmlHandlerPtr         aXmlHandler = NULL;
+    SolverObjectMapIterator itSolver;
+    GraphObjectMapIterator  itGraph;
+    TTTimeEventPtr          start, end;
+    TTValue                 v, out, aCacheElement;
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
 	
-	// TODO : pass the XmlHandlerPtr to all the time processes of the scenario to read their content from the file
+	// Switch on the name of the XML node
 	
-	return kTTErrGeneric;
+    // if the scenario is not handled by a upper scenario
+    if (mContainer == NULL) {
+        
+        // Starts scenario reading
+        if (aXmlHandler->mXmlNodeName == kTTSym_start) {
+            
+            // clear all data structures
+            mTimeEventList.clear();
+            mTimeProcessList.clear();
+            
+            for (itSolver = mVariablesMap.begin() ; itSolver != mVariablesMap.end() ; itSolver++)
+                delete (SolverVariablePtr)itSolver->second;
+            
+            mVariablesMap.clear();
+            
+            for (itSolver = mConstraintsMap.begin() ; itSolver != mConstraintsMap.end() ; itSolver++)
+                delete (SolverConstraintPtr)itSolver->second;
+            
+            mConstraintsMap.clear();
+            
+            for (itSolver = mRelationsMap.begin() ; itSolver != mRelationsMap.end() ; itSolver++)
+                delete (SolverRelationPtr)itSolver->second;
+            
+            mRelationsMap.clear();
+            
+            delete mEditionSolver;
+            mEditionSolver = new Solver();
+            
+            clearGraph();
+            
+            return kTTErrNone;
+        }
+        
+        // Ends scenario reading
+        if (aXmlHandler->mXmlNodeName == kTTSym_stop) {
+            
+            return kTTErrNone;
+        }
+        
+    }
+    
+    else {
+        
+        // get the name of the scenario
+        if (xmlTextReaderMoveToAttribute((xmlTextReaderPtr)aXmlHandler->mReader, (const xmlChar*)("name")) == 1) {
+            
+            aXmlHandler->fromXmlChar(xmlTextReaderValue((xmlTextReaderPtr)aXmlHandler->mReader), v);
+            
+            if (v.size() == 1) {
+                
+                if (v[0].type() == kTypeSymbol) {
+                    
+                    mName = v[0];
+                }
+            }
+        }
+        
+        // get the name of the start event
+        if (xmlTextReaderMoveToAttribute((xmlTextReaderPtr)aXmlHandler->mReader, (const xmlChar*)("start")) == 1) {
+            
+            aXmlHandler->fromXmlChar(xmlTextReaderValue((xmlTextReaderPtr)aXmlHandler->mReader), v);
+            
+            if (v.size() == 1) {
+                
+                if (v[0].type() == kTypeSymbol) {
+                    
+                    // TODO : find the event using his name inside our container
+                    ;//mContainer->mTimeEventList.find(&TTTimeContainerFindTimeEventWithName, (TTPtr)&v, aCacheElement);
+                }
+            }
+        }
+        
+        // get the name of the end event
+        if (xmlTextReaderMoveToAttribute((xmlTextReaderPtr)aXmlHandler->mReader, (const xmlChar*)("end")) == 1) {
+            
+            aXmlHandler->fromXmlChar(xmlTextReaderValue((xmlTextReaderPtr)aXmlHandler->mReader), v);
+            
+            if (v.size() == 1) {
+                
+                if (v[0].type() == kTypeSymbol) {
+                    
+                    // TODO : find the event using his name inside our container
+                    ;//mContainer->mTimeEventList.find(&TTTimeContainerFindTimeEventWithName, (TTPtr)&v, aCacheElement);
+                }
+            }
+        }
+    }
+    
+    // Event node
+    if (aXmlHandler->mXmlNodeName == TTSymbol("event")) {
+        
+        if (aXmlHandler->mXmlNodeStart) {
+            
+            // get the date
+            if (xmlTextReaderMoveToAttribute((xmlTextReaderPtr)aXmlHandler->mReader, (const xmlChar*)("date")) == 1) {
+                
+                aXmlHandler->fromXmlChar(xmlTextReaderValue((xmlTextReaderPtr)aXmlHandler->mReader), v);
+                
+                if (v.size() == 1) {
+                    
+                    if (v[0].type() == kTypeUInt32) {
+                        
+                        // create the time event
+                        this->TimeEventCreate(v, out);
+                        
+                        // pass the xml handler to the new event to fill his attribute
+                        aXmlHandler->setAttributeValue(kTTSym_object, out);
+                        aXmlHandler->sendMessage(TTSymbol("Read"));
+                    }
+                }
+            }
+        }
+        
+        return kTTErrNone;
+    }
+    
+    // Process node : the name of the node is the name of the process type
+    if (aXmlHandler->mXmlNodeStart) {
+        
+        // get the name of the start event
+        if (xmlTextReaderMoveToAttribute((xmlTextReaderPtr)aXmlHandler->mReader, (const xmlChar*)("start")) == 1) {
+            
+            aXmlHandler->fromXmlChar(xmlTextReaderValue((xmlTextReaderPtr)aXmlHandler->mReader), v);
+            
+            if (v.size() == 1) {
+                
+                if (v[0].type() == kTypeSymbol) {
+                    
+                    // TODO : find the event using his name inside our container
+                    ;//mContainer->mTimeEventList.find(&TTTimeContainerFindTimeEventWithName, (TTPtr)&v, aCacheElement);
+                }
+            }
+        }
+        
+        // get the name of the end event
+        if (xmlTextReaderMoveToAttribute((xmlTextReaderPtr)aXmlHandler->mReader, (const xmlChar*)("end")) == 1) {
+            
+            aXmlHandler->fromXmlChar(xmlTextReaderValue((xmlTextReaderPtr)aXmlHandler->mReader), v);
+            
+            if (v.size() == 1) {
+                
+                if (v[0].type() == kTypeSymbol) {
+                    
+                    // TODO : find the event using his name inside our container
+                    ;//mContainer->mTimeEventList.find(&TTTimeContainerFindTimeEventWithName, (TTPtr)&v, aCacheElement);
+                }
+            }
+        }
+        
+        // create the time process
+        v = aXmlHandler->mXmlNodeName;
+        v.append(TTObjectBasePtr(start));
+        v.append(TTObjectBasePtr(end));
+        
+        TimeProcessCreate(v, out);
+        
+        // pass the xml handler to the new process to fill his attribute
+        aXmlHandler->setAttributeValue(kTTSym_object, out);
+        aXmlHandler->sendMessage(TTSymbol("Read"));
+    }
+    
+    return kTTErrNone;
 }
 
 TTErr Scenario::TimeEventCreate(const TTValue& inputValue, TTValue& outputValue)

@@ -162,7 +162,8 @@ class Scenario : public TimeContainer {
     
     
     /** internal methods used to compile the execution graph */
-    void    compileScenario(TTUInt32 timeOffset);
+    void    clearGraph();
+    void    compileGraph(TTUInt32 timeOffset);
     void    compileTimeProcess(TTTimeProcessPtr aTimeProcess, TransitionPtr *previousTransition, TransitionPtr endTransition, TTUInt32 timeOffset);
     void    compileInterval(TTTimeProcessPtr aTimeProcess);
     void    compileTimeEvent(TTTimeEventPtr aTimeEvent, TTUInt32 time, TransitionPtr previousTransition, TransitionPtr currentTransition, Place* currentPlace);

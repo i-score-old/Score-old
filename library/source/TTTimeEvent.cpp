@@ -224,10 +224,51 @@ TTErr TTTimeEvent::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 TTErr TTTimeEvent::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 {
 	TTXmlHandlerPtr	aXmlHandler = NULL;
+    TTValue         v;
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
 	
-	// TODO : parse the time event attributes
+	// get the name
+    if (xmlTextReaderMoveToAttribute((xmlTextReaderPtr)aXmlHandler->mReader, (const xmlChar*)("name")) == 1) {
+        
+        aXmlHandler->fromXmlChar(xmlTextReaderValue((xmlTextReaderPtr)aXmlHandler->mReader), v);
+        
+        if (v.size() == 1) {
+            
+            if (v[0].type() == kTypeSymbol) {
+                
+                mName = v[0];
+            }
+        }
+    }
+    
+    // get the date
+    if (xmlTextReaderMoveToAttribute((xmlTextReaderPtr)aXmlHandler->mReader, (const xmlChar*)("date")) == 1) {
+        
+        aXmlHandler->fromXmlChar(xmlTextReaderValue((xmlTextReaderPtr)aXmlHandler->mReader), v);
+        
+        if (v.size() == 1) {
+            
+            if (v[0].type() == kTypeUInt32) {
+                
+                this->setDate(v);
+            }
+        }
+    }
+    
+    // get the interactive state
+    if (xmlTextReaderMoveToAttribute((xmlTextReaderPtr)aXmlHandler->mReader, (const xmlChar*)("interactive")) == 1) {
+        
+        aXmlHandler->fromXmlChar(xmlTextReaderValue((xmlTextReaderPtr)aXmlHandler->mReader), v);
+        
+        if (v.size() == 1) {
+            
+            if (v[0].type() == kTypeBoolean) {
+                
+                this->setInteractive(v);
+            }
+        }
+    }
 	
-	return kTTErrGeneric;
+	return kTTErrNone;
 }

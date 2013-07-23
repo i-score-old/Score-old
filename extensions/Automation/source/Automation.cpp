@@ -106,21 +106,6 @@ TTErr Automation::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
     TTUInt32        i;
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
-	
-    xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "automation");
-    
-    // Write the name
-    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST mName.c_str());
-    
-    // Write the start event name
-    getStartEvent()->getAttributeValue(kTTSym_name, v);
-    name = v[0];
-    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "start", BAD_CAST name.c_str());
-    
-    // Write the end event name
-    getEndEvent()->getAttributeValue(kTTSym_name, v);
-    name = v[0];
-    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "end", BAD_CAST name.c_str());
     
     // Write the curves
     mCurves.getKeys(keys);
@@ -139,9 +124,7 @@ TTErr Automation::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
         
         xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
     }
-    
-    xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
-	
+    	
 	return kTTErrNone;
 }
 

@@ -76,6 +76,11 @@ TTTimeContainer::~TTTimeContainer()
     ;
 }
 
+TTSymbol TTTimeContainer::getTimeEventName(TTTimeEventPtr aTimeEvent)
+{
+    return aTimeEvent->mName;
+}
+
 TTUInt32 TTTimeContainer::getTimeEventDate(TTTimeEventPtr aTimeEvent)
 {
     return aTimeEvent->mDate;
@@ -84,6 +89,11 @@ TTUInt32 TTTimeContainer::getTimeEventDate(TTTimeEventPtr aTimeEvent)
 TTBoolean TTTimeContainer::isTimeEventInteractive(TTTimeEventPtr aTimeEvent)
 {
     return aTimeEvent->mInteractive;
+}
+
+TTSymbol TTTimeContainer::getTimeProcessName(TTTimeProcessPtr aTimeProcess)
+{
+    return aTimeProcess->mName;
 }
 
 TTTimeEventPtr TTTimeContainer::getTimeProcessStartEvent(TTTimeProcessPtr aTimeProcess)
@@ -129,6 +139,15 @@ void TTTimeContainerFindTimeProcess(const TTValue& aValue, TTPtr timeProcessPtrT
 void TTTimeContainerFindTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found)
 {
     found = (TTObjectBasePtr)aValue[0] == (TTObjectBasePtr)timeEventPtrToMatch;
+}
+
+void TTTimeContainerFindTimeEventWithName(const TTValue& aValue, TTPtr timeEventNamePtrToMatch, TTBoolean& found)
+{
+    TTValuePtr      b = TTValuePtr(timeEventNamePtrToMatch);
+    TTSymbol        nameToMatch = (*b)[0];
+    TTTimeEventPtr  timeEventToTest = TTTimeEventPtr(TTObjectBasePtr(aValue[0]));
+    
+    found = timeEventToTest->mName == nameToMatch;
 }
 
 void TTTimeContainerFindTimeProcessWithTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found)

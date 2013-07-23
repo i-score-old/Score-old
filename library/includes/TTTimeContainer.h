@@ -101,6 +101,11 @@ protected :
     
     /* a time container can access too the protected members of any time event or time process */
     
+    /** Getter on event's name protected member
+     @aTimeProcess          a time event object
+     @return                a name symbol */
+    TTSymbol        getTimeEventName(TTTimeEventPtr aTimeEvent);
+    
     /** Getter on date time event protected member
      @aTimeProcess          a time event object
      @return                a date value */
@@ -110,6 +115,11 @@ protected :
      @aTimeProcess          a time event object
      @return                a boolean value */
     TTBoolean       isTimeEventInteractive(TTTimeEventPtr aTimeEvent);
+    
+    /** Getter on process's name protected member
+     @aTimeProcess          a time process object
+     @return                a name symbol */
+    TTSymbol        getTimeProcessName(TTTimeProcessPtr aTimeProcess);
     
     /** Getter on start event time process protected member
      @aTimeProcess          a time process object
@@ -144,6 +154,7 @@ protected :
     
     friend void TTSCORE_EXPORT TTTimeContainerFindTimeProcess(const TTValue& aValue, TTPtr timeProcessPtrToMatch, TTBoolean& found);
     friend void TTSCORE_EXPORT TTTimeContainerFindTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found);
+    friend void TTSCORE_EXPORT TTTimeContainerFindTimeEventWithName(const TTValue& aValue, TTPtr timeEventNamePtrToMatch, TTBoolean& found);
     friend void TTSCORE_EXPORT TTTimeContainerFindTimeProcessWithTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found);
 };
 
@@ -152,6 +163,8 @@ typedef TTTimeContainer* TTTimeContainerPtr;
 void TTSCORE_EXPORT TTTimeContainerFindTimeProcess(const TTValue& aValue, TTPtr timeProcessPtrToMatch, TTBoolean& found);
 
 void TTSCORE_EXPORT TTTimeContainerFindTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found);
+
+void TTSCORE_EXPORT TTTimeContainerFindTimeEventWithName(const TTValue& aValue, TTPtr timeEventNamePtrToMatch, TTBoolean& found);
 
 void TTSCORE_EXPORT TTTimeContainerFindTimeProcessWithTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found);
 
