@@ -150,12 +150,6 @@ protected :
      @aTimeProcess          a time process object
      @return                a duration value */
     TTUInt32        getTimeProcessDurationMax(TTTimeProcessPtr aTimeProcess);
-    
-    
-    friend void TTSCORE_EXPORT TTTimeContainerFindTimeProcess(const TTValue& aValue, TTPtr timeProcessPtrToMatch, TTBoolean& found);
-    friend void TTSCORE_EXPORT TTTimeContainerFindTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found);
-    friend void TTSCORE_EXPORT TTTimeContainerFindTimeEventWithName(const TTValue& aValue, TTPtr timeEventNamePtrToMatch, TTBoolean& found);
-    friend void TTSCORE_EXPORT TTTimeContainerFindTimeProcessWithTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found);
 };
 
 typedef TTTimeContainer* TTTimeContainerPtr;

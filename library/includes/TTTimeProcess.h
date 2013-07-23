@@ -217,6 +217,8 @@ protected :
     friend TTErr TTSCORE_EXPORT TTTimeProcessStartEventHappenCallback(TTPtr baton, TTValue& data);
     friend TTErr TTSCORE_EXPORT TTTimeProcessEndEventHappenCallback(TTPtr baton, TTValue& data);
     friend void TTSCORE_EXPORT TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression);
+    
+    friend void TTSCORE_EXPORT TTTimeContainerFindTimeProcessWithTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found);
 };
 
 typedef TTTimeProcess* TTTimeProcessPtr;

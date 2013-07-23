@@ -89,6 +89,8 @@ private :
      @param	outputValue     the value of the state for an address
      @return                kTTErrNone */
     TTErr           StateAddressGetValue(const TTValue& inputValue, TTValue& outputValue);
+    
+    friend void TTSCORE_EXPORT TTTimeContainerFindTimeEventWithName(const TTValue& aValue, TTPtr timeEventNamePtrToMatch, TTBoolean& found);
 };
 
 typedef TTTimeEvent* TTTimeEventPtr;
