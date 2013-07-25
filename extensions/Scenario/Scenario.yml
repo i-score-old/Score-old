@@ -42,7 +42,8 @@ includes:
   - ../../support/jamoma/includes
   
   # to include gecode solver library
-  - /Library/Frameworks/gecode.framework/Headers
+  #- /Library/Frameworks/gecode.framework/Headers       # this doesn't work anymore (suddenly and mysteriously ...)
+  - includes/gecode/                                    # so I copy the gecode include folder into the project
   
   # to use xml file format
   - /usr/include/libxml2

@@ -47,10 +47,11 @@ using std::vector;
 using std::map;
 using std::pair;
 
+#include <gecode/driver.hh>
+#include <gecode/int.hh>
 #include <gecode/kernel.hh>
 #include <gecode/minimodel.hh>
 #include <gecode/search.hh>
-#include <gecode/set.hh>
 
 using namespace Gecode;
 using namespace MiniModel;
