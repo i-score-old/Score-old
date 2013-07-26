@@ -10,10 +10,9 @@ The Score framework attempted to share the work done in the libIscore library by
 The Score framework is based on the Jamoma Foundation which allows to setup a Peer Object Model mechanism in order to embedded easily the features inside many programmation environments (such as Max) or inside specific application dealing with logical and temporal constraints. It also provides a tree structure to manage the namespace of an application in order to organize and access its services.
 
 
-
 Installing
 
-1 : First of all you need to download the Gecode framework : http://www.gecode.org/download/Gecode-4.2.0.dmg
+1 : First of all you need to download the Gecode framework : http://www.gecode.org/download/Gecode-3.7.2.dmg
 
 2 : if the Score repository is placed inside the Jamoma/Core folder of the Jamoma repository :
 	- make sure the whole Jamoma project is up-to-date and build it.
@@ -22,7 +21,6 @@ Installing
 
 or, if not run only the following build script : ./buildWithSupport.rb dev clean
 
-note : it works on Mac with LLVM version 4.2 (clang-425.0.28)
 
 
 Documentation / API

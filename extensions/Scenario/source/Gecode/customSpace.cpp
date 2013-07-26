@@ -39,6 +39,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 #include "customSpace.hpp"
 
 CustomSpace::CustomSpace() 
+//TODO: avant ": Space(), _dat(this, 0), _objFuncInitialized(false)"
 : Space(), _dat(*this, 0), _objFuncInitialized(false)
 {
 	_lastVal = -1;
@@ -47,12 +48,14 @@ CustomSpace::CustomSpace()
 
 CustomSpace::CustomSpace(bool share, CustomSpace& s) : Space(share,s) 
 {
+	//TODO: avant "_dat.update(this, share, s._dat);"
 	_dat.update(*this, share, s._dat);
 	_objFuncInitialized = s._objFuncInitialized;
 	_lastVal = s._lastVal;
 	_cpt = s._cpt;
 
 	if (_objFuncInitialized)
+	//TODO: avant "_objFunc.update(this,share,s._objFunc);	"
 		_objFunc.update(*this,share,s._objFunc);	
 }
 
@@ -76,9 +79,13 @@ CustomSpace::setObjFunc(IntVar v)
 void
 CustomSpace::constrain(const Space& t)
 {
+//TODO: avant "rel(this, _objFunc, IRT_LE, (s)->_objFunc);"
+		
 	Space* s = &const_cast<Space&>(t);
 	
 	CustomSpace* s_copy = (CustomSpace*) s;
+	
+//	std::cout << "BRAAAAAA" << std::endl;		
 	
 	rel(*this, _objFunc, IRT_LE, (s_copy)->_objFunc);
 }
@@ -92,6 +99,8 @@ CustomSpace::copy(bool share)
 int
 CustomSpace::addVariable(int min, int max)
 {
+//TODO: avant "	IntVarArray newArray(this, _dat.size()+1);"
+//TODO:	avant "IntVar v(this, min, max);"
 	IntVarArray newArray(*this, _dat.size()+1);
 	IntVar v(*this, min, max);
 
@@ -110,7 +119,8 @@ CustomSpace::addVariable(int min, int max)
 void
 CustomSpace::doBranching()
 {
-   // branch(*this, _dat, INT_VAR_MAX_MIN(), INT_VAL_MIN());
+//TODO: avant "	branch(this, _dat, BVAR_MAX_MIN, BVAL_MIN);"
+	branch(*this, _dat, INT_VAR_MAX_MIN, INT_VAL_MIN);
 }
 
 IntVar 

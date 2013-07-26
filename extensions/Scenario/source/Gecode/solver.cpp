@@ -289,7 +289,7 @@ Solver::updateState()
 		(p->second)->addToSpace();
 	}
 
-	LinIntExpr expr;
+	LinExpr expr;
 	bool init=false;
 
 	// construct the linear combination of delta variables balanced by the weight associated with their type
@@ -344,23 +344,23 @@ Solver::updateState()
 		// construction of the objective function
 		if (!init)
 		{
-			expr = LinIntExpr(vars[0], currVar->getWeight()*multiplier);
+			expr = LinExpr(vars[0], currVar->getWeight()*multiplier);
 
 			init = true;
 
-			LinIntExpr tmp(vars[1], currVar->getWeight()*multiplier);
+			LinExpr tmp(vars[1], currVar->getWeight()*multiplier);
 
-			expr = LinIntExpr(expr, Gecode::LinIntExpr::NT_ADD, tmp);
+			expr = LinExpr(expr, Gecode::LinExpr::NT_ADD, tmp);
 		}
 		else
 		{
-			LinIntExpr tmp(vars[0], currVar->getWeight()*multiplier);
+			LinExpr tmp(vars[0], currVar->getWeight()*multiplier);
 
-			expr = LinIntExpr(expr, Gecode::LinIntExpr::NT_ADD, tmp);
+			expr = LinExpr(expr, Gecode::LinExpr::NT_ADD, tmp);
 
-			tmp = LinIntExpr(vars[1], currVar->getWeight()*multiplier);
+			tmp = LinExpr(vars[1], currVar->getWeight()*multiplier);
 
-			expr = LinIntExpr(expr, Gecode::LinIntExpr::NT_ADD, tmp);
+			expr = LinExpr(expr, Gecode::LinExpr::NT_ADD, tmp);
 		}
 	}
 

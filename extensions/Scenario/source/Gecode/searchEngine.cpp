@@ -41,11 +41,13 @@ knowledge of the CeCILL-C license and that you accept its terms.
 #include "customSpace.hpp"
 
 SearchEngine::SearchEngine(CustomSpace *space)
+//TODO: avant ":_bab(space, Search::Config::c_d, Search::Config::a_d, NULL)"
 :_bab(space)
 {
 }
 
 SearchEngine::SearchEngine(CustomSpace *space, const Search::Options& o)
+//TODO: avant ":_bab(space, c_d, a_d, st)"
 :_bab(space, o)
 {
 }
@@ -63,9 +65,5 @@ SearchEngine::next()
 int 
 SearchEngine::getMemoryPeak()
 {
-	// théo : it doesn't work since gecode 4.2.0
-    // see changelog : http://www.gecode.org/doc-latest/reference/PageChange.html#SectionChanges_4_0_0
-    
-    //return _bab.statistics().memory;
-    return 0;
+	return _bab.statistics().memory;
 }
