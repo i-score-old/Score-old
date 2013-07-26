@@ -43,7 +43,7 @@ includes:
   
   # to include gecode solver library
   #- /Library/Frameworks/gecode.framework/Headers       # this doesn't work anymore (suddenly and mysteriously ...)
-  - gecode                                              # so I copy the gecode include folder into the project
+  - includes/gecode/                                    # so I copy the gecode include folder into the project
   
   # to use xml file format
   - /usr/include/libxml2
