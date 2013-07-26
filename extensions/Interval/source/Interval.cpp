@@ -62,13 +62,8 @@ TTErr Interval::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr Interval::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 {
-	TTXmlHandlerPtr	aXmlHandler = NULL;
-	
-	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
-	
-	// TODO : parse the time box attributes, the cue start and end content, start and end receiver, ...
-	
-	return kTTErrGeneric;
+    // nothing to read
+	return kTTErrNone;
 }
 
 TTErr Interval::WriteAsText(const TTValue& inputValue, TTValue& outputValue)
