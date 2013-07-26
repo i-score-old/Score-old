@@ -194,11 +194,6 @@ TTErr TTTimeEvent::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
 	
-    xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "event");
-    
-    // Write the name
-    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST mName.c_str());
-    
     // Write the date
     v = mDate;
     v.toString();
@@ -216,8 +211,6 @@ TTErr TTTimeEvent::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
     aXmlHandler->setAttributeValue(kTTSym_object, v);
     aXmlHandler->sendMessage(TTSymbol("Write"));
     
-    xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
-	
 	return kTTErrNone;
 }
 
@@ -227,25 +220,9 @@ TTErr TTTimeEvent::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     TTValue         v;
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
-	
-	// get the name
-    if (xmlTextReaderMoveToAttribute((xmlTextReaderPtr)aXmlHandler->mReader, (const xmlChar*)("name")) == 1) {
-        
-        aXmlHandler->fromXmlChar(xmlTextReaderValue((xmlTextReaderPtr)aXmlHandler->mReader), v);
-        
-        if (v.size() == 1) {
-            
-            if (v[0].type() == kTypeSymbol) {
-                
-                mName = v[0];
-            }
-        }
-    }
     
     // get the date
-    if (xmlTextReaderMoveToAttribute((xmlTextReaderPtr)aXmlHandler->mReader, (const xmlChar*)("date")) == 1) {
-        
-        aXmlHandler->fromXmlChar(xmlTextReaderValue((xmlTextReaderPtr)aXmlHandler->mReader), v);
+    if (aXmlHandler->getXmlAttribute(TTSymbol("date"), v, NO)) {
         
         if (v.size() == 1) {
             
@@ -257,9 +234,7 @@ TTErr TTTimeEvent::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     }
     
     // get the interactive state
-    if (xmlTextReaderMoveToAttribute((xmlTextReaderPtr)aXmlHandler->mReader, (const xmlChar*)("interactive")) == 1) {
-        
-        aXmlHandler->fromXmlChar(xmlTextReaderValue((xmlTextReaderPtr)aXmlHandler->mReader), v);
+    if (aXmlHandler->getXmlAttribute(TTSymbol("interactive"), v, NO)) {
         
         if (v.size() == 1) {
             
