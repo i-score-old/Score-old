@@ -12,7 +12,7 @@ The Score framework is based on the Jamoma Foundation which allows to setup a Pe
 
 Installing
 
-1 : First of all you need to download the Gecode framework : http://www.gecode.org/download/Gecode-3.7.2.dmg
+1 : First of all you need to download the Gecode framework : http://www.gecode.org/download/Gecode-3.7.3.dmg
 
 2 : if the Score repository is placed inside the Jamoma/Core folder of the Jamoma repository :
 	- make sure the whole Jamoma project is up-to-date and build it.

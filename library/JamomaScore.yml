@@ -30,9 +30,6 @@ libraries:
   - DSP
   - MODULAR
   
-  # to include gecode solver library
-  - /Library/Frameworks/gecode.framework/gecode
-  
   # to link with the xml library
   - mac /usr/lib/libxml2.dylib
   - win ../../Foundation/library/libxml2/win32/lib/libxml2_a.lib
