@@ -52,6 +52,10 @@ mEndEventCallback(NULL)
     
     addAttributeWithSetter(Active, kTypeBoolean);
     
+    addAttribute(Color, kTypeLocalValue);
+    addAttribute(Position, kTypeUInt32);
+    addAttribute(Size, kTypeUInt32);
+    
     addAttribute(Scheduler, kTypeObject);
     addAttributeProperty(Scheduler, readOnly, YES);
     addAttributeProperty(Scheduler, hidden, YES);
@@ -158,6 +162,30 @@ TTTimeProcess::~TTTimeProcess()
         mScheduler = NULL;
     }
 }
+/*
+TTErr TTTimeProcess::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
+{
+    TTXmlHandlerPtr     aXmlHandler = NULL;
+
+	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
+    
+    // Write the name
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST mName.c_str());
+    
+    // Write the start event name
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "start", BAD_CAST TTTimeEventPtr(mStartEvent)->mName.c_str());
+    
+    // Write the end event name
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "end", BAD_CAST TTTimeEventPtr(mEndEvent)->mName.c_str());
+    
+    return kTTErrNone;
+}
+
+TTErr TTTimeProcess::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
+{
+    return kTTErrGeneric;
+}
+ */
 
 TTErr TTTimeProcess::getRigid(TTValue& value)
 {

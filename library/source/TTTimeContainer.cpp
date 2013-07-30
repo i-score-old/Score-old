@@ -91,6 +91,68 @@ TTBoolean TTTimeContainer::isTimeEventInteractive(TTTimeEventPtr aTimeEvent)
     return aTimeEvent->mInteractive;
 }
 
+void TTTimeContainer::writeTimeEventAsXml(TTXmlHandlerPtr aXmlHandler, TTTimeEventPtr aTimeEvent)
+{
+    TTValue v;
+    
+    // Start an event node
+    xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "event");
+    
+    // Write the name
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST aTimeEvent->mName.c_str());
+    
+    // Pass the xml handler to the event to fill his attribute
+    v = TTObjectBasePtr(aTimeEvent);
+    aXmlHandler->setAttributeValue(kTTSym_object, v);
+    aXmlHandler->sendMessage(TTSymbol("Write"));
+    
+    // Close the event node
+    xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
+}
+
+TTTimeEventPtr TTTimeContainer::readTimeEventFromXml(TTXmlHandlerPtr aXmlHandler)
+{
+    TTTimeEventPtr  aTimeEvent = NULL;
+    TTValue         v, out;
+    
+    if (aXmlHandler->mXmlNodeStart) {
+        
+        // Get the date
+        if (!aXmlHandler->getXmlAttribute(TTSymbol("date"), v, NO)) {
+            
+            if (v.size() == 1) {
+                
+                if (v[0].type() == kTypeUInt32) {
+                    
+                    // Create the time event
+                    if (!this->TimeEventCreate(v, out)) {
+                        
+                        aTimeEvent = TTTimeEventPtr(TTObjectBasePtr(out[0]));
+                        
+                        // Get the name
+                        if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES)) {
+                            
+                            if (v.size() == 1) {
+                                
+                                if (v[0].type() == kTypeSymbol) {
+                                    
+                                    aTimeEvent->mName = v[0];
+                                }
+                            }
+                        }
+                        
+                        // Pass the xml handler to the new event to fill his attribute
+                        aXmlHandler->setAttributeValue(kTTSym_object, out);
+                        aXmlHandler->sendMessage(TTSymbol("Read"));
+                    }
+                }
+            }
+        }
+    }
+    
+    return aTimeEvent;
+}
+
 TTSymbol TTTimeContainer::getTimeProcessName(TTTimeProcessPtr aTimeProcess)
 {
     return aTimeProcess->mName;
@@ -124,6 +186,123 @@ TTUInt32 TTTimeContainer::getTimeProcessDurationMin(TTTimeProcessPtr aTimeProces
 TTUInt32 TTTimeContainer::getTimeProcessDurationMax(TTTimeProcessPtr aTimeProcess)
 {
     return aTimeProcess->mDurationMax;
+}
+
+void TTTimeContainer::writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTTimeProcessPtr aTimeProcess)
+{
+    TTValue     v;
+    TTString    s;
+    
+    // Start a node with the type of the process
+    xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST aTimeProcess->getName().c_str());
+    
+    // Write the name
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST aTimeProcess->mName.c_str());
+    
+    // Write the start event name
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "start", BAD_CAST aTimeProcess->getStartEvent()->mName.c_str());
+    
+    // Write the end event name
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "end", BAD_CAST aTimeProcess->getEndEvent()->mName.c_str());
+    
+    
+    if (aTimeProcess->mDurationMin > 0 || aTimeProcess->mDurationMax > 0) {
+        
+        // Write the duration min
+        v = aTimeProcess->mDurationMin;
+        v.toString();
+        s = TTString(v[0]);
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "durationMin", BAD_CAST s.data());
+        
+        // Write the duration max
+        v = aTimeProcess->mDurationMax;
+        v.toString();
+        s = TTString(v[0]);
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "durationMax", BAD_CAST s.data());
+    }
+    
+    // Pass the xml handler to the process to fill his attribute
+    v = TTObjectBasePtr(aTimeProcess);
+    aXmlHandler->setAttributeValue(kTTSym_object, v);
+    aXmlHandler->sendMessage(TTSymbol("Write"));
+    
+    // Close the process node
+    xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
+}
+
+TTTimeProcessPtr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHandler)
+{
+    TTTimeProcessPtr    aTimeProcess = NULL;
+    TTTimeEventPtr      start = NULL;
+    TTTimeEventPtr      end = NULL;
+    TTValue             v, out, aCacheElement;
+    
+    // Get the name of the start event
+    if (!aXmlHandler->getXmlAttribute(TTSymbol("start"), v, YES)) {
+        
+        if (v.size() == 1) {
+            
+            if (v[0].type() == kTypeSymbol) {
+                
+                // Find the start event using his name inside the scenario
+                mTimeEventList.find(&TTTimeContainerFindTimeEventWithName, (TTPtr)&v, aCacheElement);
+                
+                if (aCacheElement == kTTValNONE)
+                    return NULL;
+                
+                start = TTTimeEventPtr(TTObjectBasePtr(aCacheElement[0]));
+            }
+        }
+    }
+    
+    // Get the name of the end event
+    if (!aXmlHandler->getXmlAttribute(TTSymbol("end"), v, YES)) {
+        
+        if (v.size() == 1) {
+            
+            if (v[0].type() == kTypeSymbol) {
+                
+                // Find the end event using his name inside the scenario
+                mTimeEventList.find(&TTTimeContainerFindTimeEventWithName, (TTPtr)&v, aCacheElement);
+                
+                if (aCacheElement == kTTValNONE)
+                    return NULL;
+                
+                end = TTTimeEventPtr(TTObjectBasePtr(aCacheElement[0]));
+            }
+        }
+    }
+    
+    if (!start || !end)
+        return NULL;
+    
+    // Create the time process
+    v = aXmlHandler->mXmlNodeName;
+    v.append(TTObjectBasePtr(start));
+    v.append(TTObjectBasePtr(end));
+    
+    if (!this->TimeProcessCreate(v, out)) {
+        
+        aTimeProcess = TTTimeProcessPtr(TTObjectBasePtr(out[0]));
+        
+        // Get the time process name
+        if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES)) {
+            
+            if (v.size() == 1) {
+                
+                if (v[0].type() == kTypeSymbol) {
+                    
+                    aTimeProcess->setAttributeValue(kTTSym_name, v);
+                }
+            }
+        }
+        
+        // Pass the xml handler to the new process to fill his attribute
+        aXmlHandler->setAttributeValue(kTTSym_object, out);
+        aXmlHandler->sendMessage(TTSymbol("Read"));
+    }
+    
+    return aTimeProcess;
 }
 
 #if 0

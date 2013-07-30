@@ -116,6 +116,17 @@ protected :
      @return                a boolean value */
     TTBoolean       isTimeEventInteractive(TTTimeEventPtr aTimeEvent);
     
+    /** Write basic informations of a time event as Xml
+     @aXmlHandler           a xml handler
+     @aTimeProcess          a time event object
+     @return                nothing */
+    void            writeTimeEventAsXml(TTXmlHandlerPtr aXmlHandler, TTTimeEventPtr aTimeEvent);
+    
+    /** Read basic informations of a time event from Xml
+     @aXmlHandler           a xml handler
+     @return                a new time event */
+    TTTimeEventPtr  readTimeEventFromXml(TTXmlHandlerPtr aXmlHandler);
+    
     /** Getter on process's name protected member
      @aTimeProcess          a time process object
      @return                a name symbol */
@@ -150,6 +161,17 @@ protected :
      @aTimeProcess          a time process object
      @return                a duration value */
     TTUInt32        getTimeProcessDurationMax(TTTimeProcessPtr aTimeProcess);
+    
+    /** Write basic informations of a time process as Xml
+     @aXmlHandler           a xml handler
+     @aTimeProcess          a time process object
+     @return                nothing */
+    void            writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTTimeProcessPtr aTimeProcess);
+    
+    /** Read basic informations of a time process from Xml
+     @aXmlHandler           a xml handler
+     @return                a new time process object */
+    TTTimeProcessPtr readTimeProcessFromXml(TTXmlHandlerPtr aXmlHandler);
 };
 
 typedef TTTimeContainer* TTTimeContainerPtr;

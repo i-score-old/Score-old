@@ -46,6 +46,10 @@ class Scenario : public TimeContainer {
     ExtendedInt                 plusInfinity;
 	ExtendedInt                 minusInfinity;
 	ExtendedInt                 integer0;
+    
+    TTTimeEventPtr              mCurrentTimeEvent;               ///< an internal pointer to remember the current time event being read
+    TTTimeProcessPtr            mCurrentTimeProcess;             ///< an internal pointer to remember the current time process being read
+    
 	
     /** Get parameters names needed by this time process
      @param	value           the returned parameter names
