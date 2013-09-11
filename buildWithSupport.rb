@@ -35,9 +35,9 @@ if  win32?
 elsif mac?
     
     # Copy support/jamoma folder into /usr/local/jamoma folder
-    `cp "#{glibdir}"/support/jamoma/extensions/* /usr/local/jamoma/extensions`
-    `cp "#{glibdir}"/support/jamoma/includes/* /usr/local/jamoma/includes`
-    `cp "#{glibdir}"/support/jamoma/lib/* /usr/local/jamoma/lib`
+    `sudo cp "#{glibdir}"/support/jamoma/extensions/* /usr/local/jamoma/extensions`
+    `sudo cp "#{glibdir}"/support/jamoma/includes/* /usr/local/jamoma/includes`
+    `sudo cp "#{glibdir}"/support/jamoma/lib/* /usr/local/jamoma/lib`
     
     # Create alias
     `sudo ln -s /usr/local/jamoma/lib/JamomaFoundation.dylib /usr/local/lib/JamomaFoundation.dylib`
@@ -54,8 +54,8 @@ elsif mac?
     
     # Copy Score headers to include them into other application
     # (except the includes folder because it is done by the support/build.rb script)
-    `cp "#{glibdir}"/library/tests/*.h /usr/local/jamoma/includes`
-    `cp "#{glibdir}"/extensions/TimePluginLib.h /usr/local/jamoma/includes`
+    `sudo cp "#{glibdir}"/library/tests/*.h /usr/local/jamoma/includes`
+    `sudo cp "#{glibdir}"/extensions/TimePluginLib.h /usr/local/jamoma/includes`
     
     # Create alias
     `sudo ln -s /usr/local/jamoma/extensions/Automation.ttdylib /usr/local/lib/Automation.ttdylib`
