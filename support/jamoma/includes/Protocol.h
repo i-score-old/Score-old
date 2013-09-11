@@ -85,7 +85,7 @@ public:
 	/** Get parameters names needed by this protocol */
 	virtual TTErr getParameterNames(TTValue& value)=0;
 	
-
+	
 	/** Register an application as a client of the protocol 
         This method allocate a TTHashPtr to store parameters */
 	TTErr registerApplication(const TTValue& inputValue, TTValue& outputValue);
@@ -108,7 +108,7 @@ public:
 
 	/** Is an application registered for this protocol ? */
 	TTErr isRegistered(const TTValue& inputValue, TTValue& outputValue);
-    
+	
 	
 	/** Scan to find remote applications and add them to the application manager */
 	virtual TTErr Scan()=0;
@@ -128,7 +128,7 @@ public:
      * \return errorcode			: return a kTTErrGeneric if the protocol fails to stop for the application or if it was already stopped
      */
 	virtual TTErr Stop(const TTValue& inputValue, TTValue& outputValue)=0;
-    
+	
 	/**************************************************************************************************************************
 	 *
 	 *	SEND REQUEST METHODS
