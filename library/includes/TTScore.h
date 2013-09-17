@@ -57,7 +57,7 @@
 
 // Prototypes
 
-/** Init the Score library, and the Modular if needed */
+/** Init the Score library */
 void	TTSCORE_EXPORT	TTScoreInit();
 
 #endif // __TT_SCORE_H__
