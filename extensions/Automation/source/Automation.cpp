@@ -131,10 +131,50 @@ TTErr Automation::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 TTErr Automation::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 {
 	TTXmlHandlerPtr	aXmlHandler = NULL;
-	
+    TTObjectBasePtr curve = NULL;
+    TTSymbol        address;
+    TTValue         v;
+    
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
-	
-	// TODO : parse the automation attributes, the cue start and end content
+    
+    // Event node
+    if (aXmlHandler->mXmlNodeName == TTSymbol("Automation")) {
+        
+        if (aXmlHandler->mXmlNodeStart)
+            
+            ; // TODO : should we clear the automation here ?
+        
+        return kTTErrNone;
+    }
+    
+    // If there is a current curve
+    if (aXmlHandler->mXmlNodeName == TTSymbol("curve")) {
+        
+        if (aXmlHandler->mXmlNodeStart) {
+            
+            TTObjectBaseInstantiate(TTSymbol("Curve"), TTObjectBaseHandle(&curve), kTTValNONE);
+            
+            // Get the address
+            if (!aXmlHandler->getXmlAttribute(TTSymbol("address"), v, YES)) {
+                
+                if (v.size() == 1) {
+                    
+                    if (v[0].type() == kTypeSymbol) {
+                        
+                        address = v[0];
+                        
+                        // store the curve
+                        mCurves.append(address, curve);
+                    }
+                }
+            }
+            
+            // Pass the xml handler to the current curve to fill his data structure
+            v = TTObjectBasePtr(curve);
+            aXmlHandler->setAttributeValue(kTTSym_object, v);
+            return aXmlHandler->sendMessage(TTSymbol("Read"));
+        }
+    }
 	
 	return kTTErrGeneric;
 }
@@ -145,7 +185,7 @@ TTErr Automation::WriteAsText(const TTValue& inputValue, TTValue& outputValue)
 	
 	aTextHandler = TTTextHandlerPtr((TTObjectBasePtr)inputValue[0]);
 	
-	// TODO : write the automation attributes, the cue start and end content
+	// TODO : write the curves
 	
 	return kTTErrGeneric;
 }
@@ -157,7 +197,7 @@ TTErr Automation::ReadFromText(const TTValue& inputValue, TTValue& outputValue)
 	
 	aTextHandler = TTTextHandlerPtr((TTObjectBasePtr)inputValue[0]);
 	
-    // TODO : parse the automation attributes, the cue start and end content
+    // TODO : parse the curves
 	
 	return kTTErrGeneric;
 }

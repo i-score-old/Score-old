@@ -276,6 +276,9 @@ TTTimeProcessPtr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHan
     if (!start || !end)
         return NULL;
     
+    // DEBUG
+    TTSymbol name = aXmlHandler->mXmlNodeName;
+    
     // Create the time process
     v = aXmlHandler->mXmlNodeName;
     v.append(TTObjectBasePtr(start));
@@ -293,6 +296,30 @@ TTTimeProcessPtr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHan
                 if (v[0].type() == kTypeSymbol) {
                     
                     aTimeProcess->setAttributeValue(kTTSym_name, v);
+                }
+            }
+        }
+        
+        // Get the durationMin
+        if (!aXmlHandler->getXmlAttribute(TTSymbol("durationMin"), v, NO)) {
+            
+            if (v.size() == 1) {
+                
+                if (v[0].type() == kTypeUInt32) {
+                    
+                    aTimeProcess->setAttributeValue(TTSymbol("durationMin"), v);
+                }
+            }
+        }
+        
+        // Get the durationMin
+        if (!aXmlHandler->getXmlAttribute(TTSymbol("durationMax"), v, NO)) {
+            
+            if (v.size() == 1) {
+                
+                if (v[0].type() == kTypeUInt32) {
+                    
+                    aTimeProcess->setAttributeValue(TTSymbol("durationMax"), v);
                 }
             }
         }

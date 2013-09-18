@@ -221,28 +221,44 @@ TTErr TTTimeEvent::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
     
-    // get the date
-    if (aXmlHandler->getXmlAttribute(TTSymbol("date"), v, NO)) {
+    // Event node
+    if (aXmlHandler->mXmlNodeName == TTSymbol("event")) {
         
-        if (v.size() == 1) {
+        // get the date
+        if (!aXmlHandler->getXmlAttribute(TTSymbol("date"), v, NO)) {
             
-            if (v[0].type() == kTypeUInt32) {
+            if (v.size() == 1) {
                 
-                this->setDate(v);
+                if (v[0].type() == kTypeUInt32) {
+                    
+                    this->setDate(v);
+                }
+            }
+        }
+        
+        // get the interactive state
+        if (!aXmlHandler->getXmlAttribute(TTSymbol("interactive"), v, NO)) {
+            
+            if (v.size() == 1) {
+                
+                if (v[0].type() == kTypeInt32) {
+                    
+                    if (v[0] == 1)
+                        this->setInteractive(kTTBoolYes);
+                    else
+                        this->setInteractive(kTTBoolNo);
+                }
             }
         }
     }
     
-    // get the interactive state
-    if (aXmlHandler->getXmlAttribute(TTSymbol("interactive"), v, NO)) {
+    // Command node
+    if (aXmlHandler->mXmlNodeName == TTSymbol("command")) {
         
-        if (v.size() == 1) {
-            
-            if (v[0].type() == kTypeBoolean) {
-                
-                this->setInteractive(v);
-            }
-        }
+        // Pass the xml handler to the current state to fill his data structure
+        v = TTObjectBasePtr(mState);
+        aXmlHandler->setAttributeValue(kTTSym_object, v);
+        return aXmlHandler->sendMessage(TTSymbol("Read"));
     }
 	
 	return kTTErrNone;

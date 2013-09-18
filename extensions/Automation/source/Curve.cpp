@@ -184,24 +184,65 @@ TTErr Curve::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
     s = TTString(v[0]);
     xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "sampleRate", BAD_CAST s.data());
     
-    // Write the function
+    // Write the function parameters
     getParameters(v);
     v.toString();
     s = TTString(v[0]);
     xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "function", BAD_CAST s.data());
 	
-	return kTTErrGeneric;
+	return kTTErrNone;
 }
 
 TTErr Curve::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 {
 	TTXmlHandlerPtr	aXmlHandler = NULL;
+    TTValue         v;
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
-	
-	// TODO : parse the curve attributes
-	
-	return kTTErrGeneric;
+    
+    // get the active state
+    if (!aXmlHandler->getXmlAttribute(TTSymbol("active"), v, NO)) {
+        
+        if (v.size() == 1) {
+            
+            if (v[0].type() == kTypeInt32) {
+                
+                mActive = v[0] == 1;
+            }
+        }
+    }
+    
+    // get the redundancy
+    if (!aXmlHandler->getXmlAttribute(TTSymbol("redundancy"), v, NO)) {
+        
+        if (v.size() == 1) {
+            
+            if (v[0].type() == kTypeInt32) {
+                
+                mRedundancy = v[0] == 1;
+            }
+        }
+    }
+    
+	// get the sample rate
+    if (!aXmlHandler->getXmlAttribute(TTSymbol("sampleRate"), v, NO)) {
+        
+        if (v.size() == 1) {
+            
+            if (v[0].type() == kTypeUInt32) {
+                
+                mSampleRate = v[0];
+            }
+        }
+    }
+    
+	// get the function parameters
+    if (!aXmlHandler->getXmlAttribute(TTSymbol("function"), v, NO)) {
+        
+        setParameters(v);
+    }
+    
+	return kTTErrNone;
 }
 
 TTErr Curve::WriteAsText(const TTValue& inputValue, TTValue& outputValue)

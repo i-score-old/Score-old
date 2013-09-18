@@ -32,7 +32,7 @@ class Automation : public TimeProcess
 private :
     
     TTHash                      mCurves;						///< a table of freehand function units stored by address
-	
+
     /** Get parameters names needed by this time process
      @param	value           the returned parameter names
      @return                kTTErrNone */
