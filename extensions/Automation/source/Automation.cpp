@@ -62,7 +62,23 @@ TTErr Automation::getCurveAddresses(TTValue& value)
 
 TTErr Automation::ProcessStart()
 {
-    // do nothing
+    TTObjectBasePtr state;
+    TTValue         v;
+    
+    // théo : this a temporary part only here because we use TTScriptInterpolate (see in Automation::Process)
+    
+    // Flatten the start state to allow interpoaltion
+    getStartEvent()->getAttributeValue(TTSymbol("state"), v);
+    state = v[0];
+    
+    state->sendMessage(TTSymbol("Flatten"));
+    
+    // Flatten the end state to allow interpoaltion
+    getEndEvent()->getAttributeValue(TTSymbol("state"), v);
+    state = v[0];
+    
+    state->sendMessage(TTSymbol("Flatten"));
+    
     return kTTErrNone;
 }
 
@@ -90,6 +106,7 @@ TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
             getEndEvent()->getAttributeValue(TTSymbol("state"), v);
             endState = v[0];
             
+            // théo : this a temporary solution
             // process the interpolation between the start state and the end state
             return TTScriptInterpolate(TTScriptPtr(startState), TTScriptPtr(endState), progression);
         }
