@@ -268,6 +268,17 @@ TTErr Curve::ReadFromText(const TTValue& inputValue, TTValue& outputValue)
 	return kTTErrGeneric;
 }
 
+TTErr Curve::calculate(TTFloat64& x, TTFloat64& y)
+{
+    if (mFunction) {
+        
+        TTAudioObjectBasePtr(mFunction)->calculate(x, y);
+        return kTTErrNone;
+    }
+    
+    return kTTErrGeneric;
+}
+
 #if 0
 #pragma mark -
 #pragma mark Some Methods

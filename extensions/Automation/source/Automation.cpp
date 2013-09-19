@@ -62,23 +62,7 @@ TTErr Automation::getCurveAddresses(TTValue& value)
 
 TTErr Automation::ProcessStart()
 {
-    TTObjectBasePtr state;
-    TTValue         v;
-    
-    // théo : this a temporary part only here because we use TTScriptInterpolate (see in Automation::Process)
-    
-    // Flatten the start state to allow interpoaltion
-    getStartEvent()->getAttributeValue(TTSymbol("state"), v);
-    state = v[0];
-    
-    state->sendMessage(TTSymbol("Flatten"));
-    
-    // Flatten the end state to allow interpoaltion
-    getEndEvent()->getAttributeValue(TTSymbol("state"), v);
-    state = v[0];
-    
-    state->sendMessage(TTSymbol("Flatten"));
-    
+    // do nothing
     return kTTErrNone;
 }
 
@@ -90,9 +74,15 @@ TTErr Automation::ProcessEnd()
 
 TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTObjectBasePtr startState, endState;
-    TTFloat64       progression;
-    TTValue         v;
+    TTFloat64       progression, result;
+    TTValue         v, keys;
+    TTSymbol        key;
+    TTAddress       address;
+    TTObjectBasePtr curve;
+    TTNodePtr		aNode;
+    TTSymbol        attribute;
+	TTObjectBasePtr	anObject;
+	TTErr			err;
     
     if (inputValue.size() == 1) {
         
@@ -100,15 +90,51 @@ TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
             
             progression = inputValue[0];
             
-            getStartEvent()->getAttributeValue(TTSymbol("state"), v);
-            startState = v[0];
+            // don't process for 0. or 1. to not send the same value twice
+            if (progression == 0. || progression == 1.)
+                return kTTErrGeneric;
             
-            getEndEvent()->getAttributeValue(TTSymbol("state"), v);
-            endState = v[0];
-            
-            // théo : this a temporary solution
-            // process the interpolation between the start state and the end state
-            return TTScriptInterpolate(TTScriptPtr(startState), TTScriptPtr(endState), progression);
+            // calculate the curves
+            mCurves.getKeys(keys);
+            for (TTUInt32 i = 0; i < keys.size(); i++) {
+                
+                key = keys[i];
+                mCurves.lookup(key, v);
+                curve = v[0];
+                CurvePtr(curve)->calculate(progression, result);
+                
+                address = TTAddress(key);
+                err = getDirectoryFrom(address)->getTTNode(address, &aNode);
+                
+                if (!err) {
+                    
+                    anObject = aNode->getObject();
+                    
+                    // check object type
+                    if (anObject) {
+                        
+                        // default attribute is value attribute
+                        if (address.getAttribute() == kTTSymEmpty)
+                            attribute = kTTSym_value;
+                        else
+                            attribute = address.getAttribute();
+                        
+                        // for data object
+                        if (anObject->getName() == kTTSym_Data) {
+                            
+                            // send the line using the command message
+                            if (attribute == kTTSym_value) {
+                                
+                                anObject->sendMessage(kTTSym_Command, result, kTTValNONE);
+                                continue;
+                            }
+                        }
+                        
+                        // any other case : set attribute
+                        anObject->setAttributeValue(attribute, result);
+                    }
+                }
+            }
         }
     }
     
