@@ -8,6 +8,8 @@
 
 /* Begin PBXFileReference section */
 		4659534217870BCC0094F82C /* TTScoreAPI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TTScoreAPI.h; path = includes/TTScoreAPI.h; sourceTree = SOURCE_ROOT; };
+		465A654117F0819700B70364 /* TTTimeCondition.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TTTimeCondition.h; path = includes/TTTimeCondition.h; sourceTree = SOURCE_ROOT; };
+		465A654217F081A200B70364 /* TTTimeCondition.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TTTimeCondition.cpp; path = source/TTTimeCondition.cpp; sourceTree = SOURCE_ROOT; };
 		468EBBFA1784705C008BE2AC /* TTTimeContainer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TTTimeContainer.h; path = includes/TTTimeContainer.h; sourceTree = SOURCE_ROOT; };
 		468EBBFB17847064008BE2AC /* TTTimeContainer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TTTimeContainer.cpp; path = source/TTTimeContainer.cpp; sourceTree = SOURCE_ROOT; };
 		46B5553D177B043C00F50D89 /* TTTimeEvent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TTTimeEvent.h; path = includes/TTTimeEvent.h; sourceTree = SOURCE_ROOT; };
@@ -49,6 +51,7 @@
 				4659534217870BCC0094F82C /* TTScoreAPI.h */,
 				46F5057A166699BE00CFC3A2 /* TTScore.h */,
 				46F5057B166699BE00CFC3A2 /* TTScoreSymbolCache.h */,
+				465A654117F0819700B70364 /* TTTimeCondition.h */,
 				468EBBFA1784705C008BE2AC /* TTTimeContainer.h */,
 				46B5553D177B043C00F50D89 /* TTTimeEvent.h */,
 				46B55540177B123C00F50D89 /* TTTimeProcess.h */,
@@ -62,6 +65,7 @@
 			children = (
 				46F5059016669CFC00CFC3A2 /* TTScore.cpp */,
 				46F5059116669CFC00CFC3A2 /* TTScoreSymbolCache.cpp */,
+				465A654217F081A200B70364 /* TTTimeCondition.cpp */,
 				468EBBFB17847064008BE2AC /* TTTimeContainer.cpp */,
 				46B5553E177B044500F50D89 /* TTTimeEvent.cpp */,
 				46B55541177B124500F50D89 /* TTTimeProcess.cpp */,

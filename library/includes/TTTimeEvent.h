@@ -33,7 +33,7 @@ class TTSCORE_EXPORT TTTimeEvent : public TTObjectBase {
     friend class TTTimeContainer;
     friend class TTTimeProcess;
     
-    TTObjectBasePtr                 mContainer;                     ///< the container which handles the time event
+    TTObjectBasePtr                 mContainer;                     ///< the container which handles the event
     
 protected :
     
@@ -43,9 +43,9 @@ protected :
     
     TTObjectBasePtr                 mState;                         ///< a state handled by the event
     
-    TTBoolean                       mInteractive;                   ///< is the time event interactive ?
+    TTBoolean                       mInteractive;                   ///< is the event interactive ?
     
-    TTBoolean                       mReady;                         ///< is the time event ready to happen ?
+    TTBoolean                       mReady;                         ///< is the event ready to happen ?
  
 private :
     
@@ -53,17 +53,17 @@ private :
     TTAttributePtr                  readyAttribute;                 ///< cache active attribute for observer notification
     TTMessagePtr                    happenMessage;                  ///< cache happen message for observer notification
     
-    /** Set the date of the time event
+    /** Set the date of the event
      @param	value           a date
      @return                an error code if the date is wrong */
     TTErr           setDate(const TTValue& value);
     
-    /** Enable or disable the interactive behaviour of the time event
+    /** Enable or disable the interactive behaviour of the event
      @param	value           a boolean
      @return                kTTErrNone */
     TTErr           setInteractive(const TTValue& value);
     
-    /** Enable or disable the time event to allow it to happen
+    /** Enable or disable the event to allow it to happen
      @param	value           a boolean
      @return                kTTErrNone */
     TTErr           setReady(const TTValue& value);
