@@ -43,7 +43,7 @@ protected :
  
 private :
     
-    TTAttributePtr                  readyAttribute;                 ///< cache active attribute for observer notification
+    TTAttributePtr                  readyAttribute;                 ///< cache ready attribute for observer notification
     
     /** Enable or disable the time condition to allow it to be tested
      @param	value           a boolean
