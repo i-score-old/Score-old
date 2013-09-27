@@ -31,6 +31,32 @@ TTValue& Expression::getValue()
     return mValue;
 }
 
+TTBoolean Expression::evaluate(const TTValue& value)
+{
+    if (mOperator == kTTSymEmpty)
+        return YES;
+    
+    if (mOperator == TTSymbol("=="))
+        return mValue == value;
+    
+    if (mOperator == TTSymbol("!="))
+        return !(mValue == value);
+    
+    if (mOperator == TTSymbol(">"))
+        return mValue > value;
+    
+    if (mOperator == TTSymbol(">="))
+        return mValue >= value;
+    
+    if (mOperator == TTSymbol("<"))
+        return mValue < value;
+    
+    if (mOperator == TTSymbol("<="))
+        return mValue <= value;
+    
+    return NO;
+}
+
 void Expression::parse(TTValue& toParse)
 {
     if (toParse.size() > 0) {

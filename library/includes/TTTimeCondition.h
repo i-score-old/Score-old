@@ -20,6 +20,7 @@
 
 #include "TTScore.h"
 #include "Expression.h"
+#include "TTTimeEvent.h"
 
 /**	a class to define a condition and a set of different cases
  
@@ -70,6 +71,18 @@ private :
      @param	outputValue     nothing
      @return                an error code if the operation fails */
     TTErr           CaseRemove(const TTValue& inputValue, TTValue& outputValue);
+    
+    /**  Link an event to a case
+     @param	inputValue      an expression symbol, an event
+     @param	outputValue     nothing
+     @return                an error code if the operation fails */
+    TTErr           CaseLinkEvent(const TTValue& inputValue, TTValue& outputValue);
+    
+    /**  Unlink an event to a case
+     @param	inputValue      an expression symbol, an event
+     @param	outputValue     nothing
+     @return                an error code if the operation fails */
+    TTErr           CaseUnlinkEvent(const TTValue& inputValue, TTValue& outputValue);
     
     /** Test the case
      @param inputvalue      an expression value or symbol

@@ -77,6 +77,11 @@ public:
      @return                expression value */
     TTValue&        getValue();
     
+    /** evaluate the logical expression 
+     @param value           the value to evaluate
+     @return                return true is the test passes */
+    TTBoolean       evaluate(const TTValue& value);
+    
 private:
     
     /** Parse the expression
