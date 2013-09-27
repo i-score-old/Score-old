@@ -16,6 +16,7 @@
  */
 
 #include "TTScore.h"
+#include "Expression.h"
 #include "TTTimeEvent.h"
 #include "TTTimeProcess.h"
 #include "TTTimeCondition.h"

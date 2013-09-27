@@ -19,6 +19,7 @@
 #define __TT_TIME_CONDITION_H__
 
 #include "TTScore.h"
+#include "Expression.h"
 
 /**	a class to define a condition and a set of different cases
  
@@ -40,6 +41,9 @@ protected :
     TTSymbol                        mName;                          ///< the name of the condition
     
     TTBoolean                       mReady;                         ///< is the condition ready to be tested ?
+    
+    TTHash                          mReceivers;                     ///< a table of receivers stored by address
+    TTHash                          mCases;                         ///< a table of events stored by expression ("address operator value"). (it is possible to have more than one event per expression)
  
 private :
     
@@ -50,6 +54,29 @@ private :
      @return                kTTErrNone */
     TTErr           setReady(const TTValue& value);
     
+    /** get all cases expressions symbol
+     @param	value           a value containing one expression per case
+     @return                kTTErrNone */
+    TTErr           getCases(TTValue& value);
+    
+    /**  Add a case to test using an expression 
+     @param	inputValue      an expression value or symbol
+     @param	outputValue     nothing
+     @return                an error code if the operation fails */
+    TTErr           CaseAdd(const TTValue& inputValue, TTValue& outputValue);
+    
+    /**  Remove a case to test using an expression
+     @param	inputValue      an expression value or symbol
+     @param	outputValue     nothing
+     @return                an error code if the operation fails */
+    TTErr           CaseRemove(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Test the case
+     @param inputvalue      an expression value or symbol
+     @param outputvalue     the result as a boolean
+     @return                an error code if the operation fails */
+    TTErr           CaseTest(const TTValue& inputValue, TTValue& outputValue);
+    
     /**  needed to be handled by a TTXmlHandler
      @param	inputValue      ..
      @param	outputValue     ..
@@ -57,9 +84,22 @@ private :
 	TTErr           WriteAsXml(const TTValue& inputValue, TTValue& outputValue);
 	TTErr           ReadFromXml(const TTValue& inputValue, TTValue& outputValue);
     
+    friend TTErr TTSCORE_EXPORT TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data);
+    
 };
 
 typedef TTTimeCondition* TTTimeConditionPtr;
+
+/** The case receiver callback return back the value of observed address
+ @param	baton               a time condition instance, an address
+ @param	data                a value to test
+ @return					an error code */
+TTErr TTSCORE_EXPORT TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data);
+
+
+
+
+
 
 /** Define an unordered map to store and retreive a value relative to a TTTimeConditionPtr */
 #ifdef TT_PLATFORM_WIN

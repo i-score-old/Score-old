@@ -4,6 +4,7 @@ sources:
     
   - source/TTScore.cpp
   - source/TTScoreSymbolCache.cpp
+  - source/Expression.cpp
   - source/TTTimeCondition.cpp
   - source/TTTimeContainer.cpp
   - source/TTTimeEvent.cpp
