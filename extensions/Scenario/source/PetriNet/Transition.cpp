@@ -96,7 +96,7 @@ void Transition::createBitArray() // TODO : Should be called in addInGoingArcs
 void Transition::resetBitArray()
 {
 	for (unsigned int i = 0 ; i < m_activeArcsBitArray->getSize() ; ++i) {
-		m_activeArcsBitArray->setToZero(i); // TODO : eraseArray() do that
+		m_activeArcsBitArray->setToZero(i); // CB TODO : eraseArray() do that
 	}
 
 	if (m_startAction != NULL) {
@@ -148,7 +148,7 @@ void Transition::merge(Transition* transitionToMerge) // CB Attention, copie de 
 		newArc->changeAbsoluteTime(absoluteMinValue, absoluteMaxValue);
 		newArc->changeRelativeTime(relativeMinValue, relativeMaxValue);
 
-		getPetriNet()->deleteArc(inGoingPlace, transitionToMerge); // TODO : Arc::setTo ? +1 CB
+		getPetriNet()->deleteArc(inGoingPlace, transitionToMerge); // CB TODO : Arc::setTo ?
 	}
 
 	createBitArray();
