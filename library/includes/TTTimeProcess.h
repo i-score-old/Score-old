@@ -45,8 +45,8 @@ protected :
     TTBoolean                       mActive;                        ///< is the time process active ?
     
     TTValue                         mColor;                         ///< the color of the process (useful for gui)
-    TTUInt32                        mPosition;                      ///< the position of the process on the Y axe (useful for gui)
-    TTUInt32                        mSize;                          ///< the size of the process on the Y axe (useful for gui)
+    TTUInt32                        mVerticalPosition;              ///< the Y axe position of the process (useful for gui)
+    TTUInt32                        mVerticalSize;                  ///< the Y axe size of the process (useful for gui)
     
     TTObjectBasePtr                 mScheduler;                     ///< the scheduler object which handles the time process execution
     

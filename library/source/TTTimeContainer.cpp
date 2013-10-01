@@ -286,6 +286,24 @@ void TTTimeContainer::writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTTimeP
         xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "durationMax", BAD_CAST s.data());
     }
     
+    // Write the color
+    v = aTimeProcess->mColor;
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "color", BAD_CAST s.data());
+    
+    // Write the vertical position
+    v = aTimeProcess->mVerticalPosition;
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "verticalPosition", BAD_CAST s.data());
+    
+    // Write the vertical size
+    v = aTimeProcess->mVerticalSize;
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "verticalSize", BAD_CAST s.data());
+    
     // Pass the xml handler to the process to fill his attribute
     v = TTObjectBasePtr(aTimeProcess);
     aXmlHandler->setAttributeValue(kTTSym_object, v);
@@ -385,6 +403,42 @@ TTTimeProcessPtr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHan
                 if (v[0].type() == kTypeUInt32) {
                     
                     aTimeProcess->setAttributeValue(TTSymbol("durationMax"), v);
+                }
+            }
+        }
+        
+        // Get the color
+        if (!aXmlHandler->getXmlAttribute(TTSymbol("color"), v, NO)) {
+            
+            if (v.size() == 3) {
+                
+                if (v[0].type() == kTypeFloat64) {
+                    
+                    aTimeProcess->setAttributeValue(TTSymbol("color"), v);
+                }
+            }
+        }
+        
+        // Get the vertical position
+        if (!aXmlHandler->getXmlAttribute(TTSymbol("verticalPosition"), v, NO)) {
+            
+            if (v.size() == 1) {
+                
+                if (v[0].type() == kTypeUInt32) {
+                    
+                    aTimeProcess->setAttributeValue(TTSymbol("verticalPosition"), v);
+                }
+            }
+        }
+        
+        // Get the vertical size
+        if (!aXmlHandler->getXmlAttribute(TTSymbol("verticalSize"), v, NO)) {
+            
+            if (v.size() == 1) {
+                
+                if (v[0].type() == kTypeUInt32) {
+                    
+                    aTimeProcess->setAttributeValue(TTSymbol("verticalSize"), v);
                 }
             }
         }

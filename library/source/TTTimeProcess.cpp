@@ -27,6 +27,8 @@ mName(kTTSymEmpty),
 mDurationMin(0),
 mDurationMax(0),
 mActive(YES),
+mVerticalPosition(0),
+mVerticalSize(1),
 mScheduler(NULL),
 mStartEvent(NULL),
 mStartEventCallback(NULL),
@@ -35,9 +37,9 @@ mEndEventCallback(NULL)
 {
     TT_ASSERT("Correct number of args to create TTTimeProcess", arguments.size() == 1);
     
-    TTValue         args;
-    TTErr           err;
-    TTValuePtr      startEventBaton, endEventBaton;
+    TTValue    args;
+    TTErr      err;
+    TTValuePtr startEventBaton, endEventBaton;
     
     if (arguments.size() == 1)
         mContainer = arguments[0];
@@ -53,8 +55,8 @@ mEndEventCallback(NULL)
     addAttributeWithSetter(Active, kTypeBoolean);
     
     addAttribute(Color, kTypeLocalValue);
-    addAttribute(Position, kTypeUInt32);
-    addAttribute(Size, kTypeUInt32);
+    addAttribute(VerticalPosition, kTypeUInt32);
+    addAttribute(VerticalSize, kTypeUInt32);
     
     addAttribute(Scheduler, kTypeObject);
     addAttributeProperty(Scheduler, readOnly, YES);
