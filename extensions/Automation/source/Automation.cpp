@@ -175,7 +175,7 @@ TTErr Automation::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 {
 	TTXmlHandlerPtr	aXmlHandler = NULL;
     TTObjectBasePtr curve = NULL;
-    TTSymbol        address;
+    TTAddress       address;
     TTValue         v;
     
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
@@ -421,6 +421,8 @@ TTErr Automation::Clear()
         
         TTObjectBaseRelease(&curve);
     }
+    
+    mCurves.clear();
     
     return kTTErrNone;
 }
