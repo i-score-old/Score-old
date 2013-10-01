@@ -282,12 +282,13 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         if (aXmlHandler->mXmlNodeStart)
             mCurrentTimeProcess = readTimeProcessFromXml(aXmlHandler);
         
+        if (aXmlHandler->mXmlNodeIsEmpty)
+            mCurrentTimeProcess = NULL;
     }
     else if (mCurrentTimeProcess->getName() == aXmlHandler->mXmlNodeName) {
         
         if (!aXmlHandler->mXmlNodeStart)
             mCurrentTimeProcess = NULL;
-        
     }
     
     // If there is a current time process
