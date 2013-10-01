@@ -115,17 +115,17 @@ private :
      @return                kTTErrNone */
     TTErr           setStartDate(const TTValue& value);
     
-    /** get start event interactive value
-        this method eases the getting of the start event interactive value
-     @param	value           the returned interactive value
+    /** get start event condition object
+        this method eases the getting of the start event condition object
+     @param	value           the returned condition object
      @return                an error code if the event doesn't exist */
-    TTErr           getStartInteractive(TTValue& value);
+    TTErr           getStartCondition(TTValue& value);
     
-    /** set start event interactive or not
-        this method eases the setting of the start event interactive value
-     @param	value           boolean
+    /** set start event condition object
+        this method eases the setting of the start event condition object
+     @param	value           a condition object
      @return                an error code if the event doesn't exist */
-    TTErr           setStartInteractive(const TTValue& value);
+    TTErr           setStartCondition(const TTValue& value);
     
     /** get the time process end date
         this method eases the getting of the end event date
@@ -139,17 +139,17 @@ private :
      @return                kTTErrNone */
     TTErr           setEndDate(const TTValue& value);
     
-    /** get end event interactive value
-        this method eases the getting of the end event interactive value
-     @param	value           the returned interactive value
+    /** get end event condition object
+        this method eases the getting of the end event condition object
+     @param	value           the returned condition object
      @return                an error code if the event doesn't exist */
-    TTErr           getEndInteractive(TTValue& value);
+    TTErr           getEndCondition(TTValue& value);
     
-    /** set end event interactive or not
-        this method eases the setting of the end event interactive value
-     @param	value           boolean
+    /** set end event condition object
+        this method eases the setting of the end event condition object
+     @param	value           a condition object
      @return                an error code if the event doesn't exist */
-    TTErr           setEndInteractive(const TTValue& value);
+    TTErr           setEndCondition(const TTValue& value);
     
     /** get the time process duration
      @param	value           the returned duration
@@ -248,10 +248,10 @@ void TTSCORE_EXPORT TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progr
 
 /** Define some macros to ease the access of events attributes */
 #define mStartDate TTTimeEventPtr(mStartEvent)->mDate
-#define mStartInteractive TTTimeEventPtr(mStartEvent)->mInteractive
+#define mStartCondition TTTimeEventPtr(mStartEvent)->mCondition
 
 #define mEndDate TTTimeEventPtr(mEndEvent)->mDate
-#define mEndInteractive TTTimeEventPtr(mEndEvent)->mInteractive
+#define mEndCondition TTTimeEventPtr(mEndEvent)->mCondition
 
 #define mDuration mEndDate - mStartDate
 

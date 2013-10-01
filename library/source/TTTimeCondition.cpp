@@ -39,6 +39,7 @@ mReady(YES)
     addMessageWithArguments(CaseRemove);
     addMessageWithArguments(CaseLinkEvent);
     addMessageWithArguments(CaseUnlinkEvent);
+    addMessageWithArguments(CaseFind);
     addMessageWithArguments(CaseTest);
     
 	// needed to be handled by a TTXmlHandler
@@ -60,7 +61,7 @@ TTTimeCondition::~TTTimeCondition()
     TTSymbol        key;
     TTObjectBasePtr aReceiver;
     
-    // TODO : destroy all receivers;
+    // destroy all receivers;
     mReceivers.getKeys(keys);
     for (TTUInt8 i = 0; i < keys.size(); i++) {
         
@@ -111,8 +112,8 @@ TTErr TTTimeCondition::CaseAdd(const TTValue& inputValue, TTValue& outputValue)
         aReceiverBaton = new TTValue(TTObjectBasePtr(this));
         aReceiverBaton->append(expression.getAddress());
         
-        aReceiver->setAttributeValue(kTTSym_baton, TTPtr(aReceiverBaton));
-        aReceiver->setAttributeValue(kTTSym_function, TTPtr(&TTTimeConditionReceiverReturnValueCallback));
+        aReceiverCallback->setAttributeValue(kTTSym_baton, TTPtr(aReceiverBaton));
+        aReceiverCallback->setAttributeValue(kTTSym_function, TTPtr(&TTTimeConditionReceiverReturnValueCallback));
         
         v = TTValue((TTPtr)aReceiverCallback);
         TTObjectBaseInstantiate(TTSymbol("Receiver"), TTObjectBaseHandle(&aReceiver), v);
@@ -135,7 +136,6 @@ TTErr TTTimeCondition::CaseAdd(const TTValue& inputValue, TTValue& outputValue)
 TTErr TTTimeCondition::CaseRemove(const TTValue& inputValue, TTValue& outputValue)
 {
     Expression      expression, e;
-    TTObjectBasePtr event;
     TTObjectBasePtr aReceiver;
     TTValue         v, args, out, keys;
     TTBoolean       found = NO;
@@ -195,7 +195,7 @@ TTErr TTTimeCondition::CaseLinkEvent(const TTValue& inputValue, TTValue& outputV
     
     if (inputValue.size() == 2) {
         
-        if (inputValue[0] == kTypeSymbol && inputValue[1] == kTypeObject) {
+        if (inputValue[0].type() == kTypeSymbol && inputValue[1].type() == kTypeObject) {
             
             ExpressionParseFromValue(inputValue[0], expression);
             event = inputValue[1];
@@ -210,7 +210,8 @@ TTErr TTTimeCondition::CaseLinkEvent(const TTValue& inputValue, TTValue& outputV
                 err = mCases.append(expression, event);
                 
                 // tell the event it is conditioned
-                event->setAttributeValue(TTSymbol("condition"), TTObjectBasePtr(this));
+                v = TTObjectBasePtr(this);
+                event->setAttributeValue(TTSymbol("condition"), v);
                 
                 // TODO : observe the event ready attribute value
                 
@@ -258,6 +259,30 @@ TTErr TTTimeCondition::CaseUnlinkEvent(const TTValue& inputValue, TTValue& outpu
     return kTTErrGeneric;
 }
 
+TTErr TTTimeCondition::CaseFind(const TTValue& inputValue, TTValue& outputValue)
+{
+    TTValue     v, keys;
+    TTSymbol    key;
+    TTErr       err = kTTErrValueNotFound;
+    
+    // look for a case binding on the same event
+    mCases.getKeys(keys);
+    for (TTUInt8 i = 0; i < keys.size(); i++) {
+        
+        key = keys[i];
+        mCases.lookup(key, v);
+        
+        if (v == inputValue) {
+            
+            outputValue = keys[i];
+            err = kTTErrNone;
+            break;
+        }
+    }
+    
+    return err;
+}
+
 TTErr TTTimeCondition::CaseTest(const TTValue& inputValue, TTValue& outputValue)
 {
     Expression      expression;
@@ -282,10 +307,40 @@ TTErr TTTimeCondition::CaseTest(const TTValue& inputValue, TTValue& outputValue)
 TTErr TTTimeCondition::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 {
 	TTXmlHandlerPtr	aXmlHandler = NULL;
-    TTValue         v;
-    TTString        s;
+    TTObjectBasePtr event;
+    TTValue         v, keys;
+    TTSymbol        key, name;
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
+    
+    // Write the name
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST mName.c_str());
+    
+    // Write each case
+    mCases.getKeys(keys);
+    for (TTUInt8 i = 0; i < keys.size(); i++) {
+        
+        // Start a case node
+        xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "case");
+        
+        key = keys[i];
+        mCases.lookup(key, v);
+        
+        // Write the expression
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "expression", BAD_CAST key.c_str());
+        
+        // Write the event name
+        if (v.size() > 0) {
+            
+            event = v[0];
+            event->getAttributeValue(kTTSym_name, v);
+            name = v[0];
+            xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "event", BAD_CAST name.c_str());
+        }
+        
+        // Close the case node
+        xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
+    }
     
 	return kTTErrNone;
 }
@@ -293,12 +348,46 @@ TTErr TTTimeCondition::WriteAsXml(const TTValue& inputValue, TTValue& outputValu
 TTErr TTTimeCondition::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 {
 	TTXmlHandlerPtr	aXmlHandler = NULL;
-    TTValue         v;
+    TTValue         expressionValue, v, out;
+    TTTimeEventPtr  aTimeEvent;
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
     
     // Condition node
-    if (aXmlHandler->mXmlNodeName == TTSymbol("Condition")) {
+    if (aXmlHandler->mXmlNodeName == TTSymbol("condition")) {
+        
+        // Get the name
+        if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES)) {
+            
+            if (v.size() == 1) {
+                
+                if (v[0].type() == kTypeSymbol) {
+                    
+                    mName = v[0];
+                }
+            }
+        }
+    }
+    
+    // Case node
+    if (aXmlHandler->mXmlNodeName == TTSymbol("case")) {
+        
+        // get the expression
+        if (!aXmlHandler->getXmlAttribute(TTSymbol("expression"), expressionValue, YES)) {
+        
+            CaseAdd(expressionValue, out);
+        }
+        
+        // get the event
+        if (!aXmlHandler->getXmlAttribute(TTSymbol("event"), v, YES)) {
+            
+            // Find the event using his name from our container
+            if (!mContainer->sendMessage(TTSymbol("TimeEventFind"),v, out)) {
+            
+                expressionValue.append(out[0]);
+                CaseLinkEvent(expressionValue, out);
+            }
+        }
         
         return kTTErrNone;
     }

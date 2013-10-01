@@ -33,9 +33,10 @@ void TTScoreInit()
 		TTScoreHasInitialized = true;
 		
 		// register classes -- both internal and external
+        TTTimeCondition::registerClass();
+        TTTimeContainer::registerClass();
         TTTimeEvent::registerClass();
         TTTimeProcess::registerClass();
-        TTTimeContainer::registerClass();
         
 		TTScoreTest::registerClass();
 

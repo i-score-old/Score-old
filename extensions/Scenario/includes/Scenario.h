@@ -49,6 +49,7 @@ class Scenario : public TimeContainer {
     
     TTTimeEventPtr              mCurrentTimeEvent;               ///< an internal pointer to remember the current time event being read
     TTTimeProcessPtr            mCurrentTimeProcess;             ///< an internal pointer to remember the current time process being read
+    TTTimeConditionPtr          mCurrentTimeCondition;           ///< an internal pointer to remember the current time condition being read
     
 	
     /** Get parameters names needed by this time process
@@ -105,11 +106,11 @@ class Scenario : public TimeContainer {
      @return                an error code if the movement fails */
     TTErr   TimeEventMove(const TTValue& inputValue, TTValue& outputValue);
     
-    /** Make a time event interactive
-     @inputValue            a time event object, new boolean value
+    /** Link a time event to a condition
+     @inputValue            a time event object, a time condition object
      @outputvalue           kTTValNONE
      @return                an error code if the setting fails */
-    TTErr   TimeEventInteractive(const TTValue& inputValue, TTValue& outputValue);
+    TTErr   TimeEventCondition(const TTValue& inputValue, TTValue& outputValue);
     
     /** Trigger a time event to make it happens
      @inputValue            a time event object
@@ -151,6 +152,19 @@ class Scenario : public TimeContainer {
     
     
     
+    /** Create a time condition
+     @inputvalue            optionnal expression symbols : < "address operator value", "address operator value", ... >
+     @outputvalue           a new time condition
+     @return                an error code if the creation fails */
+    TTErr   TimeConditionCreate(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Release a time process
+     @inputValue            a time condition object to release
+     @outputvalue           kTTValNONE
+     @return                an error code if the destruction fails */
+    TTErr   TimeConditionRelease(const TTValue& inputValue, TTValue& outputValue);
+    
+    
     /** an internal method used to create all time process attribute observers */
     void    makeTimeProcessCacheElement(TTTimeProcessPtr aTimeProcess, TTValue& newCacheElement);
     
@@ -162,6 +176,12 @@ class Scenario : public TimeContainer {
     
     /** an internal method used to delete all time event attribute observers */
     void    deleteTimeEventCacheElement(const TTValue& oldCacheElement);
+    
+    /** an internal method used to create all time condition attribute observers */
+    void    makeTimeConditionCacheElement(TTTimeConditionPtr aTimeCondition, TTValue& newCacheElement);
+    
+    /** an internal method used to delete all time condition attribute observers */
+    void    deleteTimeConditionCacheElement(const TTValue& oldCacheElement);
     
     
     

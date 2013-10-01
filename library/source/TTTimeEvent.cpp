@@ -26,7 +26,7 @@ mContainer(NULL),
 mName(kTTSymEmpty),
 mDate(0),
 mState(NULL),
-mInteractive(NO),
+mCondition(NULL),
 mReady(YES)
 {
     TT_ASSERT("Correct number of args to create TTTimeEvent", arguments.size() == 1 || arguments.size() == 2);
@@ -40,7 +40,7 @@ mReady(YES)
     addAttribute(Name, kTypeSymbol);
    	addAttributeWithSetter(Date, kTypeUInt32);
     addAttribute(State, kTypeObject);
-    addAttributeWithSetter(Interactive, kTypeBoolean);
+    addAttributeWithSetter(Condition, kTypeObject);
     addAttributeWithSetter(Ready, kTypeBoolean);
     
     addMessage(Trigger);
@@ -90,19 +90,27 @@ TTErr TTTimeEvent::setDate(const TTValue& value)
     return kTTErrNone;
 }
 
-TTErr TTTimeEvent::setInteractive(const TTValue& value)
+TTErr TTTimeEvent::setCondition(const TTValue& value)
 {
-    // set the interactive value
-    mInteractive = value[0];
-    
-    // tell the container the event is becoming (or not) interactive
-    if (mContainer) {
+    if (value.size() == 1) {
         
-        TTValue v = TTObjectBasePtr(this);
-        v.append(mInteractive);
-        return mContainer->sendMessage(TTSymbol("TimeEventInteractive"), v, kTTValNONE);
+        if (value[0].type() == kTypeObject) {
+            
+            // set the condition object
+            mCondition = value[0];
+            
+            // tell the container the event is becoming (or not) conditioned
+            if (mContainer) {
+                
+                TTValue v = TTObjectBasePtr(this);
+                v.append(mCondition);
+                return mContainer->sendMessage(TTSymbol("TimeEventCondition"), v, kTTValNONE);
+            }
+        }
     }
-
+    else
+        mCondition = NULL;
+    
     return kTTErrNone;
 }
 
@@ -123,8 +131,8 @@ TTErr TTTimeEvent::Trigger()
     if (!mReady)
         return kTTErrGeneric;
     
-    // if not interactive : do nothing
-    if (!mInteractive)
+    // if not conditionned : do nothing
+    if (mCondition == NULL)
         return kTTErrGeneric;
     
     // use container to make the event happen
@@ -200,11 +208,14 @@ TTErr TTTimeEvent::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
     s = TTString(v[0]);
     xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "date", BAD_CAST s.data());
     
-    // Write if it is interactive
-    v = mInteractive;
-    v.toString();
-    s = TTString(v[0]);
-    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "interactive", BAD_CAST s.data());
+    // Write the name of the condition object
+    if (mCondition) {
+        
+        mCondition->getAttributeValue(TTSymbol("name"), v);
+        v.toString();
+        s = TTString(v[0]);
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "condition", BAD_CAST s.data());
+    }
     
     // Write the state
     v = TTObjectBasePtr(mState);
@@ -236,17 +247,15 @@ TTErr TTTimeEvent::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
             }
         }
         
-        // get the interactive state
-        if (!aXmlHandler->getXmlAttribute(TTSymbol("interactive"), v, NO)) {
+        // get the condition object name
+        if (!aXmlHandler->getXmlAttribute(TTSymbol("condition"), v, YES)) {
             
             if (v.size() == 1) {
                 
-                if (v[0].type() == kTypeInt32) {
+                if (v[0].type() == kTypeSymbol) {
                     
-                    if (v[0] == 1)
-                        this->setInteractive(kTTBoolYes);
-                    else
-                        this->setInteractive(kTTBoolNo);
+                    // do nothing
+                    // the time condition will be registered after so we can't link the time event to an unexisting object
                 }
             }
         }

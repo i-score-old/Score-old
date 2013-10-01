@@ -33,7 +33,6 @@ class TTSCORE_EXPORT TTTimeCondition : public TTObjectBase {
     TTCLASS_SETUP(TTTimeCondition)
     
     friend class TTTimeEvent;
-    friend class TTTimeContainer;
     
     TTObjectBasePtr                 mContainer;                     ///< the container which handles the condition
     
@@ -84,6 +83,12 @@ private :
      @return                an error code if the operation fails */
     TTErr           CaseUnlinkEvent(const TTValue& inputValue, TTValue& outputValue);
     
+    /**  Find a case related to an event
+     @param	inputValue      an event
+     @param	outputValue     an expression symbol
+     @return                an error code if the operation fails */
+    TTErr           CaseFind(const TTValue& inputValue, TTValue& outputValue);
+    
     /** Test the case
      @param inputvalue      an expression value or symbol
      @param outputvalue     the result as a boolean
@@ -108,8 +113,6 @@ typedef TTTimeCondition* TTTimeConditionPtr;
  @param	data                a value to test
  @return					an error code */
 TTErr TTSCORE_EXPORT TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data);
-
-
 
 
 

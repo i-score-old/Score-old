@@ -141,11 +141,9 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
 TTErr Scenario::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 {
 	TTXmlHandlerPtr     aXmlHandler = NULL;
-    TTValue             v;
     TTTimeProcessPtr    aTimeProcess;
     TTTimeEventPtr      aTimeEvent;
-    TTSymbol            name;
-    TTUInt32            time;
+    TTTimeConditionPtr  aTimeCondition;
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
     
@@ -163,6 +161,14 @@ TTErr Scenario::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
         aTimeProcess = TTTimeProcessPtr(TTObjectBasePtr(mTimeProcessList.current()[0]));
         
         writeTimeProcessAsXml(aXmlHandler, aTimeProcess);
+    }
+    
+    // Write all the time conditions
+    for (mTimeConditionList.begin(); mTimeConditionList.end(); mTimeConditionList.next()) {
+        
+        aTimeCondition = TTTimeConditionPtr(TTObjectBasePtr(mTimeConditionList.current()[0]));
+        
+        writeTimeConditionAsXml(aXmlHandler, aTimeCondition);
     }
 	
 	return kTTErrNone;
@@ -187,6 +193,7 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
             
             mCurrentTimeEvent = NULL;
             mCurrentTimeProcess = NULL;
+            mCurrentTimeCondition = NULL;
             
             // clear all data structures
             mTimeEventList.clear();
@@ -240,19 +247,41 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     // If there is a current time event
     if (mCurrentTimeEvent) {
         
-        // Pass the xml handler to the current event to fill his data structure
+        // Pass the xml handler to the current condition to fill his data structure
         v = TTObjectBasePtr(mCurrentTimeEvent);
         aXmlHandler->setAttributeValue(kTTSym_object, v);
         return aXmlHandler->sendMessage(TTSymbol("Read"));
     }
     
+    // Condition node
+    if (aXmlHandler->mXmlNodeName == TTSymbol("condition")) {
+        
+        if (aXmlHandler->mXmlNodeStart)
+            
+            mCurrentTimeCondition = readTimeConditionFromXml(aXmlHandler);
+        
+        else
+            
+            mCurrentTimeCondition = NULL;
+        
+        return kTTErrNone;
+    }
+    
+    // If there is a current time condition
+    if (mCurrentTimeCondition) {
+        
+        // Pass the xml handler to the current condition to fill his data structure
+        v = TTObjectBasePtr(mCurrentTimeCondition);
+        aXmlHandler->setAttributeValue(kTTSym_object, v);
+        return aXmlHandler->sendMessage(TTSymbol("Read"));
+    }
     
     // Process node : the name of the node is the name of the process type
     if (!mCurrentTimeProcess) {
         
         if (aXmlHandler->mXmlNodeStart)
             mCurrentTimeProcess = readTimeProcessFromXml(aXmlHandler);
-    
+        
     }
     else if (mCurrentTimeProcess->getName() == aXmlHandler->mXmlNodeName) {
         
@@ -434,23 +463,32 @@ TTErr Scenario::TimeEventMove(const TTValue& inputValue, TTValue& outputValue)
     return kTTErrGeneric;
 }
 
-TTErr Scenario::TimeEventInteractive(const TTValue& inputValue, TTValue& outputValue)
+TTErr Scenario::TimeEventCondition(const TTValue& inputValue, TTValue& outputValue)
 {
     TTTimeEventPtr          aTimeEvent;
+    TTTimeConditionPtr      aTimeCondition;
     TTTimeProcessPtr        aTimeProcess;
     TTValue                 v, aCacheElement;
     SolverObjectMapIterator it;
     
-    if (inputValue.size() == 1) {
+    if (inputValue.size() == 2) {
         
-        if (inputValue[0].type() == kTypeObject) {
+        if (inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeObject) {
             
             aTimeEvent = TTTimeEventPtr((TTObjectBasePtr)inputValue[0]);
+            aTimeCondition = TTTimeConditionPtr((TTObjectBasePtr)inputValue[1]);
             
             // try to find the time event
             mTimeEventList.find(&TTTimeContainerFindTimeEvent, (TTPtr)aTimeEvent, aCacheElement);
             
             // couldn't find the former time event in the scenario
+            if (aCacheElement == kTTValNONE)
+                return kTTErrValueNotFound;
+            
+            // try to find the time condition
+            mTimeConditionList.find(&TTTimeContainerFindTimeCondition, (TTPtr)aTimeCondition, aCacheElement);
+            
+            // couldn't find the former time condition in the scenario
             if (aCacheElement == kTTValNONE)
                 return kTTErrValueNotFound;
             
@@ -462,11 +500,13 @@ TTErr Scenario::TimeEventInteractive(const TTValue& inputValue, TTValue& outputV
                 // if the time event is the time process end event
                 if (aTimeEvent == getTimeProcessEndEvent(aTimeProcess)) {
                     
-                    // a time process with an interactive end event cannot be rigid
-                    v = TTBoolean(!isTimeEventInteractive(aTimeEvent));
+                    // a time process with a conditioned end event cannot be rigid
+                    v = TTBoolean(aTimeCondition == NULL);
                     aTimeProcess->setAttributeValue(TTSymbol("rigid"), v);
                 }
             }
+            
+            // théo : maybe there will be other stuff to do considering there is a condition with several case now ? 
             
             return kTTErrNone;
         }
@@ -556,8 +596,8 @@ TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue
                     
                     setTimeProcessEndEvent(aTimeProcess, aNewTimeEvent);
                     
-                    // a time process with an interactive end event cannot be rigid
-                    v = TTBoolean(!isTimeEventInteractive(aNewTimeEvent));
+                    // a time process with a conditioned end event cannot be rigid
+                    v = TTBoolean(getTimeEventCondition(aNewTimeEvent) == NULL);
                     aTimeProcess->setAttributeValue(TTSymbol("rigid"), v);
                 }
             }
@@ -844,29 +884,99 @@ TTErr Scenario::TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue
 }
 
 /*
-TTErr Scenario::TimeProcessActiveChange(const TTValue& inputValue, TTValue& outputValue)
+ TTErr Scenario::TimeProcessActiveChange(const TTValue& inputValue, TTValue& outputValue)
+ {
+ TTTimeProcessPtr    aTimeProcess;
+ TTBoolean           active;
+ 
+ if (inputValue.size() == 2) {
+ 
+ if (inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeBoolean) {
+ 
+ // get time process where the change comes from
+ aTimeProcess = TTTimeProcessPtr((TTObjectBasePtr)inputValue[0]);
+ 
+ // get new active value
+ active = inputValue[1];
+ 
+ // TODO : warn Solver (or mExecutionGraph ?) that this time process active state have changed
+ // TODO : update all Solver (or mExecutionGraph ?) consequences by setting time processes attributes that are affected by the consequence
+ }
+ }
+ 
+ return kTTErrGeneric;
+ }
+ */
+
+TTErr Scenario::TimeConditionCreate(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTTimeProcessPtr    aTimeProcess;
-    TTBoolean           active;
-	
-    if (inputValue.size() == 2) {
+    TTTimeConditionPtr  aTimeCondition = NULL;
+    TTValue             args, aCacheElement, out;
+    
+    // prepare argument (container)
+    args = TTValue(TTObjectBasePtr(this));
+    
+    // create the time condition
+    if(TTObjectBaseInstantiate(TTSymbol("TimeCondition"), TTObjectBaseHandle(&aTimeCondition), args))
+        return kTTErrGeneric;
+    
+    // create all observers
+    makeTimeConditionCacheElement(aTimeCondition, aCacheElement);
+    
+    // store time condition object and observers
+    mTimeConditionList.append(aCacheElement);
+    
+    // add a first case if
+    
+    // TODO : how conditions are constrained by the Solver ?
+    
+    // return the time condition
+    outputValue = TTObjectBasePtr(aTimeCondition);
+    
+    // optionnal : for each given symbol, add a case to the condition
+    for (TTUInt8 i = 0; i < inputValue.size(); i++)
+        if (inputValue[i].type() == kTypeSymbol)
+            aTimeCondition->sendMessage(TTSymbol("CaseAdd"), inputValue[i], out);
+    
+    return kTTErrNone;
+}
+
+TTErr Scenario::TimeConditionRelease(const TTValue& inputValue, TTValue& outputValue)
+{
+    TTTimeConditionPtr      aTimeCondition;
+    TTValue                 aCacheElement;
+    
+    if (inputValue.size() == 1) {
         
-        if (inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeBoolean) {
+        if (inputValue[0].type() == kTypeObject) {
             
-            // get time process where the change comes from
-            aTimeProcess = TTTimeProcessPtr((TTObjectBasePtr)inputValue[0]);
+            aTimeCondition = TTTimeConditionPtr((TTObjectBasePtr)inputValue[0]);
             
-            // get new active value
-            active = inputValue[1];
+            // try to find the time condition
+            mTimeConditionList.find(&TTTimeContainerFindTimeCondition, (TTPtr)aTimeCondition, aCacheElement);
             
-            // TODO : warn Solver (or mExecutionGraph ?) that this time process active state have changed
-            // TODO : update all Solver (or mExecutionGraph ?) consequences by setting time processes attributes that are affected by the consequence
+            // couldn't find the same time condition in the scenario
+            if (aCacheElement == kTTValNONE)
+                return kTTErrValueNotFound;
+            
+            else {
+                
+                // remove time condition object and observers
+                mTimeConditionList.remove(aCacheElement);
+                
+                // delete all observers
+                deleteTimeConditionCacheElement(aCacheElement);
+                
+                // release the time condition
+                TTObjectBaseRelease(TTObjectBaseHandle(&aTimeCondition));
+                
+                return kTTErrNone;
+            }
         }
     }
     
     return kTTErrGeneric;
 }
-*/
 
 void Scenario::makeTimeProcessCacheElement(TTTimeProcessPtr aTimeProcess, TTValue& newCacheElement)
 {
@@ -894,6 +1004,19 @@ void Scenario::deleteTimeEventCacheElement(const TTValue& oldCacheElement)
     ;
 }
 
+void Scenario::makeTimeConditionCacheElement(TTTimeConditionPtr aTimeCondition, TTValue& newCacheElement)
+{
+    newCacheElement.clear();
+    
+	// 0 : cache time condition object
+	newCacheElement.append((TTObjectBasePtr)aTimeCondition);
+}
+
+void Scenario::deleteTimeConditionCacheElement(const TTValue& oldCacheElement)
+{
+    ;
+}
+
 #if 0
 #pragma mark -
 #pragma mark Some Methods
@@ -902,7 +1025,7 @@ void Scenario::deleteTimeEventCacheElement(const TTValue& oldCacheElement)
 void ScenarioGraphTimeEventCallBack(TTPtr arg)
 {
     // cf ECOMachine : crossAControlPointCallBack function
-
+    
     TTTimeEventPtr aTimeEvent = (TTTimeEventPtr) arg;
     
 	aTimeEvent->sendMessage(TTSymbol("Happen"));

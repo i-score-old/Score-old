@@ -43,7 +43,7 @@ protected :
     
     TTObjectBasePtr                 mState;                         ///< a state handled by the event
     
-    TTBoolean                       mInteractive;                   ///< is the event interactive ?
+    TTObjectBasePtr                 mCondition;                     ///< a pointer to an optional condition object to make the event interactive
     
     TTBoolean                       mReady;                         ///< is the event ready to happen ?
  
@@ -58,10 +58,10 @@ private :
      @return                an error code if the date is wrong */
     TTErr           setDate(const TTValue& value);
     
-    /** Enable or disable the interactive behaviour of the event
-     @param	value           a boolean
+    /** Link the event to a condition
+     @param	value           a condition object
      @return                kTTErrNone */
-    TTErr           setInteractive(const TTValue& value);
+    TTErr           setCondition(const TTValue& value);
     
     /** Enable or disable the event to allow it to happen
      @param	value           a boolean

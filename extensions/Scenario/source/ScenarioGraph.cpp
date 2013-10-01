@@ -90,7 +90,7 @@ void Scenario::compileGraph(TTUInt32 timeOffset)
         
         aTimeEvent = TTTimeEventPtr(TTObjectBasePtr(mTimeEventList.current()[0]));
         
-        if (isTimeEventInteractive(aTimeEvent))
+        if (getTimeEventCondition(aTimeEvent) != NULL)
             compileInteractiveEvent(aTimeEvent, timeOffset);
 	}
 }
