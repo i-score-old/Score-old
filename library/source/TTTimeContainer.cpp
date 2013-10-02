@@ -412,7 +412,7 @@ TTTimeProcessPtr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHan
             
             if (v.size() == 3) {
                 
-                if (v[0].type() == kTypeFloat64) {
+                if (v[0].type() == kTypeInt32 && v[1].type() == kTypeInt32 && v[2].type() == kTypeInt32) {
                     
                     aTimeProcess->setAttributeValue(kTTSym_color, v);
                 }
