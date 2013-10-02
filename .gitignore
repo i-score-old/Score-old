@@ -37,3 +37,10 @@ project.xcworkspace
 
 #Doxygen generated files
 doxygen/html
+*.config
+
+*.creator
+
+*.files
+
+*.includes

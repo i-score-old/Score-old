@@ -183,7 +183,7 @@ unsigned int Arc::consumeTokenInFrom() {
 
 void Arc::produceTokenInTo(unsigned int tokenValue) {
 	if (!dynamic_cast<Place*>(m_nodeTo)) {
-		throw IllegalArgumentException("Can only produce Tokens to Places");
+		throw IllegalArgumentException("Can only produce Tokens into Places");
 	}
 
 	((Place*)m_nodeTo)->produceTokens(NB_OF_TOKEN_TO_PRODUCE, getColor(), tokenValue);
