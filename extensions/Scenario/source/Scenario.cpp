@@ -28,12 +28,17 @@ extern "C" TT_EXTENSION_EXPORT TTErr TTLoadJamomaExtension_Scenario(void)
 
 TIME_CONTAINER_CONSTRUCTOR,
 mNamespace(NULL),
+mViewZoom(TTValue(1., 1.)),
+mViewPosition(TTValue(0, 0)),
 mEditionSolver(NULL),
 mExecutionGraph(NULL)
 {
     TIME_PLUGIN_INITIALIZE
     
 	TT_ASSERT("Correct number of args to create Scenario", arguments.size() == 0 || arguments.size() == 2);
+    
+    addAttributeWithSetter(ViewZoom, kTypeLocalValue);
+    addAttributeWithSetter(ViewPosition, kTypeLocalValue);
     
     addMessage(Compile);
     
@@ -80,6 +85,20 @@ TTErr Scenario::getParameterNames(TTValue& value)
 	//value.append(TTSymbol("aParameterName"));
 	
 	return kTTErrNone;
+}
+
+TTErr Scenario::setViewZoom(const TTValue& value)
+{
+    mViewZoom = value;
+    
+    return kTTErrNone;
+}
+
+TTErr Scenario::setViewPosition(const TTValue& value)
+{
+    mViewPosition = value;
+    
+    return kTTErrNone;
 }
 
 TTErr Scenario::Compile()
@@ -130,7 +149,7 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
             
             else
                 // stop the scenario
-                return this->sendMessage(TTSymbol("Stop"));
+                return this->sendMessage(kTTSym_Stop);
             
         }
     }
@@ -146,6 +165,30 @@ TTErr Scenario::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
     TTTimeConditionPtr  aTimeCondition;
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
+    
+    // if the scenario is not handled by a upper scenario
+    if (mContainer == NULL) {
+        
+        // Start a Scenario node
+        xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "Scenario");
+        
+        writeTimeProcessAsXml(aXmlHandler, this);
+        
+        TTValue     v;
+        TTString    s;
+        
+        // Write the view zoom
+        v = mViewZoom;
+        v.toString();
+        s = TTString(v[0]);
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "viewZoom", BAD_CAST s.data());
+        
+        // Write the view position
+        v = mViewPosition;
+        v.toString();
+        s = TTString(v[0]);
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "viewPosition", BAD_CAST s.data());
+    }
     
     // Write all the time events
     for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next()) {
@@ -170,6 +213,13 @@ TTErr Scenario::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
         
         writeTimeConditionAsXml(aXmlHandler, aTimeCondition);
     }
+    
+    // if the scenario is not handled by a upper scenario
+    if (mContainer == NULL) {
+        
+        // Close the event node
+        xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
+    }
 	
 	return kTTErrNone;
 }
@@ -185,7 +235,7 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 	
 	// Switch on the name of the XML node
 	
-    // if the scenario is not handled by a upper scenario
+    // if the scenario is not handled by a upper scenario (root Scenario case)
     if (mContainer == NULL) {
         
         // Starts scenario reading
@@ -227,11 +277,69 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
             
             return kTTErrNone;
         }
+        
+        // Scenario node (root Scenario case)
+        if (aXmlHandler->mXmlNodeName == TTSymbol("Scenario")) {
+            
+            // Get the scenario name
+            if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES)) {
+                
+                if (v.size() == 1) {
+                    
+                    if (v[0].type() == kTypeSymbol) {
+                        
+                        mName = v[0];
+                    }
+                }
+            }
+            
+            // Get the scenario color
+            if (!aXmlHandler->getXmlAttribute(kTTSym_color, v, NO)) {
+                
+                if (v.size() == 3) {
+                    
+                    if (v[0].type() == kTypeInt32 && v[1].type() == kTypeInt32 && v[2].type() == kTypeInt32) {
+                        
+                        mColor = v;
+                    }
+                }
+            }
+        }
     }
     
+    // Scenario node (sub and root Scenario case)
+    if (aXmlHandler->mXmlNodeName == TTSymbol("Scenario")) {
+        
+        // Get the scenario viewZoom
+        if (!aXmlHandler->getXmlAttribute(kTTSym_viewZoom, v, NO)) {
+            
+            if (v.size() == 2) {
+                
+                if (v[0].type() == kTypeFloat64 && v[1].type() == kTypeFloat64) {
+                    
+                    mViewZoom = v;
+                }
+            }
+        }
+        
+        // Get the scenario viewPosition
+        if (!aXmlHandler->getXmlAttribute(kTTSym_viewPosition, v, NO)) {
+            
+            if (v.size() == 2) {
+                
+                if (v[0].type() == kTypeFloat64 && v[1].type() == kTypeFloat64) {
+                    
+                    mViewPosition = v;
+                }
+            }
+        }
+        
+        return kTTErrNone;
+    }
+
     
     // Event node
-    if (aXmlHandler->mXmlNodeName == TTSymbol("event")) {
+    if (aXmlHandler->mXmlNodeName == kTTSym_event) {
         
         if (aXmlHandler->mXmlNodeStart) {
             
@@ -253,11 +361,11 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         // Pass the xml handler to the current condition to fill his data structure
         v = TTObjectBasePtr(mCurrentTimeEvent);
         aXmlHandler->setAttributeValue(kTTSym_object, v);
-        return aXmlHandler->sendMessage(TTSymbol("Read"));
+        return aXmlHandler->sendMessage(kTTSym_Read);
     }
     
     // Condition node
-    if (aXmlHandler->mXmlNodeName == TTSymbol("condition")) {
+    if (aXmlHandler->mXmlNodeName == kTTSym_condition) {
         
         if (aXmlHandler->mXmlNodeStart) {
             
@@ -279,7 +387,7 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         // Pass the xml handler to the current condition to fill his data structure
         v = TTObjectBasePtr(mCurrentTimeCondition);
         aXmlHandler->setAttributeValue(kTTSym_object, v);
-        return aXmlHandler->sendMessage(TTSymbol("Read"));
+        return aXmlHandler->sendMessage(kTTSym_Read);
     }
     
     // Process node : the name of the node is the name of the process type
@@ -303,7 +411,7 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         // Pass the xml handler to the current process to fill his data structure
         v = TTObjectBasePtr(mCurrentTimeProcess);
         aXmlHandler->setAttributeValue(kTTSym_object, v);
-        return aXmlHandler->sendMessage(TTSymbol("Read"));
+        return aXmlHandler->sendMessage(kTTSym_Read);
     }
     
     return kTTErrNone;
@@ -323,7 +431,7 @@ TTErr Scenario::TimeEventCreate(const TTValue& inputValue, TTValue& outputValue)
             args.append(TTObjectBasePtr(this));
             
             // create the time event
-            if(TTObjectBaseInstantiate(TTSymbol("TimeEvent"), TTObjectBaseHandle(&aTimeEvent), args))
+            if(TTObjectBaseInstantiate(kTTSym_TimeEvent, TTObjectBaseHandle(&aTimeEvent), args))
                 return kTTErrGeneric;
             
             // create all observers
@@ -333,7 +441,7 @@ TTErr Scenario::TimeEventCreate(const TTValue& inputValue, TTValue& outputValue)
             mTimeEventList.append(aCacheElement);
             
             // get scenario duration
-            this->getAttributeValue(TTSymbol("duration"), scenarioDuration);
+            this->getAttributeValue(kTTSym_duration, scenarioDuration);
             
             // add variable to the solver
             SolverVariablePtr variable = new SolverVariable(mEditionSolver, aTimeEvent, TTUInt32(scenarioDuration[0]));
@@ -509,7 +617,7 @@ TTErr Scenario::TimeEventCondition(const TTValue& inputValue, TTValue& outputVal
                     
                     // a time process with a conditioned end event cannot be rigid
                     v = TTBoolean(aTimeCondition == NULL);
-                    aTimeProcess->setAttributeValue(TTSymbol("rigid"), v);
+                    aTimeProcess->setAttributeValue(kTTSym_rigid, v);
                 }
             }
             
@@ -605,7 +713,7 @@ TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue
                     
                     // a time process with a conditioned end event cannot be rigid
                     v = TTBoolean(getTimeEventCondition(aNewTimeEvent) == NULL);
-                    aTimeProcess->setAttributeValue(TTSymbol("rigid"), v);
+                    aTimeProcess->setAttributeValue(kTTSym_rigid, v);
                 }
             }
             
@@ -655,7 +763,7 @@ TTErr Scenario::TimeProcessCreate(const TTValue& inputValue, TTValue& outputValu
             setTimeProcessEndEvent(aTimeProcess, TTTimeEventPtr(TTObjectBasePtr(inputValue[2])));
             
             // check time process duration
-            if (!aTimeProcess->getAttributeValue(TTSymbol("duration"), duration)) {
+            if (!aTimeProcess->getAttributeValue(kTTSym_duration, duration)) {
                 
                 // create all observers
                 makeTimeProcessCacheElement(aTimeProcess, aCacheElement);
@@ -664,7 +772,7 @@ TTErr Scenario::TimeProcessCreate(const TTValue& inputValue, TTValue& outputValu
                 mTimeProcessList.append(aCacheElement);
                 
                 // get scenario duration
-                this->getAttributeValue(TTSymbol("duration"), scenarioDuration);
+                this->getAttributeValue(kTTSym_duration, scenarioDuration);
                 
                 // retreive solver variable relative to each event
                 it = mVariablesMap.find(getTimeProcessStartEvent(aTimeProcess));
@@ -794,10 +902,10 @@ TTErr Scenario::TimeProcessMove(const TTValue& inputValue, TTValue& outputValue)
             aTimeProcess = TTTimeProcessPtr((TTObjectBasePtr)inputValue[0]);
             
             // get time process duration
-            aTimeProcess->getAttributeValue(TTSymbol("duration"), duration);
+            aTimeProcess->getAttributeValue(kTTSym_duration, duration);
             
             // get scenario duration
-            this->getAttributeValue(TTSymbol("duration"), scenarioDuration);
+            this->getAttributeValue(kTTSym_duration, scenarioDuration);
             
             // update the Solver depending on the type of the time process
             timeProcessType = aTimeProcess->getName();
@@ -1035,7 +1143,7 @@ void ScenarioGraphTimeEventCallBack(TTPtr arg)
     
     TTTimeEventPtr aTimeEvent = (TTTimeEventPtr) arg;
     
-	aTimeEvent->sendMessage(TTSymbol("Happen"));
+	aTimeEvent->sendMessage(kTTSym_Happen);
 }
 
 
@@ -1044,5 +1152,5 @@ void ScenarioGraphIsEventReadyCallBack(TTPtr arg, TTBoolean isReady)
 	TTTimeEventPtr aTimeEvent = (TTTimeEventPtr) arg;
     
     TTValue v = isReady;
-    aTimeEvent->setAttributeValue(TTSymbol("ready"), v);
+    aTimeEvent->setAttributeValue(kTTSym_ready, v);
 }

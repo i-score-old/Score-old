@@ -40,4 +40,6 @@ TTSCORE_EXPORT TTSymbol         kTTSym_rigid                    (("rigid"));
 TTSCORE_EXPORT TTSymbol         kTTSym_Trigger                  (("Trigger"));
 TTSCORE_EXPORT TTSymbol         kTTSym_verticalPosition         (("verticalPosition"));
 TTSCORE_EXPORT TTSymbol         kTTSym_verticalSize             (("verticalSize"));
+TTSCORE_EXPORT TTSymbol         kTTSym_viewPosition             (("viewPosition"));
+TTSCORE_EXPORT TTSymbol         kTTSym_viewZoom                 (("viewZoom"));
 

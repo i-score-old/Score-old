@@ -42,6 +42,8 @@ extern TTSCORE_EXPORT TTSymbol	kTTSym_rigid;
 extern TTSCORE_EXPORT TTSymbol	kTTSym_Trigger;
 extern TTSCORE_EXPORT TTSymbol	kTTSym_verticalPosition;
 extern TTSCORE_EXPORT TTSymbol	kTTSym_verticalSize;
+extern TTSCORE_EXPORT TTSymbol  kTTSym_viewPosition;
+extern TTSCORE_EXPORT TTSymbol  kTTSym_viewZoom;
 
 #endif // __TT_SCORE_SYMBOL_CACHE_H__
 

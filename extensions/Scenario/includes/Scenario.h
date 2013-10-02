@@ -32,6 +32,9 @@ class Scenario : public TimeContainer {
 	
     TTAddressItemPtr            mNamespace;                     ///< the namespace workspace of the scenario
     
+    TTValue                     mViewZoom;                      ///< the zoom factor (x and y) into the scenario view (useful for gui)
+    TTValue                     mViewPosition;                  ///< the position (x and y) of the scenario view (useful for gui)
+    
     SolverPtr                   mEditionSolver;                 ///< an internal gecode solver to assist scenario edition
     SolverObjectMap             mVariablesMap;                  ///< an internal map to store and retreive SolverVariablePtr using TTTimeEventPtr
     SolverObjectMap             mConstraintsMap;                ///< an internal map to store and retreive SolverConstraintPtr using TTTimeProcessPtr
@@ -57,7 +60,15 @@ class Scenario : public TimeContainer {
      @return                kTTErrNone */
 	TTErr   getParameterNames(TTValue& value);
     
+    /** Set the view zoom factor
+     @param	value           zoomX and zoomY
+     @return                kTTErrNone */
+    TTErr           setViewZoom(const TTValue& value);
     
+    /** Set the view position
+     @param	value           zoomX and zoomY
+     @return                kTTErrNone */
+    TTErr           setViewPosition(const TTValue& value);
     
     /** Compile the scenario to prepare the petri net before execution
      @return                an error code returned by the compile method */

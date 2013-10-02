@@ -258,17 +258,25 @@ void TTTimeContainer::writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTTimeP
     TTValue     v;
     TTString    s;
     
-    // Start a node with the type of the process
-    xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST aTimeProcess->getName().c_str());
+    // If the process is handled by a upper scenario
+    if (aTimeProcess->mContainer != NULL) {
+        
+        // Start a node with the type of the process
+        xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST aTimeProcess->getName().c_str());
+    }
     
     // Write the name
     xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST aTimeProcess->mName.c_str());
     
-    // Write the start event name
-    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "start", BAD_CAST aTimeProcess->getStartEvent()->mName.c_str());
+    // If the process is handled by a upper scenario
+    if (aTimeProcess->mContainer != NULL) {
     
-    // Write the end event name
-    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "end", BAD_CAST aTimeProcess->getEndEvent()->mName.c_str());
+        // Write the start event name
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "start", BAD_CAST aTimeProcess->getStartEvent()->mName.c_str());
+    
+        // Write the end event name
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "end", BAD_CAST aTimeProcess->getEndEvent()->mName.c_str());
+    }
     
     
     if (aTimeProcess->mDurationMin > 0 || aTimeProcess->mDurationMax > 0) {
@@ -292,25 +300,29 @@ void TTTimeContainer::writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTTimeP
     s = TTString(v[0]);
     xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "color", BAD_CAST s.data());
     
-    // Write the vertical position
-    v = aTimeProcess->mVerticalPosition;
-    v.toString();
-    s = TTString(v[0]);
-    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "verticalPosition", BAD_CAST s.data());
-    
-    // Write the vertical size
-    v = aTimeProcess->mVerticalSize;
-    v.toString();
-    s = TTString(v[0]);
-    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "verticalSize", BAD_CAST s.data());
-    
-    // Pass the xml handler to the process to fill his attribute
-    v = TTObjectBasePtr(aTimeProcess);
-    aXmlHandler->setAttributeValue(kTTSym_object, v);
-    aXmlHandler->sendMessage(kTTSym_Write);
-    
-    // Close the process node
-    xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
+    // If the process is handled by a upper scenario
+    if (aTimeProcess->mContainer != NULL) {
+        
+        // Write the vertical position
+        v = aTimeProcess->mVerticalPosition;
+        v.toString();
+        s = TTString(v[0]);
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "verticalPosition", BAD_CAST s.data());
+        
+        // Write the vertical size
+        v = aTimeProcess->mVerticalSize;
+        v.toString();
+        s = TTString(v[0]);
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "verticalSize", BAD_CAST s.data());
+        
+        // Pass the xml handler to the process to fill his attribute
+        v = TTObjectBasePtr(aTimeProcess);
+        aXmlHandler->setAttributeValue(kTTSym_object, v);
+        aXmlHandler->sendMessage(kTTSym_Write);
+        
+        // Close the process node
+        xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
+    }
 }
 
 TTTimeProcessPtr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHandler)
