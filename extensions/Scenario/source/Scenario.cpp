@@ -233,10 +233,13 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     // Event node
     if (aXmlHandler->mXmlNodeName == TTSymbol("event")) {
         
-        if (aXmlHandler->mXmlNodeStart)
+        if (aXmlHandler->mXmlNodeStart) {
             
             mCurrentTimeEvent = readTimeEventFromXml(aXmlHandler);
-        
+            
+            if (aXmlHandler->mXmlNodeIsEmpty)
+                mCurrentTimeEvent = NULL;
+        }
         else
             
             mCurrentTimeEvent = NULL;
@@ -256,10 +259,13 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     // Condition node
     if (aXmlHandler->mXmlNodeName == TTSymbol("condition")) {
         
-        if (aXmlHandler->mXmlNodeStart)
+        if (aXmlHandler->mXmlNodeStart) {
             
             mCurrentTimeCondition = readTimeConditionFromXml(aXmlHandler);
         
+            if (aXmlHandler->mXmlNodeIsEmpty)
+                mCurrentTimeCondition = NULL;
+        }
         else
             
             mCurrentTimeCondition = NULL;
