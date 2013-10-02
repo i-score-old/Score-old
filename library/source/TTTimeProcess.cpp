@@ -301,6 +301,10 @@ TTErr TTTimeProcess::setStartDate(const TTValue& value)
                 v.append(mStartDate);
                 return mContainer->sendMessage(TTSymbol("TimeProcessMove"), v, kTTValNONE);
             }
+            
+            // or set the start event date directly
+            else
+                mStartEvent->setAttributeValue(kTTSym_date, value);
         }
     }
     
@@ -346,6 +350,10 @@ TTErr TTTimeProcess::setEndDate(const TTValue& value)
                 v.append(TTUInt32(value[0]));
                 return mContainer->sendMessage(TTSymbol("TimeProcessMove"), v, kTTValNONE);
             }
+            
+            // or set the end event date directly
+            else
+                mEndEvent->setAttributeValue(kTTSym_date, value);
         }
     }
     

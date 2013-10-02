@@ -177,6 +177,12 @@ TTErr Scenario::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
         TTValue     v;
         TTString    s;
         
+        // Write the end date (e.g. root scenario duration)
+        this->getAttributeValue(TTSymbol("endDate"), v);
+        v.toString();
+        s = TTString(v[0]);
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "endDate", BAD_CAST s.data());
+        
         // Write the view zoom
         v = mViewZoom;
         v.toString();
@@ -289,6 +295,18 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
                     if (v[0].type() == kTypeSymbol) {
                         
                         mName = v[0];
+                    }
+                }
+            }
+            
+            // Get the scenario end date (e.g. root scenario duration)
+            if (!aXmlHandler->getXmlAttribute(kTTSym_endDate, v, NO)) {
+                
+                if (v.size() == 1) {
+                    
+                    if (v[0].type() == kTypeUInt32) {
+                        
+                         this->setAttributeValue(TTSymbol("endDate"), v);
                     }
                 }
             }
