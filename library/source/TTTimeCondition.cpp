@@ -49,7 +49,7 @@ mReady(YES)
 	addMessageProperty(ReadFromXml, hidden, YES);
 	
     // cache some messages and attributes for high speed notification feedbacks
-    this->findAttribute(TTSymbol("ready"), &readyAttribute);
+    this->findAttribute(kTTSym_ready, &readyAttribute);
     
     // generate a random name
     mName = mName.random();
@@ -116,7 +116,7 @@ TTErr TTTimeCondition::CaseAdd(const TTValue& inputValue, TTValue& outputValue)
         aReceiverCallback->setAttributeValue(kTTSym_function, TTPtr(&TTTimeConditionReceiverReturnValueCallback));
         
         v = TTValue((TTPtr)aReceiverCallback);
-        TTObjectBaseInstantiate(TTSymbol("Receiver"), TTObjectBaseHandle(&aReceiver), v);
+        TTObjectBaseInstantiate(kTTSym_Receiver, TTObjectBaseHandle(&aReceiver), v);
         
         v = TTObjectBasePtr(aReceiver);
         mReceivers.append(expression.getAddress(), v);
@@ -211,7 +211,7 @@ TTErr TTTimeCondition::CaseLinkEvent(const TTValue& inputValue, TTValue& outputV
                 
                 // tell the event it is conditioned
                 v = TTObjectBasePtr(this);
-                event->setAttributeValue(TTSymbol("condition"), v);
+                event->setAttributeValue(kTTSym_condition, v);
                 
                 // TODO : observe the event ready attribute value
                 
@@ -247,7 +247,7 @@ TTErr TTTimeCondition::CaseUnlinkEvent(const TTValue& inputValue, TTValue& outpu
                 err = mCases.append(expression, kTTValNONE);
                 
                 // tell the event it is not conditioned anymore
-                event->setAttributeValue(TTSymbol("condition"), TTObjectBasePtr(NULL));
+                event->setAttributeValue(kTTSym_condition, TTObjectBasePtr(NULL));
                 
                 // TODO : stop observation of the event ready attribute value
                 
@@ -354,7 +354,7 @@ TTErr TTTimeCondition::ReadFromXml(const TTValue& inputValue, TTValue& outputVal
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
     
     // Condition node
-    if (aXmlHandler->mXmlNodeName == TTSymbol("condition")) {
+    if (aXmlHandler->mXmlNodeName == kTTSym_condition) {
         
         // Get the name
         if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES)) {
@@ -370,16 +370,16 @@ TTErr TTTimeCondition::ReadFromXml(const TTValue& inputValue, TTValue& outputVal
     }
     
     // Case node
-    if (aXmlHandler->mXmlNodeName == TTSymbol("case")) {
+    if (aXmlHandler->mXmlNodeName == kTTSym_case) {
         
         // get the expression
-        if (!aXmlHandler->getXmlAttribute(TTSymbol("expression"), expressionValue, YES)) {
+        if (!aXmlHandler->getXmlAttribute(kTTSym_expression, expressionValue, YES)) {
         
             CaseAdd(expressionValue, out);
         }
         
         // get the event
-        if (!aXmlHandler->getXmlAttribute(TTSymbol("event"), v, YES)) {
+        if (!aXmlHandler->getXmlAttribute(kTTSym_event, v, YES)) {
             
             // Find the event using his name from our container
             if (!mContainer->sendMessage(TTSymbol("TimeEventFind"),v, out)) {
@@ -432,7 +432,7 @@ TTErr TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data)
                 event = v[0];
                 
                 // trigger the event
-                event->sendMessage(TTSymbol("Trigger"));
+                event->sendMessage(kTTSym_Trigger);
                 
                 // at least one event has been triggered
                 found = YES;

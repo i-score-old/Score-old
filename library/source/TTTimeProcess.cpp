@@ -45,7 +45,7 @@ mEndEventCallback(NULL)
         mContainer = arguments[0];
     
     // the rigid state handles the DurationMin and DurationMax attribute
-    registerAttribute(TTSymbol("rigid"), kTypeBoolean, NULL, (TTGetterMethod)& TTTimeProcess::getRigid, (TTSetterMethod)& TTTimeProcess::setRigid);
+    registerAttribute(kTTSym_rigid, kTypeBoolean, NULL, (TTGetterMethod)& TTTimeProcess::getRigid, (TTSetterMethod)& TTTimeProcess::setRigid);
     
     addAttribute(Name, kTypeSymbol);
     
@@ -54,7 +54,7 @@ mEndEventCallback(NULL)
     
     addAttributeWithSetter(Active, kTypeBoolean);
     
-    addAttribute(Color, kTypeLocalValue);
+    addAttributeWithSetter(Color, kTypeLocalValue);
     addAttribute(VerticalPosition, kTypeUInt32);
     addAttribute(VerticalSize, kTypeUInt32);
     
@@ -76,7 +76,7 @@ mEndEventCallback(NULL)
     registerAttribute(TTSymbol("endDate"), kTypeUInt32, NULL, (TTGetterMethod)& TTTimeProcess::getEndDate, (TTSetterMethod)& TTTimeProcess::setEndDate);
     registerAttribute(TTSymbol("startCondition"), kTypeBoolean, NULL, (TTGetterMethod)& TTTimeProcess::getStartCondition, (TTSetterMethod)& TTTimeProcess::setStartCondition);
     registerAttribute(TTSymbol("endCondition"), kTypeBoolean, NULL, (TTGetterMethod)& TTTimeProcess::getEndCondition, (TTSetterMethod)& TTTimeProcess::setEndCondition);
-    registerAttribute(TTSymbol("duration"), kTypeUInt32, NULL, (TTGetterMethod)& TTTimeProcess::getDuration);
+    registerAttribute(kTTSym_duration, kTypeUInt32, NULL, (TTGetterMethod)& TTTimeProcess::getDuration);
     
     addMessage(ProcessStart);
     addMessage(ProcessEnd);
@@ -128,10 +128,15 @@ mEndEventCallback(NULL)
     }
     
     // Cache some attributes for high speed notification feedbacks
-    this->findAttribute(TTSymbol("active"), &activeAttribute);
+    this->findAttribute(kTTSym_active, &activeAttribute);
     
     // generate a random name
     mName = mName.random();
+    
+    // set default color to white
+    mColor.append(255);
+    mColor.append(255);
+    mColor.append(255);
 }
 
 TTTimeProcess::~TTTimeProcess()
@@ -390,6 +395,13 @@ TTErr TTTimeProcess::setActive(const TTValue& value)
     return kTTErrNone;
 }
 
+TTErr TTTimeProcess::setColor(const TTValue& value)
+{
+    mColor = value;
+    
+    return kTTErrNone;
+}
+
 TTErr TTTimeProcess::getIntermediateEvents(TTValue& value)
 {
     mIntermediateEvents.assignToValue(value);
@@ -446,22 +458,22 @@ TTErr TTTimeProcess::Limit(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr TTTimeProcess::Play()
 {    
-    return mStartEvent->sendMessage(TTSymbol("Happen"));
+    return mStartEvent->sendMessage(kTTSym_Happen);
 }
 
 TTErr TTTimeProcess::Stop()
 {
-    return mEndEvent->sendMessage(TTSymbol("Happen"));
+    return mEndEvent->sendMessage(kTTSym_Happen);
 }
 
 TTErr TTTimeProcess::Pause()
 {
-    return mScheduler->sendMessage(TTSymbol("Pause"));
+    return mScheduler->sendMessage(kTTSym_Pause);
 }
 
 TTErr TTTimeProcess::Resume()
 {
-    return mScheduler->sendMessage(TTSymbol("Resume"));
+    return mScheduler->sendMessage(kTTSym_Resume);
 }
 
 TTTimeEventPtr TTTimeProcess::getStartEvent()
@@ -482,7 +494,7 @@ TTErr TTTimeProcess::setStartEvent(TTTimeEventPtr aTimeEvent)
     if (mStartEvent) {
         
         // Stop start event happening observation
-        err = mStartEvent->findMessage(TTSymbol("Happen"), &aMessage);
+        err = mStartEvent->findMessage(kTTSym_Happen, &aMessage);
         
         if(!err)
             aMessage->unregisterObserverForNotifications(*mStartEventCallback);
@@ -494,7 +506,7 @@ TTErr TTTimeProcess::setStartEvent(TTTimeEventPtr aTimeEvent)
     // Observe start event happening
     if (mStartEvent) {
         
-        err = mStartEvent->findMessage(TTSymbol("Happen"), &aMessage);
+        err = mStartEvent->findMessage(kTTSym_Happen, &aMessage);
     
         if(!err)
             return aMessage->registerObserverForNotifications(*mStartEventCallback);
@@ -511,7 +523,7 @@ TTErr TTTimeProcess::setEndEvent(TTTimeEventPtr aTimeEvent)
     if (mEndEvent) {
         
         // Stop end event happening observation
-        err = mEndEvent->findMessage(TTSymbol("Happen"), &aMessage);
+        err = mEndEvent->findMessage(kTTSym_Happen, &aMessage);
         
         if(!err)
             aMessage->unregisterObserverForNotifications(*mEndEventCallback);
@@ -523,7 +535,7 @@ TTErr TTTimeProcess::setEndEvent(TTTimeEventPtr aTimeEvent)
     // Observe end event happening
     if (mEndEvent) {
         
-        err = mEndEvent->findMessage(TTSymbol("Happen"), &aMessage);
+        err = mEndEvent->findMessage(kTTSym_Happen, &aMessage);
     
         if(!err)
             return aMessage->registerObserverForNotifications(*mEndEventCallback);
@@ -558,18 +570,18 @@ TTErr TTTimeProcessStartEventHappenCallback(TTPtr baton, TTValue& data)
         aTimeProcess->ProcessStart();
         
         // launch the scheduler
-        aTimeProcess->mStartEvent->getAttributeValue(TTSymbol("date"), v);
+        aTimeProcess->mStartEvent->getAttributeValue(kTTSym_date, v);
         start = v[0];
         
-        aTimeProcess->mEndEvent->getAttributeValue(TTSymbol("date"), v);
+        aTimeProcess->mEndEvent->getAttributeValue(kTTSym_date, v);
         end = v[0];
         
         if (end > start) {
             
             v = TTFloat64(end - start);
             
-            aTimeProcess->mScheduler->setAttributeValue(TTSymbol("duration"), v);
-            aTimeProcess->mScheduler->sendMessage(TTSymbol("Go"));
+            aTimeProcess->mScheduler->setAttributeValue(kTTSym_duration, v);
+            aTimeProcess->mScheduler->sendMessage(kTTSym_Go);
             
             return kTTErrNone;
         }
@@ -591,7 +603,7 @@ TTErr TTTimeProcessEndEventHappenCallback(TTPtr baton, TTValue& data)
     // note : the ProcessStart method is called inside TTTimeProcessSchedulerCallback
 	if (aTimeProcess->mActive) {
         
-        aTimeProcess->mScheduler->sendMessage(TTSymbol("Stop"));
+        aTimeProcess->mScheduler->sendMessage(kTTSym_Stop);
         
         // close end trigger listening
         aTimeProcess->mEndEvent->setAttributeValue(kTTSym_active, NO);

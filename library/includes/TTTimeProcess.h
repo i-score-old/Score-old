@@ -161,6 +161,11 @@ private :
      @return                kTTErrNone */
     TTErr           setActive(const TTValue& value);
     
+    /** Set the time process color
+     @param	value           8 bit color format <red green blue>
+     @return                kTTErrNone */
+    TTErr           setColor(const TTValue& value);
+    
     /** Get intermediate events of the time process
      @param	value           returned events
      @return                kTTErrNone */

@@ -54,9 +54,9 @@ mReady(YES)
 	addMessageProperty(ReadFromXml, hidden, YES);
 	
     // cache some messages and attributes for high speed notification feedbacks
-    this->findAttribute(TTSymbol("date"), &dateAttribute);
-    this->findAttribute(TTSymbol("ready"), &readyAttribute);
-    this->findMessage(TTSymbol("Happen"), &happenMessage);
+    this->findAttribute(kTTSym_date, &dateAttribute);
+    this->findAttribute(kTTSym_ready, &readyAttribute);
+    this->findMessage(kTTSym_Happen, &happenMessage);
     
     // create a script
     TTObjectBaseInstantiate(kTTSym_Script, TTObjectBaseHandle(&mState), kTTValNONE);
@@ -150,7 +150,7 @@ TTErr TTTimeEvent::Trigger()
 TTErr TTTimeEvent::Happen()
 {
     // recall the state
-    TTErr err = mState->sendMessage(TTSymbol("Run"));
+    TTErr err = mState->sendMessage(kTTSym_Run);
     
     // notify observers
     happenMessage->sendNotification(kTTSym_notify, kTTValNONE);	// we use kTTSym_notify because we know that observers are TTCallback
@@ -173,7 +173,7 @@ TTErr TTTimeEvent::StateAddressGetValue(const TTValue& inputValue, TTValue& outp
             address = inputValue[0];
             
             // get the lines of the state
-            mState->getAttributeValue(TTSymbol("lines"), v);
+            mState->getAttributeValue(kTTSym_lines, v);
             lines = TTListPtr(TTPtr(v[0]));
             
             // find the line at address
@@ -211,7 +211,7 @@ TTErr TTTimeEvent::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
     // Write the name of the condition object
     if (mCondition) {
         
-        mCondition->getAttributeValue(TTSymbol("name"), v);
+        mCondition->getAttributeValue(kTTSym_name, v);
         v.toString();
         s = TTString(v[0]);
         xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "condition", BAD_CAST s.data());
@@ -220,7 +220,7 @@ TTErr TTTimeEvent::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
     // Write the state
     v = TTObjectBasePtr(mState);
     aXmlHandler->setAttributeValue(kTTSym_object, v);
-    aXmlHandler->sendMessage(TTSymbol("Write"));
+    aXmlHandler->sendMessage(kTTSym_Write);
     
 	return kTTErrNone;
 }
@@ -233,10 +233,10 @@ TTErr TTTimeEvent::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
     
     // Event node
-    if (aXmlHandler->mXmlNodeName == TTSymbol("event")) {
+    if (aXmlHandler->mXmlNodeName == kTTSym_event) {
         
         // get the date
-        if (!aXmlHandler->getXmlAttribute(TTSymbol("date"), v, NO)) {
+        if (!aXmlHandler->getXmlAttribute(kTTSym_date, v, NO)) {
             
             if (v.size() == 1) {
                 
@@ -248,7 +248,7 @@ TTErr TTTimeEvent::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         }
         
         // get the condition object name
-        if (!aXmlHandler->getXmlAttribute(TTSymbol("condition"), v, YES)) {
+        if (!aXmlHandler->getXmlAttribute(kTTSym_condition, v, YES)) {
             
             if (v.size() == 1) {
                 
@@ -262,12 +262,12 @@ TTErr TTTimeEvent::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     }
     
     // Command node
-    if (aXmlHandler->mXmlNodeName == TTSymbol("command")) {
+    if (aXmlHandler->mXmlNodeName == kTTSym_command) {
         
         // Pass the xml handler to the current state to fill his data structure
         v = TTObjectBasePtr(mState);
         aXmlHandler->setAttributeValue(kTTSym_object, v);
-        return aXmlHandler->sendMessage(TTSymbol("Read"));
+        return aXmlHandler->sendMessage(kTTSym_Read);
     }
 	
 	return kTTErrNone;

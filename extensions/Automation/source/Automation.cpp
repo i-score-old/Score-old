@@ -198,7 +198,7 @@ TTErr Automation::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
             TTObjectBaseInstantiate(TTSymbol("Curve"), TTObjectBaseHandle(&curve), kTTValNONE);
             
             // Get the address
-            if (!aXmlHandler->getXmlAttribute(TTSymbol("address"), v, YES)) {
+            if (!aXmlHandler->getXmlAttribute(kTTSym_address, v, YES)) {
                 
                 if (v.size() == 1) {
                     
@@ -215,7 +215,7 @@ TTErr Automation::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
             // Pass the xml handler to the current curve to fill his data structure
             v = TTObjectBasePtr(curve);
             aXmlHandler->setAttributeValue(kTTSym_object, v);
-            return aXmlHandler->sendMessage(TTSymbol("Read"));
+            return aXmlHandler->sendMessage(kTTSym_Read);
         }
     }
 	

@@ -201,7 +201,7 @@ TTErr Curve::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
     
     // get the active state
-    if (!aXmlHandler->getXmlAttribute(TTSymbol("active"), v, NO)) {
+    if (!aXmlHandler->getXmlAttribute(kTTSym_active, v, NO)) {
         
         if (v.size() == 1) {
             
@@ -213,7 +213,7 @@ TTErr Curve::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     }
     
     // get the redundancy
-    if (!aXmlHandler->getXmlAttribute(TTSymbol("redundancy"), v, NO)) {
+    if (!aXmlHandler->getXmlAttribute(kTTSym_redundancy, v, NO)) {
         
         if (v.size() == 1) {
             
@@ -225,7 +225,7 @@ TTErr Curve::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     }
     
 	// get the sample rate
-    if (!aXmlHandler->getXmlAttribute(TTSymbol("sampleRate"), v, NO)) {
+    if (!aXmlHandler->getXmlAttribute(kTTSym_sampleRate, v, NO)) {
         
         if (v.size() == 1) {
             
@@ -237,7 +237,7 @@ TTErr Curve::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     }
     
 	// get the function parameters
-    if (!aXmlHandler->getXmlAttribute(TTSymbol("function"), v, NO)) {
+    if (!aXmlHandler->getXmlAttribute(kTTSym_function, v, NO)) {
         
         setParameters(v);
     }

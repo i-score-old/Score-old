@@ -169,7 +169,7 @@ void TTTimeContainer::writeTimeEventAsXml(TTXmlHandlerPtr aXmlHandler, TTTimeEve
     // Pass the xml handler to the event to fill his attribute
     v = TTObjectBasePtr(aTimeEvent);
     aXmlHandler->setAttributeValue(kTTSym_object, v);
-    aXmlHandler->sendMessage(TTSymbol("Write"));
+    aXmlHandler->sendMessage(kTTSym_Write);
     
     // Close the event node
     xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
@@ -183,7 +183,7 @@ TTTimeEventPtr TTTimeContainer::readTimeEventFromXml(TTXmlHandlerPtr aXmlHandler
     if (aXmlHandler->mXmlNodeStart) {
         
         // Get the date
-        if (!aXmlHandler->getXmlAttribute(TTSymbol("date"), v, NO)) {
+        if (!aXmlHandler->getXmlAttribute(kTTSym_date, v, NO)) {
             
             if (v.size() == 1) {
                 
@@ -208,7 +208,7 @@ TTTimeEventPtr TTTimeContainer::readTimeEventFromXml(TTXmlHandlerPtr aXmlHandler
                         
                         // Pass the xml handler to the new event to fill his attribute
                         aXmlHandler->setAttributeValue(kTTSym_object, out);
-                        aXmlHandler->sendMessage(TTSymbol("Read"));
+                        aXmlHandler->sendMessage(kTTSym_Read);
                     }
                 }
             }
@@ -307,7 +307,7 @@ void TTTimeContainer::writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTTimeP
     // Pass the xml handler to the process to fill his attribute
     v = TTObjectBasePtr(aTimeProcess);
     aXmlHandler->setAttributeValue(kTTSym_object, v);
-    aXmlHandler->sendMessage(TTSymbol("Write"));
+    aXmlHandler->sendMessage(kTTSym_Write);
     
     // Close the process node
     xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
@@ -321,7 +321,7 @@ TTTimeProcessPtr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHan
     TTValue             v, out, aCacheElement;
     
     // Get the name of the start event
-    if (!aXmlHandler->getXmlAttribute(TTSymbol("start"), v, YES)) {
+    if (!aXmlHandler->getXmlAttribute(kTTSym_start, v, YES)) {
         
         if (v.size() == 1) {
             
@@ -339,7 +339,7 @@ TTTimeProcessPtr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHan
     }
     
     // Get the name of the end event
-    if (!aXmlHandler->getXmlAttribute(TTSymbol("end"), v, YES)) {
+    if (!aXmlHandler->getXmlAttribute(kTTSym_end, v, YES)) {
         
         if (v.size() == 1) {
             
@@ -384,68 +384,68 @@ TTTimeProcessPtr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHan
         }
         
         // Get the durationMin
-        if (!aXmlHandler->getXmlAttribute(TTSymbol("durationMin"), v, NO)) {
+        if (!aXmlHandler->getXmlAttribute(kTTSym_durationMin, v, NO)) {
             
             if (v.size() == 1) {
                 
                 if (v[0].type() == kTypeUInt32) {
                     
-                    aTimeProcess->setAttributeValue(TTSymbol("durationMin"), v);
+                    aTimeProcess->setAttributeValue(kTTSym_durationMin, v);
                 }
             }
         }
         
         // Get the durationMax
-        if (!aXmlHandler->getXmlAttribute(TTSymbol("durationMax"), v, NO)) {
+        if (!aXmlHandler->getXmlAttribute(kTTSym_durationMax, v, NO)) {
             
             if (v.size() == 1) {
                 
                 if (v[0].type() == kTypeUInt32) {
                     
-                    aTimeProcess->setAttributeValue(TTSymbol("durationMax"), v);
+                    aTimeProcess->setAttributeValue(kTTSym_durationMax, v);
                 }
             }
         }
         
         // Get the color
-        if (!aXmlHandler->getXmlAttribute(TTSymbol("color"), v, NO)) {
+        if (!aXmlHandler->getXmlAttribute(kTTSym_color, v, NO)) {
             
             if (v.size() == 3) {
                 
                 if (v[0].type() == kTypeFloat64) {
                     
-                    aTimeProcess->setAttributeValue(TTSymbol("color"), v);
+                    aTimeProcess->setAttributeValue(kTTSym_color, v);
                 }
             }
         }
         
         // Get the vertical position
-        if (!aXmlHandler->getXmlAttribute(TTSymbol("verticalPosition"), v, NO)) {
+        if (!aXmlHandler->getXmlAttribute(kTTSym_verticalPosition, v, NO)) {
             
             if (v.size() == 1) {
                 
                 if (v[0].type() == kTypeUInt32) {
                     
-                    aTimeProcess->setAttributeValue(TTSymbol("verticalPosition"), v);
+                    aTimeProcess->setAttributeValue(kTTSym_verticalPosition, v);
                 }
             }
         }
         
         // Get the vertical size
-        if (!aXmlHandler->getXmlAttribute(TTSymbol("verticalSize"), v, NO)) {
+        if (!aXmlHandler->getXmlAttribute(kTTSym_verticalSize, v, NO)) {
             
             if (v.size() == 1) {
                 
                 if (v[0].type() == kTypeUInt32) {
                     
-                    aTimeProcess->setAttributeValue(TTSymbol("verticalSize"), v);
+                    aTimeProcess->setAttributeValue(kTTSym_verticalSize, v);
                 }
             }
         }
         
         // Pass the xml handler to the new process to fill his attribute
         aXmlHandler->setAttributeValue(kTTSym_object, out);
-        aXmlHandler->sendMessage(TTSymbol("Read"));
+        aXmlHandler->sendMessage(kTTSym_Read);
     }
     
     return aTimeProcess;
@@ -461,7 +461,7 @@ void TTTimeContainer::writeTimeConditionAsXml(TTXmlHandlerPtr aXmlHandler, TTTim
     // Pass the xml handler to the condition to fill his attribute
     v = TTObjectBasePtr(aTimeCondition);
     aXmlHandler->setAttributeValue(kTTSym_object, v);
-    aXmlHandler->sendMessage(TTSymbol("Write"));
+    aXmlHandler->sendMessage(kTTSym_Write);
     
     // Close the condition node
     xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
@@ -481,7 +481,7 @@ TTTimeConditionPtr TTTimeContainer::readTimeConditionFromXml(TTXmlHandlerPtr aXm
             
             // Pass the xml handler to the new condition to fill his attribute
             aXmlHandler->setAttributeValue(kTTSym_object, out);
-            aXmlHandler->sendMessage(TTSymbol("Read"));
+            aXmlHandler->sendMessage(kTTSym_Read);
         }
     }
     

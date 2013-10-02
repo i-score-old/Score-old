@@ -20,12 +20,28 @@
 
 #include "TTSymbol.h"
 
-// object classe name
+// object classe names
 extern TTSCORE_EXPORT TTSymbol  kTTSym_TimeEvent;
 
-// message name
+// attribute, message or any names
+extern TTSCORE_EXPORT TTSymbol	kTTSym_case;
+extern TTSCORE_EXPORT TTSymbol	kTTSym_color;
+extern TTSCORE_EXPORT TTSymbol	kTTSym_condition;
+extern TTSCORE_EXPORT TTSymbol	kTTSym_date;
+extern TTSCORE_EXPORT TTSymbol	kTTSym_duration;
+extern TTSCORE_EXPORT TTSymbol	kTTSym_durationMin;
+extern TTSCORE_EXPORT TTSymbol	kTTSym_durationMax;
+extern TTSCORE_EXPORT TTSymbol	kTTSym_event;
+extern TTSCORE_EXPORT TTSymbol	kTTSym_expression;
 extern TTSCORE_EXPORT TTSymbol	kTTSym_Happen;
+extern TTSCORE_EXPORT TTSymbol	kTTSym_Pause;
+extern TTSCORE_EXPORT TTSymbol	kTTSym_ready;
+extern TTSCORE_EXPORT TTSymbol  kTTSym_redundancy;
+extern TTSCORE_EXPORT TTSymbol	kTTSym_Resume;
+extern TTSCORE_EXPORT TTSymbol	kTTSym_rigid;
 extern TTSCORE_EXPORT TTSymbol	kTTSym_Trigger;
+extern TTSCORE_EXPORT TTSymbol	kTTSym_verticalPosition;
+extern TTSCORE_EXPORT TTSymbol	kTTSym_verticalSize;
 
 #endif // __TT_SCORE_SYMBOL_CACHE_H__
 
