@@ -133,15 +133,12 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
     TTFloat64   progression, realTime;
     TTValue     v;
     
-    if (inputValue.size() == 1) {
+    if (inputValue.size() == 2) {
         
-        if (inputValue[0].type() == kTypeFloat64) {
+        if (inputValue[0].type() == kTypeFloat64 && inputValue[0].type() == kTypeFloat64) {
             
             progression = inputValue[0];
-            
-            // TODO : the SchedulerLib should also returns the realtime
-            mScheduler->getAttributeValue(TTSymbol("realTime"), v);
-            realTime = v[0];
+            realTime = inputValue[1];
             
             // update the mExecutionGraph to process the scenario
             if (mExecutionGraph->makeOneStep(realTime))

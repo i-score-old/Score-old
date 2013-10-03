@@ -625,10 +625,10 @@ TTErr TTTimeProcessEndEventHappenCallback(TTPtr baton, TTValue& data)
     return kTTErrGeneric;
 }
 
-void TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression)
+void TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression, TTFloat64 realTime)
 {
 	TTTimeProcessPtr	aTimeProcess = (TTTimeProcessPtr)object;
     
     // use the specific process method
-    aTimeProcess->Process(progression, kTTValNONE);
+    aTimeProcess->Process(TTValue(progression, realTime), kTTValNONE);
 }

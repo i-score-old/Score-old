@@ -225,7 +225,7 @@ protected :
     
     friend TTErr TTSCORE_EXPORT TTTimeProcessStartEventHappenCallback(TTPtr baton, TTValue& data);
     friend TTErr TTSCORE_EXPORT TTTimeProcessEndEventHappenCallback(TTPtr baton, TTValue& data);
-    friend void TTSCORE_EXPORT TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression);
+    friend void TTSCORE_EXPORT TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression, TTFloat64 realTime);
     
     friend void TTSCORE_EXPORT TTTimeContainerFindTimeProcessWithTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found);
 };
@@ -248,7 +248,7 @@ TTErr TTSCORE_EXPORT TTTimeProcessEndEventHappenCallback(TTPtr baton, TTValue& d
  @param	object				a time process instance
  @param	progression			the time progression
  @return					an error code */
-void TTSCORE_EXPORT TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression);
+void TTSCORE_EXPORT TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression, TTFloat64 realTime);
 
 
 /** Define some macros to ease the access of events attributes */
@@ -261,7 +261,7 @@ void TTSCORE_EXPORT TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progr
 #define mDuration mEndDate - mStartDate
 
 /** Define callback function to get progression back from the scheduler */
-typedef void (*TTTimeProcessProgressionCallback)(TTPtr, TTFloat64);
+typedef void (*TTTimeProcessProgressionCallback)(TTPtr, TTFloat64, TTFloat64);
 
 /** Define an unordered map to store and retreive a value relative to a TTTimeProcessPtr */
 #ifdef TT_PLATFORM_WIN

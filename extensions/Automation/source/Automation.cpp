@@ -62,7 +62,23 @@ TTErr Automation::getCurveAddresses(TTValue& value)
 
 TTErr Automation::ProcessStart()
 {
-    // do nothing
+    TTValue         v, keys;
+    TTSymbol        key;
+    TTObjectBasePtr curve;
+    
+    // reset the next times value to the sample rate of each curves
+    mCurves.getKeys(keys);
+    for (TTUInt32 i = 0; i < keys.size(); i++) {
+        
+        key = keys[i];
+        mCurves.lookup(key, v);
+        curve = v[0];
+        
+        curve->getAttributeValue(TTSymbol("sampleRate"), v);
+        
+        mNextTimes[i] = TTUInt32(v[0]);
+    }
+    
     return kTTErrNone;
 }
 
@@ -74,7 +90,7 @@ TTErr Automation::ProcessEnd()
 
 TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTFloat64       progression, result;
+    TTFloat64       progression, realTime, result;
     TTValue         v, keys;
     TTSymbol        key;
     TTAddress       address;
@@ -84,11 +100,12 @@ TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
 	TTObjectBasePtr	anObject;
 	TTErr			err;
     
-    if (inputValue.size() == 1) {
+    if (inputValue.size() == 2) {
         
-        if (inputValue[0].type() == kTypeFloat64) {
+        if (inputValue[0].type() == kTypeFloat64 && inputValue[1].type() == kTypeFloat64) {
             
             progression = inputValue[0];
+            realTime = inputValue[1];
             
             // don't process for 0. or 1. to not send the same value twice
             if (progression == 0. || progression == 1.)
@@ -98,9 +115,18 @@ TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
             mCurves.getKeys(keys);
             for (TTUInt32 i = 0; i < keys.size(); i++) {
                 
+                // a curve is processed only if the realTime is greater than its next time
+                if (TTUInt32(mNextTimes[i]) > realTime)
+                    continue;
+                
                 key = keys[i];
                 mCurves.lookup(key, v);
                 curve = v[0];
+                
+                // update the next time with its sample rate
+                curve->getAttributeValue(TTSymbol("sampleRate"), v);
+                mNextTimes[i] = TTUInt32(mNextTimes[i]) + TTUInt32(v[0]);
+                
                 CurvePtr(curve)->calculate(progression, result);
                 
                 address = TTAddress(key);
@@ -283,9 +309,15 @@ TTErr Automation::CurveAdd(const TTValue& inputValue, TTValue& outputValue)
                     parameters[5] = TTFloat64(1);
                     
                     curve->setAttributeValue(TTSymbol("parameters"), parameters);
-
+                    
                     // register the curve at address
-                    return mCurves.append(address, curve);
+                    err = mCurves.append(address, curve);
+                    
+                    // resize next time value
+                    mCurves.getKeys(v);
+                    mNextTimes.resize(v.size());
+                    
+                    return err;
                 }
             }
         }
@@ -393,6 +425,10 @@ TTErr Automation::CurveRemove(const TTValue& inputValue, TTValue& outputValue)
                 
                 // unregister the curve
                 mCurves.remove(address);
+                
+                // resize next time value
+                mCurves.getKeys(v);
+                mNextTimes.resize(v.size());
                 
                 // delete curve
                 return TTObjectBaseRelease(&curve);

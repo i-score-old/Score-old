@@ -19,6 +19,7 @@
 #define __CURVE_H__
 
 #include "TimePluginLib.h"
+#include "Automation.h"
 
 /**	The Curve class allows to ...
  
