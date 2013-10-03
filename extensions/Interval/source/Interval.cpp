@@ -54,6 +54,11 @@ TTErr Interval::Process(const TTValue& inputValue, TTValue& outputValue)
     return kTTErrNone;
 }
 
+TTErr Interval::ProcessPaused(const TTValue& inputValue, TTValue& outputValue)
+{
+    return kTTErrNone;
+}
+
 TTErr Interval::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 {
     // nothing to write	

@@ -110,7 +110,7 @@ TTErr TTTimeContainer::getTimeEvents(TTValue& value)
         return kTTErrGeneric;
     
     for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next())
-        value.append(mTimeEventList.current()[0]); // théo : here we expect the Container plugin filled the list with the object at the [0] index ...
+        value.append(mTimeEventList.current()[0]); // théo : here we expect the Container plugin fills the list with the object at the [0] index ...
     
     return kTTErrNone;
 }
@@ -123,7 +123,7 @@ TTErr TTTimeContainer::getTimeConditions(TTValue& value)
         return kTTErrGeneric;
     
     for (mTimeConditionList.begin(); mTimeConditionList.end(); mTimeConditionList.next())
-        value.append(mTimeConditionList.current()[0]); // théo : here we expect the Container plugin filled the list with the object at the [0] index ...
+        value.append(mTimeConditionList.current()[0]); // théo : here we expect the Container plugin fills the list with the object at the [0] index ...
     
     return kTTErrNone;
 }

@@ -154,6 +154,31 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
     return kTTErrGeneric;
 }
 
+TTErr Scenario::ProcessPaused(const TTValue& inputValue, TTValue& outputValue)
+{
+    TTObjectBasePtr aTimeProcess;
+    
+    if (inputValue.size() == 1) {
+        
+        if (inputValue[0].type() == kTypeBoolean) {
+            
+            for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
+                
+                aTimeProcess = mTimeProcessList.current()[0];
+                
+                if (inputValue == kTTBoolYes)
+                    aTimeProcess->sendMessage(kTTSym_Pause);
+                else
+                    aTimeProcess->sendMessage(kTTSym_Resume);
+            }
+        }
+        
+        return kTTErrNone;
+    }
+    
+    return kTTErrGeneric;
+}
+
 TTErr Scenario::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 {
 	TTXmlHandlerPtr     aXmlHandler = NULL;

@@ -58,6 +58,12 @@ private :
      @return                an error code returned by the process method */
     TTErr   Process(const TTValue& inputValue, TTValue& outputValue);
     
+    /** Specific process method for pause/resume
+     @param	inputValue      boolean paused state of the scheduler
+     @param	outputValue     return an error of the processing
+     @return                an error code returned by the process paused method */
+    TTErr   ProcessPaused(const TTValue& inputValue, TTValue& outputValue);
+    
 	/**  needed to be handled by a TTXmlHandler
      @param	inputValue      ..
      @param	outputValue     ..

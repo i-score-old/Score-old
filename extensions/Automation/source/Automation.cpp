@@ -167,6 +167,12 @@ TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
     return kTTErrGeneric;
 }
 
+TTErr Automation::ProcessPaused(const TTValue& inputValue, TTValue& outputValue)
+{
+    // théo : what do do on pause/resume ?
+    return kTTErrNone;
+}
+
 TTErr Automation::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 {
 	TTXmlHandlerPtr	aXmlHandler = NULL;

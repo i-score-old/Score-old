@@ -476,12 +476,16 @@ TTErr TTTimeProcess::Stop()
 
 TTErr TTTimeProcess::Pause()
 {
-    return mScheduler->sendMessage(kTTSym_Pause);
+    mScheduler->sendMessage(kTTSym_Pause);
+    
+    return ProcessPaused(kTTBoolYes, kTTValNONE);
 }
 
 TTErr TTTimeProcess::Resume()
 {
-    return mScheduler->sendMessage(kTTSym_Resume);
+    mScheduler->sendMessage(kTTSym_Resume);
+    
+    return ProcessPaused(kTTBoolNo, kTTValNONE);
 }
 
 TTTimeEventPtr TTTimeProcess::getStartEvent()
