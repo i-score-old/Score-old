@@ -276,6 +276,7 @@ TTErr Automation::CurveAdd(const TTValue& inputValue, TTValue& outputValue)
     TTValue         v, vStart, vEnd, parameters;
     TTAddress       address;
     TTObjectBasePtr curve = NULL;
+    TTBoolean       valid = YES;
     TTErr           err;
     
     if (inputValue.size() == 1) {
@@ -288,7 +289,7 @@ TTErr Automation::CurveAdd(const TTValue& inputValue, TTValue& outputValue)
             if (mCurves.lookup(address, v)) {
                 
                 // create a freehand function unit
-                err = TTObjectBaseInstantiate(TTSymbol("Curve"), TTObjectBaseHandle(&curve), kTTValNONE);
+                err = TTObjectBaseInstantiate(TTSymbol("Curve"), &curve, kTTValNONE);
                 
                 if (!err) {
                     
@@ -297,6 +298,19 @@ TTErr Automation::CurveAdd(const TTValue& inputValue, TTValue& outputValue)
 
                     // get the end event state value for this address
                     getEndEvent()->sendMessage(TTSymbol("StateAddressGetValue"), address, vEnd);
+                    
+                    // check start and end value validity : we can't make a curve for a symbol
+                    for (TTUInt32 i = 0; i < vStart.size(); i++)
+                        valid &= vStart[i].type() != kTypeSymbol;
+                    
+                    for (TTUInt32 i = 0; i < vEnd.size(); i++)
+                        valid &= vEnd[i].type() != kTypeSymbol;
+                    
+                    if (!valid) {
+                        
+                        TTObjectBaseRelease(&curve);
+                        return kTTErrGeneric;
+                    }
                     
                     // prepare curve parameters
                     parameters.resize(6);
