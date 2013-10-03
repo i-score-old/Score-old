@@ -602,7 +602,7 @@ PetriNet::~PetriNet()
 //	}
 }
 
-void externLaunch(void* arg)
+void externLaunch(void* arg, bool option)
 {
 	PetriNet* petriNet = (PetriNet*) arg;
 
@@ -616,7 +616,7 @@ void externLaunch(void* arg)
 	//petriNet->launch();
 }
 
-void externMustStop(void* arg)
+void externMustStop(void* arg, bool option)
 {
 	PetriNet* petriNet = (PetriNet*) arg;
 

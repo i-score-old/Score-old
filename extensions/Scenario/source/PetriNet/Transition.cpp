@@ -163,7 +163,7 @@ void Transition::merge(Transition* transitionToMerge) // CB Attention, copie de 
 	}
 }
 
-void Transition::addExternAction(void(*pt2Func)(void*), void* argPt2Func)
+void Transition::addExternAction(void(*pt2Func)(void*, bool), void* argPt2Func)
 {
 	m_externActions.push_back(new TransitionAction(pt2Func, argPt2Func));
 //	m_externAction = pt2Func;
@@ -343,7 +343,7 @@ void Transition::crossTransition(bool mustChangeTokenValue, unsigned int newToke
 
 	if (m_externActions.size() > 0) {
 		for (unsigned int i = 0 ; i < m_externActions.size() ; ++i) {
-			m_externActions[i]->m_transitionAction(m_externActions[i]->m_transitionActionArgument);
+			m_externActions[i]->m_transitionAction(m_externActions[i]->m_transitionActionArgument, true);  // théo : by default we send true to make events happen (send false to dispose them)
 		}
 	}
 

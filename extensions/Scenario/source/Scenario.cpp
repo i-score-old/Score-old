@@ -1152,13 +1152,16 @@ void Scenario::deleteTimeConditionCacheElement(const TTValue& oldCacheElement)
 #pragma mark Some Methods
 #endif
 
-void ScenarioGraphTimeEventCallBack(TTPtr arg)
+void ScenarioGraphTimeEventCallBack(TTPtr arg, TTBoolean active)
 {
     // cf ECOMachine : crossAControlPointCallBack function
     
     TTTimeEventPtr aTimeEvent = (TTTimeEventPtr) arg;
     
-	aTimeEvent->sendMessage(kTTSym_Happen);
+    if (active)
+        aTimeEvent->sendMessage(kTTSym_Happen);
+    else
+        aTimeEvent->sendMessage(kTTSym_Dispose);
 }
 
 

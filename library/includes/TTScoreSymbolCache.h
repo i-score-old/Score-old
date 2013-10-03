@@ -28,6 +28,7 @@ extern TTSCORE_EXPORT TTSymbol	kTTSym_case;
 extern TTSCORE_EXPORT TTSymbol	kTTSym_color;
 extern TTSCORE_EXPORT TTSymbol	kTTSym_condition;
 extern TTSCORE_EXPORT TTSymbol	kTTSym_date;
+extern TTSCORE_EXPORT TTSymbol	kTTSym_Dispose;
 extern TTSCORE_EXPORT TTSymbol	kTTSym_duration;
 extern TTSCORE_EXPORT TTSymbol	kTTSym_durationMin;
 extern TTSCORE_EXPORT TTSymbol	kTTSym_durationMax;

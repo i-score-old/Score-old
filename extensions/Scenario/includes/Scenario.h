@@ -63,12 +63,12 @@ class Scenario : public TimeContainer {
     /** Set the view zoom factor
      @param	value           zoomX and zoomY
      @return                kTTErrNone */
-    TTErr           setViewZoom(const TTValue& value);
+    TTErr   setViewZoom(const TTValue& value);
     
     /** Set the view position
      @param	value           zoomX and zoomY
      @return                kTTErrNone */
-    TTErr           setViewPosition(const TTValue& value);
+    TTErr   setViewPosition(const TTValue& value);
     
     /** Compile the scenario to prepare the petri net before execution
      @return                an error code returned by the compile method */
@@ -205,15 +205,16 @@ class Scenario : public TimeContainer {
     void    compileInteractiveEvent(TTTimeEventPtr aTimeEvent, TTUInt32 timeOffset);
     //void    cleanGraph(TransitionPtr endTransition);
     
-    friend void TT_EXTENSION_EXPORT ScenarioGraphTimeEventCallBack(TTPtr arg);
+    friend void TT_EXTENSION_EXPORT ScenarioGraphTimeEventCallBack(TTPtr arg, TTBoolean active);
     friend void TT_EXTENSION_EXPORT ScenarioGraphIsEventReadyCallBack(TTPtr arg, TTBoolean isReady);
 };
 
 typedef Scenario* ScenarioPtr;
 
 /** The callback method used by the execution graph when ...
- @param	arg                         a time event instance */
-void TT_EXTENSION_EXPORT ScenarioGraphTimeEventCallBack(TTPtr arg);
+ @param	arg                         a time event instance
+ @param	arg                         is time event becomes active or passive ? */
+void TT_EXTENSION_EXPORT ScenarioGraphTimeEventCallBack(TTPtr arg, TTBoolean active);
 
 /** The callback method used by the execution graph when ...
  @param	arg                         a time event instance

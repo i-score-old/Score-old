@@ -45,6 +45,7 @@ mReady(YES)
     
     addMessage(Trigger);
     addMessage(Happen);
+    addMessage(Dispose);
     addMessageWithArguments(StateAddressGetValue);
     
 	// needed to be handled by a TTXmlHandler
@@ -57,6 +58,7 @@ mReady(YES)
     this->findAttribute(kTTSym_date, &dateAttribute);
     this->findAttribute(kTTSym_ready, &readyAttribute);
     this->findMessage(kTTSym_Happen, &happenMessage);
+    this->findMessage(kTTSym_Dispose, &disposeMessage);
     
     // create a script
     TTObjectBaseInstantiate(kTTSym_Script, TTObjectBaseHandle(&mState), kTTValNONE);
@@ -156,6 +158,16 @@ TTErr TTTimeEvent::Happen()
     happenMessage->sendNotification(kTTSym_notify, kTTValNONE);	// we use kTTSym_notify because we know that observers are TTCallback
     
     return err;
+}
+
+TTErr TTTimeEvent::Dispose()
+{
+    // théo : what to do here ?
+    
+    // notify observers
+    disposeMessage->sendNotification(kTTSym_notify, kTTValNONE);	// we use kTTSym_notify because we know that observers are TTCallback
+    
+    return kTTErrNone;
 }
 
 TTErr TTTimeEvent::StateAddressGetValue(const TTValue& inputValue, TTValue& outputValue)

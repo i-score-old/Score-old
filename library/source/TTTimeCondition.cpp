@@ -105,6 +105,9 @@ TTErr TTTimeCondition::CaseAdd(const TTValue& inputValue, TTValue& outputValue)
     // if there is no receiver for the expression address
     if (mReceivers.lookup(expression.getAddress(), v)) {
         
+        // No callback for the address
+        v = TTValue((TTObjectBasePtr)NULL);
+        
         // Create a receiver callback to get the expression address value back
         aReceiverCallback = NULL;
         TTObjectBaseInstantiate(TTSymbol("callback"), &aReceiverCallback, kTTValNONE);
@@ -115,8 +118,11 @@ TTErr TTTimeCondition::CaseAdd(const TTValue& inputValue, TTValue& outputValue)
         aReceiverCallback->setAttributeValue(kTTSym_baton, TTPtr(aReceiverBaton));
         aReceiverCallback->setAttributeValue(kTTSym_function, TTPtr(&TTTimeConditionReceiverReturnValueCallback));
         
-        v = TTValue((TTPtr)aReceiverCallback);
+        v.append(aReceiverCallback);
         TTObjectBaseInstantiate(kTTSym_Receiver, TTObjectBaseHandle(&aReceiver), v);
+        
+        // set the address of the receiver
+        aReceiver->setAttributeValue(kTTSym_address, expression.getAddress());
         
         v = TTObjectBasePtr(aReceiver);
         mReceivers.append(expression.getAddress(), v);

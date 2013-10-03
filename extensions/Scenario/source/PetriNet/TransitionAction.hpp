@@ -53,10 +53,10 @@ knowledge of the CeCILL-C license and that you accept its terms.
 class TransitionAction
 {
 public:
-	TransitionAction(void(*pt2Func)(void*), void* argPt2Func);
+	TransitionAction(void(*pt2Func)(void*, bool), void* argPt2Func);
 	virtual ~TransitionAction();
 
-	void (*m_transitionAction)(void*);
+	void (*m_transitionAction)(void*, bool);
 	void* m_transitionActionArgument;
 };
 

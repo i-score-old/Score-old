@@ -44,7 +44,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  * \date 2008-2009
  */
 
-TransitionAction::TransitionAction(void(*pt2Func)(void*), void* argPt2Func)
+TransitionAction::TransitionAction(void(*pt2Func)(void*, bool), void* argPt2Func)
 {
 	m_transitionAction = pt2Func;
 	m_transitionActionArgument = argPt2Func;

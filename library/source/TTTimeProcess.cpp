@@ -572,7 +572,7 @@ TTErr TTTimeProcessStartEventHappenCallback(TTPtr baton, TTValue& data)
 	if (aTimeProcess->mActive) {
         
         // close start event listening
-        aTimeProcess->mStartEvent->setAttributeValue(kTTSym_active, NO);
+        aTimeProcess->mStartEvent->setAttributeValue(kTTSym_ready, NO);
         
         // use the specific start process method of the time process
         aTimeProcess->ProcessStart();
@@ -614,7 +614,7 @@ TTErr TTTimeProcessEndEventHappenCallback(TTPtr baton, TTValue& data)
         aTimeProcess->mScheduler->sendMessage(kTTSym_Stop);
         
         // close end trigger listening
-        aTimeProcess->mEndEvent->setAttributeValue(kTTSym_active, NO);
+        aTimeProcess->mEndEvent->setAttributeValue(kTTSym_ready, NO);
         
         // use the specific process end method of the time process
         aTimeProcess->ProcessEnd();

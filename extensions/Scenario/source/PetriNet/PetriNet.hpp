@@ -124,7 +124,7 @@ public:
 	 */
 	bool makeOneStep(unsigned int currentTime);
 
-	friend void externLaunch(void* arg);
+	friend void externLaunch(void* arg, bool option);
     
     /*
      *  Get the current time stored when the mekeOneStep is called
@@ -282,7 +282,7 @@ public:
 
 	void mustStop();
 
-	friend void externMustStop(void* arg);
+	friend void externMustStop(void* arg, bool option);
 
 	/*!
 	 * Gets the transitions in this PetriNet
@@ -405,7 +405,7 @@ private:
 	void deleteItem(PetriNetNode* nodeToDelete);
 };
 
-void externLaunch(void* arg);
-void externMustStop(void* arg);
+void externLaunch(void* arg, bool option);
+void externMustStop(void* arg, bool option);
 
 #endif /*PETRINET_H_*/

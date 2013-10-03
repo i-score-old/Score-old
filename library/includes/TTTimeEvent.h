@@ -52,6 +52,7 @@ private :
     TTAttributePtr                  dateAttribute;                  ///< cache date attribute for observer notification
     TTAttributePtr                  readyAttribute;                 ///< cache ready attribute for observer notification
     TTMessagePtr                    happenMessage;                  ///< cache happen message for observer notification
+    TTMessagePtr                    disposeMessage;                 ///< cache dispose message for observer notification
     
     /** Set the date of the event
      @param	value           a date
@@ -75,6 +76,10 @@ private :
     /** Make the event happen
      @return                an error code returned by the happen method */
     TTErr           Happen();
+    
+    /** Make the event not happen
+     @return                an error code returned by the happen method */
+    TTErr           Dispose();
     
     /**  needed to be handled by a TTXmlHandler
      @param	inputValue      ..

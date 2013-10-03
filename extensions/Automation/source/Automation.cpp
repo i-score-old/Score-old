@@ -234,6 +234,10 @@ TTErr Automation::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
                         
                         // store the curve
                         mCurves.append(address, curve);
+                        
+                        // resize next time value
+                        mCurves.getKeys(v);
+                        mNextTimes.resize(v.size());
                     }
                 }
             }

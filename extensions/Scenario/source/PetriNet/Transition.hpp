@@ -100,7 +100,7 @@ public:
 	 * \param pt2Func : function with one void* parameter.
 	 * \param argPt2Func : argument for pt2Func.
 	 */
-	void addExternAction(void(*pt2Func)(void*), void* argPt2Func);
+	void addExternAction(void(*pt2Func)(void*, bool), void* argPt2Func);
 
 	/*!
 	 * Removes actions called when the transition is crossed.
