@@ -105,7 +105,7 @@ bool PetriNet::makeOneStep(unsigned int currentTime)
                     if (topAction->getType() == START) {
                         if (topTransition->couldBeSensitize()) {
                             
-                            std::cout << "PetriNet::makeOneStep : sensitize event" << topTransition->getEvent() << std::endl;
+                            std::cout << "PetriNet::makeOneStep : sensitize event " << topTransition->getEvent() << std::endl;
                             turnIntoSensitized(topTransition);
                             
                             if (topTransition->getEvent() != NULL && m_isEventReadyCallback != NULL)
