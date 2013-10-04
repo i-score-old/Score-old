@@ -417,7 +417,7 @@ TTErr Automation::CurveUpdate(const TTValue& inputValue, TTValue& outputValue)
                 // TODO : scale the other y points value ?
                 
                 // change the last point y value : ... xn yn bn
-                parameters[parameters.size() - 3] = TTFloat64(vEnd[0]);
+                parameters[parameters.size() - 2] = TTFloat64(vEnd[0]);
                 
                 // set current curve parameters
                 curve->setAttributeValue(TTSymbol("parameters"), parameters);
