@@ -44,9 +44,10 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 #include "Token.hpp"
 
-Token::Token()
+Token::Token(int remainingTime)
+    :m_remainingTime(remainingTime == -1 ? 0 : remainingTime),
+      m_active(remainingTime != -1)
 {
-	m_remainingTime = 0;
 }
 
 Token::~Token()
@@ -61,4 +62,9 @@ void Token::setRemainingTime(unsigned int time)
 unsigned int Token::getRemainingTime()
 {
 	return m_remainingTime;
+}
+
+bool Token::isActive()
+{
+    return m_active;
 }

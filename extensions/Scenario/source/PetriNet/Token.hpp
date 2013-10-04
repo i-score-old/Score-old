@@ -49,12 +49,15 @@ class Token
 {
 private:
 	unsigned int m_remainingTime;
+    bool m_active;
 public:
-	Token();
+    Token(int remainingTime = 0);
 	virtual ~Token();
 
 	void setRemainingTime(unsigned int time);
 	unsigned int getRemainingTime();
+
+    bool isActive();
 
 };
 

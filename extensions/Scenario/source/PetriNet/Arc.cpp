@@ -173,7 +173,7 @@ int Arc::nbOfArcColorLabelTokensInFrom() {
 	return ((Place*)m_nodeFrom)->getNbOfTokens(getColor());
 }
 
-unsigned int Arc::consumeTokenInFrom() {
+int Arc::consumeTokenInFrom() {
 	if (!dynamic_cast<Place*>(m_nodeFrom)) {
 		throw IllegalArgumentException("Can only consume Tokens from Places");
 	}
@@ -181,7 +181,7 @@ unsigned int Arc::consumeTokenInFrom() {
 	return ((Place*)m_nodeFrom)->consumeTokens(NB_OF_TOKEN_TO_CONSUME, getColor());
 }
 
-void Arc::produceTokenInTo(unsigned int tokenValue) {
+void Arc::produceTokenInTo(int tokenValue) {
 	if (!dynamic_cast<Place*>(m_nodeTo)) {
 		throw IllegalArgumentException("Can only produce Tokens into Places");
 	}

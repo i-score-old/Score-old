@@ -211,7 +211,7 @@ public:
 	 *
 	 * Throws a IllegalArgumentException if the place does not have enough token to consume.
 	 */
-	unsigned int consumeTokenInFrom();
+    int consumeTokenInFrom();
 
 	/*!
 	 * Produces token in the place where the arc is going into.
@@ -219,7 +219,7 @@ public:
 	 * Throws a IllegalArgumentException if this arc is not going into a place, but
 	 * into a transition.
 	 */
-	void produceTokenInTo(unsigned int);
+    void produceTokenInTo(int);
 
 	/*!
 	 * Gets the arc color.
