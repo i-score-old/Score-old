@@ -42,7 +42,7 @@ protected :
     TTUInt32                        mDurationMin;                   ///< the minimal duration of the time process
     TTUInt32                        mDurationMax;                   ///< the maximal duration of the time process
     
-    TTBoolean                       mActive;                        ///< is the time process active ?
+    TTBoolean                       mMute;                          ///< is the time process muted ?
     
     TTValue                         mColor;                         ///< the color of the process (useful for gui)
     TTUInt32                        mVerticalPosition;              ///< the Y axe position of the process (useful for gui)
@@ -60,7 +60,7 @@ private :
     TTObjectBasePtr                 mEndEvent;                      ///< the event object which handles the time process execution stop
     TTObjectBasePtr                 mEndEventCallback;              ///< a callback to subscribe for end event notification
     
-    TTAttributePtr                  activeAttribute;                ///< cache active attribute for observer notification
+    TTBoolean                       active;                         ///< an internal flag to avoid last scheduler tick to call the process method (it could happen one tick after the stop)
     
     /** Specific process method on start
      @return                an error code returned by the process end method */
@@ -161,11 +161,6 @@ private :
      @param	value           the returned duration
      @return                kTTErrNone */
     TTErr           getDuration(TTValue& value);
-    
-    /** Set the time process active or not
-     @param	value           a boolean
-     @return                kTTErrNone */
-    TTErr           setActive(const TTValue& value);
     
     /** Set the time process color
      @param	value           8 bit color format <red green blue>

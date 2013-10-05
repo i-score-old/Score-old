@@ -59,6 +59,8 @@ mExecutionGraph(NULL)
             this->setEndEvent(TTTimeEventPtr(TTObjectBasePtr(arguments[1])));
         }
     }
+    
+    mScheduler->setAttributeValue(TTSymbol("granularity"), TTFloat64(1.));
 }
 
 Scenario::~Scenario()
@@ -103,9 +105,18 @@ TTErr Scenario::setViewPosition(const TTValue& value)
 
 TTErr Scenario::Compile()
 {
-    // compile the mExecutionGraph to prepare scenario execution
-    // TODO : pass a time offset
-    compileGraph(0);
+    TTValue v;
+    
+    // get scheduler time offset
+    mScheduler->getAttributeValue(kTTSym_offset, v);
+    
+    // compile the mExecutionGraph to prepare scenario execution from the scheduler time offset
+    compileGraph(TTUInt32(TTFloat64(v[0])));
+    
+    // TODO : compile a temporary state (using the sequence method of TTScript) with all the event before the time offset
+    // in order to recall it on the ProcessStart method.
+    
+    // TODO : mute all the events before the time offset
     
     return kTTErrNone;
 }
@@ -114,11 +125,6 @@ TTErr Scenario::ProcessStart()
 {
     // start the execution graph
     mExecutionGraph->start();
-    
-    // TODO : deal with the timeOffset
-    // problem : if we offset the scheduler time it will never call ProcessStart method (called when progression == 0)
-    // idea : add the offset afterward ? for any time process or is this specific to a scenario ?
-    //mExecutionGraph->addTime(mExecutionGraph->getTimeOffset() * 1000);
     
     return kTTErrNone;
 }

@@ -26,7 +26,7 @@ mContainer(NULL),
 mName(kTTSymEmpty),
 mDurationMin(0),
 mDurationMax(0),
-mActive(YES),
+mMute(NO),
 mVerticalPosition(0),
 mVerticalSize(1),
 mScheduler(NULL),
@@ -52,7 +52,7 @@ mEndEventCallback(NULL)
     addAttributeWithSetter(DurationMin, kTypeUInt32);
     addAttributeWithSetter(DurationMax, kTypeUInt32);
     
-    addAttributeWithSetter(Active, kTypeBoolean);
+    addAttribute(Mute, kTypeBoolean);
     
     addAttributeWithSetter(Color, kTypeLocalValue);
     addAttribute(VerticalPosition, kTypeUInt32);
@@ -126,9 +126,6 @@ mEndEventCallback(NULL)
         mScheduler = NULL;
 		logError("TimeProcess failed to load the EcoMachine Scheduler");
     }
-    
-    // Cache some attributes for high speed notification feedbacks
-    this->findAttribute(kTTSym_active, &activeAttribute);
     
     // generate a random name
     mName = mName.random();
@@ -392,17 +389,6 @@ TTErr TTTimeProcess::getDuration(TTValue& value)
     return kTTErrGeneric;
 }
 
-TTErr TTTimeProcess::setActive(const TTValue& value)
-{
-    // set the internal active value
-    mActive = value[0];
-    
-    // notify each attribute observers
-    activeAttribute->sendNotification(kTTSym_notify, mActive);             // we use kTTSym_notify because we know that observers are TTCallback
-    
-    return kTTErrNone;
-}
-
 TTErr TTTimeProcess::setColor(const TTValue& value)
 {
     mColor = value;
@@ -572,14 +558,17 @@ TTErr TTTimeProcessStartEventHappenCallback(TTPtr baton, TTValue& data)
 	b = (TTValuePtr)baton;
 	aTimeProcess = TTTimeProcessPtr((TTObjectBasePtr)(*b)[0]);
     
-    // if the time process active
-	if (aTimeProcess->mActive) {
+    // if the time process not muted
+	if (!aTimeProcess->mMute) {
         
         // close start event listening
         aTimeProcess->mStartEvent->setAttributeValue(kTTSym_ready, NO);
         
         // use the specific start process method of the time process
         aTimeProcess->ProcessStart();
+        
+        // set the internal active flag
+        aTimeProcess->active = YES;
         
         // launch the scheduler
         aTimeProcess->mStartEvent->getAttributeValue(kTTSym_date, v);
@@ -611,11 +600,15 @@ TTErr TTTimeProcessEndEventHappenCallback(TTPtr baton, TTValue& data)
 	b = (TTValuePtr)baton;
 	aTimeProcess = TTTimeProcessPtr((TTObjectBasePtr)(*b)[0]);
     
-    // if the time process active, stop the scheduler
+    // if the time process not muted, stop the scheduler
     // note : the ProcessStart method is called inside TTTimeProcessSchedulerCallback
-	if (aTimeProcess->mActive) {
+	if (!aTimeProcess->mMute) {
         
+        // stop the scheduler
         aTimeProcess->mScheduler->sendMessage(kTTSym_Stop);
+        
+        // set the internal active flag
+        aTimeProcess->active = NO;
         
         // close end trigger listening
         aTimeProcess->mEndEvent->setAttributeValue(kTTSym_ready, NO);
@@ -634,5 +627,8 @@ void TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression, TTFloat
 	TTTimeProcessPtr	aTimeProcess = (TTTimeProcessPtr)object;
     
     // use the specific process method
-    aTimeProcess->Process(TTValue(progression, realTime), kTTValNONE);
+    if (aTimeProcess->active)
+       aTimeProcess->Process(TTValue(progression, realTime), kTTValNONE);
+    else
+        std::cout << "TTTimeProcessSchedulerCallback : avoid last scheduler tick" << std::endl;
 }

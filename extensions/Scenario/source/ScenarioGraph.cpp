@@ -103,16 +103,21 @@ void Scenario::compileTimeProcess(TTTimeProcessPtr aTimeProcess, TransitionPtr* 
     Place*          currentPlace;
     Arc*            arcFromPreviousTransitionToCurrentPlace;
     Arc*            arcFromCurrentPlaceToTheEnd;
+    TTValue         v;
+    TTObjectBasePtr scheduler;
     
     TTTimeEventPtr  startEvent = getTimeProcessStartEvent(aTimeProcess);
     TTTimeEventPtr  endEvent = getTimeProcessEndEvent(aTimeProcess);
 
     // if the date to start is in the middle of a time process
-    if (getTimeEventDate(startEvent) < timeOffset && getTimeEventDate(endEvent) > timeOffset)
+    if (getTimeEventDate(startEvent) < timeOffset && getTimeEventDate(endEvent) > timeOffset) {
         
-// TODO : prepare the scheduler to start in the middle of his process
-//      aTimeProcess->setTimeOffsetInMs(timeOffset - startDate);
-        ;
+        // prepare the scheduler to start in the middle of his process
+        aTimeProcess->getAttributeValue(TTSymbol("scheduler"), v);
+        
+        scheduler = v[0];
+        scheduler->setAttributeValue(kTTSym_offset, TTFloat64(timeOffset - getTimeEventDate(startEvent)));
+    }
     
     // compile start event
     currentTransition = mExecutionGraph->createTransition();
@@ -311,14 +316,14 @@ void Scenario::compileInteractiveEvent(TTTimeEventPtr aTimeEvent, TTUInt32 timeO
     TransitionPtr currentTransition;
     Arc*          currentArc;
     
-    TTBoolean     active;
+    TTBoolean     mute;
     
     GraphObjectMapIterator  mergeIterator;
     
-    // TODO : get event active state
-    active = YES;
+    // TODO : get event mute state
+    mute = NO;
     
-    if (active && getTimeEventDate(aTimeEvent) >= timeOffset) {
+    if (!mute && getTimeEventDate(aTimeEvent) >= timeOffset) {
         
         // retreive transition
         currentTransition = TransitionPtr(mTransitionsMap[aTimeEvent]);

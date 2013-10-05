@@ -25,6 +25,7 @@ TT_BASE_OBJECT_CONSTRUCTOR,
 mContainer(NULL),
 mName(kTTSymEmpty),
 mDate(0),
+mMute(NO),
 mState(NULL),
 mCondition(NULL),
 mReady(YES)
@@ -39,6 +40,7 @@ mReady(YES)
 
     addAttribute(Name, kTypeSymbol);
    	addAttributeWithSetter(Date, kTypeUInt32);
+    addAttribute(Mute, kTypeBoolean);
     addAttribute(State, kTypeObject);
     addAttributeWithSetter(Condition, kTypeObject);
     addAttributeWithSetter(Ready, kTypeBoolean);
@@ -82,7 +84,7 @@ TTErr TTTimeEvent::setDate(const TTValue& value)
     // filter repetitions
     if (newDate != mDate) {
         
-        // set the internal active value
+        // set the internal date value
         mDate = newDate;
         
         // notify each attribute observers
@@ -151,8 +153,14 @@ TTErr TTTimeEvent::Trigger()
 
 TTErr TTTimeEvent::Happen()
 {
-    // recall the state
-    TTErr err = mState->sendMessage(kTTSym_Run);
+    TTErr err = kTTErrNone;
+    
+    // if the event not muted
+    if (!mMute) {
+        
+        // recall the state
+        TTErr err = mState->sendMessage(kTTSym_Run);
+    }
     
     // notify observers
     happenMessage->sendNotification(kTTSym_notify, kTTValNONE);	// we use kTTSym_notify because we know that observers are TTCallback

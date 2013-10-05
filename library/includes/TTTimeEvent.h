@@ -41,6 +41,8 @@ protected :
 
     TTUInt32                        mDate;                          ///< the date of the event
     
+    TTBoolean                       mMute;                          ///< is the time event muted ?
+    
     TTObjectBasePtr                 mState;                         ///< a state handled by the event
     
     TTObjectBasePtr                 mCondition;                     ///< a pointer to an optional condition object to make the event interactive

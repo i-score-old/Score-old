@@ -82,7 +82,7 @@ private :
      @return                an error code if the triggering fails */
     virtual TTErr   TimeEventTrigger(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
     
-    /** Replace a time event by another one (copying date and active attribute)
+    /** Replace a time event by another one (copying date attribute)
      @param inputValue      a former time event object, a new time event object
      @param outputvalue     kTTValNONE
      @return                an error code if the replacement fails */
