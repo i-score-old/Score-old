@@ -79,16 +79,12 @@ TTErr Automation::ProcessStart()
         mNextTimes[i] = TTUInt32(v[0]);
     }
     
-    stop = NO;
-    
     return kTTErrNone;
 }
 
 TTErr Automation::ProcessEnd()
 {
     // do nothing
-    stop = YES;
-    
     return kTTErrNone;
 }
 
@@ -103,9 +99,6 @@ TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
     TTSymbol        attribute;
 	TTObjectBasePtr	anObject;
 	TTErr			err;
-    
-    if (stop)
-        return kTTErrNone;
     
     if (inputValue.size() == 2) {
         
