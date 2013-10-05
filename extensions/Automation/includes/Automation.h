@@ -34,6 +34,8 @@ private :
     TTHash                      mCurves;						///< a table of freehand function units stored by address
     TTValue                     mNextTimes;                     ///< a value used to know when the next value can be sent for each address (this depends on the sample rate of each curves)
 
+    TTBoolean                   stop;
+    
     /** Get parameters names needed by this time process
      @param	value           the returned parameter names
      @return                kTTErrNone */
