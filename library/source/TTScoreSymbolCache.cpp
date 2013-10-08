@@ -39,6 +39,7 @@ TTSCORE_EXPORT TTSymbol         kTTSym_ready                    (("ready"));
 TTSCORE_EXPORT TTSymbol         kTTSym_redundancy               (("redundancy"));
 TTSCORE_EXPORT TTSymbol         kTTSym_Resume                   (("Resume"));
 TTSCORE_EXPORT TTSymbol         kTTSym_rigid                    (("rigid"));
+TTSCORE_EXPORT TTSymbol         kTTSym_speed                    (("speed"));
 TTSCORE_EXPORT TTSymbol         kTTSym_startDate                (("startDate"));
 TTSCORE_EXPORT TTSymbol         kTTSym_Trigger                  (("Trigger"));
 TTSCORE_EXPORT TTSymbol         kTTSym_verticalPosition         (("verticalPosition"));

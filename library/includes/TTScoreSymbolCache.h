@@ -41,6 +41,7 @@ extern TTSCORE_EXPORT TTSymbol	kTTSym_ready;
 extern TTSCORE_EXPORT TTSymbol  kTTSym_redundancy;
 extern TTSCORE_EXPORT TTSymbol	kTTSym_Resume;
 extern TTSCORE_EXPORT TTSymbol	kTTSym_rigid;
+extern TTSCORE_EXPORT TTSymbol	kTTSym_speed;
 extern TTSCORE_EXPORT TTSymbol	kTTSym_startDate;
 extern TTSCORE_EXPORT TTSymbol	kTTSym_Trigger;
 extern TTSCORE_EXPORT TTSymbol	kTTSym_verticalPosition;
