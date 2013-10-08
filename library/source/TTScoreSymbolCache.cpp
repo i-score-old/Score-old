@@ -19,7 +19,7 @@
 #include "TTScoreSymbolCache.h"
 
 // object classe name
-TTSCORE_EXPORT TTSymbol       kTTSym_TimeEvent                  (("TimeEvent"));
+TTSCORE_EXPORT TTSymbol         kTTSym_TimeEvent                (("TimeEvent"));
 
 // message name
 TTSCORE_EXPORT TTSymbol         kTTSym_case                     (("case"));
