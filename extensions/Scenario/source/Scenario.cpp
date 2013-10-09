@@ -378,13 +378,13 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
                 // Get the name
                 if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES))
                     getStartEvent()->setAttributeValue(kTTSym_name, v);
- 
-            }
+                
+                if (!aXmlHandler->mXmlNodeIsEmpty)
+                    mCurrentTimeEvent = getStartEvent();
             
-            // Pass the xml handler to the start event to fill his attribute
-            v = TTObjectBasePtr(getStartEvent());
-            aXmlHandler->setAttributeValue(kTTSym_object, v);
-            aXmlHandler->sendMessage(kTTSym_Read);
+            }
+            else
+                mCurrentTimeEvent = NULL;
         }
         
         // End Event node
@@ -400,12 +400,12 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
                 if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES))
                     getEndEvent()->setAttributeValue(kTTSym_name, v);
                 
+                if (!aXmlHandler->mXmlNodeIsEmpty)
+                    mCurrentTimeEvent = getEndEvent();
+                
             }
-            
-            // Pass the xml handler to the end event to fill his attribute
-            v = TTObjectBasePtr(getEndEvent());
-            aXmlHandler->setAttributeValue(kTTSym_object, v);
-            aXmlHandler->sendMessage(kTTSym_Read);
+            else
+                mCurrentTimeEvent = NULL;
         }
     }
     
