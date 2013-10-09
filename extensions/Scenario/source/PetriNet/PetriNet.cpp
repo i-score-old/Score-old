@@ -81,8 +81,6 @@ void PetriNet::start()
 
 bool PetriNet::makeOneStep(unsigned int currentTime)
 {
-    std::cout << "PetriNet::makeOneStep at " << currentTime << " ms"<< std::endl;
-    
     m_currentTime = currentTime;
     
     if (m_endPlace->nbOfTokens() == 0 && !m_mustStop) {
@@ -105,11 +103,15 @@ bool PetriNet::makeOneStep(unsigned int currentTime)
                     if (topAction->getType() == START) {
                         if (topTransition->couldBeSensitize()) {
                             
-                            std::cout << "PetriNet::makeOneStep : sensitize event " << topTransition->getEvent() << std::endl;
                             turnIntoSensitized(topTransition);
                             
-                            if (topTransition->getEvent() != NULL && m_isEventReadyCallback != NULL)
+                            if (topTransition->getEvent() != NULL && m_isEventReadyCallback != NULL) {
+                                
+                                // DEBUG
+                                std::cout << "PetriNet::makeOneStep : sensitize event " << topTransition->getEvent() << " at " << currentTime << " ms" << std::endl;
+                                
                                 m_isEventReadyCallback(topTransition->getEvent(), true);
+                            }
                             
                             removeTopActionOnPriorityQueue();
                             
@@ -139,8 +141,6 @@ bool PetriNet::makeOneStep(unsigned int currentTime)
             Transition* sensitizedTransitionToTestTheEvent;
             sensitizedTransitionToTestTheEvent = m_sensitizedTransitions[i];
             
-            std::cout << "PetriNet::makeOneStep : event to test " << sensitizedTransitionToTestTheEvent->getEvent() << std::endl;
-            
             // if all the going arc are not active
             if (!sensitizedTransitionToTestTheEvent->areAllInGoingArcsActive()) {
                 
@@ -149,17 +149,27 @@ bool PetriNet::makeOneStep(unsigned int currentTime)
                 --i;
                 
                 // ?
-                if (sensitizedTransitionToTestTheEvent->getEvent() != NULL && m_isEventReadyCallback != NULL)
+                if (sensitizedTransitionToTestTheEvent->getEvent() != NULL && m_isEventReadyCallback != NULL) {
+                    
+                    // DEBUG
+                    std::cout << "PetriNet::makeOneStep : sensitized event " << sensitizedTransitionToTestTheEvent->getEvent() << " not ready anymore" << std::endl;
+                    
                     m_isEventReadyCallback(sensitizedTransitionToTestTheEvent->getEvent(), false);
-                
+                }
             }
             
             // cf triggerpoint : else check if the transition event is part of the recent incomming events (or if all transition have to pass)
             else if (isAnEvent(sensitizedTransitionToTestTheEvent->getEvent()) || m_mustCrossAllTransitionWithoutWaitingEvent){
                 
                 if (sensitizedTransitionToTestTheEvent->isStatic()) {
+                    
                     sensitizedTransitionToTestTheEvent->crossTransition(true, currentTime - sensitizedTransitionToTestTheEvent->getStartDate().getValue());
+                    
                 } else {
+                    
+                    // DEBUG
+                    std::cout << "PetriNet::makeOneStep : sensitized event happened " << sensitizedTransitionToTestTheEvent->getEvent() << " at " << currentTime << " ms" << std::endl;
+                    
                     sensitizedTransitionToTestTheEvent->crossTransition(true,0);
                 }
                 
@@ -167,6 +177,7 @@ bool PetriNet::makeOneStep(unsigned int currentTime)
                 --i;
                 
                 if (sensitizedTransitionToTestTheEvent->getEvent() != NULL && m_isEventReadyCallback != NULL) {
+                    
                     m_isEventReadyCallback(sensitizedTransitionToTestTheEvent->getEvent(), false);
                 }
             }

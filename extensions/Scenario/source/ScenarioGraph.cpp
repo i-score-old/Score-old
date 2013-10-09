@@ -307,8 +307,6 @@ void Scenario::compileTimeEvent(TTTimeEventPtr aTimeEvent, TTUInt32 time, Transi
     
     // prepare transition
     currentTransition->addExternAction(&ScenarioGraphTimeEventCallBack, aTimeEvent);
-    
-    TTLogMessage("Scenario::compileTimeEvent at %ld ms\n", time);
 }
 
 void Scenario::compileInteractiveEvent(TTTimeEventPtr aTimeEvent, TTUInt32 timeOffset)
