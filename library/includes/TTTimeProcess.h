@@ -62,6 +62,9 @@ private :
     
     TTBoolean                       active;                         ///< an internal flag to avoid last scheduler tick to call the process method (it could happen one tick after the stop)
     
+    TTMessagePtr                    processStartMessage;            ///< cache process start message for observer notification
+    TTMessagePtr                    processEndMessage;              ///< cache process end message for observer notification
+    
     /** Specific process method on start
      @return                an error code returned by the process end method */
     virtual TTErr   ProcessStart() {return kTTErrGeneric;};

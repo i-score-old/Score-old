@@ -134,6 +134,10 @@ mEndEventCallback(NULL)
     mColor.append(255);
     mColor.append(255);
     mColor.append(255);
+    
+    // cache some messages for high speed notification feedbacks
+    this->findMessage(kTTSym_ProcessStart, &processStartMessage);
+    this->findMessage(kTTSym_ProcessEnd, &processEndMessage);
 }
 
 TTTimeProcess::~TTTimeProcess()
@@ -564,26 +568,30 @@ TTErr TTTimeProcessStartEventHappenCallback(TTPtr baton, TTValue& data)
         // note : don't set start event ready attribute to NO : it is to the container to take this decision
         
         // use the specific start process method of the time process
-        aTimeProcess->ProcessStart();
-        
-        // set the internal active flag
-        aTimeProcess->active = YES;
-        
-        // launch the scheduler
-        aTimeProcess->mStartEvent->getAttributeValue(kTTSym_date, v);
-        start = v[0];
-        
-        aTimeProcess->mEndEvent->getAttributeValue(kTTSym_date, v);
-        end = v[0];
-        
-        if (end > start) {
+        if (!aTimeProcess->ProcessStart()) {
             
-            v = TTFloat64(end - start);
+            // notify observers
+            aTimeProcess->processStartMessage->sendNotification(kTTSym_notify, kTTValNONE);	// we use kTTSym_notify because we know that observers are TTCallback
             
-            aTimeProcess->mScheduler->setAttributeValue(kTTSym_duration, v);
-            aTimeProcess->mScheduler->sendMessage(kTTSym_Go);
+            // set the internal active flag
+            aTimeProcess->active = YES;
             
-            return kTTErrNone;
+            // launch the scheduler
+            aTimeProcess->mStartEvent->getAttributeValue(kTTSym_date, v);
+            start = v[0];
+            
+            aTimeProcess->mEndEvent->getAttributeValue(kTTSym_date, v);
+            end = v[0];
+            
+            if (end > start) {
+                
+                v = TTFloat64(end - start);
+                
+                aTimeProcess->mScheduler->setAttributeValue(kTTSym_duration, v);
+                aTimeProcess->mScheduler->sendMessage(kTTSym_Go);
+                
+                return kTTErrNone;
+            }
         }
     }
     
@@ -611,9 +619,13 @@ TTErr TTTimeProcessEndEventHappenCallback(TTPtr baton, TTValue& data)
         // note : don't set end event ready attribute to NO : it is to the container to take this decision
 
         // use the specific process end method of the time process
-        aTimeProcess->ProcessEnd();
+        if (!aTimeProcess->ProcessEnd()) {
+            
+            // notify observers
+            aTimeProcess->processEndMessage->sendNotification(kTTSym_notify, kTTValNONE);	// we use kTTSym_notify because we know that observers are TTCallback
         
-        return kTTErrNone;
+            return kTTErrNone;
+        }
     }
     
     return kTTErrGeneric;
