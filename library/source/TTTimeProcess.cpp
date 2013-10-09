@@ -561,8 +561,7 @@ TTErr TTTimeProcessStartEventHappenCallback(TTPtr baton, TTValue& data)
     // if the time process not muted
 	if (!aTimeProcess->mMute) {
         
-        // close start event listening
-        aTimeProcess->mStartEvent->setAttributeValue(kTTSym_ready, NO);
+        // note : don't set start event ready attribute to NO : it is to the container to take this decision
         
         // use the specific start process method of the time process
         aTimeProcess->ProcessStart();
@@ -601,7 +600,6 @@ TTErr TTTimeProcessEndEventHappenCallback(TTPtr baton, TTValue& data)
 	aTimeProcess = TTTimeProcessPtr((TTObjectBasePtr)(*b)[0]);
     
     // if the time process not muted, stop the scheduler
-    // note : the ProcessStart method is called inside TTTimeProcessSchedulerCallback
 	if (!aTimeProcess->mMute) {
         
         // stop the scheduler
@@ -610,9 +608,8 @@ TTErr TTTimeProcessEndEventHappenCallback(TTPtr baton, TTValue& data)
         // set the internal active flag
         aTimeProcess->active = NO;
         
-        // close end trigger listening
-        aTimeProcess->mEndEvent->setAttributeValue(kTTSym_ready, NO);
-        
+        // note : don't set end event ready attribute to NO : it is to the container to take this decision
+
         // use the specific process end method of the time process
         aTimeProcess->ProcessEnd();
         
