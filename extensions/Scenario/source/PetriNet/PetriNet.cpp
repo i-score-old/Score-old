@@ -581,7 +581,105 @@ void PetriNet::print()
 
 	std::cout << "********" << std::endl;
 }
+/*
+void PetriNet::cleanGraph(Transition* endTransition)
+{
+//    if (mExecutionGraph == NULL) {
+//        return;
+//    }
 
+    std::map<Transition*, std::set<Transition*> >* transitionsSets = new std::map<Transition*, std::set<Transition*> >;
+
+    if (endTransition == NULL) {
+        computeTransitionsSet(endTransition, transitionsSets);
+    }
+
+    std::map<Transition*, std::set<Transition*> >::iterator it  = transitionsSets->begin();
+    while (it != transitionsSets->end())
+    {
+        Transition*                 currentTransition = it->first;
+        std::set<Transition*>            currentSet = it->second;
+        std::set<Place*>                 successorsOfNDepth;
+        std::set<Place*>                   currentTransitionPredecessors;
+        std::set<Place*>                   placesToDelete;
+        std::set <Transition*>::iterator transitionSetIterator;
+        std::set <Place*>::iterator        placeSetIterator;
+
+        for (transitionSetIterator = currentSet.begin(); transitionSetIterator != currentSet.end(); transitionSetIterator++) {
+
+            petriNetNodeList    successors = (*transitionSetIterator)->returnSuccessors();
+//            set<Place*>         successorsOfNDepthTemp;
+
+//            for (unsigned int i = 0; i < successors.size() ; ++i)
+//                successorsOfNDepthTemp.insert((Place*) successors[i]);
+
+            successorsOfNDepth.insert(successors.begin(), successors.end());
+        }
+
+        petriNetNodeList predecessors = currentTransition->returnPredecessors();
+
+        for (unsigned int i = 0; i < predecessors.size() ; ++i) {
+//            currentTransitionPredecessors.insert((Place*) predecessors[i]);
+        }
+
+        set_intersection(successorsOfNDepth.begin(),successorsOfNDepth.end(),
+                         currentTransitionPredecessors.begin(),currentTransitionPredecessors.end(),
+                         std::inserter( placesToDelete, placesToDelete.end() ) );
+
+        for (placeSetIterator = placesToDelete.begin(); placeSetIterator != placesToDelete.end(); placeSetIterator++) {
+//            Place* currentPlaceToDelete = *placeSetIterator;
+            deleteItem(currentPlaceToDelete);
+        }
+
+        ++it;
+    }
+}
+
+std::set<Transition*> PetriNet::computeTransitionsSet(Transition* endTransition, std::map<Transition*, std::set<Transition*>>* transitionsSets)
+{
+    std::set <Transition*>::iterator setIterator;
+
+    std::set<Transition*> oneDepthPredecessors = getOneDepthPredecessorsTransitions(endTransition);
+
+    std::set<Transition*> twoDepthPredecessors;
+    std::set<Transition*> nDepthPredecessors;
+
+    for (setIterator = oneDepthPredecessors.begin(); setIterator != oneDepthPredecessors.end(); setIterator++) {
+        std::set<Transition*> twoDepthPredecessorsTemp = getOneDepthPredecessorsTransitions(*setIterator);
+        twoDepthPredecessors.insert(twoDepthPredecessorsTemp.begin(), twoDepthPredecessorsTemp.end());
+    }
+
+    if (twoDepthPredecessors.size() > 0) {
+        for (setIterator = twoDepthPredecessors.begin(); setIterator != twoDepthPredecessors.end(); setIterator++) {
+            std::set<Transition*> nDepthPredecessorsTemp = computeTransitionsSet(*setIterator, transitionsSets);
+            nDepthPredecessors.insert(nDepthPredecessorsTemp.begin(), nDepthPredecessorsTemp.end());
+        }
+
+        nDepthPredecessors.insert(twoDepthPredecessors.begin(), twoDepthPredecessors.end());
+
+        (*transitionsSets)[endTransition] = nDepthPredecessors;
+    }
+
+    return nDepthPredecessors;
+}
+
+std::set<Transition*> PetriNet::getOneDepthPredecessorsTransitions(Transition* transition)
+{
+    std::set<Transition*> oneDepthPredecessors;
+    petriNetNodeList oneDepthPlaces = transition->returnPredecessors();
+
+    for (unsigned int i = 0; i < oneDepthPlaces.size(); ++i) {
+//        Place* currentPlace = (Place*) oneDepthPlaces[i];
+//        petriNetNodeList oneDepthTransitions = currentPlace->returnPredecessors();
+
+//        for(unsigned int j = 0; j < oneDepthTransitions.size(); ++j) {
+//            oneDepthPredecessors.insert((Transition*)oneDepthTransitions[j]);
+        }
+    }
+
+    return oneDepthPredecessors;
+}
+*/
 
 PetriNet::~PetriNet()
 {
