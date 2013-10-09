@@ -209,7 +209,6 @@ class Scenario : public TimeContainer {
     void    compileInterval(TTTimeProcessPtr aTimeProcess);
     void    compileTimeEvent(TTTimeEventPtr aTimeEvent, TTUInt32 time, TransitionPtr previousTransition, TransitionPtr currentTransition, Place* currentPlace);
     void    compileInteractiveEvent(TTTimeEventPtr aTimeEvent, TTUInt32 timeOffset);
-    //void    cleanGraph(TransitionPtr endTransition);
     
     friend void TT_EXTENSION_EXPORT ScenarioGraphTimeEventCallBack(TTPtr arg, TTBoolean active);
     friend void TT_EXTENSION_EXPORT ScenarioGraphIsEventReadyCallBack(TTPtr arg, TTBoolean isReady);
