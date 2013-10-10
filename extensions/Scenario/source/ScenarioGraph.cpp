@@ -269,14 +269,14 @@ void Scenario::compileInterval(TTTimeProcessPtr aTimeProcess)
         
         mArcsMap[arcFromCurrentPlaceToendTransition] = aTimeProcess;
         
-/*        // First cleaning
+        // First cleaning
         petriNetNodeList placesAfterStartTransition = startTransition->returnSuccessors();
         for (unsigned j = 0; j < placesAfterStartTransition.size(); ++j) {
             
             Place* placeToCheckIfLinkedWithEndTransition = (Place*) placesAfterStartTransition[j];
             TransitionPtr transitionToCheckIfEqualToEndTransition = (TransitionPtr) placeToCheckIfLinkedWithEndTransition->returnSuccessors()[0];
             
-            if (transitionToCheckIfEqualToEndTransition == endTransition)
+            if (mExecutionGraph->getEndPlace()->haveArcFrom(transitionToCheckIfEqualToEndTransition))
                 mExecutionGraph->deleteItem(placeToCheckIfLinkedWithEndTransition);
             
         }
@@ -287,10 +287,10 @@ void Scenario::compileInterval(TTTimeProcessPtr aTimeProcess)
             Place* placeToCheckIfLinkedWithStartTransition = (Place*) placesBeforeEndTransition[j];
             TransitionPtr transitionToCheckIfEqualToStartTransition = (TransitionPtr) placeToCheckIfLinkedWithStartTransition->returnPredecessors()[0];
             
-            if (transitionToCheckIfEqualToStartTransition == startTransition)
+            if (mExecutionGraph->getStartPlace()->haveArcTo(transitionToCheckIfEqualToStartTransition))
                 mExecutionGraph->deleteItem(placeToCheckIfLinkedWithStartTransition);
             
-        }*/
+        }
     }
 }
 
