@@ -308,7 +308,7 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     if (mContainer == NULL) {
         
         // Starts scenario reading
-        if (aXmlHandler->mXmlNodeName == kTTSym_start) {
+        if (aXmlHandler->mXmlNodeName == kTTSym_xmlHandlerReadingStarts) {
             
             mCurrentTimeEvent = NULL;
             mCurrentTimeProcess = NULL;
@@ -342,7 +342,7 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         }
         
         // Ends scenario reading
-        if (aXmlHandler->mXmlNodeName == kTTSym_stop) {
+        if (aXmlHandler->mXmlNodeName == kTTSym_xmlHandlerReadingEnds) {
             
             return kTTErrNone;
         }
