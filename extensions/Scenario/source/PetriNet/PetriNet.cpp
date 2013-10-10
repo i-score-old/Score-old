@@ -89,44 +89,44 @@ bool PetriNet::makeOneStep(unsigned int currentTime)
         
         while (!stop) {
             if (m_priorityTransitionsActionQueue.size() == 0) {
-                stop = true;
+                stop = true; // CB should check that in while condition
             } else {
                 PriorityTransitionAction* topAction = getTopActionOnPriorityQueue();
                 
-                if (!topAction->isEnable()) {
+                if (!topAction->isEnable()) { // CB why disable actions without destructiong them ?
                     removeTopActionOnPriorityQueue();
                 } else if ((unsigned int) topAction->getDate().getValue() > currentTime) {
-                    stop = true;
+                    stop = true; // CB because it's a priority queue, so it is ordered
                 } else {
                     Transition* topTransition = topAction->getTransition();
                     
-                    if (topAction->getType() == START) {
-                        if (topTransition->couldBeSensitize()) {
+                    if (topAction->getType() == START) { // CB START means actually min duration for the interval
+                        if (topTransition->couldBeSensitize()) { // CB if there is no subnet running
                             
-                            turnIntoSensitized(topTransition);
+                            turnIntoSensitized(topTransition); // CB listen to the event (even if it's a static transition ?!)
                             
-                            if (topTransition->getEvent() != NULL && m_isEventReadyCallback != NULL) {
+                            if (topTransition->getEvent() != NULL && m_isEventReadyCallback != NULL) { // CB if it's not static
                                 
                                 // DEBUG
                                 std::cout << "PetriNet::makeOneStep : sensitize event " << topTransition->getEvent() << " at " << currentTime << " ms" << std::endl;
                                 
-                                m_isEventReadyCallback(topTransition->getEvent(), true);
+                                m_isEventReadyCallback(topTransition->getEvent(), true); // CB tell to Score to listen to the event
                             }
                             
-                            removeTopActionOnPriorityQueue();
+                            removeTopActionOnPriorityQueue(); // CB Done
                             
-                        } else {
-                            topAction->setDate(currentTime + 1);
+                        } else { // CB if there is a subnet running
+                            topAction->setDate(currentTime + 1); // CB delay
                             removeTopActionOnPriorityQueue();
                             m_priorityTransitionsActionQueue.push(topAction);
                         }
                         
                         //stop = true;
-                    } else {
+                    } else { // CB if type END, actually max duration for the interval
                         if (topTransition->areAllInGoingArcsActive()) {
-                            topTransition->crossTransition(true, currentTime - topAction->getDate().getValue());
+                            topTransition->crossTransition(true, currentTime - topAction->getDate().getValue()); // CB force the transition
                             removeTopActionOnPriorityQueue();
-                        } else {
+                        } else { // CB should be part of debug, like avery IncoherentStateException actually
                             removeTopActionOnPriorityQueue();
                             throw IncoherentStateException();
                         }
@@ -141,31 +141,31 @@ bool PetriNet::makeOneStep(unsigned int currentTime)
             Transition* sensitizedTransitionToTestTheEvent;
             sensitizedTransitionToTestTheEvent = m_sensitizedTransitions[i];
             
-            // if all the going arc are not active
+            // if all the going arc are not active ; CB in fact, if we already forced the transition because of the max duration of the interval (or if there is an IncoherentState)
             if (!sensitizedTransitionToTestTheEvent->areAllInGoingArcsActive()) {
                 
                 //remove the sensitized transition
                 m_sensitizedTransitions.erase(m_sensitizedTransitions.begin() + i);
                 --i;
                 
-                // ?
+                // CB if it was an interactive event
                 if (sensitizedTransitionToTestTheEvent->getEvent() != NULL && m_isEventReadyCallback != NULL) {
                     
                     // DEBUG
                     std::cout << "PetriNet::makeOneStep : sensitized event " << sensitizedTransitionToTestTheEvent->getEvent() << " not ready anymore" << std::endl;
                     
-                    m_isEventReadyCallback(sensitizedTransitionToTestTheEvent->getEvent(), false);
+                    m_isEventReadyCallback(sensitizedTransitionToTestTheEvent->getEvent(), false); // CB tell Score to stop listening to the event
                 }
             }
             
             // cf triggerpoint : else check if the transition event is part of the recent incomming events (or if all transition have to pass)
             else if (isAnEvent(sensitizedTransitionToTestTheEvent->getEvent()) || m_mustCrossAllTransitionWithoutWaitingEvent){
                 
-                if (sensitizedTransitionToTestTheEvent->isStatic()) {
+                if (sensitizedTransitionToTestTheEvent->isStatic()) { // CB if it's in fact a static event, actually listening to nothing though
                     
                     sensitizedTransitionToTestTheEvent->crossTransition(true, currentTime - sensitizedTransitionToTestTheEvent->getStartDate().getValue());
                     
-                } else {
+                } else { // CB if it's a real interactive event that has arrived
                     
                     // DEBUG
                     std::cout << "PetriNet::makeOneStep : sensitized event happened " << sensitizedTransitionToTestTheEvent->getEvent() << " at " << currentTime << " ms" << std::endl;
@@ -174,16 +174,16 @@ bool PetriNet::makeOneStep(unsigned int currentTime)
                 }
                 
                 m_sensitizedTransitions.erase(m_sensitizedTransitions.begin() + i);
-                --i;
+                --i; // CB 0 - 1 in an unsigned int isn't a very good idea I think
                 
                 if (sensitizedTransitionToTestTheEvent->getEvent() != NULL && m_isEventReadyCallback != NULL) {
                     
-                    m_isEventReadyCallback(sensitizedTransitionToTestTheEvent->getEvent(), false);
+                    m_isEventReadyCallback(sensitizedTransitionToTestTheEvent->getEvent(), false); // CB tell Score to stop listening to the event
                 }
             }
         }
         
-        resetEvents();
+        resetEvents(); // CB discards events that nobody listens to
         
         while(!m_transitionsToCrossWhenAcceleration.empty()) {
             Transition* currentTransition = m_transitionsToCrossWhenAcceleration.back();

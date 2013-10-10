@@ -105,10 +105,10 @@ void Place::produceTokens(unsigned int nbOfTokens, unsigned int colorLabel, unsi
 		arcList outGoingArcs = outGoingArcsOf(colorLabel);
 		for (unsigned int i = 0 ; i < outGoingArcs.size() ; ++i) {
 			Arc* arc = outGoingArcs[i];
-            
+            /*
             if (!arc->getCondition()) { // CB check if the arc can be activated
                 continue;
-            }
+            }*/
 
             Transition* transitionTo = dynamic_cast<Transition*>(arc->getTo());
             
