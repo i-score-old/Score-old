@@ -131,6 +131,15 @@ TTErr Scenario::ProcessStart()
 
 TTErr Scenario::ProcessEnd()
 {
+    TTObjectBasePtr aTimeProcess;
+
+    // When a Scenario ends : stop all the time processes
+    for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
+        
+        aTimeProcess = mTimeProcessList.current()[0];
+        aTimeProcess->sendMessage(kTTSym_Stop);
+    }
+   
     return kTTErrNone;
 }
 

@@ -187,6 +187,16 @@ private :
      @return                an error code if the limitation fails */
     TTErr           Limit(const TTValue& inputValue, TTValue& outputValue);
     
+    /** Start the time process
+     this method eases the access of the start event happen message
+     @return                an error code if the play fails */
+    TTErr           Start();
+    
+    /** End the time process
+     this method eases the access of the end event happen message
+     @return                an error code if the stop fails */
+    TTErr           End();
+    
     /** Play the time process
         this method eases the managment of the scheduler object
      @return                an error code if the play fails */

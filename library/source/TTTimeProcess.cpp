@@ -79,12 +79,19 @@ mEndEventCallback(NULL)
     registerAttribute(kTTSym_duration, kTypeUInt32, NULL, (TTGetterMethod)& TTTimeProcess::getDuration);
     
     addMessage(ProcessStart);
+    addMessageProperty(ProcessStart, hidden, YES);
+    
     addMessage(ProcessEnd);
+    addMessageProperty(ProcessEnd, hidden, YES);
+    
     addMessageWithArguments(Process);
+    addMessageProperty(Process, hidden, YES);
     
     addMessageWithArguments(Move);
     addMessageWithArguments(Limit);
     
+    addMessage(Start);
+    addMessage(End);
     addMessage(Play);
     addMessage(Stop);
     addMessage(Pause);
@@ -454,14 +461,47 @@ TTErr TTTimeProcess::Limit(const TTValue& inputValue, TTValue& outputValue)
     return kTTErrGeneric;
 }
 
-TTErr TTTimeProcess::Play()
-{    
+TTErr TTTimeProcess::Start()
+{
     return mStartEvent->sendMessage(kTTSym_Happen);
+}
+
+TTErr TTTimeProcess::End()
+{
+    return mEndEvent->sendMessage(kTTSym_Happen);
+}
+
+TTErr TTTimeProcess::Play()
+{
+    TTValue    v;
+    TTUInt32   start, end;
+    
+    // set the internal active flag
+    active = YES;
+    
+    // launch the scheduler
+    mStartEvent->getAttributeValue(kTTSym_date, v);
+    start = v[0];
+    
+    mEndEvent->getAttributeValue(kTTSym_date, v);
+    end = v[0];
+    
+    if (end > start) {
+        
+        v = TTFloat64(end - start);
+        
+        mScheduler->setAttributeValue(kTTSym_duration, v);
+        mScheduler->sendMessage(kTTSym_Go);
+        
+        return kTTErrNone;
+    }
+    
+    return kTTErrGeneric;
 }
 
 TTErr TTTimeProcess::Stop()
 {
-    return mEndEvent->sendMessage(kTTSym_Happen);
+    return mScheduler->sendMessage(kTTSym_Stop);
 }
 
 TTErr TTTimeProcess::Pause()
@@ -576,22 +616,8 @@ TTErr TTTimeProcessStartEventHappenCallback(TTPtr baton, TTValue& data)
             // set the internal active flag
             aTimeProcess->active = YES;
             
-            // launch the scheduler
-            aTimeProcess->mStartEvent->getAttributeValue(kTTSym_date, v);
-            start = v[0];
-            
-            aTimeProcess->mEndEvent->getAttributeValue(kTTSym_date, v);
-            end = v[0];
-            
-            if (end > start) {
-                
-                v = TTFloat64(end - start);
-                
-                aTimeProcess->mScheduler->setAttributeValue(kTTSym_duration, v);
-                aTimeProcess->mScheduler->sendMessage(kTTSym_Go);
-                
-                return kTTErrNone;
-            }
+            // play the process
+            aTimeProcess->Play();
         }
     }
     
@@ -610,8 +636,8 @@ TTErr TTTimeProcessEndEventHappenCallback(TTPtr baton, TTValue& data)
     // if the time process not muted, stop the scheduler
 	if (!aTimeProcess->mMute) {
         
-        // stop the scheduler
-        aTimeProcess->mScheduler->sendMessage(kTTSym_Stop);
+        // stop the process
+        aTimeProcess->sendMessage(kTTSym_Stop);
         
         // set the internal active flag
         aTimeProcess->active = NO;
