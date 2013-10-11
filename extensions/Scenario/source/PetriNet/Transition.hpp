@@ -200,7 +200,7 @@ public:
 	/**
 	 * Cross the transition.
 	 */
-	void crossTransition(bool mustSetTokenValue, unsigned int newTokenValue = 0);
+    void crossTransition(bool mustSetTokenValue, int newTokenValue = 0);
 
 	/*!
 	 * Tests if one of the in-going arc comes from a place with

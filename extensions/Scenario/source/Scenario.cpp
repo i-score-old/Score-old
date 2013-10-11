@@ -771,6 +771,31 @@ TTErr Scenario::TimeEventTrigger(const TTValue& inputValue, TTValue& outputValue
     return kTTErrGeneric;
 }
 
+TTErr Scenario::TimeEventDispose(const TTValue &inputValue, TTValue &outputValue)
+{
+    TTTimeEventPtr aTimeEvent;
+
+    if (inputValue.size() == 1) {
+
+        if (inputValue[0].type() == kTypeObject) {
+
+            aTimeEvent = TTTimeEventPtr((TTObjectBasePtr)inputValue[0]);
+
+            if (mExecutionGraph) {
+
+                // if the execution graph is running
+                if (mExecutionGraph->getUpdateFactor() != 0) {
+
+                    // put the associated transition in the list of transitions to deactivate
+                    mExecutionGraph->deactivateTransition(mTransitionsMap[aTimeEvent]);
+                }
+            }
+        }
+    }
+
+    return kTTErrGeneric;
+}
+
 TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue)
 {
     TTTimeEventPtr          aFormerTimeEvent, aNewTimeEvent;

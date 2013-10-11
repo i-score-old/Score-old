@@ -172,6 +172,13 @@ TTErr TTTimeEvent::Dispose()
 {
     // théo : what to do here ?
     
+    // use container to make the event dispose
+    if(mContainer) {
+
+        TTValue v = TTObjectBasePtr(this);
+        return mContainer->sendMessage(TTSymbol("TimeEventDispose"), v, kTTValNONE);
+    } // CB /!\ skipping the other notification mechanism for now
+
     // notify observers
     disposeMessage->sendNotification(kTTSym_notify, kTTValNONE);	// we use kTTSym_notify because we know that observers are TTCallback
     

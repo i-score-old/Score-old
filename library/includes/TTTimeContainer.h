@@ -83,7 +83,13 @@ private :
      @param outputvalue     kTTValNONE
      @return                an error code if the triggering fails */
     virtual TTErr   TimeEventTrigger(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
-    
+
+    /** Dispose a time event
+     @param inputValue      a time event object
+     @param outputvalue     kTTValNONE
+     @return                an error code if the disposing fails */
+    virtual TTErr   TimeEventDispose(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+
     /** Replace a time event by another one (copying date attribute)
      @param inputValue      a former time event object, a new time event object
      @param outputvalue     kTTValNONE

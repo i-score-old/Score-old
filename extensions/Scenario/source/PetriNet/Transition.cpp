@@ -288,7 +288,7 @@ void Transition::turnIntoOriginalStatus()
 //	return NULL;
 //}
 
-void Transition::crossTransition(bool mustChangeTokenValue, unsigned int newTokenValue)
+void Transition::crossTransition(bool mustChangeTokenValue, int newTokenValue)
 {
 	if (!areAllInGoingArcsActive()) {
 		throw IncoherentStateException();
