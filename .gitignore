@@ -35,12 +35,12 @@ project.xcworkspace
 *.orig
 *.o
 
-#Doxygen generated files
+# Doxygen generated files
 doxygen/html
+
+# QtCreator files
 *.config
-
 *.creator
-
 *.files
-
 *.includes
+*.autosave
