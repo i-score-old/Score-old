@@ -787,7 +787,7 @@ TTErr Scenario::TimeEventDispose(const TTValue &inputValue, TTValue &outputValue
                 if (mExecutionGraph->getUpdateFactor() != 0) {
 
                     // put the associated transition in the list of transitions to deactivate
-                    mExecutionGraph->deactivateTransition(mTransitionsMap[aTimeEvent]);
+                    mExecutionGraph->deactivateTransition(TransitionPtr(mTransitionsMap[aTimeEvent]));
                 }
             }
         }

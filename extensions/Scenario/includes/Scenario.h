@@ -135,6 +135,12 @@ class Scenario : public TimeContainer {
      @return                an error code if the triggering fails */
     TTErr   TimeEventTrigger(const TTValue& inputValue, TTValue& outputValue);
     
+    /** Dispose a time event
+     @param inputValue      a time event object
+     @param outputvalue     kTTValNONE
+     @return                an error code if the disposing fails */
+    TTErr   TimeEventDispose(const TTValue& inputValue, TTValue& outputValue);
+
     /** Replace a time event by another one (copying date and active attribute)
      @inputValue            a former time event object, a new time event object
      @outputvalue           kTTValNONE

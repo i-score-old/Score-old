@@ -63,6 +63,9 @@ mSchedulerSpeedCallback(NULL)
     addMessageWithArguments(TimeEventTrigger);
     addMessageProperty(TimeEventTrigger, hidden, YES);
     
+    addMessageWithArguments(TimeEventDispose);
+    addMessageProperty(TimeEventDispose, hidden, YES);
+
     addMessageWithArguments(TimeEventReplace);
     addMessageProperty(TimeEventReplace, hidden, YES);
     
