@@ -62,6 +62,9 @@ private :
     
     TTBoolean                       active;                         ///< an internal flag to avoid last scheduler tick to call the process method (it could happen one tick after the stop)
     
+    TTMessagePtr                    processStartMessage;            ///< cache process start message for observer notification
+    TTMessagePtr                    processEndMessage;              ///< cache process end message for observer notification
+    
     /** Specific process method on start
      @return                an error code returned by the process end method */
     virtual TTErr   ProcessStart() {return kTTErrGeneric;};
@@ -183,6 +186,16 @@ private :
      @param	value           duration min, duration max
      @return                an error code if the limitation fails */
     TTErr           Limit(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Start the time process
+     this method eases the access of the start event happen message
+     @return                an error code if the play fails */
+    TTErr           Start();
+    
+    /** End the time process
+     this method eases the access of the end event happen message
+     @return                an error code if the stop fails */
+    TTErr           End();
     
     /** Play the time process
         this method eases the managment of the scheduler object

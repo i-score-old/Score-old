@@ -81,8 +81,6 @@ void PetriNet::start()
 
 bool PetriNet::makeOneStep(unsigned int currentTime)
 {
-    std::cout << "PetriNet::makeOneStep at " << currentTime << " ms"<< std::endl;
-    
     m_currentTime = currentTime;
     
     if (m_endPlace->nbOfTokens() == 0 && !m_mustStop) {
@@ -91,40 +89,44 @@ bool PetriNet::makeOneStep(unsigned int currentTime)
         
         while (!stop) {
             if (m_priorityTransitionsActionQueue.size() == 0) {
-                stop = true;
+                stop = true; // CB should check that in while condition
             } else {
                 PriorityTransitionAction* topAction = getTopActionOnPriorityQueue();
                 
-                if (!topAction->isEnable()) {
+                if (!topAction->isEnable()) { // CB why disable actions without destructiong them ?
                     removeTopActionOnPriorityQueue();
                 } else if ((unsigned int) topAction->getDate().getValue() > currentTime) {
-                    stop = true;
+                    stop = true; // CB because it's a priority queue, so it is ordered
                 } else {
                     Transition* topTransition = topAction->getTransition();
                     
-                    if (topAction->getType() == START) {
-                        if (topTransition->couldBeSensitize()) {
+                    if (topAction->getType() == START) { // CB START means actually min duration for the interval
+                        if (topTransition->couldBeSensitize()) { // CB if there is no subnet running
                             
-                            std::cout << "PetriNet::makeOneStep : sensitize event " << topTransition->getEvent() << std::endl;
-                            turnIntoSensitized(topTransition);
+                            turnIntoSensitized(topTransition); // CB listen to the event (even if it's a static transition ?!)
                             
-                            if (topTransition->getEvent() != NULL && m_isEventReadyCallback != NULL)
-                                m_isEventReadyCallback(topTransition->getEvent(), true);
+                            if (topTransition->getEvent() != NULL && m_isEventReadyCallback != NULL) { // CB if it's not static
+                                
+                                // DEBUG
+                                std::cout << "PetriNet::makeOneStep : sensitize event " << topTransition->getEvent() << " at " << currentTime << " ms" << std::endl;
+                                
+                                m_isEventReadyCallback(topTransition->getEvent(), true); // CB tell to Score to listen to the event
+                            }
                             
-                            removeTopActionOnPriorityQueue();
+                            removeTopActionOnPriorityQueue(); // CB Done
                             
-                        } else {
-                            topAction->setDate(currentTime + 1);
+                        } else { // CB if there is a subnet running
+                            topAction->setDate(currentTime + 1); // CB delay
                             removeTopActionOnPriorityQueue();
                             m_priorityTransitionsActionQueue.push(topAction);
                         }
                         
                         //stop = true;
-                    } else {
+                    } else { // CB if type END, actually max duration for the interval
                         if (topTransition->areAllInGoingArcsActive()) {
-                            topTransition->crossTransition(true, currentTime - topAction->getDate().getValue());
+                            topTransition->crossTransition(true, currentTime - topAction->getDate().getValue()); // CB force the transition
                             removeTopActionOnPriorityQueue();
-                        } else {
+                        } else { // CB should be part of debug, like avery IncoherentStateException actually
                             removeTopActionOnPriorityQueue();
                             throw IncoherentStateException();
                         }
@@ -139,40 +141,49 @@ bool PetriNet::makeOneStep(unsigned int currentTime)
             Transition* sensitizedTransitionToTestTheEvent;
             sensitizedTransitionToTestTheEvent = m_sensitizedTransitions[i];
             
-            std::cout << "PetriNet::makeOneStep : event to test " << sensitizedTransitionToTestTheEvent->getEvent() << std::endl;
-            
-            // if all the going arc are not active
+            // if all the going arc are not active ; CB in fact, if we already forced the transition because of the max duration of the interval (or if there is an IncoherentState)
             if (!sensitizedTransitionToTestTheEvent->areAllInGoingArcsActive()) {
                 
                 //remove the sensitized transition
                 m_sensitizedTransitions.erase(m_sensitizedTransitions.begin() + i);
                 --i;
                 
-                // ?
-                if (sensitizedTransitionToTestTheEvent->getEvent() != NULL && m_isEventReadyCallback != NULL)
-                    m_isEventReadyCallback(sensitizedTransitionToTestTheEvent->getEvent(), false);
-                
+                // CB if it was an interactive event
+                if (sensitizedTransitionToTestTheEvent->getEvent() != NULL && m_isEventReadyCallback != NULL) {
+                    
+                    // DEBUG
+                    std::cout << "PetriNet::makeOneStep : sensitized event " << sensitizedTransitionToTestTheEvent->getEvent() << " not ready anymore" << std::endl;
+                    
+                    m_isEventReadyCallback(sensitizedTransitionToTestTheEvent->getEvent(), false); // CB tell Score to stop listening to the event
+                }
             }
             
             // cf triggerpoint : else check if the transition event is part of the recent incomming events (or if all transition have to pass)
             else if (isAnEvent(sensitizedTransitionToTestTheEvent->getEvent()) || m_mustCrossAllTransitionWithoutWaitingEvent){
                 
-                if (sensitizedTransitionToTestTheEvent->isStatic()) {
+                if (sensitizedTransitionToTestTheEvent->isStatic()) { // CB if it's in fact a static event, actually listening to nothing though
+                    
                     sensitizedTransitionToTestTheEvent->crossTransition(true, currentTime - sensitizedTransitionToTestTheEvent->getStartDate().getValue());
-                } else {
+                    
+                } else { // CB if it's a real interactive event that has arrived
+                    
+                    // DEBUG
+                    std::cout << "PetriNet::makeOneStep : sensitized event happened " << sensitizedTransitionToTestTheEvent->getEvent() << " at " << currentTime << " ms" << std::endl;
+                    
                     sensitizedTransitionToTestTheEvent->crossTransition(true,0);
                 }
                 
                 m_sensitizedTransitions.erase(m_sensitizedTransitions.begin() + i);
-                --i;
+                --i; // CB 0 - 1 in an unsigned int isn't a very good idea I think
                 
                 if (sensitizedTransitionToTestTheEvent->getEvent() != NULL && m_isEventReadyCallback != NULL) {
-                    m_isEventReadyCallback(sensitizedTransitionToTestTheEvent->getEvent(), false);
+                    
+                    m_isEventReadyCallback(sensitizedTransitionToTestTheEvent->getEvent(), false); // CB tell Score to stop listening to the event
                 }
             }
         }
         
-        resetEvents();
+        resetEvents(); // CB discards events that nobody listens to
         
         while(!m_transitionsToCrossWhenAcceleration.empty()) {
             Transition* currentTransition = m_transitionsToCrossWhenAcceleration.back();
@@ -581,7 +592,105 @@ void PetriNet::print()
 
 	std::cout << "********" << std::endl;
 }
+/*
+void PetriNet::cleanGraph(Transition* endTransition)
+{
+//    if (mExecutionGraph == NULL) {
+//        return;
+//    }
 
+    std::map<Transition*, std::set<Transition*> >* transitionsSets = new std::map<Transition*, std::set<Transition*> >;
+
+    if (endTransition == NULL) {
+        computeTransitionsSet(endTransition, transitionsSets);
+    }
+
+    std::map<Transition*, std::set<Transition*> >::iterator it  = transitionsSets->begin();
+    while (it != transitionsSets->end())
+    {
+        Transition*                 currentTransition = it->first;
+        std::set<Transition*>            currentSet = it->second;
+        std::set<Place*>                 successorsOfNDepth;
+        std::set<Place*>                   currentTransitionPredecessors;
+        std::set<Place*>                   placesToDelete;
+        std::set <Transition*>::iterator transitionSetIterator;
+        std::set <Place*>::iterator        placeSetIterator;
+
+        for (transitionSetIterator = currentSet.begin(); transitionSetIterator != currentSet.end(); transitionSetIterator++) {
+
+            petriNetNodeList    successors = (*transitionSetIterator)->returnSuccessors();
+//            set<Place*>         successorsOfNDepthTemp;
+
+//            for (unsigned int i = 0; i < successors.size() ; ++i)
+//                successorsOfNDepthTemp.insert((Place*) successors[i]);
+
+            successorsOfNDepth.insert(successors.begin(), successors.end());
+        }
+
+        petriNetNodeList predecessors = currentTransition->returnPredecessors();
+
+        for (unsigned int i = 0; i < predecessors.size() ; ++i) {
+//            currentTransitionPredecessors.insert((Place*) predecessors[i]);
+        }
+
+        set_intersection(successorsOfNDepth.begin(),successorsOfNDepth.end(),
+                         currentTransitionPredecessors.begin(),currentTransitionPredecessors.end(),
+                         std::inserter( placesToDelete, placesToDelete.end() ) );
+
+        for (placeSetIterator = placesToDelete.begin(); placeSetIterator != placesToDelete.end(); placeSetIterator++) {
+//            Place* currentPlaceToDelete = *placeSetIterator;
+            deleteItem(currentPlaceToDelete);
+        }
+
+        ++it;
+    }
+}
+
+std::set<Transition*> PetriNet::computeTransitionsSet(Transition* endTransition, std::map<Transition*, std::set<Transition*>>* transitionsSets)
+{
+    std::set <Transition*>::iterator setIterator;
+
+    std::set<Transition*> oneDepthPredecessors = getOneDepthPredecessorsTransitions(endTransition);
+
+    std::set<Transition*> twoDepthPredecessors;
+    std::set<Transition*> nDepthPredecessors;
+
+    for (setIterator = oneDepthPredecessors.begin(); setIterator != oneDepthPredecessors.end(); setIterator++) {
+        std::set<Transition*> twoDepthPredecessorsTemp = getOneDepthPredecessorsTransitions(*setIterator);
+        twoDepthPredecessors.insert(twoDepthPredecessorsTemp.begin(), twoDepthPredecessorsTemp.end());
+    }
+
+    if (twoDepthPredecessors.size() > 0) {
+        for (setIterator = twoDepthPredecessors.begin(); setIterator != twoDepthPredecessors.end(); setIterator++) {
+            std::set<Transition*> nDepthPredecessorsTemp = computeTransitionsSet(*setIterator, transitionsSets);
+            nDepthPredecessors.insert(nDepthPredecessorsTemp.begin(), nDepthPredecessorsTemp.end());
+        }
+
+        nDepthPredecessors.insert(twoDepthPredecessors.begin(), twoDepthPredecessors.end());
+
+        (*transitionsSets)[endTransition] = nDepthPredecessors;
+    }
+
+    return nDepthPredecessors;
+}
+
+std::set<Transition*> PetriNet::getOneDepthPredecessorsTransitions(Transition* transition)
+{
+    std::set<Transition*> oneDepthPredecessors;
+    petriNetNodeList oneDepthPlaces = transition->returnPredecessors();
+
+    for (unsigned int i = 0; i < oneDepthPlaces.size(); ++i) {
+//        Place* currentPlace = (Place*) oneDepthPlaces[i];
+//        petriNetNodeList oneDepthTransitions = currentPlace->returnPredecessors();
+
+//        for(unsigned int j = 0; j < oneDepthTransitions.size(); ++j) {
+//            oneDepthPredecessors.insert((Transition*)oneDepthTransitions[j]);
+        }
+    }
+
+    return oneDepthPredecessors;
+}
+*/
 
 PetriNet::~PetriNet()
 {

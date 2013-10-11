@@ -83,7 +83,7 @@ void Scenario::compileGraph(TTUInt32 timeOffset)
 	}
     
 	// clean the graph
-//  cleanGraph(endTransition);
+//    mExecutionGrap->cleanGraph(endTransition);
     
 	// compile interactive events
 	for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next()) {
@@ -276,7 +276,7 @@ void Scenario::compileInterval(TTTimeProcessPtr aTimeProcess)
             Place* placeToCheckIfLinkedWithEndTransition = (Place*) placesAfterStartTransition[j];
             TransitionPtr transitionToCheckIfEqualToEndTransition = (TransitionPtr) placeToCheckIfLinkedWithEndTransition->returnSuccessors()[0];
             
-            if (transitionToCheckIfEqualToEndTransition == endTransition)
+            if (mExecutionGraph->getEndPlace()->haveArcFrom(transitionToCheckIfEqualToEndTransition))
                 mExecutionGraph->deleteItem(placeToCheckIfLinkedWithEndTransition);
             
         }
@@ -287,7 +287,7 @@ void Scenario::compileInterval(TTTimeProcessPtr aTimeProcess)
             Place* placeToCheckIfLinkedWithStartTransition = (Place*) placesBeforeEndTransition[j];
             TransitionPtr transitionToCheckIfEqualToStartTransition = (TransitionPtr) placeToCheckIfLinkedWithStartTransition->returnPredecessors()[0];
             
-            if (transitionToCheckIfEqualToStartTransition == startTransition)
+            if (mExecutionGraph->getStartPlace()->haveArcTo(transitionToCheckIfEqualToStartTransition))
                 mExecutionGraph->deleteItem(placeToCheckIfLinkedWithStartTransition);
             
         }
@@ -307,8 +307,6 @@ void Scenario::compileTimeEvent(TTTimeEventPtr aTimeEvent, TTUInt32 time, Transi
     
     // prepare transition
     currentTransition->addExternAction(&ScenarioGraphTimeEventCallBack, aTimeEvent);
-    
-    TTLogMessage("Scenario::compileTimeEvent at %ld ms\n", time);
 }
 
 void Scenario::compileInteractiveEvent(TTTimeEventPtr aTimeEvent, TTUInt32 timeOffset)
@@ -384,57 +382,7 @@ void Scenario::compileInteractiveEvent(TTTimeEventPtr aTimeEvent, TTUInt32 timeO
         }
     }
 }
-/*
-void Scenario::cleanGraph(TransitionPtr endTransition)
-{
-    if (mExecutionGraph == NULL)
-        return;
-    
-    map<TransitionPtr, set<TransitionPtr> >* transitionsSets = new map<TransitionPtr, set<TransitionPtr> >;
-    
-    if (endTransition == NULL)
-        computeTransitionsSet(endTransition, transitionsSets);
-    
-    map<TransitionPtr, set<TransitionPtr> >::iterator it  = transitionsSets->begin();
-    while (it != transitionsSets->end())
-    {
-        TransitionPtr                 currentTransition = it->first;
-        set<TransitionPtr>            currentSet = it->second;
-        set<Place*>                 successorsOfNDepth;
-        set<Place*>                 currentTransitionPredecessors;
-        set<Place*>                 placesToDelete;
-        set <TransitionPtr>::iterator transitionSetIterator;
-        set <Place*>::iterator      placeSetIterator;
-        
-        for (transitionSetIterator = currentSet.begin(); transitionSetIterator != currentSet.end(); transitionSetIterator++) {
-            
-            petriNetNodeList    successors = (*transitionSetIterator)->returnSuccessors();
-            set<Place*>         successorsOfNDepthTemp;
-            
-            for (unsigned int i = 0; i < successors.size() ; ++i)
-                successorsOfNDepthTemp.insert((Place*) successors[i]);
-            
-            successorsOfNDepth.insert(successorsOfNDepthTemp.begin(), successorsOfNDepthTemp.end());
-        }
-        
-        petriNetNodeList predecessors = currentTransition->returnPredecessors();
-        
-        for (unsigned int i = 0; i < predecessors.size() ; ++i)
-            currentTransitionPredecessors.insert((Place*) predecessors[i]);
-        
-        set_intersection(successorsOfNDepth.begin(),successorsOfNDepth.end(),
-                         currentTransitionPredecessors.begin(),currentTransitionPredecessors.end(),
-                         std::inserter( placesToDelete, placesToDelete.end() ) );
-        
-        for (placeSetIterator = placesToDelete.begin(); placeSetIterator != placesToDelete.end(); placeSetIterator++) {
-            Place* currentPlaceToDelete = *placeSetIterator;
-            mExecutionGraph->deleteItem(currentPlaceToDelete);
-        }
-        
-        ++it;
-    }
-}
-*/
+
 
 #ifdef NEW_GRAPH
 // Trying to rewrite PetriNet::makeOneStep method with the TimeEventLib and TimePluginLib formalism

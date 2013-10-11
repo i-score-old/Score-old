@@ -19,7 +19,7 @@
 #include "TTScoreSymbolCache.h"
 
 // object classe name
-TTSCORE_EXPORT TTSymbol       kTTSym_TimeEvent                  (("TimeEvent"));
+TTSCORE_EXPORT TTSymbol         kTTSym_TimeEvent                (("TimeEvent"));
 
 // message name
 TTSCORE_EXPORT TTSymbol         kTTSym_case                     (("case"));
@@ -35,10 +35,13 @@ TTSCORE_EXPORT TTSymbol         kTTSym_event                    (("event"));
 TTSCORE_EXPORT TTSymbol         kTTSym_expression               (("expression"));
 TTSCORE_EXPORT TTSymbol         kTTSym_Happen                   (("Happen"));
 TTSCORE_EXPORT TTSymbol         kTTSym_Pause                    (("Pause"));
+TTSCORE_EXPORT TTSymbol         kTTSym_ProcessStart             (("ProcessStart"));
+TTSCORE_EXPORT TTSymbol         kTTSym_ProcessEnd               (("ProcessEnd"));
 TTSCORE_EXPORT TTSymbol         kTTSym_ready                    (("ready"));
 TTSCORE_EXPORT TTSymbol         kTTSym_redundancy               (("redundancy"));
 TTSCORE_EXPORT TTSymbol         kTTSym_Resume                   (("Resume"));
 TTSCORE_EXPORT TTSymbol         kTTSym_rigid                    (("rigid"));
+TTSCORE_EXPORT TTSymbol         kTTSym_speed                    (("speed"));
 TTSCORE_EXPORT TTSymbol         kTTSym_startDate                (("startDate"));
 TTSCORE_EXPORT TTSymbol         kTTSym_Trigger                  (("Trigger"));
 TTSCORE_EXPORT TTSymbol         kTTSym_verticalPosition         (("verticalPosition"));

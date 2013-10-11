@@ -79,12 +79,19 @@ mEndEventCallback(NULL)
     registerAttribute(kTTSym_duration, kTypeUInt32, NULL, (TTGetterMethod)& TTTimeProcess::getDuration);
     
     addMessage(ProcessStart);
+    addMessageProperty(ProcessStart, hidden, YES);
+    
     addMessage(ProcessEnd);
+    addMessageProperty(ProcessEnd, hidden, YES);
+    
     addMessageWithArguments(Process);
+    addMessageProperty(Process, hidden, YES);
     
     addMessageWithArguments(Move);
     addMessageWithArguments(Limit);
     
+    addMessage(Start);
+    addMessage(End);
     addMessage(Play);
     addMessage(Stop);
     addMessage(Pause);
@@ -134,6 +141,10 @@ mEndEventCallback(NULL)
     mColor.append(255);
     mColor.append(255);
     mColor.append(255);
+    
+    // cache some messages for high speed notification feedbacks
+    this->findMessage(kTTSym_ProcessStart, &processStartMessage);
+    this->findMessage(kTTSym_ProcessEnd, &processEndMessage);
 }
 
 TTTimeProcess::~TTTimeProcess()
@@ -450,14 +461,47 @@ TTErr TTTimeProcess::Limit(const TTValue& inputValue, TTValue& outputValue)
     return kTTErrGeneric;
 }
 
-TTErr TTTimeProcess::Play()
-{    
+TTErr TTTimeProcess::Start()
+{
     return mStartEvent->sendMessage(kTTSym_Happen);
+}
+
+TTErr TTTimeProcess::End()
+{
+    return mEndEvent->sendMessage(kTTSym_Happen);
+}
+
+TTErr TTTimeProcess::Play()
+{
+    TTValue    v;
+    TTUInt32   start, end;
+    
+    // set the internal active flag
+    active = YES;
+    
+    // launch the scheduler
+    mStartEvent->getAttributeValue(kTTSym_date, v);
+    start = v[0];
+    
+    mEndEvent->getAttributeValue(kTTSym_date, v);
+    end = v[0];
+    
+    if (end > start) {
+        
+        v = TTFloat64(end - start);
+        
+        mScheduler->setAttributeValue(kTTSym_duration, v);
+        mScheduler->sendMessage(kTTSym_Go);
+        
+        return kTTErrNone;
+    }
+    
+    return kTTErrGeneric;
 }
 
 TTErr TTTimeProcess::Stop()
 {
-    return mEndEvent->sendMessage(kTTSym_Happen);
+    return mScheduler->sendMessage(kTTSym_Stop);
 }
 
 TTErr TTTimeProcess::Pause()
@@ -561,30 +605,19 @@ TTErr TTTimeProcessStartEventHappenCallback(TTPtr baton, TTValue& data)
     // if the time process not muted
 	if (!aTimeProcess->mMute) {
         
-        // close start event listening
-        aTimeProcess->mStartEvent->setAttributeValue(kTTSym_ready, NO);
+        // note : don't set start event ready attribute to NO : it is to the container to take this decision
         
         // use the specific start process method of the time process
-        aTimeProcess->ProcessStart();
-        
-        // set the internal active flag
-        aTimeProcess->active = YES;
-        
-        // launch the scheduler
-        aTimeProcess->mStartEvent->getAttributeValue(kTTSym_date, v);
-        start = v[0];
-        
-        aTimeProcess->mEndEvent->getAttributeValue(kTTSym_date, v);
-        end = v[0];
-        
-        if (end > start) {
+        if (!aTimeProcess->ProcessStart()) {
             
-            v = TTFloat64(end - start);
+            // notify observers
+            aTimeProcess->processStartMessage->sendNotification(kTTSym_notify, kTTValNONE);	// we use kTTSym_notify because we know that observers are TTCallback
             
-            aTimeProcess->mScheduler->setAttributeValue(kTTSym_duration, v);
-            aTimeProcess->mScheduler->sendMessage(kTTSym_Go);
+            // set the internal active flag
+            aTimeProcess->active = YES;
             
-            return kTTErrNone;
+            // play the process
+            aTimeProcess->Play();
         }
     }
     
@@ -601,22 +634,24 @@ TTErr TTTimeProcessEndEventHappenCallback(TTPtr baton, TTValue& data)
 	aTimeProcess = TTTimeProcessPtr((TTObjectBasePtr)(*b)[0]);
     
     // if the time process not muted, stop the scheduler
-    // note : the ProcessStart method is called inside TTTimeProcessSchedulerCallback
 	if (!aTimeProcess->mMute) {
         
-        // stop the scheduler
-        aTimeProcess->mScheduler->sendMessage(kTTSym_Stop);
+        // stop the process
+        aTimeProcess->sendMessage(kTTSym_Stop);
         
         // set the internal active flag
         aTimeProcess->active = NO;
         
-        // close end trigger listening
-        aTimeProcess->mEndEvent->setAttributeValue(kTTSym_ready, NO);
-        
+        // note : don't set end event ready attribute to NO : it is to the container to take this decision
+
         // use the specific process end method of the time process
-        aTimeProcess->ProcessEnd();
+        if (!aTimeProcess->ProcessEnd()) {
+            
+            // notify observers
+            aTimeProcess->processEndMessage->sendNotification(kTTSym_notify, kTTValNONE);	// we use kTTSym_notify because we know that observers are TTCallback
         
-        return kTTErrNone;
+            return kTTErrNone;
+        }
     }
     
     return kTTErrGeneric;

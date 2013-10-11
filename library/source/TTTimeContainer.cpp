@@ -34,8 +34,14 @@ extern "C" void TTTimeContainer::registerClass()
 
 
 TTTimeContainer :: TTTimeContainer (TTValue& arguments) :
-TTTimeProcess(arguments)
+TTTimeProcess(arguments),
+mSchedulerSpeedCallback(NULL)
 {
+    TTValue         args;
+    TTErr           err;
+    TTAttributePtr  anAttribute;
+    TTValuePtr      schedulerSpeedBaton;
+    
     TT_ASSERT("Correct number of args to create TTTimeContainer", arguments.size() == 0);
     
     registerAttribute(TTSymbol("timeProcesses"), kTypeLocalValue, NULL, (TTGetterMethod)& TTTimeContainer::getTimeProcesses, NULL);
@@ -82,11 +88,46 @@ TTTimeProcess(arguments)
     
     addMessageWithArguments(TimeConditionRelease);
     addMessageProperty(TimeConditionRelease, hidden, YES);
+    
+    // Create a scheduler speed callback to be notified of its changes and to apply it to each time process
+    mSchedulerSpeedCallback = NULL;
+    TTObjectBaseInstantiate(TTSymbol("callback"), &mSchedulerSpeedCallback, kTTValNONE);
+    
+    schedulerSpeedBaton = new TTValue(TTObjectBasePtr(this));
+    
+    mSchedulerSpeedCallback->setAttributeValue(kTTSym_baton, TTPtr(schedulerSpeedBaton));
+    mSchedulerSpeedCallback->setAttributeValue(kTTSym_function, TTPtr(&TTTimeContainerSchedulerSpeedCallback));
+    
+    // Start scheduler speed observation
+    if (mScheduler) {
+        
+        err = mScheduler->findAttribute(kTTSym_speed, &anAttribute);
+        
+        if(!err)
+            anAttribute->registerObserverForNotifications(*mSchedulerSpeedCallback);
+    }
 }
 
 TTTimeContainer::~TTTimeContainer()
 {
-    ;
+    TTAttributePtr  anAttribute;
+    TTErr           err;
+    
+    if (mScheduler) {
+        
+        // Stop scheduler speed observation
+        err = mScheduler->findAttribute(kTTSym_speed, &anAttribute);
+        
+        if(!err)
+            anAttribute->unregisterObserverForNotifications(*mSchedulerSpeedCallback);
+    }
+
+    // Release scheduler speed callback
+    if (mSchedulerSpeedCallback) {
+        delete (TTValuePtr)TTCallbackPtr(mSchedulerSpeedCallback)->getBaton();
+        TTObjectBaseRelease(TTObjectBaseHandle(&mSchedulerSpeedCallback));
+        mSchedulerSpeedCallback = NULL;
+    }
 }
 
 TTErr TTTimeContainer::getTimeProcesses(TTValue& value)
@@ -541,7 +582,35 @@ void TTTimeContainerFindTimeProcessWithTimeEvent(const TTValue& aValue, TTPtr ti
     return;
 }
 
-void TTSCORE_EXPORT TTTimeContainerFindTimeCondition(const TTValue& aValue, TTPtr timeConditionPtrToMatch, TTBoolean& found)
+void TTTimeContainerFindTimeCondition(const TTValue& aValue, TTPtr timeConditionPtrToMatch, TTBoolean& found)
 {
     found = (TTObjectBasePtr)aValue[0] == (TTObjectBasePtr)timeConditionPtrToMatch;
+}
+
+TTErr TTTimeContainerSchedulerSpeedCallback(TTPtr baton, TTValue& data)
+{
+    TTValuePtr          b;
+    TTTimeContainerPtr  aTimeContainer;
+    TTTimeProcessPtr    aTimeProcess;
+    TTObjectBasePtr     aScheduler;
+    TTValue             v, newSpeed;
+	
+	// unpack baton (container)
+	b = (TTValuePtr)baton;
+	aTimeContainer = TTTimeContainerPtr(TTObjectBasePtr((*b)[0]));
+    
+    // for each time process
+    for (aTimeContainer->mTimeProcessList.begin(); aTimeContainer->mTimeProcessList.end(); aTimeContainer->mTimeProcessList.next()) {
+        
+        aTimeProcess = TTTimeProcessPtr(TTObjectBasePtr(aTimeContainer->mTimeProcessList.current()[0]));
+        
+        // get the actual time process scheduler speed
+        aTimeProcess->getAttributeValue(TTSymbol("scheduler"), v);
+        aScheduler = TTObjectBasePtr(v[0]);
+        
+        // set the time process scheduler speed value with the container scheduler speed value
+        aScheduler->setAttributeValue(kTTSym_speed, data);
+    }
+    
+    return kTTErrNone;
 }

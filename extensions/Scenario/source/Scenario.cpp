@@ -131,6 +131,15 @@ TTErr Scenario::ProcessStart()
 
 TTErr Scenario::ProcessEnd()
 {
+    TTObjectBasePtr aTimeProcess;
+
+    // When a Scenario ends : stop all the time processes
+    for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
+        
+        aTimeProcess = mTimeProcessList.current()[0];
+        aTimeProcess->sendMessage(kTTSym_Stop);
+    }
+   
     return kTTErrNone;
 }
 
@@ -197,19 +206,13 @@ TTErr Scenario::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
     // if the scenario is not handled by a upper scenario
     if (mContainer == NULL) {
         
+        TTValue     v;
+        TTString    s;
+        
         // Start a Scenario node
         xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "Scenario");
         
         writeTimeProcessAsXml(aXmlHandler, this);
-        
-        TTValue     v;
-        TTString    s;
-        
-        // Write the end date (e.g. root scenario duration)
-        this->getAttributeValue(TTSymbol("endDate"), v);
-        v.toString();
-        s = TTString(v[0]);
-        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "endDate", BAD_CAST s.data());
         
         // Write the view zoom
         v = mViewZoom;
@@ -222,6 +225,38 @@ TTErr Scenario::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
         v.toString();
         s = TTString(v[0]);
         xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "viewPosition", BAD_CAST s.data());
+        
+        // Write the start event
+        {
+            xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "startEvent");
+            
+            // Write the name
+            xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST kTTSym_start.c_str());
+            
+            // Pass the xml handler to the event to fill his attribute
+            v = TTObjectBasePtr(getStartEvent());
+            aXmlHandler->setAttributeValue(kTTSym_object, v);
+            aXmlHandler->sendMessage(kTTSym_Write);
+            
+            // Close the event node
+            xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
+        }
+        
+        // Write the end event
+        {
+            xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "endEvent");
+            
+            // Write the name
+            xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST kTTSym_end.c_str());
+            
+            // Pass the xml handler to the event to fill his attribute
+            v = TTObjectBasePtr(getEndEvent());
+            aXmlHandler->setAttributeValue(kTTSym_object, v);
+            aXmlHandler->sendMessage(kTTSym_Write);
+            
+            // Close the event node
+            xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
+        }
     }
     
     // Write all the time events
@@ -273,7 +308,7 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     if (mContainer == NULL) {
         
         // Starts scenario reading
-        if (aXmlHandler->mXmlNodeName == kTTSym_start) {
+        if (aXmlHandler->mXmlNodeName == kTTSym_xmlHandlerReadingStarts) {
             
             mCurrentTimeEvent = NULL;
             mCurrentTimeProcess = NULL;
@@ -307,7 +342,7 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         }
         
         // Ends scenario reading
-        if (aXmlHandler->mXmlNodeName == kTTSym_stop) {
+        if (aXmlHandler->mXmlNodeName == kTTSym_xmlHandlerReadingEnds) {
             
             return kTTErrNone;
         }
@@ -327,18 +362,6 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
                 }
             }
             
-            // Get the scenario end date (e.g. root scenario duration)
-            if (!aXmlHandler->getXmlAttribute(kTTSym_endDate, v, NO)) {
-                
-                if (v.size() == 1) {
-                    
-                    if (v[0].type() == kTypeUInt32) {
-                        
-                         this->setAttributeValue(TTSymbol("endDate"), v);
-                    }
-                }
-            }
-            
             // Get the scenario color
             if (!aXmlHandler->getXmlAttribute(kTTSym_color, v, NO)) {
                 
@@ -350,6 +373,48 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
                     }
                 }
             }
+        }
+        
+        // Start Event node
+        if (aXmlHandler->mXmlNodeName == TTSymbol("startEvent")) {
+            
+            if (aXmlHandler->mXmlNodeStart) {
+                
+                // Get the date
+                if (!aXmlHandler->getXmlAttribute(kTTSym_date, v, NO))
+                    getStartEvent()->setAttributeValue(kTTSym_date, v);
+
+                // Get the name
+                if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES))
+                    getStartEvent()->setAttributeValue(kTTSym_name, v);
+                
+                if (!aXmlHandler->mXmlNodeIsEmpty)
+                    mCurrentTimeEvent = getStartEvent();
+            
+            }
+            else
+                mCurrentTimeEvent = NULL;
+        }
+        
+        // End Event node
+        if (aXmlHandler->mXmlNodeName == TTSymbol("endEvent")) {
+            
+            if (aXmlHandler->mXmlNodeStart) {
+                
+                // Get the date
+                if (!aXmlHandler->getXmlAttribute(kTTSym_date, v, NO))
+                    getEndEvent()->setAttributeValue(kTTSym_date, v);
+                
+                // Get the name
+                if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES))
+                    getEndEvent()->setAttributeValue(kTTSym_name, v);
+                
+                if (!aXmlHandler->mXmlNodeIsEmpty)
+                    mCurrentTimeEvent = getEndEvent();
+                
+            }
+            else
+                mCurrentTimeEvent = NULL;
         }
     }
     

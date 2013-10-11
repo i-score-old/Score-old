@@ -53,6 +53,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 #include "IllegalArgumentException.hpp"
 
+#include <set>
 #include <vector>
 #include <map>
 #include <list>
@@ -357,6 +358,18 @@ public:
 	void addInternPetriNet(Transition* startTransition, Transition* endTransition, PetriNet* petriNet);
 
 	void print();
+
+    /*
+     * Removes one-place shortcuts from the Petri Net.
+     * Supposedly links from the first transition to every box.
+     */
+//    void cleanGraph(Transition* endTransition);
+
+    /*
+     * Helper functions for cleanGraph.
+     */
+//    std::set<Transition*> computeTransitionsSet(Transition* endTransition, std::map<Transition*, std::set<Transition*>>* transitionsSets);
+//    std::set<Transition*> getOneDepthPredecessorsTransitions(Transition* transition);
 
 private:
 	PetriNet* m_parentPetriNet;
