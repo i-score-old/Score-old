@@ -117,9 +117,6 @@ private:
 	
 	/** */
 	TTErr setActivityOut(const TTValue& value);
-    
-    /** Clear the directory of an application (for distant application only) */
-	TTErr DirectoryClear();
 
     /** Build the directory of an application (for distant application only) */
 	TTErr DirectoryBuild();
