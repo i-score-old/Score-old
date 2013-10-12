@@ -72,8 +72,9 @@ TTErr Automation::ProcessStart()
         
         key = keys[i];
         mCurves.lookup(key, v);
-        curve = v[0];
         
+         // update the next time with the first indexed curve sample rate
+        curve = v[0];
         curve->getAttributeValue(TTSymbol("sampleRate"), v);
         
         mNextTimes[i] = TTUInt32(v[0]);
@@ -91,7 +92,7 @@ TTErr Automation::ProcessEnd()
 TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
 {
     TTFloat64       progression, realTime, result;
-    TTValue         v, keys;
+    TTValue         v, keys, objects, valueToSend;
     TTSymbol        key;
     TTAddress       address;
     TTObjectBasePtr curve;
@@ -120,15 +121,26 @@ TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
                     continue;
                 
                 key = keys[i];
-                mCurves.lookup(key, v);
-                curve = v[0];
+                mCurves.lookup(key, objects);
                 
-                // update the next time with its sample rate
+                // update the next time with the first indexed curve sample rate
+                curve = objects[0];
                 curve->getAttributeValue(TTSymbol("sampleRate"), v);
                 mNextTimes[i] = TTUInt32(mNextTimes[i]) + TTUInt32(v[0]);
                 
-                CurvePtr(curve)->calculate(progression, result);
+                // process each indexed curve to fill the value to send
+                valueToSend.clear();
+                valueToSend.resize(objects.size());
+                for (TTUInt32 i = 0; i < objects.size(); i++) {
+                    
+                    curve = objects[i];
+                    
+                    CurvePtr(curve)->calculate(progression, result);
+                    
+                    valueToSend[i] = result;
+                }
                 
+                // look for the object at the address
                 address = TTAddress(key);
                 err = getDirectoryFrom(address)->getTTNode(address, &aNode);
                 
@@ -151,19 +163,19 @@ TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
                             // send the line using the command message
                             if (attribute == kTTSym_value) {
                                 
-                                anObject->sendMessage(kTTSym_Command, result, kTTValNONE);
+                                anObject->sendMessage(kTTSym_Command, valueToSend, kTTValNONE);
                                 continue;
                             }
                         }
                         
                         // any other case : set attribute
-                        anObject->setAttributeValue(attribute, result);
+                        anObject->setAttributeValue(attribute, valueToSend);
                     }
                 }
             }
         }
     }
-    
+
     return kTTErrGeneric;
 }
 
@@ -189,11 +201,12 @@ TTErr Automation::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
         key = keys[i];
         mCurves.lookup(key, v);
         
-        xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "curve");
+        xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "indexedCurves");
         
         // Write the curve's address
         xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "address", BAD_CAST key.c_str());
         
+        // write each indexed curve
         aXmlHandler->setAttributeValue(kTTSym_object, v);
         aXmlHandler->sendMessage(TTSymbol("Write"));
         
@@ -222,12 +235,15 @@ TTErr Automation::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         return kTTErrNone;
     }
     
-    // If there is a current curve
-    if (aXmlHandler->mXmlNodeName == TTSymbol("curve")) {
+    // If there are indexed curves
+    if (aXmlHandler->mXmlNodeName == TTSymbol("indexedCurves")) {
         
         if (aXmlHandler->mXmlNodeStart) {
             
-            TTObjectBaseInstantiate(TTSymbol("Curve"), TTObjectBaseHandle(&curve), kTTValNONE);
+            mCurrentObjects.clear();
+            
+        }
+        else {
             
             // Get the address
             if (!aXmlHandler->getXmlAttribute(kTTSym_address, v, YES)) {
@@ -239,7 +255,7 @@ TTErr Automation::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
                         address = v[0];
                         
                         // store the curve
-                        mCurves.append(address, curve);
+                        mCurves.append(address, mCurrentObjects);
                         
                         // resize next time value
                         mCurves.getKeys(v);
@@ -247,12 +263,19 @@ TTErr Automation::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
                     }
                 }
             }
-            
-            // Pass the xml handler to the current curve to fill his data structure
-            v = TTObjectBasePtr(curve);
-            aXmlHandler->setAttributeValue(kTTSym_object, v);
-            return aXmlHandler->sendMessage(kTTSym_Read);
         }
+    }
+    
+    if (aXmlHandler->mXmlNodeName == TTSymbol("curve")) {
+        
+        TTObjectBaseInstantiate(TTSymbol("Curve"), TTObjectBaseHandle(&curve), kTTValNONE);
+        
+        mCurrentObjects.append(curve);
+        
+        // Pass the xml handler to the current curve to fill his data structure
+        v = TTObjectBasePtr(curve);
+        aXmlHandler->setAttributeValue(kTTSym_object, v);
+        return aXmlHandler->sendMessage(kTTSym_Read);
     }
 	
 	return kTTErrGeneric;
@@ -283,9 +306,9 @@ TTErr Automation::ReadFromText(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr Automation::CurveAdd(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTValue         v, vStart, vEnd, parameters;
+    TTValue         v, vStart, vEnd, parameters, objects;
     TTAddress       address;
-    TTObjectBasePtr curve = NULL;
+    TTObjectBasePtr curve;
     TTBoolean       valid = YES;
     TTErr           err;
     
@@ -298,51 +321,68 @@ TTErr Automation::CurveAdd(const TTValue& inputValue, TTValue& outputValue)
             // if there is no curve at the address
             if (mCurves.lookup(address, v)) {
                 
-                // create a freehand function unit
-                err = TTObjectBaseInstantiate(TTSymbol("Curve"), &curve, kTTValNONE);
+                // get the start event state value for this address
+                getStartEvent()->sendMessage(TTSymbol("StateAddressGetValue"), address, vStart);
+                
+                // get the end event state value for this address
+                getEndEvent()->sendMessage(TTSymbol("StateAddressGetValue"), address, vEnd);
+                
+                // check values size : we can't make curve for none equal sized values
+                if (vStart.size() != vEnd.size())
+                    return kTTErrGeneric;
+                
+                // check start and end value validity : we can't make a curve for a symbol
+                for (TTUInt32 i = 0; i < vStart.size(); i++)
+                    valid &= vStart[i].type() != kTypeSymbol;
+                
+                for (TTUInt32 i = 0; i < vEnd.size(); i++)
+                    valid &= vEnd[i].type() != kTypeSymbol;
+                
+                if (!valid)
+                    return kTTErrGeneric;
+
+                // create a freehand function unit for each index of the value
+                err = kTTErrNone;
+                objects.resize(vStart.size());
+                
+                for (TTUInt32 i = 0; i < vStart.size(); i++) {
+                    
+                    curve = NULL;
+                    err = TTObjectBaseInstantiate(TTSymbol("Curve"), &curve, kTTValNONE);
+                    
+                    if (!err) {
+                        
+                        // prepare curve parameters
+                        parameters.resize(6);
+                        parameters[0] = TTFloat64(0.);
+                        parameters[1] = TTFloat64(vStart[i]);
+                        parameters[2] = TTFloat64(1);
+                        
+                        parameters[3] = TTFloat64(1.);
+                        parameters[4] = TTFloat64(vEnd[i]);
+                        parameters[5] = TTFloat64(1);
+                        
+                        curve->setAttributeValue(TTSymbol("parameters"), parameters);
+                        
+                        // index the curve
+                        objects[i] = curve;
+                    }
+                    else
+                        break;
+                    
+                }
                 
                 if (!err) {
                     
-                    // get the start event state value for this address
-                    getStartEvent()->sendMessage(TTSymbol("StateAddressGetValue"), address, vStart);
-
-                    // get the end event state value for this address
-                    getEndEvent()->sendMessage(TTSymbol("StateAddressGetValue"), address, vEnd);
-                    
-                    // check start and end value validity : we can't make a curve for a symbol
-                    for (TTUInt32 i = 0; i < vStart.size(); i++)
-                        valid &= vStart[i].type() != kTypeSymbol;
-                    
-                    for (TTUInt32 i = 0; i < vEnd.size(); i++)
-                        valid &= vEnd[i].type() != kTypeSymbol;
-                    
-                    if (!valid) {
-                        
-                        TTObjectBaseRelease(&curve);
-                        return kTTErrGeneric;
-                    }
-                    
-                    // prepare curve parameters
-                    parameters.resize(6);
-                    parameters[0] = TTFloat64(0.);
-                    parameters[1] = TTFloat64(vStart[0]);
-                    parameters[2] = TTFloat64(1);
-                    
-                    parameters[3] = TTFloat64(1.);
-                    parameters[4] = TTFloat64(vEnd[0]);
-                    parameters[5] = TTFloat64(1);
-                    
-                    curve->setAttributeValue(TTSymbol("parameters"), parameters);
-                    
-                    // register the curve at address
-                    err = mCurves.append(address, curve);
+                    // register all the curves for this address
+                    mCurves.append(address, objects);
                     
                     // resize next time value
                     mCurves.getKeys(v);
                     mNextTimes.resize(v.size());
-                    
-                    return err;
                 }
+                
+                return err;
             }
         }
     }
@@ -369,7 +409,7 @@ TTErr Automation::CurveGet(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr Automation::CurveUpdate(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTValue         v, vStart, vEnd, parameters;
+    TTValue         v, vStart, vEnd, parameters, objects;
     TTAddress       address;
     TTObjectBasePtr curve;
     
@@ -398,9 +438,7 @@ TTErr Automation::CurveUpdate(const TTValue& inputValue, TTValue& outputValue)
             address = inputValue[0];
             
             // if there is a curve at the address
-            if (!mCurves.lookup(address, v)) {
-                
-                curve = v[0];
+            if (!mCurves.lookup(address, objects)) {
                 
                 // get the start event state value for this address
                 getStartEvent()->sendMessage(TTSymbol("StateAddressGetValue"), address, vStart);
@@ -408,19 +446,32 @@ TTErr Automation::CurveUpdate(const TTValue& inputValue, TTValue& outputValue)
                 // get the end event state value for this address
                 getEndEvent()->sendMessage(TTSymbol("StateAddressGetValue"), address, vEnd);
                 
-                // get current curve parameters
-                curve->getAttributeValue(TTSymbol("parameters"), parameters);
+                // check values size : can't update curves for none equal sized values
+                if (vStart.size() != vEnd.size())
+                    return kTTErrGeneric;
                 
-                // change the first point y value : x1 y1 b1 ...
-                parameters[1] = TTFloat64(vStart[0]);
+                if (objects.size() != vStart.size())
+                    return kTTErrGeneric;
                 
-                // TODO : scale the other y points value ?
-                
-                // change the last point y value : ... xn yn bn
-                parameters[parameters.size() - 2] = TTFloat64(vEnd[0]);
-                
-                // set current curve parameters
-                curve->setAttributeValue(TTSymbol("parameters"), parameters);
+                // update each indexed curve
+                for (TTUInt32 i = 0; i < objects.size(); i++) {
+                    
+                    curve = objects[i];
+                    
+                    // get current curve parameters
+                    curve->getAttributeValue(TTSymbol("parameters"), parameters);
+                    
+                    // change the first point y value : x1 y1 b1 ...
+                    parameters[1] = TTFloat64(vStart[i]);
+                    
+                    // TODO : scale the other y points value ?
+                    
+                    // change the last point y value : ... xn yn bn
+                    parameters[parameters.size() - 2] = TTFloat64(vEnd[i]);
+                    
+                    // set current curve parameters
+                    curve->setAttributeValue(TTSymbol("parameters"), parameters);
+                }
                 
                 return kTTErrNone;
             }
@@ -432,7 +483,7 @@ TTErr Automation::CurveUpdate(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr Automation::CurveRemove(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTValue         v;
+    TTValue         v, objects;
     TTAddress       address;
     TTObjectBasePtr curve;
     
@@ -443,9 +494,15 @@ TTErr Automation::CurveRemove(const TTValue& inputValue, TTValue& outputValue)
             address = inputValue[0];
             
             // if there is a curve at the address
-            if (!mCurves.lookup(address, v)) {
+            if (!mCurves.lookup(address, objects)) {
                 
-                curve = v[0];
+                // delete each indexed curve
+                for (TTUInt32 i = 0; i < objects.size(); i++) {
+                
+                    curve = objects[i];
+
+                    TTObjectBaseRelease(&curve);
+                }
                 
                 // unregister the curve
                 mCurves.remove(address);
@@ -454,8 +511,7 @@ TTErr Automation::CurveRemove(const TTValue& inputValue, TTValue& outputValue)
                 mCurves.getKeys(v);
                 mNextTimes.resize(v.size());
                 
-                // delete curve
-                return TTObjectBaseRelease(&curve);
+                return kTTErrNone;
             }
         }
     }
@@ -465,7 +521,7 @@ TTErr Automation::CurveRemove(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr Automation::Clear()
 {
-    TTValue         keys,v;
+    TTValue         keys,objects;
     TTSymbol        key;
     TTUInt32        i;
     TTObjectBasePtr curve;
@@ -475,11 +531,15 @@ TTErr Automation::Clear()
     for (i = 0; i < keys.size(); i++) {
         
         key = keys[i];
-        mCurves.lookup(key, v);
+        mCurves.lookup(key, objects);
         
-        curve = v[0];
-        
-        TTObjectBaseRelease(&curve);
+        // delete each indexed curve
+        for (TTUInt32 i = 0; i < objects.size(); i++) {
+            
+            curve = objects[i];
+            
+            TTObjectBaseRelease(&curve);
+        }
     }
     
     mCurves.clear();
