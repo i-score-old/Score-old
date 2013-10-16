@@ -40,7 +40,7 @@ TTBoolean Expression::evaluate(const TTValue& value)
         return mValue == value;
     
     if (mOperator == TTSymbol("!="))
-        return !(mValue == value);
+        return mValue != value;
     
     if (mOperator == TTSymbol(">"))
         return mValue > value;
