@@ -22,6 +22,32 @@
 #include "Expression.h"
 #include "TTTimeEvent.h"
 
+
+
+
+/** Define an unordered map to store and retreive an expression relative to a TTTimeEventPtr */
+#ifdef TT_PLATFORM_WIN
+    #include <hash_map>
+    using namespace stdext;	// Visual Studio 2008 puts the hash_map in this namespace
+    typedef hash_map<TTTimeEventPtr,Expression>    TTCaseMap;
+#else
+//	#ifdef TT_PLATFORM_LINUX
+//  at least for GCC 4.6 on the BeagleBoard, the unordered map is standard
+    #include <unordered_map>
+//	#else
+//		#include "boost/unordered_map.hpp"
+//		using namespace boost;
+//	#endif
+    typedef std::unordered_map<TTTimeEventPtr,Expression>	TTCaseMap;
+#endif
+
+typedef	TTCaseMap*                  TTCaseMapPtr;
+typedef TTCaseMap::const_iterator   TTCaseMapIterator;
+
+#endif // __TT_TIME_CONDITION_H__
+
+
+
 /**	a class to define a condition and a set of different cases
  
  The TTTimeCondition class allows to ...
@@ -43,7 +69,7 @@ protected :
     TTBoolean                       mReady;                         ///< is the condition ready to be tested ?
     
     TTHash                          mReceivers;                     ///< a table of receivers stored by address
-    TTHash                          mCases;                         ///< a table of events stored by expression ("address operator value"). (it is possible to have more than one event per expression)
+    TTCaseMap                       mCases;                         ///< a map linking an event to its expression
  
 private :
     
@@ -58,30 +84,33 @@ private :
      @param	value           a value containing one expression per case
      @return                kTTErrNone */
     TTErr           getCases(TTValue& value);
+
+    /** get all the events associated to the condition
+     @param value           the time events objects
+     @return                kTTErrNone */
+    TTErr           getEvents(TTValue& value);
     
-    /**  Add a case to test using an expression 
-     @param	inputValue      an expression value or symbol
+    /**  Add an event to the condition
+     @param	inputValue      an event
      @param	outputValue     nothing
      @return                an error code if the operation fails */
-    TTErr           CaseAdd(const TTValue& inputValue, TTValue& outputValue);
+    TTErr           EventAdd(const TTValue& inputValue, TTValue& outputValue);
     
-    /**  Remove a case to test using an expression
-     @param	inputValue      an expression value or symbol
+    /**  Remove an event from the condition
+     @param	inputValue      an event
      @param	outputValue     nothing
      @return                an error code if the operation fails */
-    TTErr           CaseRemove(const TTValue& inputValue, TTValue& outputValue);
+    TTErr           EventRemove(const TTValue& inputValue, TTValue& outputValue);
     
-    /**  Link an event to a case
-     @param	inputValue      an expression symbol, an event
+    /**  Link an expression to an event
+     @param	inputValue      an event and the expression to link
      @param	outputValue     nothing
      @return                an error code if the operation fails */
-    TTErr           CaseLinkEvent(const TTValue& inputValue, TTValue& outputValue);
-    
-    /**  Unlink an event to a case
-     @param	inputValue      an expression symbol, an event
-     @param	outputValue     nothing
-     @return                an error code if the operation fails */
-    TTErr           CaseUnlinkEvent(const TTValue& inputValue, TTValue& outputValue);
+    TTErr           EventExpression(const TTValue& inputValue, TTValue& outputValue);
+
+    /**  Helper functions to manage receivers */
+    void            cleanReceiver(TTAddress addr);
+    void            addReceiver(TTAddress addr);
     
     /**  Find a case related to an event
      @param	inputValue      an event
@@ -113,27 +142,3 @@ typedef TTTimeCondition* TTTimeConditionPtr;
  @param	data                a value to test
  @return					an error code */
 TTErr TTSCORE_EXPORT TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data);
-
-
-
-
-/** Define an unordered map to store and retreive a value relative to a TTTimeConditionPtr */
-#ifdef TT_PLATFORM_WIN
-    #include <hash_map>
-    using namespace stdext;	// Visual Studio 2008 puts the hash_map in this namespace
-    typedef hash_map<TTTimeConditionPtr,TTValuePtr>    TTTimeConditionMap;
-#else
-//	#ifdef TT_PLATFORM_LINUX
-//  at least for GCC 4.6 on the BeagleBoard, the unordered map is standard
-    #include <unordered_map>
-//	#else
-//		#include "boost/unordered_map.hpp"
-//		using namespace boost;
-//	#endif
-    typedef std::unordered_map<TTTimeConditionPtr,TTValuePtr>	TTTimeConditionMap;
-#endif
-
-typedef	TTTimeConditionMap*                 TTTimeConditionMapPtr;
-typedef TTTimeConditionMap::const_iterator	TTTimeConditionMapIterator;
-
-#endif // __TT_TIME_CONDITION_H__

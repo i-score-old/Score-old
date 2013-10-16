@@ -34,11 +34,11 @@ mReady(YES)
     addAttributeWithSetter(Ready, kTypeBoolean);
     
     registerAttribute(TTSymbol("cases"), kTypeLocalValue, NULL, (TTGetterMethod)& TTTimeCondition::getCases, NULL);
-    
-    addMessageWithArguments(CaseAdd);
-    addMessageWithArguments(CaseRemove);
-    addMessageWithArguments(CaseLinkEvent);
-    addMessageWithArguments(CaseUnlinkEvent);
+    registerAttribute(TTSymbol("events"), kTypeLocalValue, NULL, (TTGetterMethod)& TTTimeCondition::getEvents, NULL);
+
+    addMessageWithArguments(EventAdd);
+    addMessageWithArguments(EventRemove);
+    addMessageWithArguments(EventExpression);
     addMessageWithArguments(CaseFind);
     addMessageWithArguments(CaseTest);
     
@@ -86,183 +86,118 @@ TTErr TTTimeCondition::setReady(const TTValue& value)
 
 TTErr TTTimeCondition::getCases(TTValue& value)
 {
-    mCases.getKeys(value);
+    value.clear();
+
+    for (TTCaseMapIterator it = mCases.begin() ; it != mCases.end() ; it++) {
+        value.append(it->second);
+    }
     
     return kTTErrNone;
 }
 
-TTErr TTTimeCondition::CaseAdd(const TTValue& inputValue, TTValue& outputValue)
+TTErr TTTimeCondition::getEvents(TTValue& value)
 {
-    Expression      expression;
-    TTObjectBasePtr aReceiver = NULL;
-    TTObjectBasePtr aReceiverCallback = NULL;
-    TTValuePtr      aReceiverBaton;
-    TTValue         v;
-    
-    // parse the input value
-    ExpressionParseFromValue(inputValue, expression);
-    
+    value.clear();
+
+    for (TTCaseMapIterator it = mCases.begin() ; it != mCases.end() ; it++) {
+        value.append(it->first);
+    }
+
+    return kTTErrNone;
+}
+
+TTErr TTTimeCondition::EventAdd(const TTValue& inputValue, TTValue& outputValue)
+{
+    // insert the event contained in inputValue with a blank expression which evaluates to true
+    mCases.insert({{inputValue[0],Expression()}});
+
+    return kTTErrNone;
+}
+
+TTErr TTTimeCondition::EventRemove(const TTValue& inputValue, TTValue& outputValue)
+{
+    TTCaseMapIterator it = mCases.find(inputValue[0]);
+    Expression exp = it->second;
+    TTAddress addr = exp.getAddress();
+    mCases.erase(it);
+
+    if (addr != kTTAdrsEmpty) {
+        cleanReceiver(addr);
+    }
+
+    return kTTErrNone;
+}
+
+TTErr TTTimeCondition::EventExpression(const TTValue& inputValue, TTValue& outputValue)
+{
+    TTCaseMapIterator it = mCases.find(inputValue[0]);
+    Expression old_exp = it->second;
+    TTAddress old_addr = old_exp.getAddress();
+    Expression new_exp = inputValue[1];
+    TTAddress new_addr = new_exp.getAddress();
+    it->second = new_exp;
+
+    if (old_addr != new_addr && old_addr != kTTAdrsEmpty && new_addr != kTTAdrsEmpty) {
+        cleanReceiver(old_addr);
+        addReceiver(new_addr);
+    }
+
+    return kTTErrNone;
+}
+
+void TTTimeCondition::cleanReceiver(TTAddress addr) {
+    bool found = false;
+
+    for (it = mCases.begin() ; !found && it != mCases.end() ; it++) {
+        if (it->second.getAddress() == addr) {
+            found = true;
+        }
+    }
+
+    if (!found) { // ... remove the receiver for this address
+        TTValue v;
+        TTObjectBasePtr aReceiver;
+        if (!mReceivers.lookup(addr, v)) {
+
+            aReceiver = v[0];
+            TTObjectBaseRelease(&aReceiver);
+
+            mReceivers.remove(addr);
+        }
+    }
+}
+
+void TTTimeCondition::addReceiver(TTAddress addr) {
+    TTValue v;
+    TTObjectBasePtr aReceiver;
+    TTObjectBasePtr aReceiverCallback;
+    TTValuePtr aReceiverBaton;
+
     // if there is no receiver for the expression address
-    if (mReceivers.lookup(expression.getAddress(), v)) {
-        
+    if (mReceivers.lookup(addr, v)) {
+
         // No callback for the address
         v = TTValue((TTObjectBasePtr)NULL);
-        
+
         // Create a receiver callback to get the expression address value back
         aReceiverCallback = NULL;
         TTObjectBaseInstantiate(TTSymbol("callback"), &aReceiverCallback, kTTValNONE);
-        
+
         aReceiverBaton = new TTValue(TTObjectBasePtr(this));
-        aReceiverBaton->append(expression.getAddress());
-        
+        aReceiverBaton->append(addr);
+
         aReceiverCallback->setAttributeValue(kTTSym_baton, TTPtr(aReceiverBaton));
         aReceiverCallback->setAttributeValue(kTTSym_function, TTPtr(&TTTimeConditionReceiverReturnValueCallback));
-        
+
         v.append(aReceiverCallback);
         TTObjectBaseInstantiate(kTTSym_Receiver, TTObjectBaseHandle(&aReceiver), v);
-        
+
         // set the address of the receiver
-        aReceiver->setAttributeValue(kTTSym_address, expression.getAddress());
-        
+        aReceiver->setAttributeValue(kTTSym_address, addr);
+
         v = TTObjectBasePtr(aReceiver);
-        mReceivers.append(expression.getAddress(), v);
+        mReceivers.append(addr, v);
     }
-    
-    // if the expression don't exist yet
-    if (mCases.lookup(expression, v)) {
-        
-        // append the expression to the case table (with no related event)
-        v.clear();
-        return mCases.append(expression, v);
-    }
-    
-    return kTTErrGeneric;
-}
-
-TTErr TTTimeCondition::CaseRemove(const TTValue& inputValue, TTValue& outputValue)
-{
-    Expression      expression, e;
-    TTObjectBasePtr aReceiver;
-    TTValue         v, args, out, keys;
-    TTBoolean       found = NO;
-    TTErr           err;
-
-    // parse the input value
-    ExpressionParseFromValue(inputValue, expression);
-    
-    // if the expression don't exist yet
-    if (!mCases.lookup(expression, v)) {
-        
-        // unlink the event relative to this expression
-        args = expression;
-        args.append(v[0]);
-        CaseUnlinkEvent(args, out);
-        
-        // remove the case
-        err = mCases.remove(expression);
-
-        // if there is no other expression whith the same address ...
-        mCases.getKeys(keys);
-        for (TTUInt8 i = 0; i < keys.size(); i++) {
-            
-            ExpressionParseFromValue(keys[i], e);
-            
-            if (e.getAddress() == expression.getAddress()) {
-                
-                found = YES;
-                break;
-            }
-        }
-        
-        // ... remove the receiver for this address
-        if (!found) {
-            
-            if (!mReceivers.lookup(expression.getAddress(), v)) {
-                
-                aReceiver = v[0];
-                TTObjectBaseRelease(&aReceiver);
-                
-                mReceivers.remove(expression.getAddress());
-            }
-        }
-        
-        return err;
-    }
-    
-    return kTTErrGeneric;
-}
-
-TTErr TTTimeCondition::CaseLinkEvent(const TTValue& inputValue, TTValue& outputValue)
-{
-    Expression      expression;
-    TTObjectBasePtr event;
-    TTValue         v;
-    TTErr           err;
-    
-    if (inputValue.size() == 2) {
-        
-        if (inputValue[0].type() == kTypeSymbol && inputValue[1].type() == kTypeObject) {
-            
-            ExpressionParseFromValue(inputValue[0], expression);
-            event = inputValue[1];
-            
-            // if the expression exist
-            if (!mCases.lookup(expression, v)) {
-                
-                // remove the case
-                mCases.remove(expression);
-                
-                // then append the same case with the given event
-                err = mCases.append(expression, event);
-                
-                // tell the event it is conditioned
-                v = TTObjectBasePtr(this);
-                event->setAttributeValue(kTTSym_condition, v);
-                
-                // TODO : observe the event ready attribute value
-                
-                return err;
-            }
-        }
-    }
-    
-    return kTTErrGeneric;
-}
-
-TTErr TTTimeCondition::CaseUnlinkEvent(const TTValue& inputValue, TTValue& outputValue)
-{
-    Expression      expression;
-    TTObjectBasePtr event;
-    TTValue         v;
-    TTErr           err;
-    
-    if (inputValue.size() == 2) {
-        
-        if (inputValue[0] == kTypeSymbol && inputValue[1] == kTypeObject) {
-            
-            ExpressionParseFromValue(inputValue[0], expression);
-            event = inputValue[1];
-            
-            // if the expression exist
-            if (!mCases.lookup(expression, v)) {
-                
-                // remove the case
-                mCases.remove(expression);
-                
-                // then append an expression without event
-                err = mCases.append(expression, kTTValNONE);
-                
-                // tell the event it is not conditioned anymore
-                event->setAttributeValue(kTTSym_condition, TTObjectBasePtr(NULL));
-                
-                // TODO : stop observation of the event ready attribute value
-                
-                return err;
-            }
-        }
-    }
-    
-    return kTTErrGeneric;
 }
 
 TTErr TTTimeCondition::CaseFind(const TTValue& inputValue, TTValue& outputValue)
@@ -272,18 +207,11 @@ TTErr TTTimeCondition::CaseFind(const TTValue& inputValue, TTValue& outputValue)
     TTErr       err = kTTErrValueNotFound;
     
     // look for a case binding on the same event
-    mCases.getKeys(keys);
-    for (TTUInt8 i = 0; i < keys.size(); i++) {
-        
-        key = keys[i];
-        mCases.lookup(key, v);
-        
-        if (v == inputValue) {
-            
-            outputValue = keys[i];
-            err = kTTErrNone;
-            break;
-        }
+    TTCaseMapIterator it = mCases.find(inputValue[0]);
+
+    if (it != mCases.end()) {
+        outputValue = it->second;
+        err = kTTErrNone;
     }
     
     return err;
@@ -420,40 +348,18 @@ TTErr TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data)
 	b = (TTValuePtr)baton;
 	aTimeCondition = TTTimeConditionPtr(TTObjectBasePtr((*b)[0]));
     anAddress = (*b)[1];
-	
-	// for all expressions which have the same address
-    aTimeCondition->mCases.getKeys(keys);
-    
-    for (TTUInt8 i = 0; i < keys.size(); i++) {
-        
-        ExpressionParseFromValue(keys[i], expression);
-        
-        if (expression.getAddress() == anAddress) {
-            
-            // test the expression with the data
-            if (expression.evaluate(data)) {
-                
-                // get the event
-                aTimeCondition->mCases.lookup(expression, v);
-                event = v[0];
-                
-                // trigger the event
-                event->sendMessage(kTTSym_Trigger);
-                
-                // at least one event has been triggered
-                found = YES;
-            }
+
+    for (TTCaseMapIterator it = mCases.begin() ; it != mCases.end() ; it++) {
+        expression = it->second;
+        if (anAddress == expression.getAddress() && expression.evaluate(data)) {
+            it->first->sendMessage(kTTSym_Trigger);
+        } else {
+            it->first->sendMessage(kTTSym_Dispose);
         }
     }
-    
-    // if at least one event has been triggered,
-    // the time condition is not ready anymore
-    if (found) {
-        
-        aTimeCondition->mReady = NO;
-        
-        // notify each attribute observers
-        aTimeCondition->readyAttribute->sendNotification(kTTSym_notify, aTimeCondition->mReady);             // we use kTTSym_notify because we know that observers are TTCallback
-    }
+
+    aTimeCondition->mReady = NO;
+    aTimeCondition->readyAttribute->sendNotification(kTTSym_notify, aTimeCondition->mReady);
+
     return kTTErrNone;
 }
