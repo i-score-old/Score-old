@@ -247,9 +247,10 @@ TTErr TTTimeCondition::CaseTest(const TTValue& inputValue, TTValue& outputValue)
     
     return kTTErrGeneric;
 }
-/*
+
 TTErr TTTimeCondition::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 {
+    /*
 	TTXmlHandlerPtr	aXmlHandler = NULL;
     TTObjectBasePtr event;
     TTValue         v, keys;
@@ -285,12 +286,13 @@ TTErr TTTimeCondition::WriteAsXml(const TTValue& inputValue, TTValue& outputValu
         // Close the case node
         xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
     }
-    
+    */
 	return kTTErrNone;
 }
 
 TTErr TTTimeCondition::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 {
+    /*
 	TTXmlHandlerPtr	aXmlHandler = NULL;
     TTValue         expressionValue, v, out;
     TTTimeEventPtr  aTimeEvent;
@@ -335,10 +337,10 @@ TTErr TTTimeCondition::ReadFromXml(const TTValue& inputValue, TTValue& outputVal
         
         return kTTErrNone;
     }
-	
+	*/
 	return kTTErrNone;
 }
-*/
+
 #if 0
 #pragma mark -
 #pragma mark Some Methods
