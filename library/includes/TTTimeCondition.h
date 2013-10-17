@@ -44,8 +44,6 @@
 typedef	TTCaseMap*                  TTCaseMapPtr;
 typedef TTCaseMap::const_iterator   TTCaseMapIterator;
 
-#endif // __TT_TIME_CONDITION_H__
-
 
 
 /**	a class to define a condition and a set of different cases
@@ -142,3 +140,5 @@ typedef TTTimeCondition* TTTimeConditionPtr;
  @param	data                a value to test
  @return					an error code */
 TTErr TTSCORE_EXPORT TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data);
+
+#endif // __TT_TIME_CONDITION_H__
