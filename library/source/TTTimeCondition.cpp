@@ -100,7 +100,7 @@ TTErr TTTimeCondition::getEvents(TTValue& value)
     value.clear();
 
     for (TTCaseMapIterator it = mCases.begin() ; it != mCases.end() ; it++) {
-        value.append(it->first);
+        value.append((TTObjectBasePtr)it->first);
     }
 
     return kTTErrNone;
@@ -108,15 +108,19 @@ TTErr TTTimeCondition::getEvents(TTValue& value)
 
 TTErr TTTimeCondition::EventAdd(const TTValue& inputValue, TTValue& outputValue)
 {
+    TTTimeEventPtr event = TTTimeEventPtr(TTObjectBasePtr(inputValue[0]));
+
     // insert the event contained in inputValue with a blank expression which evaluates to true
-    mCases.insert({{inputValue[0],Expression()}});
+    mCases.insert({{event,Expression()}});
 
     return kTTErrNone;
 }
 
 TTErr TTTimeCondition::EventRemove(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTCaseMapIterator it = mCases.find(inputValue[0]);
+    TTTimeEventPtr event = TTTimeEventPtr(TTObjectBasePtr(inputValue[0]));
+
+    TTCaseMapIterator it = mCases.find(event);
     Expression exp = it->second;
     TTAddress addr = exp.getAddress();
     mCases.erase(it);
@@ -130,12 +134,15 @@ TTErr TTTimeCondition::EventRemove(const TTValue& inputValue, TTValue& outputVal
 
 TTErr TTTimeCondition::EventExpression(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTCaseMapIterator it = mCases.find(inputValue[0]);
+    TTTimeEventPtr event = TTTimeEventPtr(TTObjectBasePtr(inputValue[0]));
+
+    TTCaseMapIterator it = mCases.find(event);
     Expression old_exp = it->second;
     TTAddress old_addr = old_exp.getAddress();
-    Expression new_exp = inputValue[1];
+    Expression new_exp;
+    ExpressionParseFromValue(inputValue[1], new_exp);
     TTAddress new_addr = new_exp.getAddress();
-    it->second = new_exp;
+    mCases[it->first] = new_exp;
 
     if (old_addr != new_addr && old_addr != kTTAdrsEmpty && new_addr != kTTAdrsEmpty) {
         cleanReceiver(old_addr);
@@ -148,8 +155,9 @@ TTErr TTTimeCondition::EventExpression(const TTValue& inputValue, TTValue& outpu
 void TTTimeCondition::cleanReceiver(TTAddress addr) {
     bool found = false;
 
-    for (it = mCases.begin() ; !found && it != mCases.end() ; it++) {
-        if (it->second.getAddress() == addr) {
+    for (TTCaseMapIterator it = mCases.begin() ; !found && it != mCases.end() ; it++) {
+        Expression exp = it->second;
+        if (exp.getAddress() == addr) {
             found = true;
         }
     }
@@ -202,12 +210,14 @@ void TTTimeCondition::addReceiver(TTAddress addr) {
 
 TTErr TTTimeCondition::CaseFind(const TTValue& inputValue, TTValue& outputValue)
 {
+    TTTimeEventPtr event = TTTimeEventPtr(TTObjectBasePtr(inputValue[0]));
+
     TTValue     v, keys;
     TTSymbol    key;
     TTErr       err = kTTErrValueNotFound;
     
     // look for a case binding on the same event
-    TTCaseMapIterator it = mCases.find(inputValue[0]);
+    TTCaseMapIterator it = mCases.find(event);
 
     if (it != mCases.end()) {
         outputValue = it->second;
@@ -237,7 +247,7 @@ TTErr TTTimeCondition::CaseTest(const TTValue& inputValue, TTValue& outputValue)
     
     return kTTErrGeneric;
 }
-
+/*
 TTErr TTTimeCondition::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 {
 	TTXmlHandlerPtr	aXmlHandler = NULL;
@@ -328,7 +338,7 @@ TTErr TTTimeCondition::ReadFromXml(const TTValue& inputValue, TTValue& outputVal
 	
 	return kTTErrNone;
 }
-
+*/
 #if 0
 #pragma mark -
 #pragma mark Some Methods
@@ -340,16 +350,16 @@ TTErr TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data)
     TTTimeConditionPtr  aTimeCondition;
     TTAddress           anAddress;
     Expression          expression;
-    TTObjectBasePtr     event;
-    TTValue             v, keys;
-    TTBoolean           found = NO;
+//    TTObjectBasePtr     event;
+//    TTValue             v, keys;
+//    TTBoolean           found = NO;
 	
 	// unpack baton (condition, address)
 	b = (TTValuePtr)baton;
 	aTimeCondition = TTTimeConditionPtr(TTObjectBasePtr((*b)[0]));
     anAddress = (*b)[1];
 
-    for (TTCaseMapIterator it = mCases.begin() ; it != mCases.end() ; it++) {
+    for (TTCaseMapIterator it = aTimeCondition->mCases.begin() ; it != aTimeCondition->mCases.end() ; it++) {
         expression = it->second;
         if (anAddress == expression.getAddress() && expression.evaluate(data)) {
             it->first->sendMessage(kTTSym_Trigger);
