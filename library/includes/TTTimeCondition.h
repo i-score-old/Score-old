@@ -89,7 +89,7 @@ private :
     TTErr           getEvents(TTValue& value);
     
     /**  Add an event to the condition
-     @param	inputValue      an event
+     @param	inputValue      an event and optionnally the expression associated
      @param	outputValue     nothing
      @return                an error code if the operation fails */
     TTErr           EventAdd(const TTValue& inputValue, TTValue& outputValue);
