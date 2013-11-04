@@ -125,7 +125,6 @@ extern TTMODULAR_EXPORT TTSymbol	kTTSym_offset;
 
 extern TTMODULAR_EXPORT TTSymbol	kTTSym_parameter;
 extern TTMODULAR_EXPORT TTSymbol	kTTSym_preview;
-extern TTMODULAR_EXPORT TTSymbol	kTTSym_priority;
 extern TTMODULAR_EXPORT TTSymbol	kTTSym_proxy;
 
 extern TTMODULAR_EXPORT TTSymbol	kTTSym_rangeBounds;
@@ -142,8 +141,7 @@ extern TTMODULAR_EXPORT TTSymbol	kTTSym_ReadAgain;
 extern TTMODULAR_EXPORT TTSymbol	kTTSym_readonly;
 extern TTMODULAR_EXPORT TTSymbol	kTTSym_Recall;
 extern TTMODULAR_EXPORT TTSymbol	kTTSym_receiver;
-extern TTMODULAR_EXPORT TTSymbol	kTTSym_repetitionsAllow;
-extern TTMODULAR_EXPORT TTSymbol	kTTSym_Reset;
+extern TTMODULAR_EXPORT TTSymbol	kTTSym_repetitionsFilter;
 extern TTMODULAR_EXPORT TTSymbol	kTTSym_return;
 extern TTMODULAR_EXPORT TTSymbol	kTTSym_returnedValue;
 extern TTMODULAR_EXPORT TTSymbol	kTTSym_Run;
@@ -162,6 +160,7 @@ extern TTMODULAR_EXPORT TTSymbol	kTTSym_tag;
 extern TTMODULAR_EXPORT TTSymbol	kTTSym_target;
 
 extern TTMODULAR_EXPORT TTSymbol	kTTSym_unit;
+extern TTMODULAR_EXPORT TTSymbol	kTTSym_Update;
 
 extern TTMODULAR_EXPORT TTSymbol	kTTSym_value;
 extern TTMODULAR_EXPORT TTSymbol	kTTSym_valueDefault;
