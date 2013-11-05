@@ -212,10 +212,13 @@ TTErr TTTimeCondition::EventExpression(const TTValue& inputValue, TTValue& outpu
         mCases[it->first] = newExpression;
         
         // check if receivers need to be updated
-        if (oldAddress != newAddress && oldAddress != kTTAdrsEmpty && newAddress != kTTAdrsEmpty) {
+        if (oldAddress != newAddress) {
             
-            cleanReceiver(oldAddress);
-            addReceiver(newAddress);
+            if (oldAddress != kTTAdrsEmpty)
+                cleanReceiver(oldAddress);
+        
+            if (newAddress != kTTAdrsEmpty)
+                addReceiver(newAddress);
         }
 
         return kTTErrNone;
@@ -301,7 +304,6 @@ TTErr TTTimeCondition::WriteAsXml(const TTValue& inputValue, TTValue& outputValu
 TTErr TTTimeCondition::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 {
 	TTXmlHandlerPtr	aXmlHandler = NULL;
-    Expression      anExpression;
     TTValue         v, out;
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
@@ -334,9 +336,7 @@ TTErr TTTimeCondition::ReadFromXml(const TTValue& inputValue, TTValue& outputVal
                 // get the expression
                 if (!aXmlHandler->getXmlAttribute(kTTSym_expression, v, YES)) {
                     
-                    ExpressionParseFromValue(v, anExpression);
-                    out.append(anExpression);
-                    
+                    out.append(v[0]);
                     return EventAdd(out, v);
                 }
             }
