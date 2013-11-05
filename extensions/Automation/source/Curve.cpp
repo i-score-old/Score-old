@@ -165,6 +165,8 @@ TTErr Curve::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
     TTString        s;
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
+    
+    xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "curve");
 	
     // Write if it is active
     v = mActive;
@@ -189,6 +191,8 @@ TTErr Curve::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
     v.toString();
     s = TTString(v[0]);
     xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "function", BAD_CAST s.data());
+    
+    xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
 	
 	return kTTErrNone;
 }

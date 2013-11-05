@@ -160,8 +160,8 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
                 return kTTErrNone;
             
             else
-                // stop the scenario
-                return this->sendMessage(kTTSym_Stop);
+                // Make the end happen
+                return getEndEvent()->sendMessage(kTTSym_Happen);
             
         }
     }
