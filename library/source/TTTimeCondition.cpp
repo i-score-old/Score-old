@@ -425,6 +425,8 @@ TTErr TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data)
     TTTimeConditionPtr  aTimeCondition;
     TTAddress           anAddress;
     Expression          anExpression;
+    TTList              timeEventToTrigger;
+    TTList              timeEventToDispose;
 	
 	// unpack baton (condition, address)
 	b = (TTValuePtr)baton;
@@ -436,17 +438,35 @@ TTErr TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data)
         
         anExpression = it->second;
         
+        // if the address is equal to the event expression address
         if (anAddress == anExpression.getAddress()) {
             
+            // is the test of the expression passes ?
             if (anExpression.evaluate(data))
-                it->first->sendMessage(kTTSym_Trigger);
+                
+                // append to the trigger list
+                timeEventToTrigger.append(TTObjectBasePtr(it->first));
+            else
+                
+                // append to the dispose list
+                timeEventToDispose.append(TTObjectBasePtr(it->first));
         }
-        else
-            it->first->sendMessage(kTTSym_Dispose);
     }
     
-    aTimeCondition->mReady = NO;
-    aTimeCondition->readyAttribute->sendNotification(kTTSym_notify, aTimeCondition->mReady);
+    // if at least one event is in the trigger list
+    if (!timeEventToTrigger.isEmpty()) {
+        
+        // trigger all event of the trigger list
+        for (timeEventToTrigger.begin(); timeEventToTrigger.end(); timeEventToTrigger.next())
+            TTObjectBasePtr(timeEventToTrigger.current()[0])->sendMessage(kTTSym_Trigger);
+        
+        // dispose all event of the dispose list
+        for (timeEventToDispose.begin(); timeEventToDispose.end(); timeEventToDispose.next())
+            TTObjectBasePtr(timeEventToDispose.current()[0])->sendMessage(kTTSym_Trigger);
+        
+        aTimeCondition->mReady = NO;
+        aTimeCondition->readyAttribute->sendNotification(kTTSym_notify, aTimeCondition->mReady);
+    }
 
     return kTTErrNone;
 }
