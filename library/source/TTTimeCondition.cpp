@@ -88,6 +88,7 @@ TTErr TTTimeCondition::getCases(TTValue& value)
 {
     value.clear();
 
+    // for each case, append the associated expression to the result
     for (TTCaseMapIterator it = mCases.begin() ; it != mCases.end() ; it++) {
         value.append(it->second);
     }
@@ -99,8 +100,9 @@ TTErr TTTimeCondition::getEvents(TTValue& value)
 {
     value.clear();
 
+    // for each case, append the event to the result
     for (TTCaseMapIterator it = mCases.begin() ; it != mCases.end() ; it++) {
-        value.append((TTObjectBasePtr)it->first);
+        value.append((TTObjectBasePtr)it->first); // cast to TTObjectBasePtr to associate the type kTypeObject and not kTypePointer
     }
 
     return kTTErrNone;
@@ -108,12 +110,33 @@ TTErr TTTimeCondition::getEvents(TTValue& value)
 
 TTErr TTTimeCondition::EventAdd(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTTimeEventPtr event = TTTimeEventPtr(TTObjectBasePtr(inputValue[0]));
+    TTTimeEventPtr event = NULL;
+    Expression exp = NULL;
 
-    // insert the event contained in inputValue with a blank expression which evaluates to true
-    mCases.insert({{event,Expression()}});
+    switch (inputValue.size()) {
+        case 2 :                                                    // if we have two arguments
 
-    return kTTErrNone;
+            if (inputValue[1].type() != kTypeSymbol) {              // if the second argument isn't a symbol
+                return kTTErrInvalidType;                           // return an error TODO : should warn the user
+
+            }                                                       // if it's a symbol
+//            exp = Expression(TTSymbol(inputValue[1]));              // convert it to an expression
+
+        case 1 :                                                    // if we have one or two arguments
+
+            if (inputValue[0].type() != kTypeObject) {              // if the first argument isn't an object
+                return kTTErrInvalidType;                           // return en error TODO : should warn the user
+
+            }                                                       // if it's an object
+            event = TTTimeEventPtr(TTObjectBasePtr(inputValue[0])); // convert it to an event
+            mCases.insert({{event, exp ? exp : Expression()}});     // insert the event with the optionnal expression, or a blank expression which evaluates to true
+            return kTTErrNone;                                      // return no error
+
+        default :                                                   // if there is less than 1 or more than 2 arguments
+            return kTTErrWrongNumValues;                            // return an error TODO : should warn the user
+    }
+
+    return kTTErrGeneric; // never evaluated
 }
 
 TTErr TTTimeCondition::EventRemove(const TTValue& inputValue, TTValue& outputValue)
