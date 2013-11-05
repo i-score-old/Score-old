@@ -22,9 +22,6 @@
 #include "Expression.h"
 #include "TTTimeEvent.h"
 
-
-
-
 /** Define an unordered map to store and retreive an expression relative to a TTTimeEventPtr */
 #ifdef TT_PLATFORM_WIN
     #include <hash_map>
@@ -43,7 +40,6 @@
 
 typedef	TTCaseMap*                  TTCaseMapPtr;
 typedef TTCaseMap::const_iterator   TTCaseMapIterator;
-
 
 
 /**	a class to define a condition and a set of different cases
@@ -78,10 +74,10 @@ private :
      @return                kTTErrNone */
     TTErr           setReady(const TTValue& value);
     
-    /** get all cases expressions symbol
-     @param	value           a value containing one expression per case
+    /** get all expressions symbol associated to each event
+     @param	value           a value containing one expression per event
      @return                kTTErrNone */
-    TTErr           getCases(TTValue& value);
+    TTErr           getExpressions(TTValue& value);
 
     /** get all the events associated to the condition
      @param value           the time events objects
@@ -100,27 +96,23 @@ private :
      @return                an error code if the operation fails */
     TTErr           EventRemove(const TTValue& inputValue, TTValue& outputValue);
     
-    /**  Link an expression to an event
-     @param	inputValue      an event and the expression to link
+    /**  Edit the expression associated to an event
+     @param	inputValue      an event and the expression
      @param	outputValue     nothing
      @return                an error code if the operation fails */
     TTErr           EventExpression(const TTValue& inputValue, TTValue& outputValue);
 
-    /**  Helper functions to manage receivers */
-    void            cleanReceiver(TTAddress addr);
-    void            addReceiver(TTAddress addr);
-    
-    /**  Find a case related to an event
+    /**  Find an expression associated to an event
      @param	inputValue      an event
      @param	outputValue     an expression symbol
      @return                an error code if the operation fails */
-    TTErr           CaseFind(const TTValue& inputValue, TTValue& outputValue);
+    TTErr           ExpressionFind(const TTValue& inputValue, TTValue& outputValue);
     
-    /** Test the case
+    /** Test an expression
      @param inputvalue      an expression value or symbol
      @param outputvalue     the result as a boolean
      @return                an error code if the operation fails */
-    TTErr           CaseTest(const TTValue& inputValue, TTValue& outputValue);
+    TTErr           ExpressionTest(const TTValue& inputValue, TTValue& outputValue);
     
     /**  needed to be handled by a TTXmlHandler
      @param	inputValue      ..
@@ -128,6 +120,14 @@ private :
      @return                .. */
 	TTErr           WriteAsXml(const TTValue& inputValue, TTValue& outputValue);
 	TTErr           ReadFromXml(const TTValue& inputValue, TTValue& outputValue);
+    
+    /**  Helper functions to manage receivers : add a receiver for to the address if no receiver already exists
+     @param	anAddress      an address to observe */
+    void            addReceiver(TTAddress anAddress);
+    
+    /**  Helper functions to manage receivers : clean the receiver associated to the address if no other cases needs the address
+     @param	anAddress      an observed address */
+    void            cleanReceiver(TTAddress anAddress);
     
     friend TTErr TTSCORE_EXPORT TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data);
     

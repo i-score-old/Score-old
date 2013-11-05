@@ -176,7 +176,7 @@ class Scenario : public TimeContainer {
     
     
     /** Create a time condition
-     @inputvalue            optionnal expression symbols : < "address operator value", "address operator value", ... >
+     @inputvalue            nothing
      @outputvalue           a new time condition
      @return                an error code if the creation fails */
     TTErr   TimeConditionCreate(const TTValue& inputValue, TTValue& outputValue);

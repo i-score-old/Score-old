@@ -129,7 +129,7 @@ private :
     
     
     /** Create a time condition
-     @param inputvalue      optionnal expression symbols : < "address operator value", "address operator value", ... >
+     @param inputvalue      nothing
      @param outputvalue     a new time condition
      @return                an error code if the creation fails */
     virtual TTErr   TimeConditionCreate(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};

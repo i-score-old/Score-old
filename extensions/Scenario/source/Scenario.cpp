@@ -1162,7 +1162,7 @@ TTErr Scenario::TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue
 TTErr Scenario::TimeConditionCreate(const TTValue& inputValue, TTValue& outputValue)
 {
     TTTimeConditionPtr  aTimeCondition = NULL;
-    TTValue             args, aCacheElement, out;
+    TTValue             args, aCacheElement;
     
     // prepare argument (container)
     args = TTValue(TTObjectBasePtr(this));
@@ -1183,11 +1183,6 @@ TTErr Scenario::TimeConditionCreate(const TTValue& inputValue, TTValue& outputVa
     
     // return the time condition
     outputValue = TTObjectBasePtr(aTimeCondition);
-    
-    // optionnal : for each given symbol, add a case to the condition
-    for (TTUInt8 i = 0; i < inputValue.size(); i++)
-        if (inputValue[i].type() == kTypeSymbol)
-            aTimeCondition->sendMessage(TTSymbol("CaseAdd"), inputValue[i], out);
     
     return kTTErrNone;
 }
