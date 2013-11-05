@@ -74,41 +74,44 @@ int Place::nbOfTokens() {
 	return nbTokens;
 }
 
-unsigned int Place::consumeTokens(unsigned int nbOfTokens, unsigned int colorLabel) {
+int Place::consumeTokens(unsigned int nbOfTokens, unsigned int colorLabel) {
 	colorLabel--;
 
 	unsigned int time = 0;
+    bool activeToken = false;
 
 	if (m_tokenByColor[colorLabel].size() < nbOfTokens) {
 		throw IllegalArgumentException("Not enough tokens to consume");
 	} else {
 		for (unsigned int i = 0; i < nbOfTokens; ++i) {
 			time = m_tokenByColor[colorLabel].back().getRemainingTime();
+            activeToken |= m_tokenByColor[colorLabel].back().isActive();
 			m_tokenByColor[colorLabel].pop_back();
 		}
 	}
 
-	return time;
+    return activeToken ? time : -1;
 }
 
-void Place::produceTokens(unsigned int nbOfTokens, unsigned int colorLabel, unsigned int tokensTime)
+void Place::produceTokens(unsigned int nbOfTokens, unsigned int colorLabel, int tokensTime)
 {
 	unsigned int oldNumberOfTokens = getNbOfTokens(colorLabel);
 
 	for (unsigned int i = 0; i < nbOfTokens; ++i) {
-		Token token;
-		token.setRemainingTime(tokensTime);
+        Token token(tokensTime);
 		m_tokenByColor[colorLabel - 1].push_back(token);
 	}
+
+    if(tokensTime < 0){tokensTime = 0;}
 
 	if ((oldNumberOfTokens < NB_OF_TOKEN_TO_ACTIVE_ARC) && (getNbOfTokens(colorLabel) >= NB_OF_TOKEN_TO_ACTIVE_ARC)) { // CB WTF : Si un token et deux arcs sortant, bug ?
 		arcList outGoingArcs = outGoingArcsOf(colorLabel);
 		for (unsigned int i = 0 ; i < outGoingArcs.size() ; ++i) {
 			Arc* arc = outGoingArcs[i];
-            /*
-            if (!arc->getCondition()) { // CB check if the arc can be activated
-                continue;
-            }*/
+            
+//            if (!arc->getCondition()) { // CB check if the arc can be activated
+//                continue;
+//            }
 
             Transition* transitionTo = dynamic_cast<Transition*>(arc->getTo());
             

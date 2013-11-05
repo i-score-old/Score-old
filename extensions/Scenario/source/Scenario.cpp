@@ -771,6 +771,31 @@ TTErr Scenario::TimeEventTrigger(const TTValue& inputValue, TTValue& outputValue
     return kTTErrGeneric;
 }
 
+TTErr Scenario::TimeEventDispose(const TTValue &inputValue, TTValue &outputValue)
+{
+    TTTimeEventPtr aTimeEvent;
+
+    if (inputValue.size() == 1) {
+
+        if (inputValue[0].type() == kTypeObject) {
+
+            aTimeEvent = TTTimeEventPtr((TTObjectBasePtr)inputValue[0]);
+
+            if (mExecutionGraph) {
+
+                // if the execution graph is running
+                if (mExecutionGraph->getUpdateFactor() != 0) {
+
+                    // put the associated transition in the list of transitions to deactivate
+                    mExecutionGraph->deactivateTransition(TransitionPtr(mTransitionsMap[aTimeEvent]));
+                }
+            }
+        }
+    }
+
+    return kTTErrGeneric;
+}
+
 TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue)
 {
     TTTimeEventPtr          aFormerTimeEvent, aNewTimeEvent;
@@ -1137,7 +1162,7 @@ TTErr Scenario::TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue
 TTErr Scenario::TimeConditionCreate(const TTValue& inputValue, TTValue& outputValue)
 {
     TTTimeConditionPtr  aTimeCondition = NULL;
-    TTValue             args, aCacheElement, out;
+    TTValue             args, aCacheElement;
     
     // prepare argument (container)
     args = TTValue(TTObjectBasePtr(this));
@@ -1158,11 +1183,6 @@ TTErr Scenario::TimeConditionCreate(const TTValue& inputValue, TTValue& outputVa
     
     // return the time condition
     outputValue = TTObjectBasePtr(aTimeCondition);
-    
-    // optionnal : for each given symbol, add a case to the condition
-    for (TTUInt8 i = 0; i < inputValue.size(); i++)
-        if (inputValue[i].type() == kTypeSymbol)
-            aTimeCondition->sendMessage(TTSymbol("CaseAdd"), inputValue[i], out);
     
     return kTTErrNone;
 }

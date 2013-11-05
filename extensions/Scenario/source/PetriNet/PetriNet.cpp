@@ -157,7 +157,7 @@ bool PetriNet::makeOneStep(unsigned int currentTime)
                     m_isEventReadyCallback(sensitizedTransitionToTestTheEvent->getEvent(), false); // CB tell Score to stop listening to the event
                 }
             }
-            
+
             // cf triggerpoint : else check if the transition event is part of the recent incomming events (or if all transition have to pass)
             else if (isAnEvent(sensitizedTransitionToTestTheEvent->getEvent()) || m_mustCrossAllTransitionWithoutWaitingEvent){
                 
@@ -179,6 +179,22 @@ bool PetriNet::makeOneStep(unsigned int currentTime)
                 if (sensitizedTransitionToTestTheEvent->getEvent() != NULL && m_isEventReadyCallback != NULL) {
                     
                     m_isEventReadyCallback(sensitizedTransitionToTestTheEvent->getEvent(), false); // CB tell Score to stop listening to the event
+                }
+            }
+
+            // CB check if the transition should be deactivated because of a condition
+            else {
+                for (transitionList::iterator it = m_deactivatedTransitions.begin() ; sensitizedTransitionToTestTheEvent && it != m_deactivatedTransitions.end() ; it++) {
+                    if (sensitizedTransitionToTestTheEvent == *it) {
+                        sensitizedTransitionToTestTheEvent->crossTransition(true, -1); // CB -1 for inactive token
+
+                        m_sensitizedTransitions.erase(m_sensitizedTransitions.begin() + i);
+                        --i;
+
+                        sensitizedTransitionToTestTheEvent = NULL;
+
+                        m_deactivatedTransitions.erase(it);
+                    }
                 }
             }
         }
@@ -420,6 +436,12 @@ void PetriNet::turnIntoSensitized(Transition* t)
 {
 	m_sensitizedTransitions.push_back(t);
 }
+
+void PetriNet::deactivateTransition(Transition* t)
+{
+    m_deactivatedTransitions.push_back(t);
+}
+
 //
 //void PetriNet::turnIntoUnsensitized(Transition* t)
 //{

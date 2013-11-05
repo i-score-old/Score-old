@@ -82,11 +82,13 @@ public:
 	 *
 	 * Throws a IllegalArgumentException if the number of token to consume
 	 * is greater than the number of token effectively present.
+     *
+     * Returns the value of one token or -1 if all are inactive.
 	 *
 	 * \param nbOfTokens : number of tokens to consume.
 	 * \param colorLabel : (optional) color of the tokens to consume (1 if not provided).
 	 */
-	unsigned int consumeTokens(unsigned int nbOfTokens, unsigned int colorLabel = 1);
+    int consumeTokens(unsigned int nbOfTokens, unsigned int colorLabel = 1);
 
 	/*!
 	 * Produces token in the place.
@@ -94,7 +96,7 @@ public:
 	 * \param nbOfTokens : number of tokens to produce.
 	 * \param colorLabel : (optional) color of the tokens to produce (1 if not provided).
 	 */
-	void produceTokens(unsigned int nbOfTokens, unsigned int colorLabel = 1, unsigned int tokensTime = 0);
+    void produceTokens(unsigned int nbOfTokens, unsigned int colorLabel = 1, int tokensTime = 0);
     
     void merge(Place* placeToMerge); // TODO double emploi avec le merge des transition, pourrait être descendu dans PetriNetNode
 

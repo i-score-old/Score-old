@@ -259,6 +259,13 @@ public:
 	 */
 	void turnIntoSensitized(Transition* t);
 
+    /*!
+     * Specifies the given transition as deactivated.
+     *
+     * \param t : transition to set as deactivated.
+     */
+    void deactivateTransition(Transition* t);
+
 //	/*!
 //	 * Specifies the given transition as unsensitized.
 //	 * If it still has token in one of its predecessors,
@@ -405,6 +412,7 @@ private:
 //	 */
 //	transitionList m_activeTransitions; // list of actives transitions.
 	transitionList m_sensitizedTransitions;	// list of sensitized transitions.
+    transitionList m_deactivatedTransitions; // list of deactivated transitions.
 	transitionList m_transitionsToCrossWhenAcceleration;
 
 	priorityTransitionActionQueue m_priorityTransitionsActionQueue;

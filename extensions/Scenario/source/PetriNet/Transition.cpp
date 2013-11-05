@@ -288,7 +288,7 @@ void Transition::turnIntoOriginalStatus()
 //	return NULL;
 //}
 
-void Transition::crossTransition(bool mustChangeTokenValue, unsigned int newTokenValue)
+void Transition::crossTransition(bool mustChangeTokenValue, int newTokenValue)
 {
 	if (!areAllInGoingArcsActive()) {
 		throw IncoherentStateException();
@@ -302,15 +302,19 @@ void Transition::crossTransition(bool mustChangeTokenValue, unsigned int newToke
 	set<Transition*>  transitionsToReset;
 
 	unsigned int tokenValue = 0;
+    bool activeToken = false;
 
 	for (unsigned int i = 0 ; i < inGoingArc.size() ; ++i) {
 		tokenValue = inGoingArc[i]->consumeTokenInFrom();
 
-		if (isStatic()) {
-			tokenValue -= inGoingArc[i]->getRelativeMinValue().getValue();
-		} else {
-			tokenValue -= inGoingArc[i]->getRelativeMaxValue().getValue();
-		}
+        if (tokenValue != -1) {
+            activeToken = true;
+            if (isStatic()) {
+                tokenValue -= inGoingArc[i]->getRelativeMinValue().getValue();
+            } else {
+                tokenValue -= inGoingArc[i]->getRelativeMaxValue().getValue();
+            }
+        }
 
 		if (inGoingArc[i]->haveEnoughTokensInFrom()) {
 			setArcAsActive(inGoingArc[i], 0, false);
@@ -328,11 +332,7 @@ void Transition::crossTransition(bool mustChangeTokenValue, unsigned int newToke
 			}
 
 		}
-	}
-
-	if (mustChangeTokenValue) {
-		tokenValue = newTokenValue;
-	}
+    }
 
 	transitionList transitionsToResetList(transitionsToReset.begin(), transitionsToReset.end());
 
@@ -343,9 +343,15 @@ void Transition::crossTransition(bool mustChangeTokenValue, unsigned int newToke
 
 	if (m_externActions.size() > 0) {
 		for (unsigned int i = 0 ; i < m_externActions.size() ; ++i) {
-			m_externActions[i]->m_transitionAction(m_externActions[i]->m_transitionActionArgument, true);  // théo : by default we send true to make events happen (send false to dispose them)
+            m_externActions[i]->m_transitionAction(m_externActions[i]->m_transitionActionArgument, activeToken);
 		}
 	}
+
+    if (!activeToken) {
+        tokenValue = -1;
+    } else if (mustChangeTokenValue) {
+        tokenValue = newTokenValue;
+    }
 
 	for (unsigned int i = 0 ; i < outGoingArc.size() ; ++i) {
 		outGoingArc[i]->produceTokenInTo(tokenValue);
