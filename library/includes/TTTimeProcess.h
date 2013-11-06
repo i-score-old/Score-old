@@ -50,6 +50,10 @@ protected :
     
     TTObjectBasePtr                 mScheduler;                     ///< the scheduler object which handles the time process execution
     
+    TTBoolean                       mRunning;                       ///< a boolean to get the running state of the process
+                                                                    ///< it is related to the running state of the scheduler
+                                                                    ///< but it also allows to avoid last scheduler tick to call the process method (it could happen one tick after the stop)
+    
 private :
     
     TTObjectBasePtr                 mStartEvent;                    ///< the event object which handles the time process execution start
@@ -59,8 +63,6 @@ private :
     
     TTObjectBasePtr                 mEndEvent;                      ///< the event object which handles the time process execution stop
     TTObjectBasePtr                 mEndEventCallback;              ///< a callback to subscribe for end event notification
-    
-    TTBoolean                       active;                         ///< an internal flag to avoid last scheduler tick to call the process method (it could happen one tick after the stop)
     
     TTMessagePtr                    processStartMessage;            ///< cache process start message for observer notification
     TTMessagePtr                    processEndMessage;              ///< cache process end message for observer notification

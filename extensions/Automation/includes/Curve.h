@@ -35,6 +35,9 @@ private :
     TTBoolean                           mRedundancy;                    ///< is the curve allow repetitions ?
     TTUInt32                            mSampleRate;                    ///< time precision of the curve
     TTObjectBasePtr                     mFunction;						///< a freehand function unit
+    TTBoolean                           mRecording;                     ///< is the curve recording ?
+    
+    TTValue                             mRecordedParameters;            ///< a temporary value to record the value without updating the function each time it changes
 
     /** Set curve's parameters
      @param value           x1 y1 b1 x2 y2 b2 ... with x[0. :: 1.], y[min, max], b[-1. :: 1.]
@@ -45,6 +48,11 @@ private :
      @param value           x1 y1 b1 x2 y2 b2 ... with x[0. :: 1.], y[min, max], b[-1. :: 1.]
      @return                an error code if the operation fails */
     TTErr   getParameters(TTValue& value);
+    
+    /** Set curve in record mode
+     @param value           boolean
+     @return                an error code if the operation fails */
+    TTErr   setRecording(const TTValue& value);
     
     /** Get all curve's values
      @param inputvalue      duration

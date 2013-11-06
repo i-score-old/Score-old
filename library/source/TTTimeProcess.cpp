@@ -27,6 +27,7 @@ mName(kTTSymEmpty),
 mDurationMin(0),
 mDurationMax(0),
 mMute(NO),
+mRunning(NO),
 mVerticalPosition(0),
 mVerticalSize(1),
 mScheduler(NULL),
@@ -53,6 +54,9 @@ mEndEventCallback(NULL)
     addAttributeWithSetter(DurationMax, kTypeUInt32);
     
     addAttribute(Mute, kTypeBoolean);
+    
+    addAttribute(Running, kTypeBoolean);
+    addAttributeProperty(Running, readOnly, YES);
     
     addAttributeWithSetter(Color, kTypeLocalValue);
     addAttribute(VerticalPosition, kTypeUInt32);
@@ -476,8 +480,8 @@ TTErr TTTimeProcess::Play()
     TTValue    v;
     TTUInt32   start, end;
     
-    // set the internal active flag
-    active = YES;
+    // set the running state of the process
+    mRunning = YES;
     
     // launch the scheduler
     mStartEvent->getAttributeValue(kTTSym_date, v);
@@ -613,8 +617,8 @@ TTErr TTTimeProcessStartEventHappenCallback(TTPtr baton, TTValue& data)
             // notify observers
             aTimeProcess->processStartMessage->sendNotification(kTTSym_notify, kTTValNONE);	// we use kTTSym_notify because we know that observers are TTCallback
             
-            // set the internal active flag
-            aTimeProcess->active = YES;
+            // set the running state of the process
+            aTimeProcess->mRunning = YES;
             
             // play the process
             aTimeProcess->Play();
@@ -639,8 +643,8 @@ TTErr TTTimeProcessEndEventHappenCallback(TTPtr baton, TTValue& data)
         // stop the process
         aTimeProcess->sendMessage(kTTSym_Stop);
         
-        // set the internal active flag
-        aTimeProcess->active = NO;
+        // set the running state of the process
+        aTimeProcess->mRunning = NO;
         
         // note : don't set end event ready attribute to NO : it is to the container to take this decision
 
@@ -662,7 +666,7 @@ void TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression, TTFloat
 	TTTimeProcessPtr	aTimeProcess = (TTTimeProcessPtr)object;
     
     // use the specific process method
-    if (aTimeProcess->active)
+    if (aTimeProcess->mRunning)
        aTimeProcess->Process(TTValue(progression, realTime), kTTValNONE);
     else
         std::cout << "TTTimeProcessSchedulerCallback : avoid last scheduler tick" << std::endl;
