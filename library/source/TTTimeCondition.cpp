@@ -444,11 +444,11 @@ TTErr TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data)
             // is the test of the expression passes ?
             if (anExpression.evaluate(data))
                 
-                // append to the trigger list
+                // append the event to the trigger list
                 timeEventToTrigger.append(TTObjectBasePtr(it->first));
             else
                 
-                // append to the dispose list
+                // append the event to the dispose list
                 timeEventToDispose.append(TTObjectBasePtr(it->first));
         }
     }
@@ -456,11 +456,11 @@ TTErr TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data)
     // if at least one event is in the trigger list
     if (!timeEventToTrigger.isEmpty()) {
         
-        // trigger all event of the trigger list
+        // trigger all events of the trigger list
         for (timeEventToTrigger.begin(); timeEventToTrigger.end(); timeEventToTrigger.next())
             TTObjectBasePtr(timeEventToTrigger.current()[0])->sendMessage(kTTSym_Trigger);
         
-        // dispose all event of the dispose list
+        // dispose all events of the dispose list
         for (timeEventToDispose.begin(); timeEventToDispose.end(); timeEventToDispose.next())
             TTObjectBasePtr(timeEventToDispose.current()[0])->sendMessage(kTTSym_Trigger);
         

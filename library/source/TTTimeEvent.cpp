@@ -49,6 +49,8 @@ mReady(YES)
     addMessage(Happen);
     addMessage(Dispose);
     addMessageWithArguments(StateAddressGetValue);
+    addMessageWithArguments(StateAddressSetValue);
+    addMessageWithArguments(StateAddressClear);
     
 	// needed to be handled by a TTXmlHandler
 	addMessageWithArguments(WriteAsXml);
@@ -211,10 +213,80 @@ TTErr TTTimeEvent::StateAddressGetValue(const TTValue& inputValue, TTValue& outp
             
             aLine = TTDictionaryPtr((TTPtr)v[0]);
             
-            // get the start value
+            // get the value
             aLine->getValue(outputValue);
             
             return  kTTErrNone;
+        }
+    }
+    
+    return kTTErrGeneric;
+}
+
+TTErr TTTimeEvent::StateAddressSetValue(const TTValue& inputValue, TTValue& outputValue)
+{
+    TTValue         v, command;
+    TTAddress       address;
+    TTValuePtr      aValue;
+    TTListPtr       lines;
+    TTDictionaryPtr aLine;
+    TTErr           err;
+    
+    if (inputValue.size() == 2) {
+        
+        if (inputValue[0].type() == kTypeSymbol && inputValue[1].type() == kTypePointer) {
+            
+            address = inputValue[0];
+            aValue = TTValuePtr(TTPtr(inputValue[1]));
+            
+            // get the lines of the state
+            mState->getAttributeValue(kTTSym_lines, v);
+            lines = TTListPtr(TTPtr(v[0]));
+            
+            // find the line at address
+            err = lines->find(&TTScriptFindAddress, (TTPtr)&address, v);
+            
+            // if the line doesn't exist : append it to the state
+            if (err) {
+                
+                command = *aValue;
+                command.prepend(address);
+                
+                mState->sendMessage(TTSymbol("AppendCommand"), command, v);
+            }
+            
+            aLine = TTDictionaryPtr((TTPtr)v[0]);
+            
+            // set the value
+            aLine->setValue(*aValue);
+            
+            return  kTTErrNone;
+        }
+    }
+    
+    return kTTErrGeneric;
+}
+
+TTErr TTTimeEvent::StateAddressClear(const TTValue& inputValue, TTValue& outputValue)
+{
+    TTValue         v;
+    TTAddress       address;
+    TTListPtr       lines;
+    
+    if (inputValue.size() == 1) {
+        
+        if (inputValue[0].type() == kTypeSymbol) {
+            
+            address = inputValue[0];
+            
+            // get the lines of the state
+            mState->getAttributeValue(kTTSym_lines, v);
+            lines = TTListPtr(TTPtr(v[0]));
+            
+            // remove the line at address
+            lines->remove(address);
+            
+            return kTTErrNone;
         }
     }
     

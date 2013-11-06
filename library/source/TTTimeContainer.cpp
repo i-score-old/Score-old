@@ -297,6 +297,11 @@ TTUInt32 TTTimeContainer::getTimeProcessDurationMax(TTTimeProcessPtr aTimeProces
     return aTimeProcess->mDurationMax;
 }
 
+TTBoolean TTTimeContainer::getTimeProcessRunning(TTTimeProcessPtr aTimeProcess)
+{
+    return aTimeProcess->mRunning;
+}
+
 void TTTimeContainer::writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTTimeProcessPtr aTimeProcess)
 {
     TTValue     v;

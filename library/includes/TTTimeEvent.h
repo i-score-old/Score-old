@@ -97,6 +97,20 @@ private :
      @return                kTTErrNone */
     TTErr           StateAddressGetValue(const TTValue& inputValue, TTValue& outputValue);
     
+    /** Set a line value of the state for an address
+     this method eases the access of one state value
+     @param	inputValue      an address, value pointer
+     @param	outputValue     the value of the state for an address
+     @return                kTTErrNone */
+    TTErr           StateAddressSetValue(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Remove a line to the state for an address
+     this method eases the access of one state value
+     @param	inputValue      an address
+     @param	outputValue     nothing
+     @return                kTTErrNone */
+    TTErr           StateAddressClear(const TTValue& inputValue, TTValue& outputValue);
+    
     friend void TTSCORE_EXPORT TTTimeContainerFindTimeEventWithName(const TTValue& aValue, TTPtr timeEventNamePtrToMatch, TTBoolean& found);
 };
 

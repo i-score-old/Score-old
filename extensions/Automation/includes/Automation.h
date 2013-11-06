@@ -32,9 +32,11 @@ class Automation : public TimeProcess
 private :
     
     TTHash                      mCurves;						///< a table of freehand function units stored by address
+    TTHash                      mReceivers;						///< a table of freehand function units stored by address
     TTValue                     mNextTimes;                     ///< a value used to know when the next value can be sent for each address (this depends on the sample rate of each curves)
     
     TTValue                     mCurrentObjects;                ///< useful for file parsing
+    TTFloat64                   mCurrentProgression;            ///< useful for recording
     
     /** Get parameters names needed by this time process
      @param	value           the returned parameter names
@@ -107,8 +109,25 @@ private :
     /** Clear all curves
      @return                an error code if the operation fails */
     TTErr   Clear();
+    
+    /** Enable/Disable the recording of a curve during the next execution of the process
+     @inputValue            address, boolean
+     @outputvalue           kTTValNONE
+     @return                an error code if the operation fails */
+    TTErr   CurveRecord(const TTValue& inputValue, TTValue& outputValue);
+    
+    void    addReceiver(TTAddress anAddress);
+    void    removeReceiver(TTAddress anAddress);
+    
+    friend TTErr TTSCORE_EXPORT AutomationReceiverReturnValueCallback(TTPtr baton, TTValue& data);
 };
 
 typedef Automation* AutomationPtr;
+
+/** The receiver callback return back the value of observed addresses
+ @param	baton               a automation instance, an address
+ @param	data                a value to test
+ @return					an error code */
+TTErr TTSCORE_EXPORT AutomationReceiverReturnValueCallback(TTPtr baton, TTValue& data);
 
 #endif // __AUTOMATION_H__

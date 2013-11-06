@@ -23,7 +23,8 @@ TT_OBJECT_CONSTRUCTOR,
 mActive(YES),
 mRedundancy(NO),
 mSampleRate(20),
-mFunction(NULL)
+mFunction(NULL),
+mRecording(NO)
 {
 	TT_ASSERT("Correct number of args to create Curve", arguments.size() == 0);
     
@@ -33,6 +34,7 @@ mFunction(NULL)
     addAttribute(Redundancy, kTypeBoolean);
     addAttribute(SampleRate, kTypeUInt32);
     addAttribute(Function, kTypeObject);
+    addAttributeWithSetter(Recording, kTypeBoolean);
     
     addMessageWithArguments(Sample);
     
@@ -58,6 +60,12 @@ Curve::~Curve()
 
 TTErr Curve::getParameters(TTValue& value)
 {
+    if (mRecording) {
+        
+        value = mRecordedParameters;
+        return kTTErrNone;
+    }
+    
     TTValue         curveList;
     TTUInt32        i, j;
     
@@ -87,6 +95,12 @@ TTErr Curve::getParameters(TTValue& value)
 
 TTErr Curve::setParameters(const TTValue& value)
 {
+    if (mRecording) {
+        
+        mRecordedParameters = value;
+        return kTTErrNone;
+    }
+    
     TTValue     curveList;
     TTUInt32    i, j;
     
@@ -126,6 +140,28 @@ TTErr Curve::setParameters(const TTValue& value)
     }
     
     return kTTErrGeneric;
+}
+
+TTErr Curve::setRecording(const TTValue& value)
+{
+    TTBoolean newRecording = value;
+    
+    // filter repetitions
+    if (newRecording != mRecording) {
+        
+        mRecording = newRecording;
+        
+        // start recording : clear the parameters
+        if (mRecording)
+            
+            mRecordedParameters.clear();
+        
+        // end recording : set the curvelist
+        else
+            setParameters(mRecordedParameters);
+    }
+    
+    return kTTErrNone;
 }
 
 TTErr Curve::Sample(const TTValue& inputValue, TTValue& outputValue)
