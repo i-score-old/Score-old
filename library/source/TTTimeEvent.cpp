@@ -254,11 +254,13 @@ TTErr TTTimeEvent::StateAddressSetValue(const TTValue& inputValue, TTValue& outp
                 
                 mState->sendMessage(TTSymbol("AppendCommand"), command, v);
             }
+            else {
             
-            aLine = TTDictionaryPtr((TTPtr)v[0]);
+                aLine = TTDictionaryPtr((TTPtr)v[0]);
             
-            // set the value
-            aLine->setValue(*aValue);
+                // set the value
+                aLine->setValue(*aValue);
+            }
             
             return  kTTErrNone;
         }

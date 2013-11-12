@@ -505,6 +505,9 @@ TTErr TTTimeProcess::Play()
 
 TTErr TTTimeProcess::Stop()
 {
+    // set the running state of the process
+    mRunning = NO;
+    
     return mScheduler->sendMessage(kTTSym_Stop);
 }
 
@@ -600,7 +603,7 @@ TTErr TTTimeProcessStartEventHappenCallback(TTPtr baton, TTValue& data)
     TTTimeProcessPtr    aTimeProcess;
     TTValuePtr          b;
     TTValue             v;
-    TTUInt32            start, end;
+    TTUInt32            start;
     
 	// unpack baton (a time process)
 	b = (TTValuePtr)baton;
@@ -616,9 +619,6 @@ TTErr TTTimeProcessStartEventHappenCallback(TTPtr baton, TTValue& data)
             
             // notify observers
             aTimeProcess->processStartMessage->sendNotification(kTTSym_notify, kTTValNONE);	// we use kTTSym_notify because we know that observers are TTCallback
-            
-            // set the running state of the process
-            aTimeProcess->mRunning = YES;
             
             // play the process
             aTimeProcess->Play();
@@ -641,10 +641,7 @@ TTErr TTTimeProcessEndEventHappenCallback(TTPtr baton, TTValue& data)
 	if (!aTimeProcess->mMute) {
         
         // stop the process
-        aTimeProcess->sendMessage(kTTSym_Stop);
-        
-        // set the running state of the process
-        aTimeProcess->mRunning = NO;
+        aTimeProcess->Stop();
         
         // note : don't set end event ready attribute to NO : it is to the container to take this decision
 
