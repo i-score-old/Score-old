@@ -13,7 +13,6 @@
  * http://www.cecill.info
  */
 
-#include "TTValueCache.h"
 #include "TTSymbolTable.h"
 #include "TTScore.h"
 #include "TTScoreSymbolCache.h"

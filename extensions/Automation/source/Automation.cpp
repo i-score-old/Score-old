@@ -532,7 +532,7 @@ TTErr Automation::CurveGet(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr Automation::CurveUpdate(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTValue         v, vStart, vEnd, parameters, objects;
+    TTValue         v, vStart, vEnd, parameters, objects, none;
     TTAddress       address;
     TTObjectBasePtr curve;
     
@@ -548,7 +548,7 @@ TTErr Automation::CurveUpdate(const TTValue& inputValue, TTValue& outputValue)
         for (i = 0; i < keys.size(); i++) {
             
             key = keys[i];
-            CurveUpdate(key, kTTValNONE);
+            CurveUpdate(key, none);
         }
         
         return kTTErrNone;

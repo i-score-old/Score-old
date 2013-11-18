@@ -20,11 +20,11 @@
 #include "TTFoundationAPI.h"
 
 #define PROTOCOL_CONSTRUCTOR \
-TTObjectBasePtr thisTTClass :: instantiate (TTSymbol& name, TTValue& arguments) {return new thisTTClass (arguments);} \
+TTObjectBasePtr thisTTClass :: instantiate (TTSymbol name, TTValue arguments) {return new thisTTClass (arguments);} \
 \
 extern "C" void thisTTClass :: registerClass () {TTClassRegister( TTSymbol(thisTTClassName), thisTTClassTags, thisTTClass :: instantiate );} \
 \
-thisTTClass :: thisTTClass (TTValue& arguments) : Protocol(arguments)
+thisTTClass :: thisTTClass (const TTValue& arguments) : Protocol(arguments)
 
 #define PROTOCOL_INITIALIZE \
 mName = TTSymbol(thisTTClassName); \
@@ -76,7 +76,7 @@ public:
 	
 public:
 	//** Constructor.	*/
-	Protocol(TTValue& arguments);
+	Protocol(const TTValue& arguments);
 	
 	/** Destructor. */
 	virtual ~Protocol();
@@ -118,7 +118,7 @@ public:
 	/*! 
      * Run reception thread mechanism for each application
      * \param inputValue			: the application to run (default the local application)
-	 * \param outputValue			: kTTValNONE
+	 * \param outputValue			: nothing
      * \return errorcode			: return a kTTErrGeneric if the protocol fails to start for the application or if it was running already
      */
 	virtual TTErr Run(const TTValue& inputValue, TTValue& outputValue)=0;
@@ -126,7 +126,7 @@ public:
 	/*!
      * Stop the reception thread mechanism for each application
      * \param inputValue			: the application to stop (default the local application)
-	 * \param outputValue			: kTTValNONE
+	 * \param outputValue			: nothing
      * \return errorcode			: return a kTTErrGeneric if the protocol fails to stop for the application or if it was already stopped
      */
 	virtual TTErr Stop(const TTValue& inputValue, TTValue& outputValue)=0;

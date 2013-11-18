@@ -15,7 +15,7 @@
 
 #include "TimePluginLib.h"
 
-TimeProcess::TimeProcess(TTValue& arguments) :
+TimeProcess::TimeProcess(const TTValue& arguments) :
 TTTimeProcess(arguments)
 {
     TT_ASSERT("Correct number of args to create TimeProcess", arguments.size() == 0);
@@ -27,7 +27,7 @@ TimeProcess::~TimeProcess()
 }
 
 
-TimeContainer::TimeContainer(TTValue& arguments) :
+TimeContainer::TimeContainer(const TTValue& arguments) :
 TTTimeContainer(arguments)
 {
     TT_ASSERT("Correct number of args to create TimeContainer", arguments.size() == 0);

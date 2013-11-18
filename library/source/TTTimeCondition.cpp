@@ -383,7 +383,7 @@ void TTTimeCondition::addReceiver(TTAddress anAddress)
     TTObjectBasePtr aReceiver;
     TTObjectBasePtr aReceiverCallback;
     TTValuePtr      aReceiverBaton;
-    TTValue         v;
+    TTValue         v, none;
     
     // if there is no receiver for the expression address
     if (mReceivers.lookup(anAddress, v)) {
@@ -393,7 +393,7 @@ void TTTimeCondition::addReceiver(TTAddress anAddress)
         
         // Create a receiver callback to get the expression address value back
         aReceiverCallback = NULL;
-        TTObjectBaseInstantiate(TTSymbol("callback"), &aReceiverCallback, kTTValNONE);
+        TTObjectBaseInstantiate(TTSymbol("callback"), &aReceiverCallback, none);
         
         aReceiverBaton = new TTValue(TTObjectBasePtr(this));
         aReceiverBaton->append(anAddress);

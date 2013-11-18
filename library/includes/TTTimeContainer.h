@@ -62,37 +62,37 @@ private :
     
     /** Release a time event
      @param inputValue      a time event object to release
-     @param outputvalue     kTTValNONE
+     @param outputvalue     nothing
      @return                an error code if the destruction fails */
     virtual TTErr   TimeEventRelease(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
     
     /** Move a time event
      @param inputValue      a time event object, new date
-     @param outputvalue     kTTValNONE
+     @param outputvalue     nothing
      @return                an error code if the movement fails */
     virtual TTErr   TimeEventMove(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
     
     /** Link a time event to a condition
      @param inputValue      a time event object, a time condition object
-     @param outputvalue     kTTValNONE
+     @param outputvalue     nothing
      @return                an error code if the setting fails */
     virtual TTErr   TimeEventCondition(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
     
     /** Trigger a time event to make it happens
      @param inputValue      a time event object
-     @param outputvalue     kTTValNONE
+     @param outputvalue     nothing
      @return                an error code if the triggering fails */
     virtual TTErr   TimeEventTrigger(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
 
     /** Dispose a time event
      @param inputValue      a time event object
-     @param outputvalue     kTTValNONE
+     @param outputvalue     nothing
      @return                an error code if the disposing fails */
     virtual TTErr   TimeEventDispose(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
 
     /** Replace a time event by another one (copying date attribute)
      @param inputValue      a former time event object, a new time event object
-     @param outputvalue     kTTValNONE
+     @param outputvalue     nothing
      @return                an error code if the replacement fails */
     virtual TTErr   TimeEventReplace(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
     
@@ -117,13 +117,13 @@ private :
     
     /** Move a time process
      @param inputValue      a time process object, new start date, new end date
-     @param outputvalue     kTTValNONE
+     @param outputvalue     nothing
      @return                an error code if the movement fails */
     virtual TTErr   TimeProcessMove(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
     
     /** Limit a time process duration
      @param inputValue      a time process object, new duration min, new duration max
-     @param outputvalue     kTTValNONE
+     @param outputvalue     nothing
      @return                an error code if the limitation fails */
     virtual TTErr   TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
     
@@ -136,7 +136,7 @@ private :
     
     /** Release a time process
      @param inputValue      a time condition object to release
-     @param outputvalue     kTTValNONE
+     @param outputvalue     nothing
      @return                an error code if the destruction fails */
     virtual TTErr   TimeConditionRelease(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
     
