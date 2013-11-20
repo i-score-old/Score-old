@@ -210,7 +210,7 @@ protected :
     /** Getter on running state of time process protected member
      @param aTimeProcess    a time process object
      @return                a boolean value */
-    TTBoolean        getTimeProcessRunning(TTTimeProcessPtr aTimeProcess);
+    TTBoolean       getTimeProcessRunning(TTTimeProcessPtr aTimeProcess);
     
     /** Write basic informations of a time process as Xml
      @param aXmlHandler     a xml handler

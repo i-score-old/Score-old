@@ -172,16 +172,19 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
 TTErr Scenario::ProcessPaused(const TTValue& inputValue, TTValue& outputValue)
 {
     TTObjectBasePtr aTimeProcess;
+    TTBoolean       paused;
     
     if (inputValue.size() == 1) {
         
         if (inputValue[0].type() == kTypeBoolean) {
             
+            paused = inputValue[0];
+            
             for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
                 
                 aTimeProcess = mTimeProcessList.current()[0];
                 
-                if (inputValue == kTTBoolYes)
+                if (paused)
                     aTimeProcess->sendMessage(kTTSym_Pause);
                 else
                     aTimeProcess->sendMessage(kTTSym_Resume);
@@ -588,7 +591,7 @@ TTErr Scenario::TimeEventRelease(const TTValue& inputValue, TTValue& outputValue
             mTimeEventList.find(&TTTimeContainerFindTimeEvent, (TTPtr)aTimeEvent, aCacheElement);
             
             // couldn't find the same time event in the scenario
-            if (aCacheElement == kTTValNONE)
+            if (aCacheElement.size() == 0)
                 return kTTErrValueNotFound;
             
             else {
@@ -596,7 +599,7 @@ TTErr Scenario::TimeEventRelease(const TTValue& inputValue, TTValue& outputValue
                 // if the time event is used by a time process it can't be released
                 mTimeProcessList.find(&TTTimeContainerFindTimeProcessWithTimeEvent, (TTPtr)aTimeEvent, v);
                 
-                if (v == kTTValNONE) {
+                if (v.size() == 0) {
                     
                     // remove time event object and observers
                     mTimeEventList.remove(aCacheElement);
@@ -708,14 +711,14 @@ TTErr Scenario::TimeEventCondition(const TTValue& inputValue, TTValue& outputVal
             mTimeEventList.find(&TTTimeContainerFindTimeEvent, (TTPtr)aTimeEvent, aCacheElement);
             
             // couldn't find the former time event in the scenario
-            if (aCacheElement == kTTValNONE)
+            if (aCacheElement.size() == 0)
                 return kTTErrValueNotFound;
             
             // try to find the time condition
             mTimeConditionList.find(&TTTimeContainerFindTimeCondition, (TTPtr)aTimeCondition, aCacheElement);
             
             // couldn't find the former time condition in the scenario
-            if (aCacheElement == kTTValNONE)
+            if (aCacheElement.size() == 0)
                 return kTTErrValueNotFound;
             
             // for each time process
@@ -814,7 +817,7 @@ TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue
             mTimeEventList.find(&TTTimeContainerFindTimeEvent, (TTPtr)aFormerTimeEvent, aCacheElement);
             
             // couldn't find the former time event in the scenario
-            if (aCacheElement == kTTValNONE)
+            if (aCacheElement.size() == 0)
                 return kTTErrValueNotFound;
             
             else {
@@ -975,7 +978,7 @@ TTErr Scenario::TimeProcessRelease(const TTValue& inputValue, TTValue& outputVal
             mTimeProcessList.find(&TTTimeContainerFindTimeProcess, (TTPtr)aTimeProcess, aCacheElement);
             
             // couldn't find the same time process in the scenario :
-            if (aCacheElement == kTTValNONE)
+            if (aCacheElement.size() == 0)
                 return kTTErrValueNotFound;
             
             else {
@@ -1202,7 +1205,7 @@ TTErr Scenario::TimeConditionRelease(const TTValue& inputValue, TTValue& outputV
             mTimeConditionList.find(&TTTimeContainerFindTimeCondition, (TTPtr)aTimeCondition, aCacheElement);
             
             // couldn't find the same time condition in the scenario
-            if (aCacheElement == kTTValNONE)
+            if (aCacheElement.size() == 0)
                 return kTTErrValueNotFound;
             
             else {

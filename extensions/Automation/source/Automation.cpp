@@ -63,7 +63,7 @@ TTErr Automation::getCurveAddresses(TTValue& value)
 
 TTErr Automation::ProcessStart()
 {
-    TTValue         v, keys, objects, vStart, out;
+    TTValue         v, keys, objects, vStart, none;
     TTSymbol        key;
     TTObjectBasePtr curve;
     TTObjectBasePtr aReceiver;
@@ -106,7 +106,7 @@ TTErr Automation::ProcessStart()
                 // set the start event state value for this address
                 v = key;
                 v.append(TTPtr(&vStart));
-                getStartEvent()->sendMessage(TTSymbol("StateAddressSetValue"), v, out);
+                getStartEvent()->sendMessage(TTSymbol("StateAddressSetValue"), v, none);
                 
                 // create as many indexed curves as the vStart size
                 err = kTTErrNone;
@@ -115,7 +115,7 @@ TTErr Automation::ProcessStart()
                 for (i = 0; i < vStart.size(); i++) {
                     
                     curve = NULL;
-                    err = TTObjectBaseInstantiate(TTSymbol("Curve"), &curve, kTTValNONE);
+                    err = TTObjectBaseInstantiate(TTSymbol("Curve"), &curve, none);
                     
                     if (!err) {
                         // set the curve in record mode
@@ -202,7 +202,7 @@ TTErr Automation::ProcessEnd()
 TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
 {
     TTFloat64       progression, realTime, result;
-    TTValue         v, keys, objects, valueToSend;
+    TTValue         v, keys, objects, valueToSend, none;
     TTSymbol        key;
     TTAddress       address;
     TTObjectBasePtr curve;
@@ -285,7 +285,7 @@ TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
                             // send the line using the command message
                             if (attribute == kTTSym_value) {
                                 
-                                anObject->sendMessage(kTTSym_Command, valueToSend, kTTValNONE);
+                                anObject->sendMessage(kTTSym_Command, valueToSend, none);
                                 continue;
                             }
                         }
@@ -343,7 +343,7 @@ TTErr Automation::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 	TTXmlHandlerPtr	aXmlHandler = NULL;
     TTObjectBasePtr curve = NULL;
     TTAddress       address;
-    TTValue         v;
+    TTValue         v, none;
     
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
     
@@ -390,7 +390,7 @@ TTErr Automation::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     
     if (aXmlHandler->mXmlNodeName == TTSymbol("curve")) {
         
-        TTObjectBaseInstantiate(TTSymbol("Curve"), TTObjectBaseHandle(&curve), kTTValNONE);
+        TTObjectBaseInstantiate(TTSymbol("Curve"), TTObjectBaseHandle(&curve), none);
         
         mCurrentObjects.append(curve);
         
@@ -428,7 +428,7 @@ TTErr Automation::ReadFromText(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr Automation::CurveAdd(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTValue         v, vStart, vEnd, parameters, objects;
+    TTValue         v, vStart, vEnd, parameters, objects, none;
     TTAddress       address;
     TTObjectBasePtr curve;
     TTBoolean       valid = YES;
@@ -471,7 +471,7 @@ TTErr Automation::CurveAdd(const TTValue& inputValue, TTValue& outputValue)
                 for (i = 0; i < vStart.size(); i++) {
                     
                     curve = NULL;
-                    err = TTObjectBaseInstantiate(TTSymbol("Curve"), &curve, kTTValNONE);
+                    err = TTObjectBaseInstantiate(TTSymbol("Curve"), &curve, none);
                     
                     if (!err) {
                         
@@ -725,7 +725,7 @@ void Automation::addReceiver(TTAddress anAddress)
     TTObjectBasePtr aReceiver;
     TTObjectBasePtr aReceiverCallback;
     TTValuePtr      aReceiverBaton;
-    TTValue         v;
+    TTValue         v, none;
     
     // if there is no receiver for the expression address
     if (mReceivers.lookup(anAddress, v)) {
@@ -735,7 +735,7 @@ void Automation::addReceiver(TTAddress anAddress)
         
         // Create a receiver callback to get the expression address value back
         aReceiverCallback = NULL;
-        TTObjectBaseInstantiate(TTSymbol("callback"), &aReceiverCallback, kTTValNONE);
+        TTObjectBaseInstantiate(TTSymbol("callback"), &aReceiverCallback, none);
         
         aReceiverBaton = new TTValue(TTObjectBasePtr(this));
         aReceiverBaton->append(anAddress);

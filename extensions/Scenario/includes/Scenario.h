@@ -106,84 +106,84 @@ class Scenario : public TimeContainer {
 
     
     /** Create a time event
-     @inputvalue            a date
-     @outputvalue           a new time event
+     @param inputvalue      a date
+     @param outputvalue     a new time event
      @return                an error code if the creation fails */
     TTErr   TimeEventCreate(const TTValue& inputValue, TTValue& outputValue);
     
     /** Release a time event
-     @inputValue            a time event object to release
-     @outputvalue           kTTValNONE
+     @param inputvalue      a time event object to release
+     @param outputvalue     nothing            
      @return                an error code if the destruction fails */
     TTErr   TimeEventRelease(const TTValue& inputValue, TTValue& outputValue);
     
     /** Move a time event
-     @inputValue            a time event object, new date
-     @outputvalue           kTTValNONE
+     @param inputvalue      a time event object, new date
+     @param outputvalue     nothing            
      @return                an error code if the movement fails */
     TTErr   TimeEventMove(const TTValue& inputValue, TTValue& outputValue);
     
     /** Link a time event to a condition
-     @inputValue            a time event object, a time condition object
-     @outputvalue           kTTValNONE
+     @param inputvalue      a time event object, a time condition object
+     @param outputvalue     nothing            
      @return                an error code if the setting fails */
     TTErr   TimeEventCondition(const TTValue& inputValue, TTValue& outputValue);
     
     /** Trigger a time event to make it happens
-     @inputValue            a time event object
-     @outputvalue           kTTValNONE
+     @param inputvalue      a time event object
+     @param outputvalue     nothing            
      @return                an error code if the triggering fails */
     TTErr   TimeEventTrigger(const TTValue& inputValue, TTValue& outputValue);
     
     /** Dispose a time event
      @param inputValue      a time event object
-     @param outputvalue     kTTValNONE
+     @param outputvalue     nothing            
      @return                an error code if the disposing fails */
     TTErr   TimeEventDispose(const TTValue& inputValue, TTValue& outputValue);
 
     /** Replace a time event by another one (copying date and active attribute)
-     @inputValue            a former time event object, a new time event object
-     @outputvalue           kTTValNONE
+     @param inputvalue      a former time event object, a new time event object
+     @param outputvalue     nothing            
      @return                an error code if the replacement fails */
     TTErr   TimeEventReplace(const TTValue& inputValue, TTValue& outputValue);
     
     
     
     /** Create a time process
-     @inputvalue            a time process type, a start event, a end event
-     @outputvalue           a new time process
+     @param inputvalue      a time process type, a start event, a end event
+     @param outputvalue     a new time process
      @return                an error code if the creation fails */
     TTErr   TimeProcessCreate(const TTValue& inputValue, TTValue& outputValue);
     
     /** Release a time process
-     @inputValue            a time process object to release
-     @outputvalue           its the start and the end event
+     @param inputvalue      a time process object to release
+     @param outputvalue     its the start and the end event
      @return                an error code if the destruction fails */
     TTErr   TimeProcessRelease(const TTValue& inputValue, TTValue& outputValue);
     
     /** Move a time process
-     @inputValue            a time process object, new start date, new end date
-     @outputvalue           kTTValNONE
+     @param inputvalue      a time process object, new start date, new end date
+     @param outputvalue     nothing            
      @return                an error code if the movement fails */
     TTErr   TimeProcessMove(const TTValue& inputValue, TTValue& outputValue);
     
     /** Limit a time process duration
-     @inputValue            a time process object, new duration min, new duration max
-     @outputvalue           kTTValNONE
+     @param inputvalue      a time process object, new duration min, new duration max
+     @param outputvalue     nothing            
      @return                an error code if the limitation fails */
     TTErr   TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue);
     
     
     
     /** Create a time condition
-     @inputvalue            nothing
-     @outputvalue           a new time condition
+     @param inputvalue      nothing
+     @param outputvalue     a new time condition
      @return                an error code if the creation fails */
     TTErr   TimeConditionCreate(const TTValue& inputValue, TTValue& outputValue);
     
     /** Release a time process
-     @inputValue            a time condition object to release
-     @outputvalue           kTTValNONE
+     @param inputvalue      a time condition object to release
+     @param outputvalue     nothing            
      @return                an error code if the destruction fails */
     TTErr   TimeConditionRelease(const TTValue& inputValue, TTValue& outputValue);
     

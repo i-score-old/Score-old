@@ -197,7 +197,7 @@ TTErr TTTimeEvent::StateAddressGetValue(const TTValue& inputValue, TTValue& outp
     TTValue         v;
     TTAddress       address;
     TTListPtr       lines;
-    TTDictionaryPtr aLine;
+    TTDictionaryBasePtr aLine;
     TTErr           err;
     
     if (inputValue.size() == 1) {
@@ -216,7 +216,7 @@ TTErr TTTimeEvent::StateAddressGetValue(const TTValue& inputValue, TTValue& outp
             if (err)
                 return err;
             
-            aLine = TTDictionaryPtr((TTPtr)v[0]);
+            aLine = TTDictionaryBasePtr((TTPtr)v[0]);
             
             // get the value
             aLine->getValue(outputValue);
@@ -234,7 +234,7 @@ TTErr TTTimeEvent::StateAddressSetValue(const TTValue& inputValue, TTValue& outp
     TTAddress       address;
     TTValuePtr      aValue;
     TTListPtr       lines;
-    TTDictionaryPtr aLine;
+    TTDictionaryBasePtr aLine;
     TTErr           err;
     
     if (inputValue.size() == 2) {
@@ -261,7 +261,7 @@ TTErr TTTimeEvent::StateAddressSetValue(const TTValue& inputValue, TTValue& outp
             }
             else {
             
-                aLine = TTDictionaryPtr((TTPtr)v[0]);
+                aLine = TTDictionaryBasePtr((TTPtr)v[0]);
             
                 // set the value
                 aLine->setValue(*aValue);
