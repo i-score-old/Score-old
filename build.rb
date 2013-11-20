@@ -7,54 +7,70 @@ glibdir = Dir.pwd
 
 projectNameParts = glibdir.split('/')
 projectName = projectNameParts.last;
-projectName.sub!(/Jamoma/, "")
 ENV['JAMOMAPROJECT'] = projectName
 
 puts "pre-build..."
-Dir.chdir "#{glibdir}/../Shared"
+Dir.chdir "#{glibdir}/support"
 load "jamomalib.rb"
-Dir.chdir "#{glibdir}"
 
-# Copy Foundation, DSP and Modular extensions, headers and dylibs
-# into the support/jamoma folder to allows to build without all the Jamoma repository
 if  win?
     
 elsif mac?
     
-    # Foundation extensions, includes and lib
-    `cp "#{glibdir}"/../Foundation/extensions/DataspaceLib/build/DataspaceLib.ttdylib "#{glibdir}"/support/jamoma/extensions`
-    `cp "#{glibdir}"/../Foundation/extensions/NetworkLib/build/NetworkLib.ttdylib "#{glibdir}"/support/jamoma/extensions`
+    # Clean /usr/local/jamoma folder
+    `rm /usr/local/jamoma/extensions/*.*`
+    `rm /usr/local/jamoma/includes/*.*`
+    `rm /usr/local/jamoma/lib/*.*`
     
-    `cp "#{glibdir}"/../Foundation/library/includes/* "#{glibdir}"/support/jamoma/includes`
+end
+
+Dir.chdir "#{glibdir}/support"
+load "build.rb"
+
+puts "post-build..."
+Dir.chdir "#{glibdir}"
+
+if  win?
     
-    `cp "#{glibdir}"/../Foundation/library/build/JamomaFoundation.dylib "#{glibdir}"/support/jamoma/lib`
+elsif mac?
     
-    # DSP extensions, includes and lib
-    `cp "#{glibdir}"/../DSP/extensions/FunctionLib/build/FunctionLib.ttdylib "#{glibdir}"/support/jamoma/extensions`
-    `cp "#{glibdir}"/../DSP/extensions/AnalysisLib/build/AnalysisLib.ttdylib "#{glibdir}"/support/jamoma/extensions`
+    # Copy support/jamoma folder into /usr/local/jamoma folder
+    `cp -f -p "#{glibdir}"/support/jamoma/extensions/* /usr/local/jamoma/extensions`
+    `cp -f -p "#{glibdir}"/support/jamoma/includes/* /usr/local/jamoma/includes`
+    `cp -f -p "#{glibdir}"/support/jamoma/lib/* /usr/local/jamoma/lib`
     
-    `cp "#{glibdir}"/../DSP/library/includes/* "#{glibdir}"/support/jamoma/includes`
+    # Create alias
+    `ln -s /usr/local/jamoma/lib/JamomaFoundation.dylib /usr/local/lib/JamomaFoundation.dylib`
+    `ln -s /usr/local/jamoma/lib/JamomaDSP.dylib /usr/local/lib/JamomaDSP.dylib`
+    `ln -s /usr/local/jamoma/lib/JamomaModular.dylib /usr/local/lib/JamomaModular.dylib`
     
-    `cp "#{glibdir}"/../DSP/library/build/JamomaDSP.dylib "#{glibdir}"/support/jamoma/lib`
+    `ln -s /usr/local/jamoma/extensions/AnalysisLib.ttdylib /usr/local/lib/AnalysisLib.ttdylib`
+    `ln -s /usr/local/jamoma/extensions/FunctionLib.ttdylib /usr/local/lib/FunctionLib.ttdylib`
+    `ln -s /usr/local/jamoma/extensions/NetworkLib.ttdylib /usr/local/lib/NetworkLib.ttdylib`
+    `ln -s /usr/local/jamoma/extensions/System.ttdylib /usr/local/lib/System.ttdylib`
+    `ln -s /usr/local/jamoma/extensions/DataspaceLib.ttdylib /usr/local/lib/DataspaceLib.ttdylib`
+    `ln -s /usr/local/jamoma/extensions/Minuit.ttdylib /usr/local/lib/Minuit.ttdylib`
+    `ln -s /usr/local/jamoma/extensions/OSC.ttdylib /usr/local/lib/OSC.ttdylib`
     
-    # Modular extensions, includes and lib
-    `cp "#{glibdir}"/../Modular/extensions/Minuit/build/Minuit.ttdylib "#{glibdir}"/support/jamoma/extensions`
-    `cp "#{glibdir}"/../Modular/extensions/OSC/build/OSC.ttdylib "#{glibdir}"/support/jamoma/extensions`
-    `cp "#{glibdir}"/../Modular/extensions/System/build/System.ttdylib "#{glibdir}"/support/jamoma/extensions`
+    # Copy Score headers to include them into other application
+    `cp -f -p "#{glibdir}"/library/includes/*.h /usr/local/jamoma/includes`
+    `cp -f -p "#{glibdir}"/library/tests/*.h /usr/local/jamoma/includes`
+    `cp -f -p "#{glibdir}"/extensions/TimePluginLib.h /usr/local/jamoma/includes`
     
-    `cp "#{glibdir}"/../Modular/library/includes/TTModular.h "#{glibdir}"/support/jamoma/includes`
-    `cp "#{glibdir}"/../Modular/library/includes/TTModularSymbolCache.h "#{glibdir}"/support/jamoma/includes`
-    `cp "#{glibdir}"/../Modular/library/PeerObject/*.h "#{glibdir}"/support/jamoma/includes`
-    `cp "#{glibdir}"/../Modular/library/ProtocolLib/Protocol.h "#{glibdir}"/support/jamoma/includes`
-    `cp "#{glibdir}"/../Modular/library/SchedulerLib/Scheduler.h "#{glibdir}"/support/jamoma/includes`
+    # Copy Score dylibs to include them into other application
+    `cp -f -p "#{glibdir}"/library/build/JamomaScore.dylib /usr/local/jamoma/lib`
+    `cp -f -p "#{glibdir}"/extensions/Automation/build/Automation.ttdylib /usr/local/jamoma/extensions`
+    `cp -f -p "#{glibdir}"/extensions/Interval/build/Interval.ttdylib /usr/local/jamoma/extensions`
+    `cp -f -p "#{glibdir}"/extensions/Scenario/build/Scenario.ttdylib /usr/local/jamoma/extensions`
     
-    `cp "#{glibdir}"/../Modular/library/build/JamomaModular.dylib "#{glibdir}"/support/jamoma/lib`
+    # Create alias
+    `ln -s /usr/local/jamoma/extensions/JamomaScore.dylib /usr/local/lib/JamomaScore.dylib`
+    `ln -s /usr/local/jamoma/extensions/Automation.ttdylib /usr/local/lib/Automation.ttdylib`
+    `ln -s /usr/local/jamoma/extensions/Interval.ttdylib /usr/local/lib/Interval.ttdylib`
+    `ln -s /usr/local/jamoma/extensions/Scenario.ttdylib /usr/local/lib/Scenario.ttdylib`
     
 end
 
 puts "done"
 puts
 
-
-Dir.chdir "#{glibdir}/../Shared"
-load "build.rb"

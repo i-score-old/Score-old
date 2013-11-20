@@ -1,4 +1,5 @@
 defines:
+  - TTSCORE_EXPORTS
   
 sources:
     

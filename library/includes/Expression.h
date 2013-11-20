@@ -37,8 +37,7 @@ public:
     /** Expression Constructor */
     Expression() :
     mAddress(kTTAdrsEmpty),
-    mOperator(kTTSymEmpty),
-    mValue(kTTValNONE)
+    mOperator(kTTSymEmpty)
     {
         mSymbolPointer = gTTAddressTable.lookup("");
     }

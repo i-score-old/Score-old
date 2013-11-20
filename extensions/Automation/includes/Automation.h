@@ -83,26 +83,26 @@ private :
 	TTErr	ReadFromText(const TTValue& inputValue, TTValue& outputValue);
     
     /** Add a curve at an address
-     @inputvalue            address
-     @outputvalue           a curve object
+     @param inputvalue      address
+     @param outputvalue     a curve object
      @return                an error code if the operation fails */
     TTErr   CurveAdd(const TTValue& inputValue, TTValue& outputValue);
     
     /** Get curve's parameters at an address
-     @inputvalue            address
-     @outputvalue           a curve object
+     @param inputvalue      address
+     @param outputvalue     a curve object
      @return                an error code if the operation fails */
     TTErr   CurveGet(const TTValue& inputValue, TTValue& outputValue);
     
     /** Update a curve at an address (when start or end state has changed)
-     @inputValue            address
-     @outputvalue           kTTValNONE
+     @param inputvalue      address
+     @param outputvalue     nothing
      @return                an error code if the operation fails */
     TTErr   CurveUpdate(const TTValue& inputValue, TTValue& outputValue);
     
     /** Remove a curve at an address
-     @inputValue            address
-     @outputvalue           kTTValNONE
+     @param inputvalue      address
+     @param outputvalue     nothing
      @return                an error code if the operation fails */
     TTErr   CurveRemove(const TTValue& inputValue, TTValue& outputValue);
     
@@ -111,8 +111,8 @@ private :
     TTErr   Clear();
     
     /** Enable/Disable the recording of a curve during the next execution of the process
-     @inputValue            address, boolean
-     @outputvalue           kTTValNONE
+     @param inputvalue      address, boolean
+     @param outputvalue     nothing
      @return                an error code if the operation fails */
     TTErr   CurveRecord(const TTValue& inputValue, TTValue& outputValue);
     

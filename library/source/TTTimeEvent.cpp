@@ -30,6 +30,8 @@ mState(NULL),
 mCondition(NULL),
 mReady(YES)
 {
+    TTValue none;
+    
     TT_ASSERT("Correct number of args to create TTTimeEvent", arguments.size() == 1 || arguments.size() == 2);
     
     if (arguments.size() >= 1)
@@ -65,7 +67,7 @@ mReady(YES)
     this->findMessage(kTTSym_Dispose, &disposeMessage);
     
     // create a script
-    TTObjectBaseInstantiate(kTTSym_Script, TTObjectBaseHandle(&mState), kTTValNONE);
+    TTObjectBaseInstantiate(kTTSym_Script, TTObjectBaseHandle(&mState), none);
     
     // generate a random name
     mName = mName.random();
@@ -108,9 +110,9 @@ TTErr TTTimeEvent::setCondition(const TTValue& value)
             // tell the container the event is becoming (or not) conditioned
             if (mContainer) {
                 
-                TTValue v = TTObjectBasePtr(this);
+                TTValue none, v = TTObjectBasePtr(this);
                 v.append(mCondition);
-                return mContainer->sendMessage(TTSymbol("TimeEventCondition"), v, kTTValNONE);
+                return mContainer->sendMessage(TTSymbol("TimeEventCondition"), v, none);
             }
         }
     }
@@ -144,8 +146,8 @@ TTErr TTTimeEvent::Trigger()
     // use container to make the event happen
     if (mContainer) {
         
-        TTValue v = TTObjectBasePtr(this);
-        return mContainer->sendMessage(TTSymbol("TimeEventTrigger"), v, kTTValNONE);
+        TTValue none, v = TTObjectBasePtr(this);
+        return mContainer->sendMessage(TTSymbol("TimeEventTrigger"), v, none);
     }
     
     // otherwise make it happens now
@@ -155,8 +157,9 @@ TTErr TTTimeEvent::Trigger()
 
 TTErr TTTimeEvent::Happen()
 {
-    TTErr err = kTTErrNone;
-    
+    TTValue none;
+    TTErr   err = kTTErrNone;
+
     // if the event not muted
     if (!mMute) {
         
@@ -165,24 +168,26 @@ TTErr TTTimeEvent::Happen()
     }
     
     // notify observers
-    happenMessage->sendNotification(kTTSym_notify, kTTValNONE);	// we use kTTSym_notify because we know that observers are TTCallback
+    happenMessage->sendNotification(kTTSym_notify, none);	// we use kTTSym_notify because we know that observers are TTCallback
     
     return err;
 }
 
 TTErr TTTimeEvent::Dispose()
 {
+    TTValue none;
+    
     // théo : what to do here ?
     
     // use container to make the event dispose
     if(mContainer) {
 
         TTValue v = TTObjectBasePtr(this);
-        return mContainer->sendMessage(TTSymbol("TimeEventDispose"), v, kTTValNONE);
+        return mContainer->sendMessage(TTSymbol("TimeEventDispose"), v, none);
     } // CB /!\ skipping the other notification mechanism for now
 
     // notify observers
-    disposeMessage->sendNotification(kTTSym_notify, kTTValNONE);	// we use kTTSym_notify because we know that observers are TTCallback
+    disposeMessage->sendNotification(kTTSym_notify, none);	// we use kTTSym_notify because we know that observers are TTCallback
     
     return kTTErrNone;
 }
@@ -192,7 +197,7 @@ TTErr TTTimeEvent::StateAddressGetValue(const TTValue& inputValue, TTValue& outp
     TTValue         v;
     TTAddress       address;
     TTListPtr       lines;
-    TTDictionaryPtr aLine;
+    TTDictionaryBasePtr aLine;
     TTErr           err;
     
     if (inputValue.size() == 1) {
@@ -211,7 +216,7 @@ TTErr TTTimeEvent::StateAddressGetValue(const TTValue& inputValue, TTValue& outp
             if (err)
                 return err;
             
-            aLine = TTDictionaryPtr((TTPtr)v[0]);
+            aLine = TTDictionaryBasePtr((TTPtr)v[0]);
             
             // get the value
             aLine->getValue(outputValue);
@@ -229,7 +234,7 @@ TTErr TTTimeEvent::StateAddressSetValue(const TTValue& inputValue, TTValue& outp
     TTAddress       address;
     TTValuePtr      aValue;
     TTListPtr       lines;
-    TTDictionaryPtr aLine;
+    TTDictionaryBasePtr aLine;
     TTErr           err;
     
     if (inputValue.size() == 2) {
@@ -254,11 +259,13 @@ TTErr TTTimeEvent::StateAddressSetValue(const TTValue& inputValue, TTValue& outp
                 
                 mState->sendMessage(TTSymbol("AppendCommand"), command, v);
             }
+            else {
             
-            aLine = TTDictionaryPtr((TTPtr)v[0]);
+                aLine = TTDictionaryBasePtr((TTPtr)v[0]);
             
-            // set the value
-            aLine->setValue(*aValue);
+                // set the value
+                aLine->setValue(*aValue);
+            }
             
             return  kTTErrNone;
         }

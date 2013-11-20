@@ -38,7 +38,7 @@ mEndEventCallback(NULL)
 {
     TT_ASSERT("Correct number of args to create TTTimeProcess", arguments.size() == 1);
     
-    TTValue    args;
+    TTValue    args, none;
     TTErr      err;
     TTValuePtr startEventBaton, endEventBaton;
     
@@ -109,7 +109,7 @@ mEndEventCallback(NULL)
     
     // Create a start event callback to be notified and start the process execution
     mStartEventCallback = NULL;
-    TTObjectBaseInstantiate(TTSymbol("callback"), &mStartEventCallback, kTTValNONE);
+    TTObjectBaseInstantiate(TTSymbol("callback"), &mStartEventCallback, none);
     
     startEventBaton = new TTValue(TTObjectBasePtr(this));
     
@@ -118,7 +118,7 @@ mEndEventCallback(NULL)
     
     // Create a end event callback to be notified and end the process execution
     mEndEventCallback = NULL;
-    TTObjectBaseInstantiate(TTSymbol("callback"), &mEndEventCallback, kTTValNONE);
+    TTObjectBaseInstantiate(TTSymbol("callback"), &mEndEventCallback, none);
     
     endEventBaton = new TTValue(TTObjectBasePtr(this));
     
@@ -215,7 +215,7 @@ TTErr TTTimeProcess::getRigid(TTValue& value)
 
 TTErr TTTimeProcess::setRigid(const TTValue& value)
 {
-    TTValue v, duration;
+    TTValue v, none, duration;
     
     if (value.size()) {
         
@@ -240,7 +240,7 @@ TTErr TTTimeProcess::setRigid(const TTValue& value)
             
             // if the time process is handled by a scenario
             if (mContainer)
-                return mContainer->sendMessage(TTSymbol("TimeProcessLimit"), v, kTTValNONE);
+                return mContainer->sendMessage(TTSymbol("TimeProcessLimit"), v, none);
         }
     }
     
@@ -259,10 +259,10 @@ TTErr TTTimeProcess::setDurationMin(const TTValue& value)
             // tell to the container the limit changes
             if (mContainer) {
                 
-                TTValue v = TTObjectBasePtr(this);
+                TTValue none, v = TTObjectBasePtr(this);
                 v.append(mDurationMin);
                 v.append(mDurationMax);
-                return mContainer->sendMessage(TTSymbol("TimeProcessLimit"), v, kTTValNONE);
+                return mContainer->sendMessage(TTSymbol("TimeProcessLimit"), v, none);
             }
         }
     }
@@ -282,10 +282,10 @@ TTErr TTTimeProcess::setDurationMax(const TTValue& value)
             // tell to the container the limit changes
             if (mContainer) {
                 
-                TTValue v = TTObjectBasePtr(this);
+                TTValue none, v = TTObjectBasePtr(this);
                 v.append(mDurationMin);
                 v.append(mDurationMax);
-                return mContainer->sendMessage(TTSymbol("TimeProcessLimit"), v, kTTValNONE);
+                return mContainer->sendMessage(TTSymbol("TimeProcessLimit"), v, none);
             }
         }
     }
@@ -308,10 +308,10 @@ TTErr TTTimeProcess::setStartDate(const TTValue& value)
             // tell to the container the process date changes
             if (mContainer) {
                 
-                TTValue v = TTObjectBasePtr(this);
+                TTValue none, v = TTObjectBasePtr(this);
                 v.append(TTUInt32(value[0]));
                 v.append(mStartDate);
-                return mContainer->sendMessage(TTSymbol("TimeProcessMove"), v, kTTValNONE);
+                return mContainer->sendMessage(TTSymbol("TimeProcessMove"), v, none);
             }
             
             // or set the start event date directly
@@ -357,10 +357,10 @@ TTErr TTTimeProcess::setEndDate(const TTValue& value)
             // tell to the container the process date changes
             if (mContainer) {
                 
-                TTValue v = TTObjectBasePtr(this);
+                TTValue none, v = TTObjectBasePtr(this);
                 v.append(mStartDate);
                 v.append(TTUInt32(value[0]));
-                return mContainer->sendMessage(TTSymbol("TimeProcessMove"), v, kTTValNONE);
+                return mContainer->sendMessage(TTSymbol("TimeProcessMove"), v, none);
             }
             
             // or set the end event date directly
@@ -429,10 +429,10 @@ TTErr TTTimeProcess::Move(const TTValue& inputValue, TTValue& outputValue)
                 // if the time process is handled by a container
                 if (mContainer) {
                     
-                    TTValue v = TTObjectBasePtr(this);
+                    TTValue none, v = TTObjectBasePtr(this);
                     v.append(TTUInt32(inputValue[0]));
                     v.append(TTUInt32(inputValue[1]));
-                    return mContainer->sendMessage(TTSymbol("TimeProcessMove"), v, kTTValNONE);
+                    return mContainer->sendMessage(TTSymbol("TimeProcessMove"), v, none);
                 }
             }
         }
@@ -454,10 +454,10 @@ TTErr TTTimeProcess::Limit(const TTValue& inputValue, TTValue& outputValue)
             // if the time process is handled by a scenario
             if (mContainer) {
                 
-                TTValue v = TTObjectBasePtr(this);
+                TTValue none, v = TTObjectBasePtr(this);
                 v.append(mDurationMin);
                 v.append(mDurationMax);
-                return mContainer->sendMessage(TTSymbol("TimeProcessLimit"), v, kTTValNONE);
+                return mContainer->sendMessage(TTSymbol("TimeProcessLimit"), v, none);
             }
         }
     }
@@ -505,21 +505,28 @@ TTErr TTTimeProcess::Play()
 
 TTErr TTTimeProcess::Stop()
 {
+    // set the running state of the process
+    mRunning = NO;
+    
     return mScheduler->sendMessage(kTTSym_Stop);
 }
 
 TTErr TTTimeProcess::Pause()
 {
+    TTValue none;
+    
     mScheduler->sendMessage(kTTSym_Pause);
     
-    return ProcessPaused(kTTBoolYes, kTTValNONE);
+    return ProcessPaused(TTBoolean(YES), none);
 }
 
 TTErr TTTimeProcess::Resume()
 {
+    TTValue none;
+    
     mScheduler->sendMessage(kTTSym_Resume);
     
-    return ProcessPaused(kTTBoolNo, kTTValNONE);
+    return ProcessPaused(TTBoolean(NO), none);
 }
 
 TTTimeEventPtr TTTimeProcess::getStartEvent()
@@ -599,8 +606,8 @@ TTErr TTTimeProcessStartEventHappenCallback(TTPtr baton, TTValue& data)
 {
     TTTimeProcessPtr    aTimeProcess;
     TTValuePtr          b;
-    TTValue             v;
-    TTUInt32            start, end;
+    TTValue             v, none;
+    TTUInt32            start;
     
 	// unpack baton (a time process)
 	b = (TTValuePtr)baton;
@@ -615,10 +622,7 @@ TTErr TTTimeProcessStartEventHappenCallback(TTPtr baton, TTValue& data)
         if (!aTimeProcess->ProcessStart()) {
             
             // notify observers
-            aTimeProcess->processStartMessage->sendNotification(kTTSym_notify, kTTValNONE);	// we use kTTSym_notify because we know that observers are TTCallback
-            
-            // set the running state of the process
-            aTimeProcess->mRunning = YES;
+            aTimeProcess->processStartMessage->sendNotification(kTTSym_notify, none);	// we use kTTSym_notify because we know that observers are TTCallback
             
             // play the process
             aTimeProcess->Play();
@@ -632,6 +636,7 @@ TTErr TTTimeProcessEndEventHappenCallback(TTPtr baton, TTValue& data)
 {
     TTTimeProcessPtr    aTimeProcess;
     TTValuePtr          b;
+    TTValue             none;
     
 	// unpack baton (a time process)
 	b = (TTValuePtr)baton;
@@ -641,10 +646,7 @@ TTErr TTTimeProcessEndEventHappenCallback(TTPtr baton, TTValue& data)
 	if (!aTimeProcess->mMute) {
         
         // stop the process
-        aTimeProcess->sendMessage(kTTSym_Stop);
-        
-        // set the running state of the process
-        aTimeProcess->mRunning = NO;
+        aTimeProcess->Stop();
         
         // note : don't set end event ready attribute to NO : it is to the container to take this decision
 
@@ -652,7 +654,7 @@ TTErr TTTimeProcessEndEventHappenCallback(TTPtr baton, TTValue& data)
         if (!aTimeProcess->ProcessEnd()) {
             
             // notify observers
-            aTimeProcess->processEndMessage->sendNotification(kTTSym_notify, kTTValNONE);	// we use kTTSym_notify because we know that observers are TTCallback
+            aTimeProcess->processEndMessage->sendNotification(kTTSym_notify, none);	// we use kTTSym_notify because we know that observers are TTCallback
         
             return kTTErrNone;
         }
@@ -664,10 +666,11 @@ TTErr TTTimeProcessEndEventHappenCallback(TTPtr baton, TTValue& data)
 void TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression, TTFloat64 realTime)
 {
 	TTTimeProcessPtr	aTimeProcess = (TTTimeProcessPtr)object;
+    TTValue             none;
     
     // use the specific process method
     if (aTimeProcess->mRunning)
-       aTimeProcess->Process(TTValue(progression, realTime), kTTValNONE);
+       aTimeProcess->Process(TTValue(progression, realTime), none);
     else
         std::cout << "TTTimeProcessSchedulerCallback : avoid last scheduler tick" << std::endl;
 }

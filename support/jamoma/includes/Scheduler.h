@@ -20,18 +20,18 @@
 #include "TTFoundationAPI.h"
 
 #define SCHEDULER_CONSTRUCTOR \
-TTObjectBasePtr thisTTClass :: instantiate (TTSymbol& name, TTValue& arguments) {return new thisTTClass (arguments);} \
+TTObjectBasePtr thisTTClass :: instantiate (TTSymbol name, TTValue arguments) {return new thisTTClass (arguments);} \
 \
 extern "C" void thisTTClass :: registerClass () {TTClassRegister( TTSymbol(thisTTClassName), thisTTClassTags, thisTTClass :: instantiate );} \
 \
-thisTTClass :: thisTTClass (TTValue& arguments) : Scheduler(arguments)
+thisTTClass :: thisTTClass (const TTValue& arguments) : Scheduler(arguments)
 
 #define SCHEDULER_INITIALIZE \
 mName = TTSymbol(thisTTClassName); \
 mVersion = TTSymbol(thisSchedulerVersion); \
 mAuthor = TTSymbol(thisSchedulerAuthor); \
 mStretchable = TTSymbol(thisSchedulerStretchable); \
-registerAttribute(TTSymbol("ParameterNames"), kTypeLocalValue, NULL, (TTGetterMethod)& thisTTClass::getParameterNames); \
+registerAttribute(TTSymbol("parameterNames"), kTypeLocalValue, NULL, (TTGetterMethod)& thisTTClass::getParameterNames); \
 /*addAttributeProperty(ParameterNames, readOnly, YES); \ */
 
 typedef void (*SchedulerProgressionCallback)(TTPtr, TTFloat64, TTFloat64);
@@ -76,7 +76,7 @@ protected:
 public:
     
 	//** Constructor.	*/
-	Scheduler(TTValue& arguments);
+	Scheduler(const TTValue& arguments);
 	
 	/** Destructor. */
 	virtual ~Scheduler();

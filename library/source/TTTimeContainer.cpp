@@ -21,7 +21,7 @@
 
 /****************************************************************************************************/
 
-TTObjectBasePtr TTTimeContainer::instantiate (TTSymbol& name, TTValue& arguments)
+TTObjectBasePtr TTTimeContainer::instantiate (TTSymbol name, const TTValue arguments)
 {
 	return new TTTimeContainer(arguments);
 }
@@ -33,11 +33,11 @@ extern "C" void TTTimeContainer::registerClass()
 }
 
 
-TTTimeContainer :: TTTimeContainer (TTValue& arguments) :
+TTTimeContainer :: TTTimeContainer (const TTValue& arguments) :
 TTTimeProcess(arguments),
 mSchedulerSpeedCallback(NULL)
 {
-    TTValue         args;
+    TTValue         args, none;
     TTErr           err;
     TTAttributePtr  anAttribute;
     TTValuePtr      schedulerSpeedBaton;
@@ -94,7 +94,7 @@ mSchedulerSpeedCallback(NULL)
     
     // Create a scheduler speed callback to be notified of its changes and to apply it to each time process
     mSchedulerSpeedCallback = NULL;
-    TTObjectBaseInstantiate(TTSymbol("callback"), &mSchedulerSpeedCallback, kTTValNONE);
+    TTObjectBaseInstantiate(TTSymbol("callback"), &mSchedulerSpeedCallback, none);
     
     schedulerSpeedBaton = new TTValue(TTObjectBasePtr(this));
     
@@ -179,7 +179,7 @@ TTErr TTTimeContainer::TimeEventFind(const TTValue& inputValue, TTValue& outputV
     // Find the process using his name inside the container
     mTimeEventList.find(&TTTimeContainerFindTimeEventWithName, (TTPtr)&inputValue, outputValue);
     
-    if (outputValue == kTTValNONE)
+    if (outputValue.size() == 0)
         return kTTErrValueNotFound;
     
     return kTTErrNone;
@@ -391,7 +391,7 @@ TTTimeProcessPtr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHan
                 // Find the start event using his name inside the container
                 mTimeEventList.find(&TTTimeContainerFindTimeEventWithName, (TTPtr)&v, aCacheElement);
                 
-                if (aCacheElement == kTTValNONE)
+                if (aCacheElement.size() == 0)
                     return NULL;
                 
                 start = TTTimeEventPtr(TTObjectBasePtr(aCacheElement[0]));
@@ -409,7 +409,7 @@ TTTimeProcessPtr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHan
                 // Find the end event using his name inside the container
                 mTimeEventList.find(&TTTimeContainerFindTimeEventWithName, (TTPtr)&v, aCacheElement);
                 
-                if (aCacheElement == kTTValNONE)
+                if (aCacheElement.size() == 0)
                     return NULL;
                 
                 end = TTTimeEventPtr(TTObjectBasePtr(aCacheElement[0]));

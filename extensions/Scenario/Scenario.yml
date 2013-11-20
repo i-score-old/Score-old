@@ -10,7 +10,7 @@ sources:
   - source/Gecode/searchEngine.cpp
   - source/Gecode/solver_wrap.cpp
   - source/Gecode/solver.cpp
-  		
+
   - source/PetriNet/Arc.cpp
   - source/PetriNet/ExtendedInt.cpp
   - source/PetriNet/PetriNet.cpp
