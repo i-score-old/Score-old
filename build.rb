@@ -53,13 +53,19 @@ elsif mac?
     `ln -s /usr/local/jamoma/extensions/OSC.ttdylib /usr/local/lib/OSC.ttdylib`
     
     # Copy Score headers to include them into other application
-    # (except the includes folder because it is done by the support/build.rb script)
+    `cp -f -p "#{glibdir}"/library/includes/*.h /usr/local/jamoma/includes`
     `cp -f -p "#{glibdir}"/library/tests/*.h /usr/local/jamoma/includes`
     `cp -f -p "#{glibdir}"/extensions/TimePluginLib.h /usr/local/jamoma/includes`
     
+    # Copy Score dylibs to include them into other application
+    `cp -f -p "#{glibdir}"/library/build/JamomaScore.dylib /usr/local/jamoma/lib`
+    `cp -f -p "#{glibdir}"/extensions/Automation/build/Automation.ttdylib /usr/local/jamoma/extensions`
+    `cp -f -p "#{glibdir}"/extensions/Interval/build/Interval.ttdylib /usr/local/jamoma/extensions`
+    `cp -f -p "#{glibdir}"/extensions/Scenario/build/Scenario.ttdylib /usr/local/jamoma/extensions`
+    
     # Create alias
+    `ln -s /usr/local/jamoma/extensions/JamomaScore.dylib /usr/local/lib/JamomaScore.dylib`
     `ln -s /usr/local/jamoma/extensions/Automation.ttdylib /usr/local/lib/Automation.ttdylib`
-    `ln -s /usr/local/jamoma/extensions/Condition.ttdylib /usr/local/lib/Condition.ttdylib`
     `ln -s /usr/local/jamoma/extensions/Interval.ttdylib /usr/local/lib/Interval.ttdylib`
     `ln -s /usr/local/jamoma/extensions/Scenario.ttdylib /usr/local/lib/Scenario.ttdylib`
     
