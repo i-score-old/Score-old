@@ -21,13 +21,7 @@ and copy libxml.framework to /Library/Frameworks
 
 4 : give you a full access (read+write) on /usr/local/lib folder.
 
-5 : in the terminal run the following build script from the Score folder : ./buildWithSupport.rb dev clean
-
-optional : if the Score repository is placed inside the Jamoma/Core folder of the Jamoma repository :
-	- make sure the whole Jamoma project is up-to-date and build it.
-	- then, in the Terminal, run the build script : ./build.rb dev clean
-	- then run the build script : ./buildWithSupport.rb dev clean
-
+5 : in the terminal run the build script from the Score folder : ./build.rb dev clean
 
 Documentation / API
 ...
