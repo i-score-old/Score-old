@@ -231,6 +231,8 @@ TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
             mCurves.getKeys(keys);
             for (i = 0; i < keys.size(); i++) {
                 
+                key = keys[i];
+                
                 // a curve is processed only if the realTime is greater than its next time
                 if (TTUInt32(mNextTimes[i]) > realTime)
                     continue;
@@ -239,14 +241,8 @@ TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
                 if (!mReceivers.lookup(key, objects))
                     continue;
                 
-                key = keys[i];
                 mCurves.lookup(key, objects);
                 curve = objects[0];
-                
-                // don't process recording curves
-                curve->getAttributeValue(TTSymbol("recording"), v);
-                if (TTBoolean(v[0]))
-                    continue;
                 
                 // update the next time with the first indexed curve sample rate
                 curve->getAttributeValue(TTSymbol("sampleRate"), v);
