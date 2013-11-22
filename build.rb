@@ -53,15 +53,10 @@ elsif mac?
     `ln -s /usr/local/jamoma/extensions/OSC.ttdylib /usr/local/lib/OSC.ttdylib`
     
     # Copy Score headers to include them into other application
+    # Don't need to copy Score dylibs because the copy step is in the Makefile
     `cp -f -p "#{glibdir}"/library/includes/*.h /usr/local/jamoma/includes`
     `cp -f -p "#{glibdir}"/library/tests/*.h /usr/local/jamoma/includes`
     `cp -f -p "#{glibdir}"/extensions/TimePluginLib.h /usr/local/jamoma/includes`
-    
-    # Copy Score dylibs to include them into other application
-    `cp -f -p "#{glibdir}"/library/build/JamomaScore.dylib /usr/local/jamoma/lib`
-    `cp -f -p "#{glibdir}"/extensions/Automation/build/Automation.ttdylib /usr/local/jamoma/extensions`
-    `cp -f -p "#{glibdir}"/extensions/Interval/build/Interval.ttdylib /usr/local/jamoma/extensions`
-    `cp -f -p "#{glibdir}"/extensions/Scenario/build/Scenario.ttdylib /usr/local/jamoma/extensions`
     
     # Create alias
     `ln -s /usr/local/jamoma/extensions/JamomaScore.dylib /usr/local/lib/JamomaScore.dylib`
