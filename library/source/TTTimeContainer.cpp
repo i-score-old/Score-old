@@ -420,9 +420,6 @@ TTTimeProcessPtr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHan
     if (!start || !end)
         return NULL;
     
-    // DEBUG
-    TTSymbol name = aXmlHandler->mXmlNodeName;
-    
     // Create the time process
     v = aXmlHandler->mXmlNodeName;
     v.append(TTObjectBasePtr(start));
