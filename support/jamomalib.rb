@@ -636,7 +636,7 @@ else
 			distropath = "@loader_path"
 
 			# Max externals are bundles, and they expect the libs to be in different location
-			distropath = "@loader_path/../../../../support" if project_type == "library"
+			distropath = "/usr/local/lib" if project_type == "library"
 		
 		end
 
