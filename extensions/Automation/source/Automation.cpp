@@ -251,14 +251,23 @@ TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
                 // process each indexed curve to fill the value to send
                 valueToSend.clear();
                 valueToSend.resize(objects.size());
+                err = kTTErrNone;
                 for (j = 0; j < objects.size(); j++) {
                     
                     curve = objects[j];
                     
-                    CurvePtr(curve)->calculate(progression, result);
+                    err = CurvePtr(curve)->calculate(progression, result);
+                    
+                    // if an indexed curve cannot be processed (because it is not active for example)
+                    if (err)
+                        break;
                     
                     valueToSend[j] = result;
                 }
+                
+                // if an indexed curve cannot be processed (because it is not active for example)
+                if (err)
+                    break;
                 
                 // look for the object at the address
                 address = TTAddress(key);
