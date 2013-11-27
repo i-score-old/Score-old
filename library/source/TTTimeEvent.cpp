@@ -276,24 +276,14 @@ TTErr TTTimeEvent::StateAddressSetValue(const TTValue& inputValue, TTValue& outp
 
 TTErr TTTimeEvent::StateAddressClear(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTValue         v;
-    TTAddress       address;
-    TTListPtr       lines;
-    
+    TTValue none;
+
     if (inputValue.size() == 1) {
         
         if (inputValue[0].type() == kTypeSymbol) {
             
-            address = inputValue[0];
-            
-            // get the lines of the state
-            mState->getAttributeValue(kTTSym_lines, v);
-            lines = TTListPtr(TTPtr(v[0]));
-            
-            // remove the line at address
-            lines->remove(address);
-            
-            return kTTErrNone;
+            // remove the lines of the state
+            return mState->sendMessage(TTSymbol("RemoveCommand"), inputValue, none);
         }
     }
     
