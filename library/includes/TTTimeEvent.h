@@ -80,7 +80,7 @@ private :
     TTErr           Happen();
     
     /** Make the event not happen
-     @return                an error code returned by the happen method */
+     @return                an error code returned by the dispose method */
     TTErr           Dispose();
     
     /**  needed to be handled by a TTXmlHandler

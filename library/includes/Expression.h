@@ -26,7 +26,7 @@
  */
 class Expression : public TTSymbol
 {
-private :
+private:
     
     TTAddress                           mAddress;                       ///< the address
     TTSymbol                            mOperator;                      ///< logical operator (Ø, >, ≥, <, ≤, ==, !=)
