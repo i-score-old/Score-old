@@ -32,6 +32,9 @@ TTSCORE_EXPORT TTSymbol         kTTSym_durationMax              (("durationMax")
 TTSCORE_EXPORT TTSymbol         kTTSym_endDate                  (("endDate"));
 TTSCORE_EXPORT TTSymbol         kTTSym_event                    (("event"));
 TTSCORE_EXPORT TTSymbol         kTTSym_expression               (("expression"));
+TTSCORE_EXPORT TTSymbol         kTTSym_trigger                  (("trigger"));
+TTSCORE_EXPORT TTSymbol         kTTSym_default                  (("default"));
+TTSCORE_EXPORT TTSymbol         kTTSym_dispose                  (("dispose"));
 TTSCORE_EXPORT TTSymbol         kTTSym_Happen                   (("Happen"));
 TTSCORE_EXPORT TTSymbol         kTTSym_Pause                    (("Pause"));
 TTSCORE_EXPORT TTSymbol         kTTSym_ProcessStart             (("ProcessStart"));

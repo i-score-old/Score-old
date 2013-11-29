@@ -22,11 +22,20 @@
 #include "Expression.h"
 #include "TTTimeEvent.h"
 
-/** Define an unordered map to store and retreive an expression relative to a TTTimeEventPtr */
+/** Define a struct containing two expressions and a boolean, as the expression to trigger, the one to dispose, and the default comportment */
+struct Comportment {
+    Comportment() : trigger(), dispose(), dflt(true) {}
+
+    Expression trigger;
+    Expression dispose;
+    TTBoolean dflt;
+};
+
+/** Define an unordered map to store and retreive a comportment relative to a TTTimeEventPtr */
 #ifdef TT_PLATFORM_WIN
     #include <hash_map>
     using namespace stdext;	// Visual Studio 2008 puts the hash_map in this namespace
-    typedef hash_map<TTTimeEventPtr,Expression>    TTCaseMap;
+    typedef hash_map<TTTimeEventPtr,Comportment>    TTCaseMap;
 #else
 //	#ifdef TT_PLATFORM_LINUX
 //  at least for GCC 4.6 on the BeagleBoard, the unordered map is standard
@@ -35,7 +44,7 @@
 //		#include "boost/unordered_map.hpp"
 //		using namespace boost;
 //	#endif
-    typedef std::unordered_map<TTTimeEventPtr,Expression>	TTCaseMap;
+    typedef std::unordered_map<TTTimeEventPtr,Comportment>	TTCaseMap;
 #endif
 
 typedef	TTCaseMap*                  TTCaseMapPtr;
@@ -53,7 +62,7 @@ class TTSCORE_EXPORT TTTimeCondition : public TTObjectBase {
     TTCLASS_SETUP(TTTimeCondition)
     
     friend class TTTimeEvent;
-    
+
     TTObjectBasePtr                 mContainer;                     ///< the container which handles the condition
     
 protected :
@@ -63,7 +72,7 @@ protected :
     TTBoolean                       mReady;                         ///< is the condition ready to be tested ?
     
     TTHash                          mReceivers;                     ///< a table of receivers stored by address
-    TTCaseMap                       mCases;                         ///< a map linking an event to its expression
+    TTCaseMap                       mCases;                         ///< a map linking an event to its comportment
  
 private :
     
@@ -85,7 +94,7 @@ private :
     TTErr           getEvents(TTValue& value);
     
     /**  Add an event to the condition
-     @param	inputValue      an event and optionnally the expression associated
+     @param	inputValue      an event and optionnally the comportment associated
      @param	outputValue     nothing
      @return                an error code if the operation fails */
     TTErr           EventAdd(const TTValue& inputValue, TTValue& outputValue);
@@ -96,18 +105,42 @@ private :
      @return                an error code if the operation fails */
     TTErr           EventRemove(const TTValue& inputValue, TTValue& outputValue);
     
-    /**  Edit the expression associated to an event
+    /**  Edit the trigger expression associated to an event
      @param	inputValue      an event and the expression
      @param	outputValue     nothing
      @return                an error code if the operation fails */
-    TTErr           EventExpression(const TTValue& inputValue, TTValue& outputValue);
+    TTErr           EventTriggerExpression(const TTValue& inputValue, TTValue& outputValue);
 
-    /**  Find an expression associated to an event
+    /**  Edit the dispose expression associated to an event
+     @param	inputValue      an event and the expression
+     @param	outputValue     nothing
+     @return                an error code if the operation fails */
+    TTErr           EventDisposeExpression(const TTValue& inputValue, TTValue& outputValue);
+
+    /**  Edit the default comportment associated to an event
+     @param	inputValue      an event and a boolean
+     @param	outputValue     nothing
+     @return                an error code if the operation fails */
+    TTErr           EventDefault(const TTValue& inputValue, TTValue& outputValue);
+
+    /**  Find the trigger expression associated to an event
      @param	inputValue      an event
      @param	outputValue     an expression symbol
      @return                an error code if the operation fails */
-    TTErr           ExpressionFind(const TTValue& inputValue, TTValue& outputValue);
+    TTErr           TriggerExpressionFind(const TTValue& inputValue, TTValue& outputValue);
     
+    /**  Find the dispose expression associated to an event
+     @param	inputValue      an event
+     @param	outputValue     an expression symbol
+     @return                an error code if the operation fails */
+    TTErr           DisposeExpressionFind(const TTValue& inputValue, TTValue& outputValue);
+
+    /**  Find the default comportment associated to an event
+     @param	inputValue      an event
+     @param	outputValue     an expression symbol
+     @return                an error code if the operation fails */
+    TTErr           DefaultFind(const TTValue& inputValue, TTValue& outputValue);
+
     /** Test an expression
      @param inputvalue      an expression value or symbol
      @param outputvalue     the result as a boolean
