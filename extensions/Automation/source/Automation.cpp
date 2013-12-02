@@ -267,7 +267,7 @@ TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
                 
                 // if an indexed curve cannot be processed (because it is not active for example)
                 if (err)
-                    break;
+                    continue;
                 
                 // look for the object at the address
                 address = TTAddress(key);
