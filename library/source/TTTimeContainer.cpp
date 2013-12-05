@@ -195,6 +195,11 @@ TTUInt32 TTTimeContainer::getTimeEventDate(TTTimeEventPtr aTimeEvent)
     return aTimeEvent->mDate;
 }
 
+TTObjectBasePtr TTTimeContainer::getTimeEventState(TTTimeEventPtr aTimeEvent)
+{
+    return aTimeEvent->mState;
+}
+
 TTObjectBasePtr TTTimeContainer::getTimeEventCondition(TTTimeEventPtr aTimeEvent)
 {
     return aTimeEvent->mCondition;

@@ -213,6 +213,23 @@ TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
     TTUInt32        i, j;
 	TTErr			err;
     
+    // if nothing is provided : Process at the current progression and realTime of the scheduler
+    if (inputValue.size() == 0) {
+        
+        // TODO : TTTimeProcess should extend Scheduler class
+        // get scheduler progression and realTime
+        mScheduler->getAttributeValue(TTSymbol("progression"), v);
+        progression = TTFloat64(v[0]);
+        
+        mScheduler->getAttributeValue(TTSymbol("realTime"), v);
+        realTime = TTFloat64(v[0]);
+        
+        v = progression;
+        v.append(realTime);
+        
+        return Process(v, none);
+    }
+    
     if (inputValue.size() == 2) {
         
         if (inputValue[0].type() == kTypeFloat64 && inputValue[1].type() == kTypeFloat64) {

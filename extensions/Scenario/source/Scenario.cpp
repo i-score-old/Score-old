@@ -105,19 +105,69 @@ TTErr Scenario::setViewPosition(const TTValue& value)
 
 TTErr Scenario::Compile()
 {
-    TTValue v;
+    TTObjectBasePtr aTimeEvent, aTimeProcess, state;
+    TTValue         v, none;
+    TTUInt32        timeOffset, date;
     
     // get scheduler time offset
     mScheduler->getAttributeValue(kTTSym_offset, v);
+    timeOffset = TTFloat64(v[0]);
     
     // compile the mExecutionGraph to prepare scenario execution from the scheduler time offset
-    compileGraph(TTUInt32(TTFloat64(v[0])));
+    compileGraph(timeOffset);
     
-    // TODO : compile a temporary state (using the sequence method of TTScript) with all the event before the time offset
-    // in order to recall it on the ProcessStart method.
+    // create a temporary state to compile all the event states before the time offset
+	state = NULL;
+	TTObjectBaseInstantiate(kTTSym_Script, TTObjectBaseHandle(&state), none);
     
-    // TODO : mute all the events before the time offset
+    // mute the start event of the Scenario if there is a timeOffset
+    if (timeOffset > 0.)
+        getStartEvent()->setAttributeValue(kTTSym_mute, v);
     
+    // mute all the events before the time offset
+    for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next()) {
+        
+        aTimeEvent = mTimeEventList.current()[0];
+        aTimeEvent->getAttributeValue(kTTSym_date, v);
+        date = v[0];
+        
+        v = TTBoolean(date < timeOffset);
+        aTimeEvent->setAttributeValue(kTTSym_mute, v);
+        
+        // merge the event state into the temporary state
+        if (date < timeOffset)
+            TTScriptMerge(TTScriptPtr(getTimeEventState(TTTimeEventPtr(aTimeEvent))), TTScriptPtr(state));
+    }
+    
+    // run the temporary state
+    state->sendMessage(kTTSym_Run);
+    
+    // delete the temporary state
+    TTObjectBaseRelease(&state);
+    
+    // prepare the timeOffset of each time process scheduler and mute them if needed
+    for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
+        
+        aTimeProcess = mTimeProcessList.current()[0];
+        
+        TTTimeEventPtr  startEvent = getTimeProcessStartEvent(TTTimeProcessPtr(aTimeProcess));
+        TTTimeEventPtr  endEvent = getTimeProcessEndEvent(TTTimeProcessPtr(aTimeProcess));
+    
+        // if the date to start is in the middle of a time process
+        if (getTimeEventDate(startEvent) < timeOffset && getTimeEventDate(endEvent) > timeOffset) {
+        
+            // prepare the time process to start in the middle of his process
+            aTimeProcess->sendMessage(kTTSym_Goto, timeOffset - getTimeEventDate(startEvent), none);
+            
+            // process at current time offset (passing nothing to the Process method)
+            aTimeProcess->sendMessage(kTTSym_Process, none, none);
+        }
+        
+        // mute if the end event is before the timeOffset
+        v = TTBoolean(getTimeEventDate(endEvent) < timeOffset);
+        aTimeProcess->setAttributeValue(kTTSym_mute, v);
+    }
+
     return kTTErrNone;
 }
 
@@ -137,6 +187,7 @@ TTErr Scenario::ProcessEnd()
     for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
         
         aTimeProcess = mTimeProcessList.current()[0];
+        
         aTimeProcess->sendMessage(kTTSym_Stop);
     }
    
@@ -147,6 +198,40 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
 {
     TTFloat64   progression, realTime;
     TTValue     v;
+    
+    // if nothing is provided : use the current progression and realTime of the scheduler
+    if (inputValue.size() == 0) {
+        
+        TTObjectBasePtr aTimeProcess;
+        TTValue         none;
+        TTUInt32        timeOffset;
+        
+        // TODO : TTTimeProcess should extend Scheduler class
+        mScheduler->getAttributeValue(kTTSym_offset, v);
+        timeOffset = TTFloat64(v[0]);
+        
+        // TODO : build the current state of the scenario processing all time events and processes
+        // prepare the timeOffset of each time process scheduler and mute them if needed
+        for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
+            
+            aTimeProcess = mTimeProcessList.current()[0];
+            
+            TTTimeEventPtr  startEvent = getTimeProcessStartEvent(TTTimeProcessPtr(aTimeProcess));
+            TTTimeEventPtr  endEvent = getTimeProcessEndEvent(TTTimeProcessPtr(aTimeProcess));
+            
+            // if the date to start is in the middle of a time process
+            if (getTimeEventDate(startEvent) < timeOffset && getTimeEventDate(endEvent) > timeOffset) {
+                
+                // prepare the time process to start in the middle of his process
+                aTimeProcess->sendMessage(kTTSym_Goto, timeOffset - getTimeEventDate(startEvent), none);
+                
+                // process at current time offset (passing nothing to the Process method)
+                aTimeProcess->sendMessage(kTTSym_Process, none, none);
+            }
+        }
+        
+        return kTTErrNone;
+    }
     
     if (inputValue.size() == 2) {
         

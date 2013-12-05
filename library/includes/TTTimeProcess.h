@@ -179,15 +179,25 @@ private :
     
     /** Move the time process
      this method eases the setting of the start and end event dates
-     @param	value           new start date, new end date
+     @param	inputValue      new start date, new end date
+     @param	outputValue     nothing
      @return                an error code if the movement fails */
     TTErr           Move(const TTValue& inputValue, TTValue& outputValue);
     
     /** Limit the time process duration
         this method eases the setting of the minimal and maximal durations
-     @param	value           duration min, duration max
+     @param	inputValue      duration min, duration max
+     @param	outputValue     nothing
      @return                an error code if the limitation fails */
     TTErr           Limit(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Set the time progression of the time process
+     // TODO : TTTimeProcess should extend Scheduler class
+     this method eases the setting of the scheduler time offset
+     @param	inputValue      a date to go relative to the duration of the time process
+     @param	outputValue     nothing
+     @return                an error code if the operation fails */
+    TTErr           Goto(const TTValue& inputValue, TTValue& outputValue);
     
     /** Start the time process
      this method eases the access of the start event happen message
@@ -199,7 +209,7 @@ private :
      @return                an error code if the stop fails */
     TTErr           End();
     
-    /** Play the time process
+    /** Play the time process from a time offset
         this method eases the managment of the scheduler object
      @return                an error code if the play fails */
     TTErr           Play();
