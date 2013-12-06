@@ -216,6 +216,25 @@ TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
     // if nothing is provided : Process at the current progression and realTime of the scheduler
     if (inputValue.size() == 0) {
         
+        // reset the next times value to the sample rate of each curves
+        mCurves.getKeys(keys);
+        
+        for (i = 0; i < keys.size(); i++) {
+            
+            key = keys[i];
+            mCurves.lookup(key, objects);
+            
+            // in case of recording it could have no objects
+            if (objects.size()) {
+                
+                // update the next time with the first indexed curve sample rate
+                curve = objects[0];
+                curve->getAttributeValue(TTSymbol("sampleRate"), v);
+                
+                mNextTimes[i] = TTUInt32(v[0]);
+            }
+        }
+        
         // TODO : TTTimeProcess should extend Scheduler class
         // get scheduler progression and realTime
         mScheduler->getAttributeValue(TTSymbol("progression"), v);
