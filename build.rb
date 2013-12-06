@@ -59,7 +59,7 @@ elsif mac?
     `cp -f -p "#{glibdir}"/extensions/TimePluginLib.h /usr/local/jamoma/includes`
     
     # Create alias
-    `ln -s /usr/local/jamoma/extensions/JamomaScore.dylib /usr/local/lib/JamomaScore.dylib`
+    `ln -s /usr/local/jamoma/lib/JamomaScore.dylib /usr/local/lib/JamomaScore.dylib`
     `ln -s /usr/local/jamoma/extensions/Automation.ttdylib /usr/local/lib/Automation.ttdylib`
     `ln -s /usr/local/jamoma/extensions/Interval.ttdylib /usr/local/lib/Interval.ttdylib`
     `ln -s /usr/local/jamoma/extensions/Scenario.ttdylib /usr/local/lib/Scenario.ttdylib`
