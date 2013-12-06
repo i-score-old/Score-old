@@ -156,6 +156,11 @@ protected :
      @return                a date value */
     TTUInt32        getTimeEventDate(TTTimeEventPtr aTimeEvent);
     
+    /** Getter on state time event protected member
+     @param aTimeProcess    a time event object
+     @return                a state object */
+    TTObjectBasePtr getTimeEventState(TTTimeEventPtr aTimeEvent);
+    
     /** Getter on condition time event protected member
      @param aTimeProcess    a time event object
      @return                a condition object */

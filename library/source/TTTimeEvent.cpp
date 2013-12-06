@@ -164,7 +164,7 @@ TTErr TTTimeEvent::Happen()
     if (!mMute) {
         
         // recall the state
-        TTErr err = mState->sendMessage(kTTSym_Run);
+        err = mState->sendMessage(kTTSym_Run);
     }
     
     // notify observers
@@ -176,20 +176,24 @@ TTErr TTTimeEvent::Happen()
 TTErr TTTimeEvent::Dispose()
 {
     TTValue none;
+    TTErr   err = kTTErrNone;
     
-    // théo : what to do here ?
+    // if the event not muted
+    if (!mMute) {
+        
+        // use container to make the event dispose
+        if(mContainer) {
+            
+            TTValue v = TTObjectBasePtr(this);
+            err = mContainer->sendMessage(TTSymbol("TimeEventDispose"), v, none);
+            
+        } // CB /!\ skipping the other notification mechanism for now
+    }
     
-    // use container to make the event dispose
-    if(mContainer) {
-
-        TTValue v = TTObjectBasePtr(this);
-        return mContainer->sendMessage(TTSymbol("TimeEventDispose"), v, none);
-    } // CB /!\ skipping the other notification mechanism for now
-
     // notify observers
     disposeMessage->sendNotification(kTTSym_notify, none);	// we use kTTSym_notify because we know that observers are TTCallback
     
-    return kTTErrNone;
+    return err;
 }
 
 TTErr TTTimeEvent::StateAddressGetValue(const TTValue& inputValue, TTValue& outputValue)
