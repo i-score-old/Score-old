@@ -620,6 +620,7 @@ TTErr Scenario::TimeEventCreate(const TTValue& inputValue, TTValue& outputValue)
             
             // store time event object and observers
             mTimeEventList.append(aCacheElement);
+            mTimeEventList.sort(&TTTimeEventCompareDate);
             
             // get scenario duration
             this->getAttributeValue(kTTSym_duration, scenarioDuration);
@@ -900,6 +901,7 @@ TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue
                 
                 // store the new time event object and observers
                 mTimeEventList.append(aCacheElement);
+                mTimeEventList.sort(&TTTimeEventCompareDate);
             }
             
             // replace the former time event in all time process which binds on it

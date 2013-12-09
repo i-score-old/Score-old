@@ -112,9 +112,12 @@ private :
     TTErr           StateAddressClear(const TTValue& inputValue, TTValue& outputValue);
     
     friend void TTSCORE_EXPORT TTTimeContainerFindTimeEventWithName(const TTValue& aValue, TTPtr timeEventNamePtrToMatch, TTBoolean& found);
+    friend TTBoolean TTSCORE_EXPORT TTTimeEventCompareDate(TTValue& v1, TTValue& v2);
 };
 
 typedef TTTimeEvent* TTTimeEventPtr;
+
+TTBoolean TTSCORE_EXPORT TTTimeEventCompareDate(TTValue& v1, TTValue& v2);
 
 /** Define an unordered map to store and retreive a value relative to a TTTimeEventPtr */
 #ifdef TT_PLATFORM_WIN
