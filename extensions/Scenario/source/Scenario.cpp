@@ -161,6 +161,9 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
         state = NULL;
         TTObjectBaseInstantiate(kTTSym_Script, TTObjectBaseHandle(&state), none);
         
+        // add the state of the scenario start
+        TTScriptMerge(TTScriptPtr(getTimeEventState(TTTimeEventPtr(getStartEvent()))), TTScriptPtr(state));
+        
         // mute the start event of the Scenario if there is a timeOffset
         if (timeOffset > 0.)
             getStartEvent()->setAttributeValue(kTTSym_mute, v);
