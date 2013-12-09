@@ -61,6 +61,11 @@ TTTimeCondition::~TTTimeCondition()
     TTSymbol        key;
     TTObjectBasePtr aReceiver;
     
+    // update each event condition
+    v = TTObjectBasePtr(NULL);
+    for (TTCaseMapIterator it = mCases.begin() ; it != mCases.end() ; it++)
+        TTObjectBasePtr(it->first)->setAttributeValue(kTTSym_condition, v);
+    
     // destroy all receivers;
     mReceivers.getKeys(keys);
     for (TTUInt8 i = 0; i < keys.size(); i++) {
