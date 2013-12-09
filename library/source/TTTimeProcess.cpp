@@ -92,10 +92,14 @@ mEndEventCallback(NULL)
     addMessageWithArguments(Process);
     addMessageProperty(Process, hidden, YES);
     
-    addMessageWithArguments(Move);
-    addMessageWithArguments(Limit);
+    addMessageWithArguments(ProcessPaused);
+    addMessageProperty(ProcessPaused, hidden, YES);
     
     addMessageWithArguments(Goto);
+    addMessageProperty(Goto, hidden, YES);
+    
+    addMessageWithArguments(Move);
+    addMessageWithArguments(Limit);
     
     addMessage(Start);
     addMessage(End);
@@ -462,27 +466,6 @@ TTErr TTTimeProcess::Limit(const TTValue& inputValue, TTValue& outputValue)
                 v.append(mDurationMax);
                 return mContainer->sendMessage(TTSymbol("TimeProcessLimit"), v, none);
             }
-        }
-    }
-    
-    return kTTErrGeneric;
-}
-
-TTErr TTTimeProcess::Goto(const TTValue& inputValue, TTValue& outputValue)
-{
-    TTValue     v;
-    TTUInt32    duration, timeOffset;
-    
-    if (inputValue.size() == 1) {
-        
-        if (inputValue[0].type() == kTypeUInt32) {
-            
-            getDuration(v);
-            duration = v[0];
-            mScheduler->setAttributeValue(kTTSym_duration, TTFloat64(duration));
-            
-            timeOffset = inputValue[0];
-            mScheduler->setAttributeValue(kTTSym_offset, TTFloat64(timeOffset));
         }
     }
     

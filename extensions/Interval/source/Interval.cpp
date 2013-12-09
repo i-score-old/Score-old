@@ -59,6 +59,31 @@ TTErr Interval::ProcessPaused(const TTValue& inputValue, TTValue& outputValue)
     return kTTErrNone;
 }
 
+TTErr Interval::Goto(const TTValue& inputValue, TTValue& outputValue)
+{
+    TTValue     v;
+    TTUInt32    duration, timeOffset;
+    
+    if (inputValue.size() == 1) {
+        
+        if (inputValue[0].type() == kTypeUInt32) {
+            
+            this->getAttributeValue(kTTSym_duration, v);
+            
+            // TODO : TTTimeProcess should extend Scheduler class
+            duration = v[0];
+            mScheduler->setAttributeValue(kTTSym_duration, TTFloat64(duration));
+            
+            timeOffset = inputValue[0];
+            mScheduler->setAttributeValue(kTTSym_offset, TTFloat64(timeOffset));
+            
+            return kTTErrNone;
+        }
+    }
+    
+    return kTTErrGeneric;
+}
+
 TTErr Interval::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 {
     // nothing to write	

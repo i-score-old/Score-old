@@ -96,6 +96,12 @@ class Scenario : public TimeContainer {
      @return                an error code returned by the process paused method */
     TTErr   ProcessPaused(const TTValue& inputValue, TTValue& outputValue);
     
+    /** Specific go to method to set the process at a date
+     @param	inputValue      a date where to go relative to the duration of the time process
+     @param	outputValue     nothing
+     @return                an error code if the operation fails */
+    TTErr   Goto(const TTValue& inputValue, TTValue& outputValue);
+    
     /**  needed to be handled by a TTXmlHandler
      @param	inputValue      ..
      @param	outputValue     ..

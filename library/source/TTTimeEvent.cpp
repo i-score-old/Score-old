@@ -372,3 +372,16 @@ TTErr TTTimeEvent::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 	
 	return kTTErrNone;
 }
+
+#if 0
+#pragma mark -
+#pragma mark Some Methods
+#endif
+
+TTBoolean TTSCORE_EXPORT TTTimeEventCompareDate(TTValue& v1, TTValue& v2)
+{
+    TTObjectBasePtr timeEvent1 = v1[0];
+    TTObjectBasePtr timeEvent2 = v2[0];
+    
+    return TTTimeEventPtr(timeEvent1)->mDate < TTTimeEventPtr(timeEvent2)->mDate;
+}
