@@ -103,21 +103,9 @@ void Scenario::compileTimeProcess(TTTimeProcessPtr aTimeProcess, TransitionPtr* 
     Place*          currentPlace;
     Arc*            arcFromPreviousTransitionToCurrentPlace;
     Arc*            arcFromCurrentPlaceToTheEnd;
-    TTValue         v;
-    TTObjectBasePtr scheduler;
     
     TTTimeEventPtr  startEvent = getTimeProcessStartEvent(aTimeProcess);
     TTTimeEventPtr  endEvent = getTimeProcessEndEvent(aTimeProcess);
-
-    // if the date to start is in the middle of a time process
-    if (getTimeEventDate(startEvent) < timeOffset && getTimeEventDate(endEvent) > timeOffset) {
-        
-        // prepare the scheduler to start in the middle of his process
-        aTimeProcess->getAttributeValue(TTSymbol("scheduler"), v);
-        
-        scheduler = v[0];
-        scheduler->setAttributeValue(kTTSym_offset, TTFloat64(timeOffset - getTimeEventDate(startEvent)));
-    }
     
     // compile start event
     currentTransition = mExecutionGraph->createTransition();

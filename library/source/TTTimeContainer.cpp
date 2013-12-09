@@ -195,6 +195,11 @@ TTUInt32 TTTimeContainer::getTimeEventDate(TTTimeEventPtr aTimeEvent)
     return aTimeEvent->mDate;
 }
 
+TTObjectBasePtr TTTimeContainer::getTimeEventState(TTTimeEventPtr aTimeEvent)
+{
+    return aTimeEvent->mState;
+}
+
 TTObjectBasePtr TTTimeContainer::getTimeEventCondition(TTTimeEventPtr aTimeEvent)
 {
     return aTimeEvent->mCondition;
@@ -419,9 +424,6 @@ TTTimeProcessPtr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHan
     
     if (!start || !end)
         return NULL;
-    
-    // DEBUG
-    TTSymbol name = aXmlHandler->mXmlNodeName;
     
     // Create the time process
     v = aXmlHandler->mXmlNodeName;

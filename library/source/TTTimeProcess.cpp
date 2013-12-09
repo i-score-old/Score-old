@@ -41,6 +41,7 @@ mEndEventCallback(NULL)
     TTValue    args, none;
     TTErr      err;
     TTValuePtr startEventBaton, endEventBaton;
+    TTAttributePtr anAttribute;
     
     if (arguments.size() == 1)
         mContainer = arguments[0];
@@ -93,6 +94,8 @@ mEndEventCallback(NULL)
     
     addMessageWithArguments(Move);
     addMessageWithArguments(Limit);
+    
+    addMessageWithArguments(Goto);
     
     addMessage(Start);
     addMessage(End);
@@ -465,6 +468,27 @@ TTErr TTTimeProcess::Limit(const TTValue& inputValue, TTValue& outputValue)
     return kTTErrGeneric;
 }
 
+TTErr TTTimeProcess::Goto(const TTValue& inputValue, TTValue& outputValue)
+{
+    TTValue     v;
+    TTUInt32    duration, timeOffset;
+    
+    if (inputValue.size() == 1) {
+        
+        if (inputValue[0].type() == kTypeUInt32) {
+            
+            getDuration(v);
+            duration = v[0];
+            mScheduler->setAttributeValue(kTTSym_duration, TTFloat64(duration));
+            
+            timeOffset = inputValue[0];
+            mScheduler->setAttributeValue(kTTSym_offset, TTFloat64(timeOffset));
+        }
+    }
+    
+    return kTTErrGeneric;
+}
+
 TTErr TTTimeProcess::Start()
 {
     return mStartEvent->sendMessage(kTTSym_Happen);
@@ -493,8 +517,8 @@ TTErr TTTimeProcess::Play()
     if (end > start) {
         
         v = TTFloat64(end - start);
-        
         mScheduler->setAttributeValue(kTTSym_duration, v);
+        
         mScheduler->sendMessage(kTTSym_Go);
         
         return kTTErrNone;
@@ -607,7 +631,6 @@ TTErr TTTimeProcessStartEventHappenCallback(TTPtr baton, TTValue& data)
     TTTimeProcessPtr    aTimeProcess;
     TTValuePtr          b;
     TTValue             v, none;
-    TTUInt32            start;
     
 	// unpack baton (a time process)
 	b = (TTValuePtr)baton;

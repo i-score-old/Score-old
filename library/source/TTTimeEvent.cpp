@@ -164,7 +164,7 @@ TTErr TTTimeEvent::Happen()
     if (!mMute) {
         
         // recall the state
-        TTErr err = mState->sendMessage(kTTSym_Run);
+        err = mState->sendMessage(kTTSym_Run);
     }
     
     // notify observers
@@ -176,20 +176,24 @@ TTErr TTTimeEvent::Happen()
 TTErr TTTimeEvent::Dispose()
 {
     TTValue none;
+    TTErr   err = kTTErrNone;
     
-    // théo : what to do here ?
+    // if the event not muted
+    if (!mMute) {
+        
+        // use container to make the event dispose
+        if(mContainer) {
+            
+            TTValue v = TTObjectBasePtr(this);
+            err = mContainer->sendMessage(TTSymbol("TimeEventDispose"), v, none);
+            
+        } // CB /!\ skipping the other notification mechanism for now
+    }
     
-    // use container to make the event dispose
-    if(mContainer) {
-
-        TTValue v = TTObjectBasePtr(this);
-        return mContainer->sendMessage(TTSymbol("TimeEventDispose"), v, none);
-    } // CB /!\ skipping the other notification mechanism for now
-
     // notify observers
     disposeMessage->sendNotification(kTTSym_notify, none);	// we use kTTSym_notify because we know that observers are TTCallback
     
-    return kTTErrNone;
+    return err;
 }
 
 TTErr TTTimeEvent::StateAddressGetValue(const TTValue& inputValue, TTValue& outputValue)
@@ -276,24 +280,14 @@ TTErr TTTimeEvent::StateAddressSetValue(const TTValue& inputValue, TTValue& outp
 
 TTErr TTTimeEvent::StateAddressClear(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTValue         v;
-    TTAddress       address;
-    TTListPtr       lines;
-    
+    TTValue none;
+
     if (inputValue.size() == 1) {
         
         if (inputValue[0].type() == kTypeSymbol) {
             
-            address = inputValue[0];
-            
-            // get the lines of the state
-            mState->getAttributeValue(kTTSym_lines, v);
-            lines = TTListPtr(TTPtr(v[0]));
-            
-            // remove the line at address
-            lines->remove(address);
-            
-            return kTTErrNone;
+            // remove the lines of the state
+            return mState->sendMessage(TTSymbol("RemoveCommand"), inputValue, none);
         }
     }
     

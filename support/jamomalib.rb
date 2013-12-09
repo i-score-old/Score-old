@@ -636,7 +636,7 @@ else
 			distropath = "@loader_path"
 
 			# Max externals are bundles, and they expect the libs to be in different location
-			distropath = "@loader_path/../../../../support" if project_type == "library"
+			distropath = "/usr/local/lib" if project_type == "library"
 		
 		end
 
@@ -1808,19 +1808,21 @@ else
           if max && mac?
             makefile.write("\tcp build/$(NAME) #{builddir}\n")
           end
-          #if project_type != "implementation"
-            #if linux?
-              #makefile.write("\tsudo cp #{build_temp}/$(NAME)#{extension_suffix} #{extension_dest}\n")
-            #elsif mac?
-              # if projectname == "JamomaMax"
-              #     makefile.write("\t#{path_to_moduleroot}/../../Core/Shared/jamoma_copy.sh build/$(NAME)#{extension_suffix} #{path_to_moduleroot}/Jamoma/support\n")
-              # else
-              #     makefile.write("\t#{path_to_moduleroot}/../Shared/jamoma_copy.sh build/$(NAME)#{extension_suffix} #{path_to_moduleroot}/../../Implementations/Max/Jamoma/support\n")
-              # end
-            #else
+          if project_type != "implementation"
+            if linux?
+              makefile.write("\tsudo cp #{build_temp}/$(NAME)#{extension_suffix} #{extension_dest}\n")
+            elsif mac?
+               if projectname == "JamomaMax"
+                   makefile.write("\t#{path_to_moduleroot}/../../Core/Shared/jamoma_copy.sh build/$(NAME)#{extension_suffix} #{path_to_moduleroot}/Jamoma/support\n")
+               elsif project_type == "extension"
+                   makefile.write("\t#{path_to_moduleroot}/support/jamoma_copy.sh build/$(NAME)#{extension_suffix} /usr/local/jamoma/extensions\n")
+               else
+                   makefile.write("\t#{path_to_moduleroot}/support/jamoma_copy.sh build/$(NAME)#{extension_suffix} /usr/local/jamoma/lib\n")
+               end
+            else
               #TODO: windows support for this...  need to write a DOS script
-            #end
-          #end
+            end
+          end
 
 		  if postbuilds
 			postbuilds.each do |postbuild|

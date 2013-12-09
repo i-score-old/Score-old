@@ -427,17 +427,17 @@ TTErr TTTimeCondition::ReadFromXml(const TTValue& inputValue, TTValue& outputVal
                 EventAdd(out, v); // TODO : better using the second argument
 
                 // get the expressions
-                if (!aXmlHandler->getXmlAttribute(kTTSym_trigger, v, YES)) {
+                if (!aXmlHandler->getXmlAttribute(TTSymbol("trigger"), v, YES)) {
                     out.append(v[0]);
                     EventTriggerExpression(out, v);
                     out.pop_back();
                 }
-                if (!aXmlHandler->getXmlAttribute(kTTSym_dispose, v, YES)) {
+                if (!aXmlHandler->getXmlAttribute(TTSymbol("dispose"), v, YES)) {
                     out.append(v[0]);
                     EventDisposeExpression(out, v);
                     out.pop_back();
                 }
-                if (!aXmlHandler->getXmlAttribute(kTTSym_default, v, NO)) {
+                if (!aXmlHandler->getXmlAttribute(TTSymbol("default"), v, NO)) {
                     out.append(v[0] == 1);
                     EventDefault(out, v);
                 }
