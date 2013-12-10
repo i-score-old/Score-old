@@ -34,6 +34,8 @@ TTSCORE_EXPORT TTSymbol         kTTSym_event                    (("event"));
 TTSCORE_EXPORT TTSymbol         kTTSym_expression               (("expression"));
 TTSCORE_EXPORT TTSymbol         kTTSym_Goto                     (("Goto"));
 TTSCORE_EXPORT TTSymbol         kTTSym_Happen                   (("Happen"));
+TTSCORE_EXPORT TTSymbol         kTTSym_Limit                    (("Limit"));
+TTSCORE_EXPORT TTSymbol         kTTSym_Move                     (("Move"));
 TTSCORE_EXPORT TTSymbol         kTTSym_Pause                    (("Pause"));
 TTSCORE_EXPORT TTSymbol         kTTSym_Process                  (("Process"));
 TTSCORE_EXPORT TTSymbol         kTTSym_ProcessStart             (("ProcessStart"));

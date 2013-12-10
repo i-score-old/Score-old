@@ -42,6 +42,22 @@ TTErr TTSCORE_EXPORT TTScoreTimeEventCreate(TTTimeEventPtr *timeEvent, TTUInt32 
  @return                        kTTErrGeneric if the deletion fails */
 TTErr TTSCORE_EXPORT TTScoreTimeEventRelease(TTTimeEventPtr *timeEvent, TTTimeContainerPtr timeContainer = NULL);
 
+/** Define callback function to be notified when a time event becomes ready or not */
+typedef void (*TTScoreTimeEventReadyCallback)(TTTimeEventPtr, TTBoolean);
+typedef	TTScoreTimeEventReadyCallback* TTScoreTimeEventReadyCallbackPtr;
+
+/** Create a callback to be notified when a time event becomes ready or not
+ @param	timeEvent               a time event instance
+ @param readyCallback           a handler on a callback instance
+ @param readyCallbackFunction   the TTScoreTimeEventReadyCallback function to call
+ @return                        kTTErrGeneric if the creation fails */
+TTErr TTSCORE_EXPORT TTScoreTimeEventReadyCallbackCreate(TTTimeEventPtr timeEvent, TTObjectBasePtr *readyCallback, TTScoreTimeEventReadyCallbackPtr readyCallbackFunction);
+
+/** Delete a callback used to be notified when a time event becomes ready or not
+ @param readyCallback           a handler on a callback instance
+ @return                        kTTErrGeneric if the deletion fails */
+TTErr TTSCORE_EXPORT TTScoreTimeEventREadyCallbackRelease(TTTimeEventPtr timeEvent, TTObjectBasePtr *readyCallback);
+
 /*
     Functions for time processes
  */
@@ -92,14 +108,14 @@ TTErr TTSCORE_EXPORT TTScoreTimeProcessSetRigid(TTTimeProcessPtr timeProcess, co
  @param startDate               start date of the time process
  @param endDate                 end date of the time process
  @return                        kTTErrGeneric if the operation fails */
-//TTErr TTSCORE_EXPORT TTScoreTimeProcessMove(TTTimeProcessPtr timeProcess, const TTUInt32 startDate, const TTUInt32 endDate);
+TTErr TTSCORE_EXPORT TTScoreTimeProcessMove(TTTimeProcessPtr timeProcess, const TTUInt32 startDate, const TTUInt32 endDate);
 
 /** Limit a time process duration
  @param	timeProcess             a time process instance
  @param durationMin             the minimal duration of the time process (default : 0)
  @param durationMax             the maximal duration of the time process (default : 0)
  @return                        kTTErrGeneric if the operation fails */
-//TTErr TTSCORE_EXPORT TTScoreTimeProcessLimit(TTTimeProcessPtr timeProcess, const TTUInt32 durationMin, const TTUInt32 durationMax);
+TTErr TTSCORE_EXPORT TTScoreTimeProcessLimit(TTTimeProcessPtr timeProcess, const TTUInt32 durationMin, const TTUInt32 durationMax);
 
 /** Define callback function to be notified when a time process starts */
 typedef void (*TTScoreTimeProcessStartCallback)(TTTimeProcessPtr);
@@ -138,12 +154,17 @@ TTErr TTSCORE_EXPORT TTScoreTimeProcessEndCallbackRelease(TTTimeProcessPtr timeP
 #pragma mark some internal functions
 #endif
 
+/** Define callback function used internally to call a TTScoreTimeEventReadyCallback relative to a time event
+ @param	baton                   a time event instance and a TTScoreTimeEventReadyCallback function to call with
+ @param	data                    nothing */
+void internal_TTScoreTimeEventReadyCallback(TTPtr baton, TTValue& data);
+
 /** Define callback function used internally to call a TTScoreTimeProcessStartCallback relative to a time process
- @param	baton                   a time process instance and a TTScoreTimeProcessStartCallback method to call with
+ @param	baton                   a time process instance and a TTScoreTimeProcessStartCallback function to call with
  @param	data                    nothing */
 void internal_TTScoreTimeProcessStartCallback(TTPtr baton, TTValue& data);
 
 /** Define callback function used internally to call a TTScoreTimeProcessEndCallback relative to a time process
- @param	baton                   a time process instance and a TTScoreTimeProcessEndCallback method to call with
+ @param	baton                   a time process instance and a TTScoreTimeProcessEndCallback function to call with
  @param	data                    nothing */
 void internal_TTScoreTimeProcessEndCallback(TTPtr baton, TTValue& data);

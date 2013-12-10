@@ -79,6 +79,38 @@ TTErr TTScoreTimeEventRelease(TTTimeEventPtr *timeEvent, TTTimeContainerPtr time
         return TTObjectBaseRelease(TTObjectBaseHandle(timeEvent));
 }
 
+TTErr TTScoreTimeEventReadyCallbackCreate(TTTimeEventPtr timeEvent, TTObjectBasePtr *readyCallback, TTScoreTimeEventReadyCallbackPtr readyCallbackFunction)
+{
+    TTValue         v, none;
+    TTValuePtr      readyAttributeBaton;
+    TTAttributePtr  anAttribute;
+    TTErr           err;
+    
+    readyCallback = NULL;
+    
+    // Create a TTCallback to observe time event ready attribute (using internal_TTScoreTimeEventReadyCallback)
+    TTObjectBaseInstantiate(TTSymbol("callback"), readyCallback, none);
+    
+    readyAttributeBaton = new TTValue(TTPtr(timeEvent)); // readyAttributeBaton will be deleted during the callback destruction
+    readyAttributeBaton->append(TTPtr(readyCallbackFunction));
+    
+    (*readyCallback)->setAttributeValue(kTTSym_baton, TTPtr(readyAttributeBaton));
+    (*readyCallback)->setAttributeValue(kTTSym_function, TTPtr(&internal_TTScoreTimeEventReadyCallback));
+    
+    // register for ready attribute observation
+    err = timeEvent->findAttribute(kTTSym_ready, &anAttribute);
+    
+    if (!err)
+        anAttribute->registerObserverForNotifications(**readyCallback);
+    
+    return err;
+}
+
+TTErr TTScoreTimeEventREadyCallbackRelease(TTTimeEventPtr timeEvent, TTObjectBasePtr *readyCallback)
+{
+    
+}
+
 TTErr TTScoreTimeProcessCreate(TTTimeProcessPtr *timeProcess, const std::string timeProcessClass, TTTimeEventPtr startEvent, TTTimeEventPtr endEvent, TTTimeContainerPtr timeContainer)
 {
     TTValue args;
@@ -160,9 +192,29 @@ TTErr TTScoreTimeProcessSetName(TTTimeProcessPtr timeProcess, const std::string 
     return timeProcess->setAttributeValue(kTTSym_name, name.c_str());
 }
 
-TTErr TTSCORE_EXPORT TTScoreTimeProcessSetRigid(TTTimeProcessPtr timeProcess, const TTBoolean rigid)
+TTErr TTScoreTimeProcessSetRigid(TTTimeProcessPtr timeProcess, const TTBoolean rigid)
 {
     return timeProcess->setAttributeValue(kTTSym_rigid, rigid);
+}
+
+TTErr TTScoreTimeProcessMove(TTTimeProcessPtr timeProcess, const TTUInt32 startDate, const TTUInt32 endDate)
+{
+    TTValue v, none;
+    
+    v = startDate;
+    v.append(endDate);
+    
+    return timeProcess->sendMessage(kTTSym_Move, v, none);
+}
+
+TTErr TTScoreTimeProcessLimit(TTTimeProcessPtr timeProcess, const TTUInt32 durationMin, const TTUInt32 durationMax)
+{
+    TTValue v, none;
+    
+    v = durationMin;
+    v.append(durationMax);
+    
+    return timeProcess->sendMessage(kTTSym_Limit, v, none);
 }
 
 TTErr TTScoreTimeProcessStartCallbackCreate(TTTimeProcessPtr timeProcess, TTObjectBasePtr *startCallback, TTScoreTimeProcessStartCallbackPtr startCallbackFunction)
@@ -174,7 +226,7 @@ TTErr TTScoreTimeProcessStartCallbackCreate(TTTimeProcessPtr timeProcess, TTObje
     
     *startCallback = NULL;
     
-    // create a TTCallback to observe when time process starts (using TimeProcessStartCallback)
+    // create a TTCallback to observe when time process starts (using internal_TTScoreTimeProcessStartCallback)
     TTObjectBaseInstantiate(TTSymbol("callback"), startCallback, none);
     
     // store the function to call and the time process to pass
@@ -224,7 +276,7 @@ TTErr TTScoreTimeProcessEndCallbackCreate(TTTimeProcessPtr timeProcess, TTObject
     
     *endCallback = NULL;
     
-    // create a TTCallback to observe when time process starts (using TimeProcessStartCallback)
+    // create a TTCallback to observe when time process starts (using internal_TTScoreTimeProcessEndCallback)
     TTObjectBaseInstantiate(TTSymbol("callback"), endCallback, none);
     
     // store the function to call and the time process to pass
@@ -269,6 +321,21 @@ TTErr TTScoreTimeProcessEndCallbackRelease(TTTimeProcessPtr timeProcess, TTObjec
 #pragma mark -
 #pragma mark some internal functions
 #endif
+
+void internal_TTScoreTimeEventReadyCallback(TTPtr baton, TTValue& data)
+{
+    TTValuePtr          b;
+    TTTimeEventPtr      timeEvent;
+    TTScoreTimeEventReadyCallbackPtr readyCallbackFunction;
+	
+	// unpack baton (time process, function)
+	b = (TTValuePtr)baton;
+	timeEvent = TTTimeEventPtr((TTPtr)(*b)[0]);
+    readyCallbackFunction = TTScoreTimeEventReadyCallbackPtr((TTPtr)(*b)[1]);
+    
+    // call the function
+    (*readyCallbackFunction)(timeEvent, TTBoolean(data[0]));
+}
 
 void internal_TTScoreTimeProcessStartCallback(TTPtr baton, TTValue& data)
 {
