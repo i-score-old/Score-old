@@ -57,7 +57,7 @@
 
 // Prototypes
 
-/** Init the Score library */
-void	TTSCORE_EXPORT	TTScoreInit();
+/** Initialize Score framework */
+void TTScoreInit();
 
 #endif // __TT_SCORE_H__

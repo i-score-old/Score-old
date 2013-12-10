@@ -2,7 +2,7 @@ defines:
   - TTSCORE_EXPORTS
   
 sources:
-    
+  - source/TTScoreAPI.cpp
   - source/TTScore.cpp
   - source/TTScoreSymbolCache.cpp
   - source/Expression.cpp
