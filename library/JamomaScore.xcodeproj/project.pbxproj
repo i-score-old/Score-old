@@ -21,6 +21,7 @@
 		46B55541177B124500F50D89 /* TTTimeProcess.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TTTimeProcess.cpp; path = source/TTTimeProcess.cpp; sourceTree = SOURCE_ROOT; };
 		46BFD37D170DAE9900B99389 /* TTScore.test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TTScore.test.cpp; sourceTree = "<group>"; };
 		46BFD37E170DAE9900B99389 /* TTScore.test.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TTScore.test.h; sourceTree = "<group>"; };
+		46D6FF0C18576004005D49AF /* TTScoreAPI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TTScoreAPI.cpp; path = source/TTScoreAPI.cpp; sourceTree = SOURCE_ROOT; };
 		46F5057A166699BE00CFC3A2 /* TTScore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TTScore.h; path = includes/TTScore.h; sourceTree = SOURCE_ROOT; };
 		46F5057B166699BE00CFC3A2 /* TTScoreSymbolCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TTScoreSymbolCache.h; path = includes/TTScoreSymbolCache.h; sourceTree = SOURCE_ROOT; };
 		46F5059016669CFC00CFC3A2 /* TTScore.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TTScore.cpp; path = source/TTScore.cpp; sourceTree = SOURCE_ROOT; };
@@ -66,6 +67,7 @@
 		46F505731666991700CFC3A2 /* source */ = {
 			isa = PBXGroup;
 			children = (
+				46D6FF0C18576004005D49AF /* TTScoreAPI.cpp */,
 				46F5059016669CFC00CFC3A2 /* TTScore.cpp */,
 				46F5059116669CFC00CFC3A2 /* TTScoreSymbolCache.cpp */,
 				464FE81617F5840300529725 /* Expression.cpp */,

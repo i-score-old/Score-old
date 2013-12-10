@@ -274,7 +274,6 @@ TTErr TTSCORE_EXPORT TTTimeProcessEndEventHappenCallback(TTPtr baton, TTValue& d
  @return					an error code */
 void TTSCORE_EXPORT TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression, TTFloat64 realTime);
 
-
 /** Define some macros to ease the access of events attributes */
 #define mStartDate TTTimeEventPtr(mStartEvent)->mDate
 #define mStartCondition TTTimeEventPtr(mStartEvent)->mCondition
