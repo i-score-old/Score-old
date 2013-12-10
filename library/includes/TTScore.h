@@ -55,9 +55,4 @@
 
 #include "TTScore.test.h"
 
-// Prototypes
-
-/** Initialize Score framework */
-void TTScoreInit();
-
 #endif // __TT_SCORE_H__

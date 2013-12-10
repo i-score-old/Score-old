@@ -19,9 +19,32 @@
 
 /* Main Score functions */
 
+static bool TTScoreInitialized = false;
+
 void TTScoreInitialize()
 {
-    TTScoreInit();
+    // Initialized Foundation framework
+	TTFoundationInit();
+    
+	if (!TTScoreInitialized) {
+		
+		TTScoreInitialized = true;
+		
+		// register classes -- both internal and external
+        TTTimeCondition::registerClass();
+        TTTimeContainer::registerClass();
+        TTTimeEvent::registerClass();
+        TTTimeProcess::registerClass();
+        
+		TTScoreTest::registerClass();
+        
+#ifdef TT_DEBUG
+		TTLogMessage("Score -- Version %s -- Debugging Enabled\n", TTSCORE_VERSION_STRING);
+#else
+		TTLogMessage("Score -- Version %s\n", TTSCORE_VERSION_STRING);
+#endif
+        
+	}
 }
 
 TTErr TTScoreTimeEventCreate(TTTimeEventPtr *timeEvent, TTUInt32 date, TTTimeContainerPtr timeContainer)
