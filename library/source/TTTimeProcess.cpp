@@ -27,21 +27,17 @@ mName(kTTSymEmpty),
 mDurationMin(0),
 mDurationMax(0),
 mMute(NO),
-mRunning(NO),
 mVerticalPosition(0),
 mVerticalSize(1),
 mScheduler(NULL),
+mRunning(NO),
 mStartEvent(NULL),
-mStartEventCallback(NULL),
-mEndEvent(NULL),
-mEndEventCallback(NULL)
+mEndEvent(NULL)
 {
     TT_ASSERT("Correct number of args to create TTTimeProcess", arguments.size() == 1);
     
-    TTValue    args, none;
+    TTValue    args;
     TTErr      err;
-    TTValuePtr startEventBaton, endEventBaton;
-    TTAttributePtr anAttribute;
     
     if (arguments.size() == 1)
         mContainer = arguments[0];
@@ -114,23 +110,15 @@ mEndEventCallback(NULL)
 	addMessageWithArguments(ReadFromXml);
 	addMessageProperty(ReadFromXml, hidden, YES);
     
-    // Create a start event callback to be notified and start the process execution
-    mStartEventCallback = NULL;
-    TTObjectBaseInstantiate(TTSymbol("callback"), &mStartEventCallback, none);
-    
-    startEventBaton = new TTValue(TTObjectBasePtr(this));
-    
-    mStartEventCallback->setAttributeValue(kTTSym_baton, TTPtr(startEventBaton));
-    mStartEventCallback->setAttributeValue(kTTSym_function, TTPtr(&TTTimeProcessStartEventHappenCallback));
-    
-    // Create a end event callback to be notified and end the process execution
-    mEndEventCallback = NULL;
-    TTObjectBaseInstantiate(TTSymbol("callback"), &mEndEventCallback, none);
-    
-    endEventBaton = new TTValue(TTObjectBasePtr(this));
-    
-    mEndEventCallback->setAttributeValue(kTTSym_baton, TTPtr(endEventBaton));
-    mEndEventCallback->setAttributeValue(kTTSym_function, TTPtr(&TTTimeProcessEndEventHappenCallback));
+    // needed to be notified by events
+    addMessageWithArguments(EventDateChanged);
+    addMessageProperty(EventDateChanged, hidden, YES);
+    addMessageWithArguments(EventReadyChanged);
+    addMessageProperty(EventReadyChanged, hidden, YES);
+    addMessageWithArguments(EventHappened);
+    addMessageProperty(EventHappened, hidden, YES);
+    addMessageWithArguments(EventDisposed);
+    addMessageProperty(EventDisposed, hidden, YES);
     
     // Creation of a scheduler based on the System scheduler plugin
     // Prepare callback argument to be notified of :
@@ -142,7 +130,7 @@ mEndEventCallback(NULL)
     
 	if (err) {
         mScheduler = NULL;
-		logError("TimeProcess failed to load the EcoMachine Scheduler");
+		logError("TimeProcess failed to load the System Scheduler");
     }
     
     // generate a random name
@@ -152,35 +140,15 @@ mEndEventCallback(NULL)
     mColor.append(255);
     mColor.append(255);
     mColor.append(255);
-    
-    // cache some messages for high speed notification feedbacks
-    this->findMessage(kTTSym_ProcessStart, &processStartMessage);
-    this->findMessage(kTTSym_ProcessEnd, &processEndMessage);
 }
 
 TTTimeProcess::~TTTimeProcess()
 {
+    // Don't release start event here because it can be used by another time process
     setStartEvent(NULL);
     
-    // Don't release start event here because it can be used by another time process
-    
-    // Release start event callback
-    if (mStartEventCallback) {
-        delete (TTValuePtr)TTCallbackPtr(mStartEventCallback)->getBaton();
-        TTObjectBaseRelease(TTObjectBaseHandle(&mStartEventCallback));
-        mStartEventCallback = NULL;
-    }
-    
     // Don't release end event here because it can be used by another time process
-    
     setEndEvent(NULL);
-    
-    // Release end event callback
-    if (mEndEventCallback) {
-        delete (TTValuePtr)TTCallbackPtr(mEndEventCallback)->getBaton();
-        TTObjectBaseRelease(TTObjectBaseHandle(&mEndEventCallback));
-        mEndEventCallback = NULL;
-    }
     
     // Release scheduler
     if (mScheduler) {
@@ -188,30 +156,6 @@ TTTimeProcess::~TTTimeProcess()
         mScheduler = NULL;
     }
 }
-/*
-TTErr TTTimeProcess::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
-{
-    TTXmlHandlerPtr     aXmlHandler = NULL;
-
-	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
-    
-    // Write the name
-    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST mName.c_str());
-    
-    // Write the start event name
-    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "start", BAD_CAST TTTimeEventPtr(mStartEvent)->mName.c_str());
-    
-    // Write the end event name
-    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "end", BAD_CAST TTTimeEventPtr(mEndEvent)->mName.c_str());
-    
-    return kTTErrNone;
-}
-
-TTErr TTTimeProcess::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
-{
-    return kTTErrGeneric;
-}
- */
 
 TTErr TTTimeProcess::getRigid(TTValue& value)
 {
@@ -536,6 +480,122 @@ TTErr TTTimeProcess::Resume()
     return ProcessPaused(TTBoolean(NO), none);
 }
 
+#if 0
+#pragma mark -
+#pragma mark Notifications
+#endif
+
+TTErr TTTimeProcess::EventDateChanged(const TTValue& inputValue, TTValue& outputValue)
+{
+    TT_ASSERT("TTTimeProcess::EventDateChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
+    
+    TTObjectBasePtr aTimeEvent = inputValue[0];
+    
+    if (aTimeEvent == mStartEvent) {
+        
+        return kTTErrNone;
+    }
+    else if (aTimeEvent == mEndEvent) {
+        
+        return kTTErrNone;
+    }
+    
+    TTLogError("TTTimeProcess::EventDateChanged : wrong event\n");
+    return kTTErrGeneric;
+}
+
+TTErr TTTimeProcess::EventReadyChanged(const TTValue& inputValue, TTValue& outputValue)
+{
+    TT_ASSERT("TTTimeProcess::EventReadyChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
+    
+    TTObjectBasePtr aTimeEvent = inputValue[0];
+    
+    if (aTimeEvent == mStartEvent) {
+        
+        return kTTErrNone;
+    }
+    else if (aTimeEvent == mEndEvent) {
+        
+        return kTTErrNone;
+    }
+    
+    TTLogError("TTTimeProcess::EventReadyChanged : wrong event\n");
+    return kTTErrGeneric;
+}
+
+TTErr TTTimeProcess::EventHappened(const TTValue& inputValue, TTValue& outputValue)
+{
+    TT_ASSERT("TTTimeProcess::EventHappened : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
+    
+    TTObjectBasePtr aTimeEvent = inputValue[0];
+    
+    if (aTimeEvent == mStartEvent) {
+        
+        // if the time process is muted
+        if (mMute)
+            return kTTErrNone;
+            
+        // note : don't set start event ready attribute to NO : it is to the container to take this decision
+            
+        // use the specific start process method of the time process
+        if (!ProcessStart()) {
+            
+            // notify start message observers
+            sendNotification(kTTSym_ProcessStarted, TTObjectBasePtr(this));
+            
+            // play the process
+            return Play();
+        }
+    }
+    else if (aTimeEvent == mEndEvent) {
+        
+        // if the time process is muted
+        if (mMute)
+            return kTTErrNone;
+            
+        // stop the process
+        Stop();
+        
+        // note : don't set end event ready attribute to NO : it is to the container to take this decision
+        
+        // use the specific process end method of the time process
+        if (!ProcessEnd()) {
+            
+            // notify observers
+            sendNotification(kTTSym_ProcessEnded, TTObjectBasePtr(this));
+            
+            return kTTErrNone;
+        }
+    }
+    
+    TTLogError("TTTimeProcess::EventHappened : wrong event\n");
+    return kTTErrGeneric;
+}
+
+TTErr TTTimeProcess::EventDisposed(const TTValue& inputValue, TTValue& outputValue)
+{
+    TT_ASSERT("TTTimeProcess::EventDisposed inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
+    
+    TTObjectBasePtr aTimeEvent = inputValue[0];
+    
+    if (aTimeEvent == mStartEvent) {
+        
+        return kTTErrNone;
+    }
+    else if (aTimeEvent == mEndEvent) {
+        
+        return kTTErrNone;
+    }
+    
+    TTLogError("TTTimeProcess::EventDisposed : wrong event\n");
+    return kTTErrGeneric;
+}
+
+#if 0
+#pragma mark -
+#pragma mark Start and End events accessors
+#endif
+
 TTTimeEventPtr TTTimeProcess::getStartEvent()
 {
     return (TTTimeEventPtr)mStartEvent;
@@ -548,126 +608,40 @@ TTTimeEventPtr TTTimeProcess::getEndEvent()
 
 TTErr TTTimeProcess::setStartEvent(TTTimeEventPtr aTimeEvent)
 {
-    TTMessagePtr    aMessage;
-    TTErr           err;
-    
-    if (mStartEvent) {
-        
-        // Stop start event happening observation
-        err = mStartEvent->findMessage(kTTSym_Happen, &aMessage);
-        
-        if(!err)
-            aMessage->unregisterObserverForNotifications(*mStartEventCallback);
-    }
+    // Stop start event observation
+    if (mStartEvent)
+        mStartEvent->unregisterObserverForNotifications(*this);
     
     // Replace the start event by the new one
     mStartEvent = aTimeEvent;
     
-    // Observe start event happening
-    if (mStartEvent) {
-        
-        err = mStartEvent->findMessage(kTTSym_Happen, &aMessage);
-    
-        if(!err)
-            return aMessage->registerObserverForNotifications(*mStartEventCallback);
-    }
+    // Observe start event
+    if (mStartEvent)
+        mStartEvent->registerObserverForNotifications(*this);
     
     return kTTErrNone;
 }
 
 TTErr TTTimeProcess::setEndEvent(TTTimeEventPtr aTimeEvent)
 {
-    TTMessagePtr    aMessage;
-    TTErr           err;
-    
-    if (mEndEvent) {
-        
-        // Stop end event happening observation
-        err = mEndEvent->findMessage(kTTSym_Happen, &aMessage);
-        
-        if(!err)
-            aMessage->unregisterObserverForNotifications(*mEndEventCallback);
-    }
+    // Stop end event observation
+    if (mEndEvent)
+        mEndEvent->unregisterObserverForNotifications(*this);
     
     // Replace the end event by the new one
     mEndEvent = aTimeEvent;
     
-    // Observe end event happening
-    if (mEndEvent) {
-        
-        err = mEndEvent->findMessage(kTTSym_Happen, &aMessage);
-    
-        if(!err)
-            return aMessage->registerObserverForNotifications(*mEndEventCallback);
-    }
+    // Observe end event
+    if (mEndEvent)
+        mEndEvent->registerObserverForNotifications(*this);
     
     return kTTErrNone;
 }
 
 #if 0
 #pragma mark -
-#pragma mark Some Methods
+#pragma mark Scheduler callback
 #endif
-
-TTErr TTTimeProcessStartEventHappenCallback(TTPtr baton, TTValue& data)
-{
-    TTTimeProcessPtr    aTimeProcess;
-    TTValuePtr          b;
-    TTValue             v, none;
-    
-	// unpack baton (a time process)
-	b = (TTValuePtr)baton;
-	aTimeProcess = TTTimeProcessPtr((TTObjectBasePtr)(*b)[0]);
-    
-    // if the time process not muted
-	if (!aTimeProcess->mMute) {
-        
-        // note : don't set start event ready attribute to NO : it is to the container to take this decision
-        
-        // use the specific start process method of the time process
-        if (!aTimeProcess->ProcessStart()) {
-            
-            // notify observers
-            aTimeProcess->processStartMessage->sendNotification(kTTSym_notify, none);	// we use kTTSym_notify because we know that observers are TTCallback
-            
-            // play the process
-            aTimeProcess->Play();
-        }
-    }
-    
-    return kTTErrGeneric;
-}
-
-TTErr TTTimeProcessEndEventHappenCallback(TTPtr baton, TTValue& data)
-{
-    TTTimeProcessPtr    aTimeProcess;
-    TTValuePtr          b;
-    TTValue             none;
-    
-	// unpack baton (a time process)
-	b = (TTValuePtr)baton;
-	aTimeProcess = TTTimeProcessPtr((TTObjectBasePtr)(*b)[0]);
-    
-    // if the time process not muted, stop the scheduler
-	if (!aTimeProcess->mMute) {
-        
-        // stop the process
-        aTimeProcess->Stop();
-        
-        // note : don't set end event ready attribute to NO : it is to the container to take this decision
-
-        // use the specific process end method of the time process
-        if (!aTimeProcess->ProcessEnd()) {
-            
-            // notify observers
-            aTimeProcess->processEndMessage->sendNotification(kTTSym_notify, none);	// we use kTTSym_notify because we know that observers are TTCallback
-        
-            return kTTErrNone;
-        }
-    }
-    
-    return kTTErrGeneric;
-}
 
 void TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression, TTFloat64 realTime)
 {

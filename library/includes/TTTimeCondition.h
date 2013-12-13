@@ -76,8 +76,6 @@ protected :
  
 private :
     
-    TTAttributePtr                  readyAttribute;                 ///< cache ready attribute for observer notification
-    
     /** Enable or disable the time condition to allow it to be tested
      @param	value           a boolean
      @return                kTTErrNone */
@@ -153,6 +151,18 @@ private :
      @return                .. */
 	TTErr           WriteAsXml(const TTValue& inputValue, TTValue& outputValue);
 	TTErr           ReadFromXml(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** To be notified when an event date changed
+     @param inputValue      the event which have changed his date
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr           EventDateChanged(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** To be notified when an event ready changed
+     @param inputValue      the event which have changed his ready state
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr           EventReadyChanged(const TTValue& inputValue, TTValue& outputValue);
     
     /**  Helper functions to manage receivers : add a receiver for to the address if no receiver already exists
      @param	anAddress      an address to observe */

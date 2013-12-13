@@ -52,9 +52,6 @@ mReady(YES)
 	addMessageWithArguments(ReadFromXml);
 	addMessageProperty(ReadFromXml, hidden, YES);
 	
-    // cache some messages and attributes for high speed notification feedbacks
-    this->findAttribute(kTTSym_ready, &readyAttribute);
-    
     // generate a random name
     mName = mName.random();
 }
@@ -87,8 +84,8 @@ TTErr TTTimeCondition::setReady(const TTValue& value)
     // set the ready value
     mReady = value[0];
     
-    // notify each attribute observers
-    readyAttribute->sendNotification(kTTSym_notify, mReady);             // we use kTTSym_notify because we know that observers are TTCallback
+    // notify each observers
+    sendNotification(kTTSym_ConditionReadyChanged, mReady);
     
     return kTTErrNone;
 }
@@ -161,6 +158,9 @@ TTErr TTTimeCondition::EventAdd(const TTValue& inputValue, TTValue& outputValue)
             v = TTObjectBasePtr(this);
             event->setAttributeValue(kTTSym_condition, v);
             
+            // observe the event
+            event->registerObserverForNotifications(*this);
+            
             // return no error
             return kTTErrNone;
         
@@ -199,6 +199,9 @@ TTErr TTTimeCondition::EventRemove(const TTValue& inputValue, TTValue& outputVal
         // tell the event it is not conditioned anymore
         v = TTObjectBasePtr(NULL);
         event->setAttributeValue(kTTSym_condition, v);
+        
+        // don't observe the event anymore
+        event->unregisterObserverForNotifications(*this);
         
         return kTTErrNone;
     }
@@ -453,6 +456,41 @@ TTErr TTTimeCondition::ReadFromXml(const TTValue& inputValue, TTValue& outputVal
 	return kTTErrNone;
 }
 
+TTErr TTTimeCondition::EventDateChanged(const TTValue& inputValue, TTValue& outputValue)
+{
+    TT_ASSERT("TTTimeCondition::EventDateChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
+    
+    TTTimeEventPtr      event = TTTimeEventPtr(TTObjectBasePtr(inputValue[0]));
+    TTCaseMapIterator   it = mCases.find(event);
+    
+    // if the event exists
+    if (it != mCases.end()) {
+        
+        return kTTErrNone;
+    }
+    
+    TTLogError("TTTimeCondition::EventDateChanged : wrong event");
+    return kTTErrGeneric;
+}
+
+TTErr TTTimeCondition::EventReadyChanged(const TTValue& inputValue, TTValue& outputValue)
+{
+    TT_ASSERT("TTTimeCondition::EventReadyChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
+    
+    TTTimeEventPtr      event = TTTimeEventPtr(TTObjectBasePtr(inputValue[0]));
+    TTCaseMapIterator   it = mCases.find(event);
+    
+    // if the event exists
+    if (it != mCases.end()) {
+        
+        
+        return kTTErrNone;
+    }
+    
+    TTLogError("TTTimeCondition::EventReadyChanged : wrong event");
+    return kTTErrGeneric;
+}
+
 void TTTimeCondition::cleanReceiver(TTAddress anAddress) // TODO : un compteur de réérence sur les receivers ?
 {
     TTBoolean found = false;
@@ -585,7 +623,7 @@ TTErr TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data)
             TTObjectBasePtr(timeEventToDispose.current()[0])->sendMessage(kTTSym_Dispose);
         
         aTimeCondition->mReady = NO;
-        aTimeCondition->readyAttribute->sendNotification(kTTSym_notify, aTimeCondition->mReady);
+        aTimeCondition->sendNotification(kTTSym_ConditionReadyChanged, aTimeCondition->mReady);
     }
 
     return kTTErrNone;

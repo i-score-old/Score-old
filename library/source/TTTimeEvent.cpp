@@ -60,12 +60,6 @@ mReady(YES)
 	addMessageWithArguments(ReadFromXml);
 	addMessageProperty(ReadFromXml, hidden, YES);
 	
-    // cache some messages and attributes for high speed notification feedbacks
-    this->findAttribute(kTTSym_date, &dateAttribute);
-    this->findAttribute(kTTSym_ready, &readyAttribute);
-    this->findMessage(kTTSym_Happen, &happenMessage);
-    this->findMessage(kTTSym_Dispose, &disposeMessage);
-    
     // create a script
     TTObjectBaseInstantiate(kTTSym_Script, TTObjectBaseHandle(&mState), none);
     
@@ -91,8 +85,8 @@ TTErr TTTimeEvent::setDate(const TTValue& value)
         // set the internal date value
         mDate = newDate;
         
-        // notify each attribute observers
-        dateAttribute->sendNotification(kTTSym_notify, mDate);             // we use kTTSym_notify because we know that observers are TTCallback
+        // notify each date attribute observers
+        sendNotification(kTTSym_EventDateChanged, TTObjectBasePtr(this));
     }
     
     return kTTErrNone;
@@ -128,7 +122,7 @@ TTErr TTTimeEvent::setReady(const TTValue& value)
     mReady = value[0];
     
     // notify each attribute observers
-    readyAttribute->sendNotification(kTTSym_notify, mReady);             // we use kTTSym_notify because we know that observers are TTCallback
+    sendNotification(kTTSym_EventReadyChanged, TTObjectBasePtr(this));
     
     return kTTErrNone;
 }
@@ -143,6 +137,10 @@ TTErr TTTimeEvent::Trigger()
     if (mCondition == NULL)
         return kTTErrGeneric;
     
+    // if the event muted
+    if (mMute)
+        return kTTErrNone;
+    
     // use container to make the event happen
     if (mContainer) {
         
@@ -155,43 +153,51 @@ TTErr TTTimeEvent::Trigger()
         return Happen();
 }
 
-TTErr TTTimeEvent::Happen()
-{
-    TTValue none;
-    TTErr   err = kTTErrNone;
-
-    // if the event not muted
-    if (!mMute) {
-        
-        // recall the state
-        err = mState->sendMessage(kTTSym_Run);
-    }
-    
-    // notify observers
-    happenMessage->sendNotification(kTTSym_notify, none);	// we use kTTSym_notify because we know that observers are TTCallback
-    
-    return err;
-}
-
 TTErr TTTimeEvent::Dispose()
 {
     TTValue none;
     TTErr   err = kTTErrNone;
     
-    // if the event not muted
-    if (!mMute) {
+    // if not ready : do nothing
+    if (!mReady)
+        return kTTErrGeneric;
+    
+    // if not conditionned : do nothing
+    if (mCondition == NULL)
+        return kTTErrGeneric;
+    
+    // if the event muted
+    if (mMute)
+        return kTTErrNone;
+    
+    // use container to make the event dispose
+    if(mContainer) {
         
-        // use container to make the event dispose
-        if(mContainer) {
-            
-            TTValue v = TTObjectBasePtr(this);
-            err = mContainer->sendMessage(TTSymbol("TimeEventDispose"), v, none);
-            
-        } // CB /!\ skipping the other notification mechanism for now
+        TTValue v = TTObjectBasePtr(this);
+        return mContainer->sendMessage(TTSymbol("TimeEventDispose"), v, none);
     }
     
+    // TO : there isn't "don't happen" message so what do we do here ?
+    else {
+        
+        sendNotification(kTTSym_EventDisposed, TTObjectBasePtr(this));
+        return kTTErrNone;
+    }
+}
+
+TTErr TTTimeEvent::Happen()
+{
+    TTErr err = kTTErrNone;
+
+    // if the event muted
+    if (mMute)
+        return kTTErrNone;
+    
+    // recall the state
+    err = mState->sendMessage(kTTSym_Run);
+    
     // notify observers
-    disposeMessage->sendNotification(kTTSym_notify, none);	// we use kTTSym_notify because we know that observers are TTCallback
+    sendNotification(kTTSym_EventHappened, TTObjectBasePtr(this));
     
     return err;
 }

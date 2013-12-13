@@ -57,15 +57,10 @@ protected :
 private :
     
     TTObjectBasePtr                 mStartEvent;                    ///< the event object which handles the time process execution start
-    TTObjectBasePtr                 mStartEventCallback;            ///< a callback to subscribe for start event notification
     
     TTList                          mIntermediateEvents;            ///< the list of all intermediate events
     
     TTObjectBasePtr                 mEndEvent;                      ///< the event object which handles the time process execution stop
-    TTObjectBasePtr                 mEndEventCallback;              ///< a callback to subscribe for end event notification
-    
-    TTMessagePtr                    processStartMessage;            ///< cache process start message for observer notification
-    TTMessagePtr                    processEndMessage;              ///< cache process end message for observer notification
     
     /** Specific process method on start
      @return                an error code returned by the process end method */
@@ -226,6 +221,30 @@ private :
         this method eases the managment of the scheduler object
      @return                an error code if the resume fails */
     TTErr           Resume();
+    
+    /** To be notified when an event date changed
+     @param inputValue      the event which have changed his date
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr           EventDateChanged(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** To be notified when an event ready changed
+     @param inputValue      the event which have changed his ready state
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr           EventReadyChanged(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** To be notified when an event happened
+     @param inputValue      the event which have happened
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr           EventHappened(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** To be notified when an event is disposed
+     @param inputValue      the event which have been disposed
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr           EventDisposed(const TTValue& inputValue, TTValue& outputValue);
 
 protected :
     
@@ -247,26 +266,12 @@ protected :
      @return                an error code if it fails */
     TTErr           setEndEvent(TTTimeEventPtr aTimeProcess);
     
-    friend TTErr TTSCORE_EXPORT TTTimeProcessStartEventHappenCallback(TTPtr baton, TTValue& data);
-    friend TTErr TTSCORE_EXPORT TTTimeProcessEndEventHappenCallback(TTPtr baton, TTValue& data);
     friend void TTSCORE_EXPORT TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression, TTFloat64 realTime);
     
     friend void TTSCORE_EXPORT TTTimeContainerFindTimeProcessWithTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found);
 };
 
 typedef TTTimeProcess* TTTimeProcessPtr;
-
-/** The start event happen callback to start the time process execution
- @param	baton               a time process instance
- @param	data                a value relative to the event
- @return					an error code */
-TTErr TTSCORE_EXPORT TTTimeProcessStartEventHappenCallback(TTPtr baton, TTValue& data);
-
-/** The end event happen callback to end the time process execution
- @param	baton               a time process instance
- @param	data                a value relative to the event
- @return					an error code */
-TTErr TTSCORE_EXPORT TTTimeProcessEndEventHappenCallback(TTPtr baton, TTValue& data);
 
 /** The scheduler time progression callback
  @param	object				a time process instance
