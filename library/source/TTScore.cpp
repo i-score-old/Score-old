@@ -14,45 +14,10 @@
  */
 
 #include "TTScore.h"
-#include "TTTimeEvent.h"
-#include "TTTimeProcess.h"
-#include "TTTimeContainer.h"
-
-// Statics and Globals
-static bool TTScoreHasInitialized = false;
-
-/****************************************************************************************************/
-
-void TTScoreInit()
-{	
-	// Initialized Foundation framework
-	TTFoundationInit();
-
-	if (!TTScoreHasInitialized) {
-		
-		TTScoreHasInitialized = true;
-		
-		// register classes -- both internal and external
-        TTTimeCondition::registerClass();
-        TTTimeContainer::registerClass();
-        TTTimeEvent::registerClass();
-        TTTimeProcess::registerClass();
-        
-		TTScoreTest::registerClass();
-
-#ifdef TT_DEBUG
-		TTLogMessage("Score -- Version %s -- Debugging Enabled\n", TTSCORE_VERSION_STRING);
-#else
-		TTLogMessage("Score -- Version %s\n", TTSCORE_VERSION_STRING);
-#endif
-
-	}
-}
 
 #ifdef TT_PLATFORM_LINUX
 int main(void)
 {
-	// TODO: should we call TTScoreInit() here?
 	return 0;
 }
 #endif
