@@ -23,6 +23,15 @@
 // object classe names
 extern TTSCORE_EXPORT TTSymbol  kTTSym_TimeEvent;
 
+// notifications
+extern TTSCORE_EXPORT TTSymbol  kTTSym_ConditionReadyChanged;
+extern TTSCORE_EXPORT TTSymbol	kTTSym_EventDateChanged;
+extern TTSCORE_EXPORT TTSymbol	kTTSym_EventDisposed;
+extern TTSCORE_EXPORT TTSymbol	kTTSym_EventHappened;
+extern TTSCORE_EXPORT TTSymbol	kTTSym_EventReadyChanged;
+extern TTSCORE_EXPORT TTSymbol	kTTSym_ProcessStarted;
+extern TTSCORE_EXPORT TTSymbol	kTTSym_ProcessEnded;
+
 // attribute, message or any names
 extern TTSCORE_EXPORT TTSymbol	kTTSym_case;
 extern TTSCORE_EXPORT TTSymbol	kTTSym_color;

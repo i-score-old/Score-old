@@ -51,11 +51,6 @@ protected :
  
 private :
     
-    TTAttributePtr                  dateAttribute;                  ///< cache date attribute for observer notification
-    TTAttributePtr                  readyAttribute;                 ///< cache ready attribute for observer notification
-    TTMessagePtr                    happenMessage;                  ///< cache happen message for observer notification
-    TTMessagePtr                    disposeMessage;                 ///< cache dispose message for observer notification
-    
     /** Set the date of the event
      @param	value           a date
      @return                an error code if the date is wrong */

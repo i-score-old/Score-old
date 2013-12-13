@@ -20,6 +20,15 @@
 // object classe name
 TTSCORE_EXPORT TTSymbol         kTTSym_TimeEvent                (("TimeEvent"));
 
+// notifications
+TTSCORE_EXPORT TTSymbol         kTTSym_ConditionReadyChanged    (("ConditionReadyChanged"));
+TTSCORE_EXPORT TTSymbol         kTTSym_EventDateChanged         (("EventDateChanged"));
+TTSCORE_EXPORT TTSymbol         kTTSym_EventDisposed            (("EventDisposed"));
+TTSCORE_EXPORT TTSymbol         kTTSym_EventHappened            (("EventHappened"));
+TTSCORE_EXPORT TTSymbol         kTTSym_EventReadyChanged        (("EventReadyChanged"));
+TTSCORE_EXPORT TTSymbol         kTTSym_ProcessStarted           (("ProcessStarted"));
+TTSCORE_EXPORT TTSymbol         kTTSym_ProcessEnded             (("ProcessEnded"));
+
 // message name
 TTSCORE_EXPORT TTSymbol         kTTSym_case                     (("case"));
 TTSCORE_EXPORT TTSymbol         kTTSym_color                    (("color"));
