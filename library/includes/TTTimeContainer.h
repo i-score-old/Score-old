@@ -37,8 +37,6 @@ protected :
     
 private :
     
-    TTObjectBasePtr             mSchedulerSpeedCallback;        ///< a callback to subscribe for scheduler speed change
-    
     /** Get all time processes objects
      @param value           all time processes objects
      @return                kTTErrGeneric if mTimeProcessList is empty */
@@ -140,7 +138,11 @@ private :
      @return                an error code if the destruction fails */
     virtual TTErr   TimeConditionRelease(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
     
-
+    /** To be notified when athe scheduler speed changed
+     @param inputValue      the new speed value
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr           SchedulerSpeedChanged(const TTValue& inputValue, TTValue& outputValue);
     
 protected :
     
@@ -259,13 +261,5 @@ void TTSCORE_EXPORT TTTimeContainerFindTimeProcessWithName(const TTValue& aValue
 void TTSCORE_EXPORT TTTimeContainerFindTimeCondition(const TTValue& aValue, TTPtr timeConditionPtrToMatch, TTBoolean& found);
 
 void TTSCORE_EXPORT TTTimeContainerFindTimeConditionWithName(const TTValue& aValue, TTPtr timeConditionNamePtrToMatch, TTBoolean& found);
-
-/** A callback to observe the scheduler speed
- @param	baton               a time container instance
- @param	data                a speed value
- @return					an error code */
-TTErr TTSCORE_EXPORT TTTimeContainerSchedulerSpeedCallback(TTPtr baton, TTValue& data);
-
-
 
 #endif // __TT_TIME_CONTAINER_H__
