@@ -222,8 +222,8 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
             TTScriptMerge(TTScriptPtr(getTimeEventState(TTTimeEventPtr(getStartEvent()))), TTScriptPtr(state));
             
             // mute the start event of the Scenario if there is a timeOffset
-            if (timeOffset > 0.)
-                getStartEvent()->setAttributeValue(kTTSym_mute, v);
+            v = TTBoolean(timeOffset > 0.);
+            getStartEvent()->setAttributeValue(kTTSym_mute, v);
             
             // mute all the events before the time offset
             for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next()) {
@@ -260,6 +260,12 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
                     // go to time offset
                     aTimeProcess->sendMessage(kTTSym_Goto, timeOffset - getTimeEventDate(startEvent), none);
                 }
+                
+                else if (getTimeEventDate(startEvent) >= timeOffset)
+                    aTimeProcess->sendMessage(kTTSym_Goto, TTUInt32(0.), none);
+                
+                else if (getTimeEventDate(endEvent) <= timeOffset)
+                    aTimeProcess->sendMessage(kTTSym_Goto, TTUInt32(1.), none);
                 
                 // mute if the end event is before the timeOffset
                 v = TTBoolean(getTimeEventDate(endEvent) < timeOffset);

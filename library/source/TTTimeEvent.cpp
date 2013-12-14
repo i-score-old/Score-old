@@ -166,10 +166,6 @@ TTErr TTTimeEvent::Dispose()
     if (mCondition == NULL)
         return kTTErrGeneric;
     
-    // if the event muted
-    if (mMute)
-        return kTTErrNone;
-    
     // use container to make the event dispose
     if(mContainer) {
         
@@ -189,12 +185,12 @@ TTErr TTTimeEvent::Happen()
 {
     TTErr err = kTTErrNone;
 
-    // if the event muted
-    if (mMute)
-        return kTTErrNone;
+    // if the event is not muted
+    if (!mMute) {
     
-    // recall the state
-    err = mState->sendMessage(kTTSym_Run);
+        // recall the state
+        err = mState->sendMessage(kTTSym_Run);
+    }
     
     // notify observers
     sendNotification(kTTSym_EventHappened, TTObjectBasePtr(this));
