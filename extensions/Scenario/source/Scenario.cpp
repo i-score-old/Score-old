@@ -30,8 +30,11 @@ TIME_CONTAINER_CONSTRUCTOR,
 mNamespace(NULL),
 mViewZoom(TTValue(1., 1.)),
 mViewPosition(TTValue(0, 0)),
-mEditionSolver(NULL),
+mEditionSolver(NULL)
+#ifndef NO_EXECUTION_GRAPH
+,
 mExecutionGraph(NULL)
+#endif
 {
     TIME_PLUGIN_INITIALIZE
     
@@ -40,15 +43,19 @@ mExecutionGraph(NULL)
     addAttributeWithSetter(ViewZoom, kTypeLocalValue);
     addAttributeWithSetter(ViewPosition, kTypeLocalValue);
     
+#ifndef NO_EXECUTION_GRAPH
     addMessage(Compile);
+#endif
     
     // Create the edition solver
     mEditionSolver = new Solver();
-    
+
+#ifndef NO_EXECUTION_GRAPH
     // Create extended int
     plusInfinity = ExtendedInt(PLUS_INFINITY, 0);
     minusInfinity = ExtendedInt(MINUS_INFINITY, 0);
     integer0 = ExtendedInt(INTEGER, 0);
+#endif
     
     // it is possible to pass 2 events for the root scenario (which don't need a container by definition)
     if (arguments.size() == 2) {
@@ -75,10 +82,13 @@ Scenario::~Scenario()
         mEditionSolver = NULL;
     }
     
+#ifndef NO_EXECUTION_GRAPH
     if (mExecutionGraph) {
         delete mExecutionGraph;
         mExecutionGraph = NULL;
     }
+#endif
+    
 }
 
 TTErr Scenario::getParameterNames(TTValue& value)
@@ -103,6 +113,7 @@ TTErr Scenario::setViewPosition(const TTValue& value)
     return kTTErrNone;
 }
 
+#ifndef NO_EXECUTION_GRAPH
 TTErr Scenario::Compile()
 {
     TTValue         v;
@@ -117,12 +128,17 @@ TTErr Scenario::Compile()
 
     return kTTErrNone;
 }
+#endif
 
 TTErr Scenario::ProcessStart()
 {
+#ifndef NO_EXECUTION_GRAPH
     // start the execution graph
     mExecutionGraph->start();
-    
+#else
+    // go to the first time event (as they are sorted by date)
+    mTimeEventList.begin();
+#endif
     return kTTErrNone;
 }
 
@@ -152,6 +168,7 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
             progression = inputValue[0];
             realTime = inputValue[1];
             
+#ifndef NO_EXECUTION_GRAPH
             // update the mExecutionGraph to process the scenario
             if (mExecutionGraph->makeOneStep(realTime))
                 return kTTErrNone;
@@ -159,6 +176,28 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
             else
                 // Make the end happen
                 return getEndEvent()->sendMessage(kTTSym_Happen);
+#else
+            TTValue     v;
+            TTUInt32    date;
+            
+            // get the current time event (as they are sorted by date)
+            TTObjectBasePtr aTimeEvent = mTimeEventList.current()[0];
+            aTimeEvent->getAttributeValue(kTTSym_date, v);
+            date = v[0];
+            
+            // if the event date is lower than the real time
+            if (date < realTime) {
+                
+                // make the event to happen
+                aTimeEvent->sendMessage(kTTSym_Happen);
+                
+                // try to process the next event
+                mTimeEventList.next();
+                Process(inputValue, outputValue);
+            }
+            
+            return kTTErrNone;
+#endif
             
         }
     }
@@ -382,7 +421,6 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 {
     TTXmlHandlerPtr         aXmlHandler = NULL;
     SolverObjectMapIterator itSolver;
-    GraphObjectMapIterator  itGraph;
     TTValue                 v;
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
@@ -421,7 +459,9 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
             delete mEditionSolver;
             mEditionSolver = new Solver();
             
+#ifndef NO_EXECUTION_GRAPH
             clearGraph();
+#endif
             
             return kTTErrNone;
         }
@@ -837,8 +877,7 @@ TTErr Scenario::TimeEventTrigger(const TTValue& inputValue, TTValue& outputValue
             
             aTimeEvent = TTTimeEventPtr((TTObjectBasePtr)inputValue[0]);
             
-            // cf ECOMachine::receiveNetworkMessage(std::string netMessage)
-            
+#ifndef NO_EXECUTION_GRAPH
             if (mExecutionGraph) {
                 
                 // if the excecution graph is running
@@ -851,6 +890,10 @@ TTErr Scenario::TimeEventTrigger(const TTValue& inputValue, TTValue& outputValue
                     return kTTErrNone;
                 }
             }
+#else
+            return kTTErrNone;
+#endif
+            
         }
     }
     
@@ -867,6 +910,7 @@ TTErr Scenario::TimeEventDispose(const TTValue &inputValue, TTValue &outputValue
 
             aTimeEvent = TTTimeEventPtr((TTObjectBasePtr)inputValue[0]);
 
+#ifndef NO_EXECUTION_GRAPH
             if (mExecutionGraph) {
 
                 // if the execution graph is running
@@ -876,6 +920,10 @@ TTErr Scenario::TimeEventDispose(const TTValue &inputValue, TTValue &outputValue
                     mExecutionGraph->deactivateTransition(TransitionPtr(mTransitionsMap[aTimeEvent]));
                 }
             }
+#else
+            return kTTErrNone;
+#endif
+            
         }
     }
 
@@ -1355,6 +1403,7 @@ void Scenario::deleteTimeConditionCacheElement(const TTValue& oldCacheElement)
 #pragma mark Some Methods
 #endif
 
+#ifndef NO_EXECUTION_GRAPH
 void ScenarioGraphTimeEventCallBack(TTPtr arg, TTBoolean active)
 {
     // cf ECOMachine : crossAControlPointCallBack function
@@ -1375,3 +1424,4 @@ void ScenarioGraphIsEventReadyCallBack(TTPtr arg, TTBoolean isReady)
     TTValue v = isReady;
     aTimeEvent->setAttributeValue(kTTSym_ready, v);
 }
+#endif
