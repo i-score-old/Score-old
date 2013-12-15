@@ -136,6 +136,9 @@ TTErr Scenario::ProcessStart()
     // start the execution graph
     mExecutionGraph->start();
 #else
+    
+    TTLogMessage("Scenario::ProcessStart : without execution graph\n");
+    
     // go to the first time event (as they are sorted by date)
     mTimeEventList.begin();
 #endif
@@ -180,23 +183,28 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
             TTValue     v;
             TTUInt32    date;
             
-            // get the current time event (as they are sorted by date)
-            TTObjectBasePtr aTimeEvent = mTimeEventList.current()[0];
-            aTimeEvent->getAttributeValue(kTTSym_date, v);
-            date = v[0];
-            
-            // if the event date is lower than the real time
-            if (date < realTime) {
+            // if there is more event to process
+            if (mTimeEventList.end()) {
                 
-                // make the event to happen
-                aTimeEvent->sendMessage(kTTSym_Happen);
+                // get the current time event (as they are sorted by date)
+                TTObjectBasePtr aTimeEvent = mTimeEventList.current()[0];
+                aTimeEvent->getAttributeValue(kTTSym_date, v);
+                date = v[0];
                 
-                // try to process the next event
-                mTimeEventList.next();
-                Process(inputValue, outputValue);
+                // if the event date is lower than the real time
+                if (date < realTime) {
+                    
+                    // make the event to happen
+                    aTimeEvent->sendMessage(kTTSym_Happen);
+                    
+                    // try to process the next event
+                    mTimeEventList.next();
+                    return Process(inputValue, outputValue);
+                }
             }
-            
-            return kTTErrNone;
+            else
+                // Make the end happen
+                return getEndEvent()->sendMessage(kTTSym_Happen);
 #endif
             
         }
