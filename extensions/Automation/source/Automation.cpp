@@ -589,7 +589,10 @@ TTErr Automation::CurveGet(const TTValue& inputValue, TTValue& outputValue)
             
             address = inputValue[0];
             
-            return mCurves.lookup(address, outputValue);
+            mCurves.lookup(address, outputValue);
+            
+            if (outputValue.size())
+                return kTTErrNone;
         }
     }
     
