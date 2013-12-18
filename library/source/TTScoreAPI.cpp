@@ -79,34 +79,34 @@ TTErr TTScoreTimeEventRelease(TTTimeEventPtr *timeEvent, TTTimeContainerPtr time
         return TTObjectBaseRelease(TTObjectBaseHandle(timeEvent));
 }
 
-TTErr TTScoreTimeEventReadyCallbackCreate(TTTimeEventPtr timeEvent, TTObjectBasePtr *readyCallback, TTScoreTimeEventReadyCallbackPtr readyCallbackFunction)
+TTErr TTScoreTimeEventStatusCallbackCreate(TTTimeEventPtr timeEvent, TTObjectBasePtr *statusCallback, TTScoreTimeEventStatusCallbackPtr statusCallbackFunction)
 {
     TTValue         v, none;
-    TTValuePtr      readyAttributeBaton;
+    TTValuePtr      statusAttributeBaton;
     TTAttributePtr  anAttribute;
     TTErr           err;
     
-    readyCallback = NULL;
+    statusCallback = NULL;
     
-    // Create a TTCallback to observe time event ready attribute (using internal_TTScoreTimeEventReadyCallback)
-    TTObjectBaseInstantiate(TTSymbol("callback"), readyCallback, none);
+    // Create a TTCallback to observe time event status attribute (using internal_TTScoreTimeEventStatusCallback)
+    TTObjectBaseInstantiate(TTSymbol("callback"), statusCallback, none);
     
-    readyAttributeBaton = new TTValue(TTPtr(timeEvent)); // readyAttributeBaton will be deleted during the callback destruction
-    readyAttributeBaton->append(TTPtr(readyCallbackFunction));
+    statusAttributeBaton = new TTValue(TTPtr(timeEvent)); // statusAttributeBaton will be deleted during the callback destruction
+    statusAttributeBaton->append(TTPtr(statusCallbackFunction));
     
-    (*readyCallback)->setAttributeValue(kTTSym_baton, TTPtr(readyAttributeBaton));
-    (*readyCallback)->setAttributeValue(kTTSym_function, TTPtr(&internal_TTScoreTimeEventReadyCallback));
+    (*statusCallback)->setAttributeValue(kTTSym_baton, TTPtr(statusAttributeBaton));
+    (*statusCallback)->setAttributeValue(kTTSym_function, TTPtr(&internal_TTScoreTimeEventStatusCallback));
     
-    // register for ready attribute observation
-    err = timeEvent->findAttribute(kTTSym_ready, &anAttribute);
+    // register for status attribute observation
+    err = timeEvent->findAttribute(kTTSym_status, &anAttribute);
     
     if (!err)
-        anAttribute->registerObserverForNotifications(**readyCallback);
+        anAttribute->registerObserverForNotifications(**statusCallback);
     
     return err;
 }
 
-TTErr TTScoreTimeEventREadyCallbackRelease(TTTimeEventPtr timeEvent, TTObjectBasePtr *readyCallback)
+TTErr TTScoreTimeEventStatusCallbackRelease(TTTimeEventPtr timeEvent, TTObjectBasePtr *statusCallback)
 {
     
 }
@@ -322,19 +322,19 @@ TTErr TTScoreTimeProcessEndCallbackRelease(TTTimeProcessPtr timeProcess, TTObjec
 #pragma mark some internal functions
 #endif
 
-void internal_TTScoreTimeEventReadyCallback(TTPtr baton, TTValue& data)
+void internal_TTScoreTimeEventStatusCallback(TTPtr baton, TTValue& data)
 {
     TTValuePtr          b;
     TTTimeEventPtr      timeEvent;
-    TTScoreTimeEventReadyCallbackPtr readyCallbackFunction;
+    TTScoreTimeEventStatusCallbackPtr statusCallbackFunction;
 	
 	// unpack baton (time process, function)
 	b = (TTValuePtr)baton;
 	timeEvent = TTTimeEventPtr((TTPtr)(*b)[0]);
-    readyCallbackFunction = TTScoreTimeEventReadyCallbackPtr((TTPtr)(*b)[1]);
+    statusCallbackFunction = TTScoreTimeEventStatusCallbackPtr((TTPtr)(*b)[1]);
     
     // call the function
-    (*readyCallbackFunction)(timeEvent, TTBoolean(data[0]));
+    (*statusCallbackFunction)(timeEvent, TTBoolean(data[0]));
 }
 
 void internal_TTScoreTimeProcessStartCallback(TTPtr baton, TTValue& data)

@@ -42,21 +42,21 @@ TTErr TTSCORE_EXPORT TTScoreTimeEventCreate(TTTimeEventPtr *timeEvent, TTUInt32 
  @return                        kTTErrGeneric if the deletion fails */
 TTErr TTSCORE_EXPORT TTScoreTimeEventRelease(TTTimeEventPtr *timeEvent, TTTimeContainerPtr timeContainer = NULL);
 
-/** Define callback function to be notified when a time event becomes ready or not */
-typedef void (*TTScoreTimeEventReadyCallback)(TTTimeEventPtr, TTBoolean);
-typedef	TTScoreTimeEventReadyCallback* TTScoreTimeEventReadyCallbackPtr;
+/** Define callback function to be notified when a time event status change */
+typedef void (*TTScoreTimeEventStatusCallback)(TTTimeEventPtr, TTBoolean);
+typedef	TTScoreTimeEventStatusCallback* TTScoreTimeEventStatusCallbackPtr;
 
-/** Create a callback to be notified when a time event becomes ready or not
+/** Create a callback to be notified when a time event status change
  @param	timeEvent               a time event instance
- @param readyCallback           a handler on a callback instance
- @param readyCallbackFunction   the TTScoreTimeEventReadyCallback function to call
+ @param statusCallback          a handler on a callback instance
+ @param statusCallbackFunction  the TTScoreTimeEventStatusCallback function to call
  @return                        kTTErrGeneric if the creation fails */
-TTErr TTSCORE_EXPORT TTScoreTimeEventReadyCallbackCreate(TTTimeEventPtr timeEvent, TTObjectBasePtr *readyCallback, TTScoreTimeEventReadyCallbackPtr readyCallbackFunction);
+TTErr TTSCORE_EXPORT TTScoreTimeEventStatusCallbackCreate(TTTimeEventPtr timeEvent, TTObjectBasePtr *statusCallback, TTScoreTimeEventStatusCallbackPtr statusCallbackFunction);
 
-/** Delete a callback used to be notified when a time event becomes ready or not
- @param readyCallback           a handler on a callback instance
+/** Delete a callback used to be notified when a time event becomes status or not
+ @param statusCallback          a handler on a callback instance
  @return                        kTTErrGeneric if the deletion fails */
-TTErr TTSCORE_EXPORT TTScoreTimeEventREadyCallbackRelease(TTTimeEventPtr timeEvent, TTObjectBasePtr *readyCallback);
+TTErr TTSCORE_EXPORT TTScoreTimeEventREadyCallbackRelease(TTTimeEventPtr timeEvent, TTObjectBasePtr *statusCallback);
 
 /*
     Functions for time processes
@@ -154,10 +154,10 @@ TTErr TTSCORE_EXPORT TTScoreTimeProcessEndCallbackRelease(TTTimeProcessPtr timeP
 #pragma mark some internal functions
 #endif
 
-/** Define callback function used internally to call a TTScoreTimeEventReadyCallback relative to a time event
- @param	baton                   a time event instance and a TTScoreTimeEventReadyCallback function to call with
+/** Define callback function used internally to call a TTScoreTimeEventStatusCallback relative to a time event
+ @param	baton                   a time event instance and a TTScoreTimeEventStatusCallback function to call with
  @param	data                    nothing */
-void internal_TTScoreTimeEventReadyCallback(TTPtr baton, TTValue& data);
+void internal_TTScoreTimeEventStatusCallback(TTPtr baton, TTValue& data);
 
 /** Define callback function used internally to call a TTScoreTimeProcessStartCallback relative to a time process
  @param	baton                   a time process instance and a TTScoreTimeProcessStartCallback function to call with

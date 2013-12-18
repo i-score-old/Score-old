@@ -118,11 +118,20 @@ TTErr Scenario::Compile()
     TTValue         v;
     TTUInt32        timeOffset;
     TTBoolean       compiled;
+    TTObjectBasePtr aTimeEvent;
     TTObjectBasePtr aTimeProcess;
     
     // get scheduler time offset
     mScheduler->getAttributeValue(kTTSym_offset, v);
     timeOffset = TTFloat64(v[0]);
+    
+    // set all time events to a waiting status
+    for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next()) {
+        
+        aTimeEvent = mTimeEventList.current()[0];
+        
+        aTimeEvent->setAttributeValue(kTTSym_status, kTTSym_eventWaiting);
+    }
     
 #ifndef NO_EXECUTION_GRAPH
     // compile the mExecutionGraph to prepare scenario execution from the scheduler time offset
@@ -1446,7 +1455,7 @@ void ScenarioGraphIsEventReadyCallBack(TTPtr arg, TTBoolean isReady)
 {
 	TTTimeEventPtr aTimeEvent = (TTTimeEventPtr) arg;
     
-    TTValue v = isReady;
-    aTimeEvent->setAttributeValue(kTTSym_ready, v);
+    if (isReady)
+        aTimeEvent->setAttributeValue(kTTSym_status, kTTSym_eventPending);
 }
 #endif

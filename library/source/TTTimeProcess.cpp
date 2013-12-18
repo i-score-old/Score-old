@@ -120,12 +120,8 @@ mEndEvent(NULL)
     // needed to be notified by events
     addMessageWithArguments(EventDateChanged);
     addMessageProperty(EventDateChanged, hidden, YES);
-    addMessageWithArguments(EventReadyChanged);
-    addMessageProperty(EventReadyChanged, hidden, YES);
-    addMessageWithArguments(EventHappened);
-    addMessageProperty(EventHappened, hidden, YES);
-    addMessageWithArguments(EventDisposed);
-    addMessageProperty(EventDisposed, hidden, YES);
+    addMessageWithArguments(EventStatusChanged);
+    addMessageProperty(EventStatusChanged, hidden, YES);
     
     // Creation of a scheduler based on the System scheduler plugin
     // Prepare callback argument to be notified of :
@@ -517,90 +513,76 @@ TTErr TTTimeProcess::EventDateChanged(const TTValue& inputValue, TTValue& output
     return kTTErrGeneric;
 }
 
-TTErr TTTimeProcess::EventReadyChanged(const TTValue& inputValue, TTValue& outputValue)
+TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outputValue)
 {
-    TT_ASSERT("TTTimeProcess::EventReadyChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
+    TT_ASSERT("TTTimeProcess::EventStatusChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
     
     TTObjectBasePtr aTimeEvent = inputValue[0];
+    TTSymbol        status;
+    TTValue         v;
     
-    if (aTimeEvent == mStartEvent) {
-        
+    aTimeEvent->getAttributeValue(kTTSym_status, v);
+    status = v[0];
+    
+    // event wainting case :
+    if (status == kTTSym_eventWaiting) {
         return kTTErrNone;
     }
-    else if (aTimeEvent == mEndEvent) {
-        
+    // event pending case :
+    else if (status == kTTSym_eventPending) {
         return kTTErrNone;
     }
-    
-    TTLogError("TTTimeProcess::EventReadyChanged : wrong event\n");
-    return kTTErrGeneric;
-}
-
-TTErr TTTimeProcess::EventHappened(const TTValue& inputValue, TTValue& outputValue)
-{
-    TT_ASSERT("TTTimeProcess::EventHappened : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
-    
-    TTObjectBasePtr aTimeEvent = inputValue[0];
-    
-    if (aTimeEvent == mStartEvent) {
+    // event happened case :
+    else if (status == kTTSym_eventHappened) {
         
-        // if the time process is muted
-        if (mMute)
-            return kTTErrNone;
+        if (aTimeEvent == mStartEvent) {
             
-        // note : don't set start event ready attribute to NO : it is to the container to take this decision
+            // if the time process is muted
+            if (mMute)
+                return kTTErrNone;
             
-        // use the specific start process method of the time process
-        if (!ProcessStart()) {
+            // note : don't set start event ready attribute to NO : it is to the container to take this decision
             
-            // notify start message observers
-            sendNotification(kTTSym_ProcessStarted, TTObjectBasePtr(this));
-            
-            // play the process
-            return Play();
+            // use the specific start process method of the time process
+            if (!ProcessStart()) {
+                
+                // notify start message observers
+                sendNotification(kTTSym_ProcessStarted, TTObjectBasePtr(this));
+                
+                // play the process
+                return Play();
+            }
         }
-    }
-    else if (aTimeEvent == mEndEvent) {
-        
-        // if the time process is muted
-        if (mMute)
-            return kTTErrNone;
+        else if (aTimeEvent == mEndEvent) {
             
-        // stop the process
-        Stop();
-        
-        // note : don't set end event ready attribute to NO : it is to the container to take this decision
-        
-        // use the specific process end method of the time process
-        if (!ProcessEnd()) {
+            // if the time process is muted
+            if (mMute)
+                return kTTErrNone;
             
-            // notify observers
-            sendNotification(kTTSym_ProcessEnded, TTObjectBasePtr(this));
+            // stop the process
+            Stop();
             
-            return kTTErrNone;
+            // note : don't set end event ready attribute to NO : it is to the container to take this decision
+            
+            // use the specific process end method of the time process
+            if (!ProcessEnd()) {
+                
+                // notify observers
+                sendNotification(kTTSym_ProcessEnded, TTObjectBasePtr(this));
+                
+                return kTTErrNone;
+            }
         }
-    }
-    
-    TTLogError("TTTimeProcess::EventHappened : wrong event\n");
-    return kTTErrGeneric;
-}
-
-TTErr TTTimeProcess::EventDisposed(const TTValue& inputValue, TTValue& outputValue)
-{
-    TT_ASSERT("TTTimeProcess::EventDisposed inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
-    
-    TTObjectBasePtr aTimeEvent = inputValue[0];
-    
-    if (aTimeEvent == mStartEvent) {
         
-        return kTTErrNone;
+        TTLogError("TTTimeProcess::EventStatusChanged : wrong event happened\n");
+        return kTTErrGeneric;
     }
-    else if (aTimeEvent == mEndEvent) {
-        
+    // event disposed case :
+    else if (status == kTTSym_eventDisposed) {
         return kTTErrNone;
     }
     
-    TTLogError("TTTimeProcess::EventDisposed : wrong event\n");
+    TTLogError("TTTimeProcess::EventStatusChanged : wrong status\n");
     return kTTErrGeneric;
 }
 

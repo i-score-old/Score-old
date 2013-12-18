@@ -20,6 +20,16 @@
 
 #include "TTScore.h"
 
+/** \ingroup enums
+ Event status flag
+ */
+enum TTTimeEventStatusFlag {
+    kEventWaiting = 0,					///< this flag means the event is not ready to happened
+	kEventPending = 1,					///< this flag means the event is conditionned and ready to happened
+	kEventHappened = 2,                ///< this flag means the event have already happened
+	kEventDisposed = 3					///< this flag means  the event have been disposed
+};
+
 /**	a class to define an event
  
  The TTTimeEvent class allows to ...
@@ -41,13 +51,13 @@ protected :
 
     TTUInt32                        mDate;                          ///< the date of the event
     
+    TTSymbol                        mStatus;                        ///< the status of the event : kTTSym_eventWaiting, kTTSym_eventPending, kTTSym_eventHappened, kTTSym_eventdisposed.
+    
     TTBoolean                       mMute;                          ///< is the time event muted ?
     
     TTObjectBasePtr                 mState;                         ///< a state handled by the event
     
     TTObjectBasePtr                 mCondition;                     ///< a pointer to an optional condition object to make the event interactive
-    
-    TTBoolean                       mReady;                         ///< is the event ready to happen ?
  
 private :
     
@@ -61,10 +71,10 @@ private :
      @return                kTTErrNone */
     TTErr           setCondition(const TTValue& value);
     
-    /** Enable or disable the event to allow it to happen
-     @param	value           a boolean
+    /** Set the event status
+     @param	value           a TTTimeEventStatusFlag
      @return                kTTErrNone */
-    TTErr           setReady(const TTValue& value);
+    TTErr           setStatus(const TTValue& value);
     
     /** Try to make the event happen (possibility to use the scenario to check event validity)
      @return                an error code returned by the trigger method */

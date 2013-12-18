@@ -23,9 +23,7 @@ TTSCORE_EXPORT TTSymbol         kTTSym_TimeEvent                (("TimeEvent"));
 // notifications
 TTSCORE_EXPORT TTSymbol         kTTSym_ConditionReadyChanged    (("ConditionReadyChanged"));
 TTSCORE_EXPORT TTSymbol         kTTSym_EventDateChanged         (("EventDateChanged"));
-TTSCORE_EXPORT TTSymbol         kTTSym_EventDisposed            (("EventDisposed"));
-TTSCORE_EXPORT TTSymbol         kTTSym_EventHappened            (("EventHappened"));
-TTSCORE_EXPORT TTSymbol         kTTSym_EventReadyChanged        (("EventReadyChanged"));
+TTSCORE_EXPORT TTSymbol         kTTSym_EventStatusChanged       (("EventStatusChanged"));
 TTSCORE_EXPORT TTSymbol         kTTSym_ProcessStarted           (("ProcessStarted"));
 TTSCORE_EXPORT TTSymbol         kTTSym_ProcessEnded             (("ProcessEnded"));
 
@@ -42,6 +40,10 @@ TTSCORE_EXPORT TTSymbol         kTTSym_durationMin              (("durationMin")
 TTSCORE_EXPORT TTSymbol         kTTSym_durationMax              (("durationMax"));
 TTSCORE_EXPORT TTSymbol         kTTSym_endDate                  (("endDate"));
 TTSCORE_EXPORT TTSymbol         kTTSym_event                    (("event"));
+TTSCORE_EXPORT TTSymbol         kTTSym_eventDisposed            (("eventDisposed"));
+TTSCORE_EXPORT TTSymbol         kTTSym_eventHappened            (("eventHappened"));
+TTSCORE_EXPORT TTSymbol         kTTSym_eventPending             (("eventPending"));
+TTSCORE_EXPORT TTSymbol         kTTSym_eventWaiting             (("eventWaiting"));
 TTSCORE_EXPORT TTSymbol         kTTSym_expression               (("expression"));
 TTSCORE_EXPORT TTSymbol         kTTSym_Goto                     (("Goto"));
 TTSCORE_EXPORT TTSymbol         kTTSym_Happen                   (("Happen"));
@@ -60,6 +62,7 @@ TTSCORE_EXPORT TTSymbol         kTTSym_sampled                  (("sampled"));
 TTSCORE_EXPORT TTSymbol         kTTSym_samples                  (("samples"));
 TTSCORE_EXPORT TTSymbol         kTTSym_speed                    (("speed"));
 TTSCORE_EXPORT TTSymbol         kTTSym_startDate                (("startDate"));
+TTSCORE_EXPORT TTSymbol         kTTSym_status                   (("status"));
 TTSCORE_EXPORT TTSymbol         kTTSym_Trigger                  (("Trigger"));
 TTSCORE_EXPORT TTSymbol         kTTSym_verticalPosition         (("verticalPosition"));
 TTSCORE_EXPORT TTSymbol         kTTSym_verticalSize             (("verticalSize"));

@@ -377,26 +377,39 @@ TTErr TTTimeCondition::EventDateChanged(const TTValue& inputValue, TTValue& outp
     return kTTErrGeneric;
 }
 
-TTErr TTTimeCondition::EventReadyChanged(const TTValue& inputValue, TTValue& outputValue)
+TTErr TTTimeCondition::EventStatusChanged(const TTValue& inputValue, TTValue& outputValue)
 {
-    TT_ASSERT("TTTimeCondition::EventReadyChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
+    TT_ASSERT("TTTimeCondition::EventStatusChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
     
-    TTTimeEventPtr      event = TTTimeEventPtr(TTObjectBasePtr(inputValue[0]));
-    TTCaseMapIterator   it = mCases.find(event);
-    TTBoolean           ready;
-    TTValue             v;
+    TTTimeEventPtr          event = TTTimeEventPtr(TTObjectBasePtr(inputValue[0]));
+    TTCaseMapIterator       it = mCases.find(event);
+    TTSymbol                status;
+    TTValue                 v;
     
     // if the event exists
     if (it != mCases.end()) {
         
-        // get the ready state
-        event->getAttributeValue(kTTSym_ready, v);
-        ready = v[0];
+        // get the status
+        event->getAttributeValue(kTTSym_status, v);
+        status = v[0];
+        
+        if (status == kTTSym_eventWaiting) {
+            ;
+        }
+        else if (status == kTTSym_eventPending) {
+            ;
+        }
+        else if (status == kTTSym_eventHappened) {
+            ;
+        }
+        else if (status == kTTSym_eventDisposed) {
+            ;
+        }
         
         return kTTErrNone;
     }
     
-    TTLogError("TTTimeCondition::EventReadyChanged : wrong event");
+    TTLogError("TTTimeCondition::EventStatusChanged : wrong event");
     return kTTErrGeneric;
 }
 
