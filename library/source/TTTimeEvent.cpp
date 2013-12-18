@@ -25,10 +25,10 @@ TT_BASE_OBJECT_CONSTRUCTOR,
 mContainer(NULL),
 mName(kTTSymEmpty),
 mDate(0),
+mStatus(kEventWaiting),
 mMute(NO),
 mState(NULL),
-mCondition(NULL),
-mReady(YES)
+mCondition(NULL)
 {
     TTValue none;
     
@@ -45,7 +45,7 @@ mReady(YES)
     addAttribute(Mute, kTypeBoolean);
     addAttribute(State, kTypeObject);
     addAttributeWithSetter(Condition, kTypeObject);
-    addAttributeWithSetter(Ready, kTypeBoolean);
+    addAttributeWithSetter(Status, kTypeSymbol);
     
     addMessage(Trigger);
     addMessage(Happen);
@@ -116,21 +116,21 @@ TTErr TTTimeEvent::setCondition(const TTValue& value)
     return kTTErrNone;
 }
 
-TTErr TTTimeEvent::setReady(const TTValue& value)
+TTErr TTTimeEvent::setStatus(const TTValue& value)
 {
-    // set the ready value
-    mReady = value[0];
+    // set status
+    mStatus = value[0];
     
     // notify each attribute observers
-    sendNotification(kTTSym_EventReadyChanged, TTObjectBasePtr(this));
+    sendNotification(kTTSym_EventStatusChanged, TTObjectBasePtr(this));
     
     return kTTErrNone;
 }
 
 TTErr TTTimeEvent::Trigger()
 {
-    // if not ready : do nothing
-    if (!mReady)
+    // if not pending : do nothing
+    if (mStatus != kTTSym_eventPending)
         return kTTErrGeneric;
     
     // if not conditionned : do nothing
@@ -158,8 +158,8 @@ TTErr TTTimeEvent::Dispose()
     TTValue none;
     TTErr   err = kTTErrNone;
     
-    // if not ready : do nothing
-    if (!mReady)
+    // if not pending : do nothing
+    if (mStatus != kTTSym_eventPending)
         return kTTErrGeneric;
     
     // if not conditionned : do nothing
@@ -167,18 +167,14 @@ TTErr TTTimeEvent::Dispose()
         return kTTErrGeneric;
     
     // use container to make the event dispose
-    if(mContainer) {
+    if (mContainer) {
         
         TTValue v = TTObjectBasePtr(this);
         return mContainer->sendMessage(TTSymbol("TimeEventDispose"), v, none);
     }
     
-    // TO : there isn't "don't happen" message so what do we do here ?
-    else {
-        
-        sendNotification(kTTSym_EventDisposed, TTObjectBasePtr(this));
-        return kTTErrNone;
-    }
+    setStatus(kTTSym_eventDisposed);
+    return kTTErrNone;
 }
 
 TTErr TTTimeEvent::Happen()
@@ -192,9 +188,7 @@ TTErr TTTimeEvent::Happen()
         err = mState->sendMessage(kTTSym_Run);
     }
     
-    // notify observers
-    sendNotification(kTTSym_EventHappened, TTObjectBasePtr(this));
-    
+    setStatus(kTTSym_eventHappened);
     return err;
 }
 

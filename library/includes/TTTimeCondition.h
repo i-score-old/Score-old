@@ -158,11 +158,11 @@ private :
      @return                kTTErrNone */
     TTErr           EventDateChanged(const TTValue& inputValue, TTValue& outputValue);
     
-    /** To be notified when an event ready changed
-     @param inputValue      the event which have changed his ready state
+    /** To be notified when an event status changed
+     @param inputValue      the event which have changed his status
      @param outputValue     nothing
      @return                kTTErrNone */
-    TTErr           EventReadyChanged(const TTValue& inputValue, TTValue& outputValue);
+    TTErr           EventStatusChanged(const TTValue& inputValue, TTValue& outputValue);
     
     /**  Helper functions to manage receivers : add a receiver for to the address if no receiver already exists
      @param	anAddress      an address to observe */

@@ -235,24 +235,12 @@ private :
      @return                kTTErrNone */
     TTErr           EventDateChanged(const TTValue& inputValue, TTValue& outputValue);
     
-    /** To be notified when an event ready changed
-     @param inputValue      the event which have changed his ready state
+    /** To be notified when an event status changed
+     @param inputValue      the event which have changed his status
      @param outputValue     nothing
      @return                kTTErrNone */
-    TTErr           EventReadyChanged(const TTValue& inputValue, TTValue& outputValue);
+    TTErr           EventStatusChanged(const TTValue& inputValue, TTValue& outputValue);
     
-    /** To be notified when an event happened
-     @param inputValue      the event which have happened
-     @param outputValue     nothing
-     @return                kTTErrNone */
-    TTErr           EventHappened(const TTValue& inputValue, TTValue& outputValue);
-    
-    /** To be notified when an event is disposed
-     @param inputValue      the event which have been disposed
-     @param outputValue     nothing
-     @return                kTTErrNone */
-    TTErr           EventDisposed(const TTValue& inputValue, TTValue& outputValue);
-
 protected :
     
     /** get the start event
