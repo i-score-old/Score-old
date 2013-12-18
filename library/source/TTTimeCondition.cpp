@@ -462,9 +462,15 @@ TTErr TTTimeCondition::EventDateChanged(const TTValue& inputValue, TTValue& outp
     
     TTTimeEventPtr      event = TTTimeEventPtr(TTObjectBasePtr(inputValue[0]));
     TTCaseMapIterator   it = mCases.find(event);
+    TTUInt32            date;
+    TTValue             v;
     
     // if the event exists
     if (it != mCases.end()) {
+        
+        // get the date
+        event->getAttributeValue(kTTSym_date, v);
+        date = v[0];
         
         return kTTErrNone;
     }
@@ -479,10 +485,15 @@ TTErr TTTimeCondition::EventReadyChanged(const TTValue& inputValue, TTValue& out
     
     TTTimeEventPtr      event = TTTimeEventPtr(TTObjectBasePtr(inputValue[0]));
     TTCaseMapIterator   it = mCases.find(event);
+    TTBoolean           ready;
+    TTValue             v;
     
     // if the event exists
     if (it != mCases.end()) {
         
+        // get the ready state
+        event->getAttributeValue(kTTSym_ready, v);
+        ready = v[0];
         
         return kTTErrNone;
     }
