@@ -73,7 +73,9 @@ protected :
     
     TTHash                          mReceivers;                     ///< a table of receivers stored by address
     TTCaseMap                       mCases;                         ///< a map linking an event to its comportment
- 
+
+    TTUInt8                         mUnreadyCounter;                ///< counting the number of unready events
+
 private :
     
     /** Enable or disable the time condition to allow it to be tested

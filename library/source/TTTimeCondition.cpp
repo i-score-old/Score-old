@@ -23,7 +23,8 @@
 
 TT_BASE_OBJECT_CONSTRUCTOR,
 mContainer(NULL),
-mReady(YES)
+mReady(NO),
+mUnreadyCounter(0)
 {
     TT_ASSERT("Correct number of args to create TTTimeCondition", arguments.size() == 1);
     
@@ -153,6 +154,10 @@ TTErr TTTimeCondition::EventAdd(const TTValue& inputValue, TTValue& outputValue)
             
             // insert the event with an expression
             mCases.insert({{event, aComportment}});
+
+            // increment the count of unready events
+            // CB TODO : could the event already be ready ? huge bug ! no mean to check
+            mUnreadyCounter++;
             
             // tell the event it is conditioned
             v = TTObjectBasePtr(this);
@@ -189,6 +194,9 @@ TTErr TTTimeCondition::EventRemove(const TTValue& inputValue, TTValue& outputVal
         
         // remove the case
         mCases.erase(it);
+
+        // decrement the unready counter
+        mUnreadyCounter--;
         
         // clean receivers
         if ((addr = aComportment.trigger.getAddress()) != kTTAdrsEmpty)
@@ -495,17 +503,14 @@ TTErr TTTimeCondition::EventStatusChanged(const TTValue& inputValue, TTValue& ou
         event->getAttributeValue(kTTSym_status, v);
         status = v[0];
         
-        if (status == kTTSym_eventWaiting) {
-            ;
-        }
-        else if (status == kTTSym_eventPending) {
-            ;
-        }
-        else if (status == kTTSym_eventHappened) {
-            ;
-        }
-        else if (status == kTTSym_eventDisposed) {
-            ;
+        if (status == kTTSym_eventPending) {
+            if (--mUnreadyCounter == 0) {
+                setReady(YES);
+            }
+        } else {
+            if (mUnreadyCounter++ == 0) {
+                setReady(NO);
+            }
         }
         
         return kTTErrNone;
@@ -600,10 +605,16 @@ TTErr TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data)
     TTList              timeEventToTrigger;
     TTList              timeEventToDispose;
     TTBoolean           dispose = NO;
+    TTValue             v;
 	
 	// unpack baton (condition, address)
 	b = (TTValuePtr)baton;
 	aTimeCondition = TTTimeConditionPtr(TTObjectBasePtr((*b)[0]));
+
+    // only if the condition is ready
+    aTimeCondition->getAttributeValue(kTTSym_ready, v);
+    if (!v[0]) return kTTErrNone;
+
     anAddress = (*b)[1];
     
     // for each event's expressions matching the incoming address
