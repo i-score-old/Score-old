@@ -39,6 +39,12 @@ TTErr Interval::getParameterNames(TTValue& value)
 	return kTTErrNone;
 }
 
+TTErr Interval::Compile()
+{
+    mCompiled = YES;
+    return kTTErrNone;
+}
+
 TTErr Interval::ProcessStart()
 {
     return kTTErrNone;

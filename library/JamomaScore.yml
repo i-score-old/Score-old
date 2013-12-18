@@ -5,6 +5,7 @@ sources:
   - source/TTScoreAPI.cpp
   - source/TTScore.cpp
   - source/TTScoreSymbolCache.cpp
+  - source/Curve.cpp
   - source/Expression.cpp
   - source/TTTimeCondition.cpp
   - source/TTTimeContainer.cpp

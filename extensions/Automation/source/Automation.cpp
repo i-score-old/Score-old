@@ -41,6 +41,8 @@ TIME_PROCESS_CONSTRUCTOR
     addMessageWithArguments(CurveRemove);
     addMessage(Clear);
     addMessageWithArguments(CurveRecord);
+    
+    mScheduler->setAttributeValue(TTSymbol("granularity"), TTFloat64(1.));
 }
 
 Automation::~Automation()
@@ -61,6 +63,38 @@ TTErr Automation::getCurveAddresses(TTValue& value)
     return mCurves.getKeys(value);
 }
 
+TTErr Automation::Compile()
+{
+    TTValue         duration, keys, objects, none;
+    TTSymbol        key;
+    TTObjectBasePtr curve;
+    TTUInt32        i, j;
+    
+    // get the current duration
+    getAttributeValue(kTTSym_duration, duration);
+    
+    // sample all curves for the current duration
+    mCurves.getKeys(keys);
+    
+    for (i = 0; i < keys.size(); i++) {
+        
+        key = keys[i];
+        mCurves.lookup(key, objects);
+        
+        // sample each indexed curves
+        for (j = 0; j < objects.size(); j++) {
+            
+            curve = objects[j];
+            curve->sendMessage(TTSymbol("Sample"), duration, none);
+        }
+    }
+    
+    // compilation done
+    mCompiled = YES;
+    
+    return kTTErrNone;
+}
+
 TTErr Automation::ProcessStart()
 {
     TTValue         v, keys, objects, vStart, none;
@@ -70,7 +104,7 @@ TTErr Automation::ProcessStart()
     TTUInt32        i, j;
     TTErr           err;
     
-    // reset the next times value to the sample rate of each curves
+    // set curves on the first sample and prepare new curves to record the address value
     mCurves.getKeys(keys);
 
     for (i = 0; i < keys.size(); i++) {
@@ -78,17 +112,14 @@ TTErr Automation::ProcessStart()
         key = keys[i];
         mCurves.lookup(key, objects);
         
-        // in case of recording it could have no objects
-        if (objects.size()) {
+        // set each indexed curves on the first sample
+        for (j = 0; j < objects.size(); j++) {
             
-            // update the next time with the first indexed curve sample rate
-            curve = objects[0];
-            curve->getAttributeValue(TTSymbol("sampleRate"), v);
-            
-            mNextTimes[i] = TTUInt32(v[0]);
+            curve = objects[j];
+            CurvePtr(curve)->begin();
         }
         
-        // prepare new curves to record the address value
+        // a curve with a receiver is recording
         if (!mReceivers.lookup(key, v)) {
             
             aReceiver = v[0];
@@ -119,15 +150,9 @@ TTErr Automation::ProcessStart()
                     err = TTObjectBaseInstantiate(TTSymbol("Curve"), &curve, none);
                     
                     if (!err) {
-                        // set the curve in record mode
-                        curve->setAttributeValue(TTSymbol("recording"), YES);
                         
                         // store the first point
-                        v = TTFloat64(0.);          // progression
-                        v.append(TTFloat64(vStart[j]));// value
-                        v.append(TTFloat64(1.));    // base
-                        
-                        curve->setAttributeValue(TTSymbol("parameters"), v);
+                        CurvePtr(curve)->append(TTValue(0., vStart[j]));
                         
                         // index the curve
                         objects[j] = curve;
@@ -156,6 +181,7 @@ TTErr Automation::ProcessEnd()
     TTObjectBasePtr curve;
     TTObjectBasePtr aReceiver;
     TTUInt32        i, j;
+    TTBoolean       change = NO;
     
     // edit last point of each recording curves
     mReceivers.getKeys(keys);
@@ -180,37 +206,37 @@ TTErr Automation::ProcessEnd()
                     
                     curve = objects[j];
                     
-                    // get current curve parameters
-                    curve->getAttributeValue(TTSymbol("parameters"), v);
-                    
                     // store the last point
-                    v.append(TTFloat64(1.));    // progression
-                    v.append(TTFloat64(vEnd[j]));// value
-                    v.append(TTFloat64(1.));    // base
+                    CurvePtr(curve)->append(TTValue(1., vEnd[j]));
                     
-                    curve->setAttributeValue(TTSymbol("parameters"), v);
-
-                    // set the curve not in record mode
-                    curve->setAttributeValue(TTSymbol("recording"), NO);
+                    // set the curve in record mode
+                    curve->setAttributeValue(kTTSym_recorded, YES);
+                    
+                    // set the curve as already sampled
+                    curve->setAttributeValue(kTTSym_sampled, YES);
+                    
+                    // some parameters have changed
+                    change = YES;
                 }
             }
         }
     }
+    
+    // is the last compilation still valid ?
+    mCompiled = !change && mCompiled;
 
     return kTTErrNone;
 }
 
 TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTFloat64       progression, realTime, result;
+    TTFloat64       progression, realTime, sample;
     TTValue         v, keys, objects, valueToSend, none;
     TTSymbol        key;
     TTAddress       address;
-    TTObjectBasePtr curve;
-    TTNodePtr		aNode;
-    TTSymbol        attribute;
-	TTObjectBasePtr	anObject;
+    TTObjectBasePtr curve, sender;
     TTUInt32        i, j;
+    TTBoolean       redundancy;
 	TTErr			err;
     
     if (inputValue.size() == 2) {
@@ -232,74 +258,42 @@ TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
             for (i = 0; i < keys.size(); i++) {
                 
                 key = keys[i];
-                
-                // a curve is processed only if the realTime is greater than its next time
-                if (TTUInt32(mNextTimes[i]) > realTime)
-                    continue;
-                
+                                
                 // a curve is processed only if it is not recording
                 if (!mReceivers.lookup(key, objects))
                     continue;
                 
                 mCurves.lookup(key, objects);
-                curve = objects[0];
-                
-                // update the next time with the first indexed curve sample rate
-                curve->getAttributeValue(TTSymbol("sampleRate"), v);
-                mNextTimes[i] = TTUInt32(mNextTimes[i]) + TTUInt32(v[0]);
-                
+
                 // process each indexed curve to fill the value to send
                 valueToSend.clear();
                 valueToSend.resize(objects.size());
                 err = kTTErrNone;
+                redundancy = YES;
                 for (j = 0; j < objects.size(); j++) {
                     
                     curve = objects[j];
                     
-                    err = CurvePtr(curve)->calculate(progression, result);
+                    err = CurvePtr(curve)->nextSampleAt(progression, sample);
                     
-                    // if an indexed curve cannot be processed (because it is not active for example)
-                    if (err)
+                    // if no value
+                    if (err == kTTErrValueNotFound)
                         break;
                     
-                    valueToSend[j] = result;
+                    redundancy &= err == kTTErrGeneric;
+                    
+                    valueToSend[j] = sample;
                 }
                 
-                // if an indexed curve cannot be processed (because it is not active for example)
-                if (err)
+                // if no value
+                if (err == kTTErrValueNotFound || redundancy)
                     continue;
                 
-                // look for the object at the address
-                address = TTAddress(key);
-                err = getDirectoryFrom(address)->getTTNode(address, &aNode);
-                
-                if (!err) {
+                // look for the sender at the address
+                if (!mSenders.lookup(key, objects)) {
                     
-                    anObject = aNode->getObject();
-                    
-                    // check object type
-                    if (anObject) {
-                        
-                        // default attribute is value attribute
-                        if (address.getAttribute() == kTTSymEmpty)
-                            attribute = kTTSym_value;
-                        else
-                            attribute = address.getAttribute();
-                        
-                        // for data object
-                        if (anObject->getName() == kTTSym_Data) {
-                            
-                            // send the line using the command message
-                            if (attribute == kTTSym_value) {
-                                
-                                anObject->sendMessage(kTTSym_Command, valueToSend, none);
-                                continue;
-                            }
-                        }
-                        
-                        // any other case : set attribute
-                        anObject->setAttributeValue(attribute, valueToSend);
-                    }
+                    sender = objects[0];
+                    sender->sendMessage(kTTSym_Send, valueToSend, none);
                 }
             }
         }
@@ -321,7 +315,7 @@ TTErr Automation::Goto(const TTValue& inputValue, TTValue& outputValue)
     TTValue         v, keys, objects, none;
     TTSymbol        key;
     TTObjectBasePtr curve;
-    TTUInt32        i;
+    TTUInt32        i, j;
     
     if (inputValue.size() == 1) {
         
@@ -336,7 +330,14 @@ TTErr Automation::Goto(const TTValue& inputValue, TTValue& outputValue)
             timeOffset = inputValue[0];
             mScheduler->setAttributeValue(kTTSym_offset, TTFloat64(timeOffset));
             
-            // reset the next times value to the sample rate of each curves
+            // get scheduler progression and realTime
+            mScheduler->getAttributeValue(TTSymbol("progression"), v);
+            progression = TTFloat64(v[0]);
+            
+            mScheduler->getAttributeValue(TTSymbol("realTime"), v);
+            realTime = TTFloat64(v[0]);
+            
+            // reset each curves on its first sample
             mCurves.getKeys(keys);
             
             for (i = 0; i < keys.size(); i++) {
@@ -344,24 +345,13 @@ TTErr Automation::Goto(const TTValue& inputValue, TTValue& outputValue)
                 key = keys[i];
                 mCurves.lookup(key, objects);
                 
-                // in case of recording it could have no objects
-                if (objects.size()) {
+                for (j = 0; j < objects.size(); j++) {
                     
-                    // update the next time with the first indexed curve sample rate
-                    curve = objects[0];
-                    curve->getAttributeValue(TTSymbol("sampleRate"), v);
+                    curve = objects[j];
                     
-                    mNextTimes[i] = TTUInt32(v[0]);
+                    CurvePtr(curve)->begin();
                 }
             }
-            
-            // TODO : TTTimeProcess should extend Scheduler class
-            // get scheduler progression and realTime
-            mScheduler->getAttributeValue(TTSymbol("progression"), v);
-            progression = TTFloat64(v[0]);
-            
-            mScheduler->getAttributeValue(TTSymbol("realTime"), v);
-            realTime = TTFloat64(v[0]);
             
             v = progression;
             v.append(realTime);
@@ -409,19 +399,9 @@ TTErr Automation::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 	TTXmlHandlerPtr	aXmlHandler = NULL;
     TTObjectBasePtr curve = NULL;
     TTAddress       address;
-    TTValue         v, none;
+    TTValue         v, none, duration;
     
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
-    
-    // Event node
-    if (aXmlHandler->mXmlNodeName == TTSymbol("Automation")) {
-        
-        if (aXmlHandler->mXmlNodeStart)
-            
-            ; // TODO : should we clear the automation here ?
-        
-        return kTTErrNone;
-    }
     
     // If there are indexed curves
     if (aXmlHandler->mXmlNodeName == TTSymbol("indexedCurves")) {
@@ -445,9 +425,8 @@ TTErr Automation::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
                         // store the curve
                         mCurves.append(address, mCurrentObjects);
                         
-                        // resize next time value
-                        mCurves.getKeys(v);
-                        mNextTimes.resize(v.size());
+                        // add a sender
+                        addSender(address);
                     }
                 }
             }
@@ -496,7 +475,7 @@ TTErr Automation::CurveAdd(const TTValue& inputValue, TTValue& outputValue)
 {
     TTValue         v, vStart, vEnd, parameters, objects, none;
     TTAddress       address;
-    TTObjectBasePtr curve;
+    TTObjectBasePtr curve, sender;
     TTBoolean       valid = YES;
     TTErr           err;
     TTUInt32        i;
@@ -530,7 +509,7 @@ TTErr Automation::CurveAdd(const TTValue& inputValue, TTValue& outputValue)
                 if (!valid)
                     return kTTErrGeneric;
 
-                // create a freehand function unit for each index of the value
+                // create a curve for each index of the value
                 err = kTTErrNone;
                 objects.resize(vStart.size());
                 
@@ -551,7 +530,7 @@ TTErr Automation::CurveAdd(const TTValue& inputValue, TTValue& outputValue)
                         parameters[4] = TTFloat64(vEnd[i]);
                         parameters[5] = TTFloat64(1);
                         
-                        curve->setAttributeValue(TTSymbol("parameters"), parameters);
+                        curve->setAttributeValue(TTSymbol("functionParameters"), parameters);
                         
                         // index the curve
                         objects[i] = curve;
@@ -566,9 +545,11 @@ TTErr Automation::CurveAdd(const TTValue& inputValue, TTValue& outputValue)
                     // register all the curves for this address
                     mCurves.append(address, objects);
                     
-                    // resize next time value
-                    mCurves.getKeys(v);
-                    mNextTimes.resize(v.size());
+                    // add a sender for the curve
+                    addSender(address);
+                    
+                    // the last compilation is not valid
+                    mCompiled = NO;
                 }
                 
                 return err;
@@ -605,6 +586,7 @@ TTErr Automation::CurveUpdate(const TTValue& inputValue, TTValue& outputValue)
     TTAddress       address;
     TTObjectBasePtr curve;
     TTUInt32        i;
+    TTBoolean       change = NO;
     
     // update all curves
     if (inputValue.size() == 0) {
@@ -651,19 +633,26 @@ TTErr Automation::CurveUpdate(const TTValue& inputValue, TTValue& outputValue)
                     curve = objects[i];
                     
                     // get current curve parameters
-                    curve->getAttributeValue(TTSymbol("parameters"), parameters);
-
-                    // change the first point y value : x1 y1 b1 ...
-                    parameters[1] = TTFloat64(vStart[i]);
-                    
-                    // TODO : scale the other y points value ?
-                    
-                    // change the last point y value : ... xn yn bn
-                    parameters[parameters.size() - 2] = TTFloat64(vEnd[i]);
-                    
-                    // set current curve parameters
-                    curve->setAttributeValue(TTSymbol("parameters"), parameters);
+                    if (!curve->getAttributeValue(TTSymbol("functionParameters"), parameters)) {
+                        
+                        // change the first point y value : x1 y1 b1 ...
+                        parameters[1] = TTFloat64(vStart[i]);
+                        
+                        // TODO : scale the other y points value ?
+                        
+                        // change the last point y value : ... xn yn bn
+                        parameters[parameters.size() - 2] = TTFloat64(vEnd[i]);
+                        
+                        // set current curve parameters
+                        curve->setAttributeValue(TTSymbol("functionParameters"), parameters);
+                        
+                        // some parameters have changed
+                        change = YES;
+                    }
                 }
+                
+                // is the last compilation still valid ?
+                mCompiled = !change && mCompiled;
                 
                 return kTTErrNone;
             }
@@ -699,9 +688,8 @@ TTErr Automation::CurveRemove(const TTValue& inputValue, TTValue& outputValue)
                 // unregister the curve
                 mCurves.remove(address);
                 
-                // resize next time value
-                mCurves.getKeys(v);
-                mNextTimes.resize(v.size());
+                // remove sender
+                removeSender(address);
                 
                 // remove receiver
                 removeReceiver(address);
@@ -736,6 +724,9 @@ TTErr Automation::Clear()
             TTObjectBaseRelease(&curve);
         }
         
+        // remove sender
+        removeSender(TTAddress(key));
+        
         // remove receiver
         removeReceiver(TTAddress(key));
     }
@@ -764,9 +755,8 @@ TTErr Automation::CurveRecord(const TTValue& inputValue, TTValue& outputValue)
                 // register the address with no curves
                 mCurves.append(address, objects);
                 
-                // resize next time value
-                mCurves.getKeys(v);
-                mNextTimes.resize(v.size());
+                // add a sender
+                addSender(address);
             }
             
             // add or remove receiver for the address
@@ -789,6 +779,40 @@ TTErr Automation::CurveRecord(const TTValue& inputValue, TTValue& outputValue)
     return kTTErrGeneric;
 }
 
+void Automation::addSender(TTAddress anAddress)
+{
+    TTObjectBasePtr aSender;
+    TTValue         v, none;
+    
+    // if there is no sender for the address
+    if (mSenders.lookup(anAddress, v)) {
+        
+        aSender = NULL;
+        TTObjectBaseInstantiate(kTTSym_Sender, TTObjectBaseHandle(&aSender), none);
+        
+        // set the address of the sender
+        aSender->setAttributeValue(kTTSym_address, anAddress);
+        
+        v = TTObjectBasePtr(aSender);
+        mSenders.append(anAddress, v);
+    }
+}
+
+void Automation::removeSender(TTAddress anAddress)
+{
+    TTObjectBasePtr aSender;
+    TTValue         v;
+    
+    // remove the sender for this address
+    if (!mSenders.lookup(anAddress, v)) {
+        
+        aSender = v[0];
+        TTObjectBaseRelease(&aSender);
+        
+        mSenders.remove(anAddress);
+    }
+}
+
 void Automation::addReceiver(TTAddress anAddress)
 {
     TTObjectBasePtr aReceiver;
@@ -796,7 +820,7 @@ void Automation::addReceiver(TTAddress anAddress)
     TTValuePtr      aReceiverBaton;
     TTValue         v, none;
     
-    // if there is no receiver for the expression address
+    // if there is no receiver for the address
     if (mReceivers.lookup(anAddress, v)) {
         
         // No callback for the address
@@ -873,15 +897,8 @@ TTErr AutomationReceiverReturnValueCallback(TTPtr baton, TTValue& data)
                 
                 curve = objects[i];
                 
-                // get current curve parameters
-                curve->getAttributeValue(TTSymbol("parameters"), v);
-            
                 // store the next point
-                v.append(anAutomation->mCurrentProgression);// progression
-                v.append(TTFloat64(data[i]));               // value
-                v.append(TTFloat64(1.));                    // base
-                
-                curve->setAttributeValue(TTSymbol("parameters"), v);
+                CurvePtr(curve)->append(TTValue(anAutomation->mCurrentProgression, TTFloat64(data[i])));
             }
         }
     }

@@ -31,6 +31,7 @@ mVerticalPosition(0),
 mVerticalSize(1),
 mScheduler(NULL),
 mRunning(NO),
+mCompiled(NO),
 mStartEvent(NULL),
 mEndEvent(NULL)
 {
@@ -55,6 +56,9 @@ mEndEvent(NULL)
     addAttribute(Running, kTypeBoolean);
     addAttributeProperty(Running, readOnly, YES);
     
+    addAttribute(Compiled, kTypeBoolean);
+    addAttributeProperty(Compiled, readOnly, YES);
+    
     addAttributeWithSetter(Color, kTypeLocalValue);
     addAttribute(VerticalPosition, kTypeUInt32);
     addAttribute(VerticalSize, kTypeUInt32);
@@ -78,6 +82,9 @@ mEndEvent(NULL)
     registerAttribute(TTSymbol("startCondition"), kTypeBoolean, NULL, (TTGetterMethod)& TTTimeProcess::getStartCondition, (TTSetterMethod)& TTTimeProcess::setStartCondition);
     registerAttribute(TTSymbol("endCondition"), kTypeBoolean, NULL, (TTGetterMethod)& TTTimeProcess::getEndCondition, (TTSetterMethod)& TTTimeProcess::setEndCondition);
     registerAttribute(kTTSym_duration, kTypeUInt32, NULL, (TTGetterMethod)& TTTimeProcess::getDuration);
+    
+    addMessage(Compile);
+    addMessageProperty(Compile, hidden, YES);
     
     addMessage(ProcessStart);
     addMessageProperty(ProcessStart, hidden, YES);
@@ -493,9 +500,15 @@ TTErr TTTimeProcess::EventDateChanged(const TTValue& inputValue, TTValue& output
     
     if (aTimeEvent == mStartEvent) {
         
+        // if needed, the compile method should be called again now
+        mCompiled = NO;
+        
         return kTTErrNone;
     }
     else if (aTimeEvent == mEndEvent) {
+        
+        // if needed, the compile method should be called again now
+        mCompiled = NO;
         
         return kTTErrNone;
     }

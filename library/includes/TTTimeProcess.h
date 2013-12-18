@@ -54,6 +54,8 @@ protected :
                                                                     ///< it is related to the running state of the scheduler
                                                                     ///< but it also allows to avoid last scheduler tick to call the process method (it could happen one tick after the stop)
     
+    TTBoolean                       mCompiled;                      ///< a boolean flag to know if the compile method needs to be called or not (uselly after an event date change)
+    
 private :
     
     TTObjectBasePtr                 mStartEvent;                    ///< the event object which handles the time process execution start
@@ -62,8 +64,13 @@ private :
     
     TTObjectBasePtr                 mEndEvent;                      ///< the event object which handles the time process execution stop
     
+    /** Specific compilation method used to pre-processed data in order to accelarate Process method.
+     the compiled attribute allows to know if the process needs to be compiled or not.
+     @return                an error code returned by the compile method */
+    virtual TTErr   Compile() {return kTTErrGeneric;};
+    
     /** Specific process method on start
-     @return                an error code returned by the process end method */
+     @return                an error code returned by the process start method */
     virtual TTErr   ProcessStart() {return kTTErrGeneric;};
     
     /** Specific process method on end

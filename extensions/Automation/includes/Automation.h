@@ -32,9 +32,9 @@ class Automation : public TimeProcess
 private :
     
     TTHash                      mCurves;						///< a table of freehand function units stored by address
-    TTHash                      mReceivers;						///< a table of freehand function units stored by address
-    TTValue                     mNextTimes;                     ///< a value used to know when the next value can be sent for each address (this depends on the sample rate of each curves)
-    
+    TTHash                      mSenders;						///< a table of TTSender to send curves
+    TTHash                      mReceivers;						///< a table of TTReceiver to record curves
+   
     TTValue                     mCurrentObjects;                ///< useful for file parsing
     TTFloat64                   mCurrentProgression;            ///< useful for recording
     
@@ -47,6 +47,11 @@ private :
      @param	value           the returned curve addresses
      @return                kTTErrNone */
 	TTErr   getCurveAddresses(TTValue& value);
+    
+    /** Specific compilation method used to pre-processed data in order to accelarate Process method.
+     the compiled attribute allows to know if the process needs to be compiled or not.
+     @return                an error code returned by the compile method */
+    TTErr   Compile();
     
     /** Specific process method on start
      @return                an error code returned by the process end method */
@@ -121,6 +126,9 @@ private :
      @param outputvalue     nothing
      @return                an error code if the operation fails */
     TTErr   CurveRecord(const TTValue& inputValue, TTValue& outputValue);
+    
+    void    addSender(TTAddress anAddress);
+    void    removeSender(TTAddress anAddress);
     
     void    addReceiver(TTAddress anAddress);
     void    removeReceiver(TTAddress anAddress);

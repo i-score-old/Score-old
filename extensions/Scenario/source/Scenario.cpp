@@ -113,22 +113,36 @@ TTErr Scenario::setViewPosition(const TTValue& value)
     return kTTErrNone;
 }
 
-#ifndef NO_EXECUTION_GRAPH
 TTErr Scenario::Compile()
 {
     TTValue         v;
     TTUInt32        timeOffset;
+    TTBoolean       compiled;
+    TTObjectBasePtr aTimeProcess;
     
     // get scheduler time offset
     mScheduler->getAttributeValue(kTTSym_offset, v);
     timeOffset = TTFloat64(v[0]);
     
+#ifndef NO_EXECUTION_GRAPH
     // compile the mExecutionGraph to prepare scenario execution from the scheduler time offset
     compileGraph(timeOffset);
-
+#endif
+    
+    // compile all time processes if they need to be compiled
+    for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
+        
+        aTimeProcess = mTimeProcessList.current()[0];
+        
+        aTimeProcess->getAttributeValue(kTTSym_compiled, v);
+        compiled = v[0];
+        
+        if (!compiled)
+            aTimeProcess->sendMessage(kTTSym_Compile);
+    }
+    
     return kTTErrNone;
 }
-#endif
 
 TTErr Scenario::ProcessStart()
 {

@@ -2,7 +2,7 @@
  *
  * @ingroup scoreExtension
  *
- * @brief a curve handles a function unit and some other features to avoid redundency, sample rate, ...
+ * @brief a curve samples a freehand function unit at a sample rate
  *
  * @details The Curve class allows to ... @n@n
  *
@@ -25,7 +25,7 @@
  
  @see Automation
  */
-class Curve : public TTDataObjectBase
+class Curve : public TTObjectBase, public TTList
 {
 	TTCLASS_SETUP(Curve)
 	
@@ -35,24 +35,29 @@ private :
     TTBoolean                           mRedundancy;                    ///< is the curve allow repetitions ?
     TTUInt32                            mSampleRate;                    ///< time precision of the curve
     TTObjectBasePtr                     mFunction;						///< a freehand function unit
-    TTBoolean                           mRecording;                     ///< is the curve recording ?
+    TTBoolean                           mRecorded;                      ///< is the curve based on a record or not ?
+    TTBoolean                           mSampled;                       ///< is the curve already sampled ?
+    TTFloat64                           mLastSample;                    ///< used internally to avoid redundancy
     
-    TTValue                             mRecordedParameters;            ///< a temporary value to record the value without updating the function each time it changes
-
-    /** Set curve's parameters
+    /** Set curve's function parameters
      @param value           x1 y1 b1 x2 y2 b2 ... with x[0. :: 1.], y[min, max], b[-1. :: 1.]
      @return                an error code if the operation fails */
-    TTErr   setParameters(const TTValue& value);
+    TTErr   setFunctionParameters(const TTValue& value);
     
-    /** Get curve's parameters
+    /** Get curve's function parameters
      @param value           x1 y1 b1 x2 y2 b2 ... with x[0. :: 1.], y[min, max], b[-1. :: 1.]
      @return                an error code if the operation fails */
-    TTErr   getParameters(TTValue& value);
+    TTErr   getFunctionParameters(TTValue& value);
     
-    /** Set curve in record mode
+    /** Set sample rate
+     @param value           unsigned integer
+     @return                an error code if the operation fails */
+    TTErr   setSampleRate(const TTValue& value);
+    
+    /** Set curve as record based
      @param value           boolean
      @return                an error code if the operation fails */
-    TTErr   setRecording(const TTValue& value);
+    TTErr   setRecorded(const TTValue& value);
     
     /** Get all curve's values
      @param inputvalue      duration
@@ -76,11 +81,12 @@ private :
     
 public:
     
-    /** Calculate curve's values for a given x
+    /** Get the next sample values for a given x.
+     a call TTList::begin() method before to use this method could be needed
      @param x               a float64 between [0. :: 1.]
      @param y               a float64 between [min :: max]
      @return                an error code if the operation fails */
-    TTErr   calculate(TTFloat64& x, TTFloat64& y);
+    TTErr   nextSampleAt(TTFloat64& x, TTFloat64& y);
 };
 
 typedef Curve* CurvePtr;
