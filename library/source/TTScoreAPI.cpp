@@ -64,7 +64,7 @@ TTErr TTScoreTimeEventCreate(TTTimeEventPtr *timeEvent, TTUInt32 date, TTTimeCon
         return err;
     }
     else
-        return TTObjectBaseInstantiate(kTTSym_TimeEvent, TTObjectBaseHandle(timeEvent), date);
+        return TTObjectBaseInstantiate(kTTSym_TimeEvent, TTObjectBaseHandle(timeEvent), TTValue(date));
 }
 
 TTErr TTScoreTimeEventRelease(TTTimeEventPtr *timeEvent, TTTimeContainerPtr timeContainer)
