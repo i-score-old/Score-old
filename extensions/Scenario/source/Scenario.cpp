@@ -1303,31 +1303,6 @@ TTErr Scenario::TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue
     return kTTErrGeneric;
 }
 
-/*
- TTErr Scenario::TimeProcessActiveChange(const TTValue& inputValue, TTValue& outputValue)
- {
- TTTimeProcessPtr    aTimeProcess;
- TTBoolean           active;
- 
- if (inputValue.size() == 2) {
- 
- if (inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeBoolean) {
- 
- // get time process where the change comes from
- aTimeProcess = TTTimeProcessPtr((TTObjectBasePtr)inputValue[0]);
- 
- // get new active value
- active = inputValue[1];
- 
- // TODO : warn Solver (or mExecutionGraph ?) that this time process active state have changed
- // TODO : update all Solver (or mExecutionGraph ?) consequences by setting time processes attributes that are affected by the consequence
- }
- }
- 
- return kTTErrGeneric;
- }
- */
-
 TTErr Scenario::TimeConditionCreate(const TTValue& inputValue, TTValue& outputValue)
 {
     TTTimeConditionPtr  aTimeCondition = NULL;
