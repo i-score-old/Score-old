@@ -20,7 +20,10 @@
 
 #include "TimePluginLib.h"
 #include "ScenarioSolver.h"
+
+#ifndef NO_EXECUTION_GRAPH
 #include "ScenarioGraph.h"
+#endif
 
 /**	The Scenario class allows to ...
  
@@ -39,17 +42,17 @@ class Scenario : public TimeContainer {
     SolverObjectMap             mVariablesMap;                  ///< an internal map to store and retreive SolverVariablePtr using TTTimeEventPtr
     SolverObjectMap             mConstraintsMap;                ///< an internal map to store and retreive SolverConstraintPtr using TTTimeProcessPtr
     SolverObjectMap             mRelationsMap;                  ///< an internal map to store and retreive SolverRelationPtr using TTTimeProcessPtr
-    
+#ifndef NO_EXECUTION_GRAPH
     GraphPtr                    mExecutionGraph;                ///< an internal petri net to execute the scenario according time event relations
-    
+
     GraphObjectMap              mTransitionsMap;                ///< an internal map to store and retreive TransitionPtr using TTTimeEventPtr
 	GraphObjectMap              mArcsMap;                       ///< an internal map to store and retreive Arc* using TTTimeProcessPtr
     GraphObjectMap              mMergedTransitionsMap;          ///< an internal map to store and retreive TransitionPtr using another TransitionPtr
-    
+   
     ExtendedInt                 plusInfinity;
 	ExtendedInt                 minusInfinity;
 	ExtendedInt                 integer0;
-    
+#endif     
     TTTimeEventPtr              mCurrentTimeEvent;               ///< an internal pointer to remember the current time event being read
     TTTimeProcessPtr            mCurrentTimeProcess;             ///< an internal pointer to remember the current time process being read
     TTTimeConditionPtr          mCurrentTimeCondition;           ///< an internal pointer to remember the current time condition being read
@@ -70,11 +73,10 @@ class Scenario : public TimeContainer {
      @return                kTTErrNone */
     TTErr   setViewPosition(const TTValue& value);
     
-    /** Compile the scenario to prepare the petri net before execution
+    /** Specific compilation method used to pre-processed data in order to accelarate Process method.
+     the compiled attribute allows to know if the process needs to be compiled or not.
      @return                an error code returned by the compile method */
     TTErr   Compile();
-    
-    
     
     /** Specific process method on start
      @return                an error code returned by the process end method */
@@ -213,7 +215,7 @@ class Scenario : public TimeContainer {
     void    deleteTimeConditionCacheElement(const TTValue& oldCacheElement);
     
     
-    
+ #ifndef NO_EXECUTION_GRAPH
     /** internal methods used to compile the execution graph */
     void    clearGraph();
     void    compileGraph(TTUInt32 timeOffset);
@@ -224,10 +226,12 @@ class Scenario : public TimeContainer {
     
     friend void TT_EXTENSION_EXPORT ScenarioGraphTimeEventCallBack(TTPtr arg, TTBoolean active);
     friend void TT_EXTENSION_EXPORT ScenarioGraphIsEventReadyCallBack(TTPtr arg, TTBoolean isReady);
+#endif
 };
 
 typedef Scenario* ScenarioPtr;
 
+#ifndef NO_EXECUTION_GRAPH
 /** The callback method used by the execution graph when ...
  @param	arg                         a time event instance
  @param	arg                         is time event becomes active or passive ? */
@@ -237,5 +241,6 @@ void TT_EXTENSION_EXPORT ScenarioGraphTimeEventCallBack(TTPtr arg, TTBoolean act
  @param	arg                         a time event instance
  @param	isReady                     is the time event ready to be triggered ? */
 void TT_EXTENSION_EXPORT ScenarioGraphIsEventReadyCallBack(TTPtr arg, TTBoolean isReady);
+#endif
 
 #endif // __SCENARIO_H__

@@ -93,7 +93,7 @@ bool PetriNet::makeOneStep(unsigned int currentTime)
             } else {
                 PriorityTransitionAction* topAction = getTopActionOnPriorityQueue();
                 
-                if (!topAction->isEnable()) { // CB why disable actions without destructiong them ?
+                if (!topAction->isEnable()) { // CB why disable actions without destructing them ?
                     removeTopActionOnPriorityQueue();
                 } else if ((unsigned int) topAction->getDate().getValue() > currentTime) {
                     stop = true; // CB because it's a priority queue, so it is ordered

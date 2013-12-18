@@ -1,5 +1,6 @@
-#defines:
+defines:
 #  - TIME_PLUGIN_DEBUG
+   - NO_EXECUTION_GRAPH
 
 sources:
   - ../TimePluginLib.cpp	

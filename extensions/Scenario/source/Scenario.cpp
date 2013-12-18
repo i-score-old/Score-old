@@ -30,8 +30,11 @@ TIME_CONTAINER_CONSTRUCTOR,
 mNamespace(NULL),
 mViewZoom(TTValue(1., 1.)),
 mViewPosition(TTValue(0, 0)),
-mEditionSolver(NULL),
+mEditionSolver(NULL)
+#ifndef NO_EXECUTION_GRAPH
+,
 mExecutionGraph(NULL)
+#endif
 {
     TIME_PLUGIN_INITIALIZE
     
@@ -40,15 +43,19 @@ mExecutionGraph(NULL)
     addAttributeWithSetter(ViewZoom, kTypeLocalValue);
     addAttributeWithSetter(ViewPosition, kTypeLocalValue);
     
+#ifndef NO_EXECUTION_GRAPH
     addMessage(Compile);
+#endif
     
     // Create the edition solver
     mEditionSolver = new Solver();
-    
+
+#ifndef NO_EXECUTION_GRAPH
     // Create extended int
     plusInfinity = ExtendedInt(PLUS_INFINITY, 0);
     minusInfinity = ExtendedInt(MINUS_INFINITY, 0);
     integer0 = ExtendedInt(INTEGER, 0);
+#endif
     
     // it is possible to pass 2 events for the root scenario (which don't need a container by definition)
     if (arguments.size() == 2) {
@@ -75,10 +82,13 @@ Scenario::~Scenario()
         mEditionSolver = NULL;
     }
     
+#ifndef NO_EXECUTION_GRAPH
     if (mExecutionGraph) {
         delete mExecutionGraph;
         mExecutionGraph = NULL;
     }
+#endif
+    
 }
 
 TTErr Scenario::getParameterNames(TTValue& value)
@@ -107,22 +117,45 @@ TTErr Scenario::Compile()
 {
     TTValue         v;
     TTUInt32        timeOffset;
+    TTBoolean       compiled;
+    TTObjectBasePtr aTimeProcess;
     
     // get scheduler time offset
     mScheduler->getAttributeValue(kTTSym_offset, v);
     timeOffset = TTFloat64(v[0]);
     
+#ifndef NO_EXECUTION_GRAPH
     // compile the mExecutionGraph to prepare scenario execution from the scheduler time offset
     compileGraph(timeOffset);
-
+#endif
+    
+    // compile all time processes if they need to be compiled
+    for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
+        
+        aTimeProcess = mTimeProcessList.current()[0];
+        
+        aTimeProcess->getAttributeValue(kTTSym_compiled, v);
+        compiled = v[0];
+        
+        if (!compiled)
+            aTimeProcess->sendMessage(kTTSym_Compile);
+    }
+    
     return kTTErrNone;
 }
 
 TTErr Scenario::ProcessStart()
 {
+#ifndef NO_EXECUTION_GRAPH
     // start the execution graph
     mExecutionGraph->start();
+#else
     
+    TTLogMessage("Scenario::ProcessStart : without execution graph\n");
+    
+    // go to the first time event (as they are sorted by date)
+    mTimeEventList.begin();
+#endif
     return kTTErrNone;
 }
 
@@ -152,6 +185,7 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
             progression = inputValue[0];
             realTime = inputValue[1];
             
+#ifndef NO_EXECUTION_GRAPH
             // update the mExecutionGraph to process the scenario
             if (mExecutionGraph->makeOneStep(realTime))
                 return kTTErrNone;
@@ -159,6 +193,33 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
             else
                 // Make the end happen
                 return getEndEvent()->sendMessage(kTTSym_Happen);
+#else
+            TTValue     v;
+            TTUInt32    date;
+            
+            // if there is more event to process
+            if (mTimeEventList.end()) {
+                
+                // get the current time event (as they are sorted by date)
+                TTObjectBasePtr aTimeEvent = mTimeEventList.current()[0];
+                aTimeEvent->getAttributeValue(kTTSym_date, v);
+                date = v[0];
+                
+                // if the event date is lower than the real time
+                if (date < realTime) {
+                    
+                    // make the event to happen
+                    aTimeEvent->sendMessage(kTTSym_Happen);
+                    
+                    // try to process the next event
+                    mTimeEventList.next();
+                    return Process(inputValue, outputValue);
+                }
+            }
+            else
+                // Make the end happen
+                return getEndEvent()->sendMessage(kTTSym_Happen);
+#endif
             
         }
     }
@@ -222,8 +283,8 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
             TTScriptMerge(TTScriptPtr(getTimeEventState(TTTimeEventPtr(getStartEvent()))), TTScriptPtr(state));
             
             // mute the start event of the Scenario if there is a timeOffset
-            if (timeOffset > 0.)
-                getStartEvent()->setAttributeValue(kTTSym_mute, v);
+            v = TTBoolean(timeOffset > 0.);
+            getStartEvent()->setAttributeValue(kTTSym_mute, v);
             
             // mute all the events before the time offset
             for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next()) {
@@ -260,6 +321,12 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
                     // go to time offset
                     aTimeProcess->sendMessage(kTTSym_Goto, timeOffset - getTimeEventDate(startEvent), none);
                 }
+                
+                else if (getTimeEventDate(startEvent) >= timeOffset)
+                    aTimeProcess->sendMessage(kTTSym_Goto, TTUInt32(0.), none);
+                
+                else if (getTimeEventDate(endEvent) <= timeOffset)
+                    aTimeProcess->sendMessage(kTTSym_Goto, TTUInt32(1.), none);
                 
                 // mute if the end event is before the timeOffset
                 v = TTBoolean(getTimeEventDate(endEvent) < timeOffset);
@@ -376,7 +443,6 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 {
     TTXmlHandlerPtr         aXmlHandler = NULL;
     SolverObjectMapIterator itSolver;
-    GraphObjectMapIterator  itGraph;
     TTValue                 v;
 	
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
@@ -415,7 +481,9 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
             delete mEditionSolver;
             mEditionSolver = new Solver();
             
+#ifndef NO_EXECUTION_GRAPH
             clearGraph();
+#endif
             
             return kTTErrNone;
         }
@@ -831,8 +899,7 @@ TTErr Scenario::TimeEventTrigger(const TTValue& inputValue, TTValue& outputValue
             
             aTimeEvent = TTTimeEventPtr((TTObjectBasePtr)inputValue[0]);
             
-            // cf ECOMachine::receiveNetworkMessage(std::string netMessage)
-            
+#ifndef NO_EXECUTION_GRAPH
             if (mExecutionGraph) {
                 
                 // if the excecution graph is running
@@ -845,6 +912,10 @@ TTErr Scenario::TimeEventTrigger(const TTValue& inputValue, TTValue& outputValue
                     return kTTErrNone;
                 }
             }
+#else
+            return kTTErrNone;
+#endif
+            
         }
     }
     
@@ -861,15 +932,23 @@ TTErr Scenario::TimeEventDispose(const TTValue &inputValue, TTValue &outputValue
 
             aTimeEvent = TTTimeEventPtr((TTObjectBasePtr)inputValue[0]);
 
+#ifndef NO_EXECUTION_GRAPH
             if (mExecutionGraph) {
 
                 // if the execution graph is running
                 if (mExecutionGraph->getUpdateFactor() != 0) {
 
                     // put the associated transition in the list of transitions to deactivate
+                    TTLogMessage("Scenario::TimeEventDispose : %p\n", TTPtr(aTimeEvent));
                     mExecutionGraph->deactivateTransition(TransitionPtr(mTransitionsMap[aTimeEvent]));
+
+                    return kTTErrNone;
                 }
             }
+#else
+            return kTTErrNone;
+#endif
+            
         }
     }
 
@@ -1349,6 +1428,7 @@ void Scenario::deleteTimeConditionCacheElement(const TTValue& oldCacheElement)
 #pragma mark Some Methods
 #endif
 
+#ifndef NO_EXECUTION_GRAPH
 void ScenarioGraphTimeEventCallBack(TTPtr arg, TTBoolean active)
 {
     // cf ECOMachine : crossAControlPointCallBack function
@@ -1369,3 +1449,4 @@ void ScenarioGraphIsEventReadyCallBack(TTPtr arg, TTBoolean isReady)
     TTValue v = isReady;
     aTimeEvent->setAttributeValue(kTTSym_ready, v);
 }
+#endif

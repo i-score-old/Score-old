@@ -2,7 +2,7 @@
  *
  * @ingroup scoreExtension
  *
- * @brief a curve handles a function unit and some other features to avoid redundency, sample rate, ...
+ * @brief a curve samples a freehand function unit at a sample rate
  *
  * @see Automation
  *
@@ -19,22 +19,24 @@
 #define thisTTClassName             "Curve"
 #define thisTTClassTags             "curve"
 
-TT_OBJECT_CONSTRUCTOR,
+TT_BASE_OBJECT_CONSTRUCTOR,
 mActive(YES),
 mRedundancy(NO),
 mSampleRate(20),
 mFunction(NULL),
-mRecording(NO)
+mRecorded(NO),
+mSampled(NO),
+mLastSample(0.)
 {
 	TT_ASSERT("Correct number of args to create Curve", arguments.size() == 0);
     
-    registerAttribute(TTSymbol("parameters"), kTypeLocalValue, NULL, (TTGetterMethod)& Curve::getParameters, (TTSetterMethod)& Curve::setParameters);
+    registerAttribute(TTSymbol("functionParameters"), kTypeLocalValue, NULL, (TTGetterMethod)& Curve::getFunctionParameters, (TTSetterMethod)& Curve::setFunctionParameters);
     
     addAttribute(Active, kTypeBoolean);
     addAttribute(Redundancy, kTypeBoolean);
-    addAttribute(SampleRate, kTypeUInt32);
-    addAttribute(Function, kTypeObject);
-    addAttributeWithSetter(Recording, kTypeBoolean);
+    addAttributeWithSetter(SampleRate, kTypeUInt32);
+    addAttribute(Recorded, kTypeBoolean);
+    addAttribute(Sampled, kTypeBoolean);
     
     addMessageWithArguments(Sample);
     
@@ -58,16 +60,13 @@ Curve::~Curve()
     TTObjectBaseRelease(&mFunction);
 }
 
-TTErr Curve::getParameters(TTValue& value)
+TTErr Curve::getFunctionParameters(TTValue& value)
 {
-    if (mRecording) {
-        
-        value = mRecordedParameters;
-        return kTTErrNone;
-    }
-    
     TTValue         curveList;
     TTUInt32        i, j;
+    
+    if (mRecorded)
+        return kTTErrGeneric;
     
     if (!mFunction->getAttributeValue(TTSymbol("curveList"), curveList)) {
         
@@ -93,16 +92,10 @@ TTErr Curve::getParameters(TTValue& value)
     return kTTErrGeneric;
 }
 
-TTErr Curve::setParameters(const TTValue& value)
+TTErr Curve::setFunctionParameters(const TTValue& value)
 {
-    if (mRecording) {
-        
-        mRecordedParameters = value;
-        return kTTErrNone;
-    }
-    
-    TTValue     curveList;
-    TTUInt32    i, j;
+    TTValue     curveList, none;
+    TTUInt32    i, j, duration;
     
     if (value.size() > 0) {
         
@@ -135,62 +128,133 @@ TTErr Curve::setParameters(const TTValue& value)
                 return kTTErrGeneric;
         }
         
+        // retreive the current duration
+        duration = getSize() * mSampleRate;
+        
+        // clear the samples
+        clear();
+        
+        // it is not based on a record anymore
+        mRecorded = NO;
+        
         // set function curve list
-        return mFunction->setAttributeValue(TTSymbol("curveList"), curveList);
+        mFunction->setAttributeValue(TTSymbol("curveList"), curveList);
+        
+        // sample the curve
+        mSampled = NO;
+        if (duration)
+            Sample(duration, none);
+        
+        return kTTErrNone;
     }
     
     return kTTErrGeneric;
 }
 
-TTErr Curve::setRecording(const TTValue& value)
+TTErr Curve::setSampleRate(const TTValue& value)
 {
-    TTBoolean newRecording = value;
+    TTUInt32    newSampleRate, duration;
+    TTValue     none;
     
-    // filter repetitions
-    if (newRecording != mRecording) {
+    if (value.size() == 1) {
         
-        mRecording = newRecording;
-        
-        // start recording : clear the parameters
-        if (mRecording)
+        if (value[0].type() == kTypeUInt32) {
             
-            mRecordedParameters.clear();
-        
-        // end recording : set the curvelist
-        else
-            setParameters(mRecordedParameters);
+            newSampleRate = value;
+            
+            // filter repetitions
+            if (newSampleRate != mSampleRate) {
+                
+                // retreive the current duration from the old sample rate
+                duration = getSize() * mSampleRate;
+                
+                // set the new sample rate
+                mSampleRate = newSampleRate;
+                
+                // resample the curve
+                mSampled = NO;
+                if (duration)
+                    Sample(duration, none);
+                
+                return kTTErrNone;
+            }
+        }
     }
     
-    return kTTErrNone;
+    return kTTErrGeneric;
 }
 
 TTErr Curve::Sample(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTUInt32        i, duration, nbPoints;
-    TTFloat64       x, y;
-    
     if (inputValue.size() == 1) {
         
         if (inputValue[0].type() == kTypeUInt32) {
+            
+            TTUInt32    i, nbPoints, duration;
+            TTFloat64   x, y;
             
             duration = inputValue[0];
             
             nbPoints = duration / mSampleRate;
             
-            // get function values
-            outputValue.clear();
-            for (i = 0; i < nbPoints; i++) {
+            // for a same number of points and already sampled curve
+            if (nbPoints == getSize() && mSampled) {
                 
-                x = TTFloat64(i) / TTFloat64(nbPoints);
-                TTAudioObjectBasePtr(mFunction)->calculate(x, y);
+                // return the samples
+                outputValue.clear();
+                for (begin(); end(); next())
+                    outputValue.append(current()[1]);
                 
-                outputValue.append(y);
+                mSampled = YES;
+                
+                return kTTErrNone;
             }
+            
+            // for a record based curve
+            if (mRecorded) {
+                
+                TTList newSamples;
+                
+                // get new samples from current samples
+                begin();
+                outputValue.clear();
+                for (i = 0; i < nbPoints; i++) {
+                    
+                    x = TTFloat64(i) / TTFloat64(nbPoints);
+                    nextSampleAt(x, y);
+                    
+                    newSamples.append(TTValue(x, y));
+                    outputValue.append(y);
+                }
+                
+                // copy the new samples
+                clear();
+                for (newSamples.begin(); newSamples.end(); newSamples.next())
+                    append(newSamples.current());
+            }
+            
+            // for a function based curve
+            else {
+                
+                // get new samples from function
+                clear();
+                outputValue.clear();
+                for (i = 0; i < nbPoints; i++) {
+                    
+                    x = TTFloat64(i) / TTFloat64(nbPoints);
+                    TTAudioObjectBasePtr(mFunction)->calculate(x, y);
+                    
+                    append(TTValue(x, y));
+                    outputValue.append(y);
+                }
+            }
+            
+            mSampled = YES;
             
             return kTTErrNone;
         }
     }
-    
+
     return kTTErrGeneric;
 }
 
@@ -222,11 +286,28 @@ TTErr Curve::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
     s = TTString(v[0]);
     xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "sampleRate", BAD_CAST s.data());
     
-    // Write the function parameters
-    getParameters(v);
-    v.toString();
-    s = TTString(v[0]);
-    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "function", BAD_CAST s.data());
+    if (!mRecorded) {
+        
+        // Write the function parameters
+        getFunctionParameters(v);
+        v.toString();
+        s = TTString(v[0]);
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "function", BAD_CAST s.data());
+    }
+    else {
+        
+        // Write the samples
+        v.clear();
+        for (begin(); end(); next()) {
+            
+            v.append(current()[0]);
+            v.append(current()[1]);
+        }
+            
+        v.toString();
+        s = TTString(v[0]);
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "samples", BAD_CAST s.data());
+    }
     
     xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
 	
@@ -276,10 +357,23 @@ TTErr Curve::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         }
     }
     
-	// get the function parameters
+    // get the function parameters
     if (!aXmlHandler->getXmlAttribute(kTTSym_function, v, NO)) {
         
-        setParameters(v);
+        setFunctionParameters(v);
+        
+        mRecorded = NO;
+    }
+    
+    // get the function samples
+    else if (!aXmlHandler->getXmlAttribute(kTTSym_samples, v, NO)) {
+        
+        clear();
+        for (TTUInt32 i = 0; i < v.size(); i = i+2)
+            append(TTValue(v[i], v[i+1]));
+        
+        mRecorded = YES;
+        mSampled = YES;
     }
     
 	return kTTErrNone;
@@ -308,15 +402,38 @@ TTErr Curve::ReadFromText(const TTValue& inputValue, TTValue& outputValue)
 	return kTTErrGeneric;
 }
 
-TTErr Curve::calculate(TTFloat64& x, TTFloat64& y)
+TTErr Curve::nextSampleAt(TTFloat64& x, TTFloat64& y)
 {
-    if (mFunction && mActive) {
+    if (mActive) {
         
-        TTAudioObjectBasePtr(mFunction)->calculate(x, y);
-        return kTTErrNone;
+        TTBoolean   found = NO;
+        TTErr       err = kTTErrNone;
+        
+        // while the list doesn't reach the end
+        while (end()) {
+                
+            if (TTFloat64(current()[0]) < x)
+                next();
+            
+            else {
+                y = current()[1];
+                found = YES;
+                break;
+            }
+        }
+        
+        if (found) {
+            
+            if (!mRedundancy && y == mLastSample)
+                err = kTTErrGeneric;
+            
+            mLastSample = y;
+            
+            return err;
+        }
     }
     
-    return kTTErrGeneric;
+    return kTTErrValueNotFound;
 }
 
 #if 0

@@ -35,6 +35,11 @@ private :
      @return                kTTErrNone */
 	TTErr   getParameterNames(TTValue& value);
     
+    /** Specific compilation method used to pre-processed data in order to accelarate Process method.
+     the compiled attribute allows to know if the process needs to be compiled or not.
+     @return                an error code returned by the compile method */
+    TTErr   Compile();
+    
     /** Specific process method on start
      @return                an error code returned by the process end method */
     TTErr   ProcessStart();

@@ -15,6 +15,8 @@
  * http://www.cecill.info
  */
 
+#ifndef NO_EXECUTION_GRAPH
+
 #ifndef __SCENARIO_GRAPH_H__
 #define __SCENARIO_GRAPH_H__
 
@@ -45,3 +47,5 @@ typedef	GraphObjectMap*                    GraphObjectMapPtr;
 typedef GraphObjectMap::const_iterator     GraphObjectMapIterator;
 
 #endif // __SCENARIO_GRAPH_H__
+
+#endif // NO_EXECUTION_GRAPH

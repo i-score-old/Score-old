@@ -13,6 +13,8 @@
  * http://www.cecill.info
  */
 
+#ifndef NO_EXECUTION_GRAPH
+
 #include "Scenario.h"
 #include "ScenarioGraph.h"
 
@@ -552,3 +554,5 @@ bool Scenario::step(TTUInt32 currentTimeInMs)
     return YES;
 }
 #endif
+
+#endif // NO_EXECUTION_GRAPH
