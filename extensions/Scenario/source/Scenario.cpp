@@ -697,6 +697,15 @@ TTErr Scenario::TimeEventCreate(const TTValue& inputValue, TTValue& outputValue)
         
         if (inputValue[0].type() == kTypeUInt32) {
             
+            // an event cannot be created beyond the duration of its container
+            this->getAttributeValue(kTTSym_duration, scenarioDuration);
+            
+            if (TTUInt32(inputValue[0]) > TTUInt32(scenarioDuration[0])) {
+                
+                TTLogError("Scenario::TimeEventCreate : event created beyond the duration of its container\n");
+                return kTTErrGeneric;
+            }
+            
             // prepare argument (date, container)
             args = TTValue(inputValue[0]);
             args.append(TTObjectBasePtr(this));
@@ -711,9 +720,6 @@ TTErr Scenario::TimeEventCreate(const TTValue& inputValue, TTValue& outputValue)
             // store time event object and observers
             mTimeEventList.append(aCacheElement);
             mTimeEventList.sort(&TTTimeEventCompareDate);
-            
-            // get scenario duration
-            this->getAttributeValue(kTTSym_duration, scenarioDuration);
             
             // add variable to the solver
             SolverVariablePtr variable = new SolverVariable(mEditionSolver, aTimeEvent, TTUInt32(scenarioDuration[0]));
@@ -811,6 +817,7 @@ TTErr Scenario::TimeEventMove(const TTValue& inputValue, TTValue& outputValue)
     SolverVariablePtr       variable;
     SolverObjectMapIterator it;
     SolverError             sErr;
+    TTValue                 scenarioDuration;
     
     // can't move an event during a load
     if (mLoading)
@@ -821,6 +828,15 @@ TTErr Scenario::TimeEventMove(const TTValue& inputValue, TTValue& outputValue)
         if (inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeUInt32 ) {
             
             aTimeEvent = TTTimeEventPtr((TTObjectBasePtr)inputValue[0]);
+            
+            // an event cannot be moved beyond the duration of its container
+            this->getAttributeValue(kTTSym_duration, scenarioDuration);
+            
+            if (TTUInt32(inputValue[1]) > TTUInt32(scenarioDuration[0])) {
+                
+                TTLogError("Scenario::TimeEventMove : event moved beyond the duration of its container\n");
+                return kTTErrGeneric;
+            }
             
             // retreive solver variable relative to the time event
             it = mVariablesMap.find(aTimeEvent);
@@ -1223,6 +1239,13 @@ TTErr Scenario::TimeProcessMove(const TTValue& inputValue, TTValue& outputValue)
             
             // get scenario duration
             this->getAttributeValue(kTTSym_duration, scenarioDuration);
+            
+            // a process cannot be moved beyond the duration of its container
+            if (TTUInt32(inputValue[1]) > TTUInt32(scenarioDuration[0]) || TTUInt32(inputValue[2]) > TTUInt32(scenarioDuration[0])) {
+                
+                TTLogError("Scenario::TimeProcessMove : process moved beyond the duration of its container\n");
+                return kTTErrGeneric;
+            }
             
             // update the Solver depending on the type of the time process
             timeProcessType = aTimeProcess->getName();
