@@ -30,11 +30,11 @@ TIME_CONTAINER_CONSTRUCTOR,
 mNamespace(NULL),
 mViewZoom(TTValue(1., 1.)),
 mViewPosition(TTValue(0, 0)),
-mEditionSolver(NULL)
+mEditionSolver(NULL),
 #ifndef NO_EXECUTION_GRAPH
-,
-mExecutionGraph(NULL)
+mExecutionGraph(NULL),
 #endif
+mLoading(NO)
 {
     TIME_PLUGIN_INITIALIZE
     
@@ -464,6 +464,8 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         // Starts scenario reading
         if (aXmlHandler->mXmlNodeName == kTTSym_xmlHandlerReadingStarts) {
             
+            mLoading = YES;
+            
             mCurrentTimeEvent = NULL;
             mCurrentTimeProcess = NULL;
             mCurrentTimeCondition = NULL;
@@ -499,6 +501,8 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         
         // Ends scenario reading
         if (aXmlHandler->mXmlNodeName == kTTSym_xmlHandlerReadingEnds) {
+            
+            mLoading = NO;
             
             return kTTErrNone;
         }
@@ -807,6 +811,10 @@ TTErr Scenario::TimeEventMove(const TTValue& inputValue, TTValue& outputValue)
     SolverVariablePtr       variable;
     SolverObjectMapIterator it;
     SolverError             sErr;
+    
+    // can't move an event during a load
+    if (mLoading)
+        return kTTErrGeneric;
     
     if (inputValue.size() == 2) {
         
@@ -1200,6 +1208,10 @@ TTErr Scenario::TimeProcessMove(const TTValue& inputValue, TTValue& outputValue)
     SolverObjectMapIterator it;
     SolverError             sErr;
     
+    // can't move a process during a load
+    if (mLoading)
+        return kTTErrGeneric;
+    
     if (inputValue.size() == 3) {
         
         if (inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeUInt32 && inputValue[2].type() == kTypeUInt32) {
@@ -1288,7 +1300,7 @@ TTErr Scenario::TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue
                 sErr = constraint->limit(inputValue[1], inputValue[2]);
             }
             
-            if (!sErr) {
+            if (!sErr && !mLoading) {
                 
                 // update each solver variable value
                 for (it = mVariablesMap.begin() ; it != mVariablesMap.end() ; it++)
