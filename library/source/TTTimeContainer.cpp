@@ -202,6 +202,13 @@ TTTimeEventPtr TTTimeContainer::readTimeEventFromXml(TTXmlHandlerPtr aXmlHandler
                 
                 if (v[0].type() == kTypeUInt32) {
                     
+                    // an event cannot be created after the end even of its container
+                    if (TTUInt32(v[0]) > getEndEvent()->mDate) {
+                        
+                        TTLogError("TTTimeContainer::readTimeEventFromXml : event created after the end event of its container\n");
+                        return NULL;
+                    }
+                    
                     // Create the time event
                     if (!this->TimeEventCreate(v, out)) {
                         

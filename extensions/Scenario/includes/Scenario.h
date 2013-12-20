@@ -53,9 +53,11 @@ class Scenario : public TimeContainer {
 	ExtendedInt                 minusInfinity;
 	ExtendedInt                 integer0;
 #endif     
-    TTTimeEventPtr              mCurrentTimeEvent;               ///< an internal pointer to remember the current time event being read
-    TTTimeProcessPtr            mCurrentTimeProcess;             ///< an internal pointer to remember the current time process being read
-    TTTimeConditionPtr          mCurrentTimeCondition;           ///< an internal pointer to remember the current time condition being read
+    TTTimeEventPtr              mCurrentTimeEvent;              ///< an internal pointer to remember the current time event being read
+    TTTimeProcessPtr            mCurrentTimeProcess;            ///< an internal pointer to remember the current time process being read
+    TTTimeConditionPtr          mCurrentTimeCondition;          ///< an internal pointer to remember the current time condition being read
+    
+    TTBoolean                   mLoading;                       ///< a flag true when the scenario is loading (mainly used to mute the edition solver)
     
 	
     /** Get parameters names needed by this time process
