@@ -646,6 +646,6 @@ void TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression, TTFloat
     // use the specific process method
     if (aTimeProcess->mRunning)
        aTimeProcess->Process(TTValue(progression, realTime), none);
-    else
-        std::cout << "TTTimeProcessSchedulerCallback : avoid last scheduler tick" << std::endl;
+    //else
+    //    std::cout << "TTTimeProcessSchedulerCallback : avoid last scheduler tick" << std::endl;
 }
