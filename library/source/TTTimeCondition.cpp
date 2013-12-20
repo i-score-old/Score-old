@@ -51,6 +51,10 @@ mReady(YES)
 	addMessageProperty(WriteAsXml, hidden, YES);
 	addMessageWithArguments(ReadFromXml);
 	addMessageProperty(ReadFromXml, hidden, YES);
+    
+    // needed to be notified by events
+    addMessageWithArguments(EventDateChanged);
+    addMessageWithArguments(EventStatusChanged);
 	
     // generate a random name
     mName = mName.random();
