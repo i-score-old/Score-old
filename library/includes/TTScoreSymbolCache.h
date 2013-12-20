@@ -56,6 +56,7 @@ extern TTSCORE_EXPORT TTSymbol	kTTSym_Pause;
 extern TTSCORE_EXPORT TTSymbol	kTTSym_Process;
 extern TTSCORE_EXPORT TTSymbol	kTTSym_ProcessStart;
 extern TTSCORE_EXPORT TTSymbol	kTTSym_ProcessEnd;
+extern TTSCORE_EXPORT TTSymbol  kTTSym_ready;
 extern TTSCORE_EXPORT TTSymbol  kTTSym_redundancy;
 extern TTSCORE_EXPORT TTSymbol	kTTSym_Resume;
 extern TTSCORE_EXPORT TTSymbol	kTTSym_recorded;
