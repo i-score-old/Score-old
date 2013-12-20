@@ -159,9 +159,8 @@ TTErr TTTimeCondition::EventAdd(const TTValue& inputValue, TTValue& outputValue)
             // insert the event with an expression
             mCases.insert({{event, aComportment}});
 
-            // increment the count of unready events
-            // CB TODO : could the event already be ready ? huge bug ! no mean to check
-            mUnreadyCounter++;
+            // set the event to waiting, incrementing the unready counter via observation
+            event->setAttributeValue(kTTSym_status, kTTSym_eventWaiting);
             
             // tell the event it is conditioned
             v = TTObjectBasePtr(this);
