@@ -35,9 +35,9 @@ if  win?
 elsif mac?
     
     # Copy support/jamoma folder into /usr/local/jamoma folder
-    `cp -f -p "#{glibdir}"/support/jamoma/extensions/* /usr/local/jamoma/extensions`
-    `cp -f -p "#{glibdir}"/support/jamoma/includes/* /usr/local/jamoma/includes`
-    `cp -f -p "#{glibdir}"/support/jamoma/lib/* /usr/local/jamoma/lib`
+    `cp -f -p ./support/jamoma/extensions/* /usr/local/jamoma/extensions`
+    `cp -f -p ./support/jamoma/includes/* /usr/local/jamoma/includes`
+    `cp -f -p ./support/jamoma/lib/* /usr/local/jamoma/lib`
     
     # Create alias
     `ln -s /usr/local/jamoma/lib/JamomaFoundation.dylib /usr/local/lib/JamomaFoundation.dylib`
@@ -54,9 +54,9 @@ elsif mac?
     
     # Copy Score headers to include them into other application
     # Don't need to copy Score dylibs because the copy step is in the Makefile
-    `cp -f -p "#{glibdir}"/library/includes/*.h /usr/local/jamoma/includes`
-    `cp -f -p "#{glibdir}"/library/tests/*.h /usr/local/jamoma/includes`
-    `cp -f -p "#{glibdir}"/extensions/TimePluginLib.h /usr/local/jamoma/includes`
+    `cp -f -p ./library/includes/*.h /usr/local/jamoma/includes`
+    `cp -f -p ./library/tests/*.h /usr/local/jamoma/includes`
+    `cp -f -p ./extensions/TimePluginLib.h /usr/local/jamoma/includes`
     
     # Create alias
     `ln -s /usr/local/jamoma/lib/JamomaScore.dylib /usr/local/lib/JamomaScore.dylib`
