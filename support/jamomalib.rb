@@ -638,9 +638,9 @@ else
 			# Max externals are bundles, and they expect the libs to be in different location
 			distropath = "/usr/local/lib" if project_type == "library"
 		
-		end
+    end
 
-		if ($g_use_yaml_project_files && File.exists?("#{projectdir}/#{projectname}.yml"))
+    if ($g_use_yaml_project_files && File.exists?("#{projectdir}/#{projectname}.yml"))
 			yaml = YAML.load_file( "#{projectdir}/#{projectname}.yml")
 			projectname.gsub!('#','\##') if mac?		 # in case there is a # in the project name, which would be interpreted as a comment symbol
 
@@ -1639,7 +1639,8 @@ else
 					# First detect if we are in Xcode 4.4, since the environment variables will break the build for Xcode 3
 					out = ""
 					err = ""
-					Open3.popen3("xcodebuild -version") do |stdin, stdout, stderr|
+					Open3.popen3("xcodebuild -version")
+                    do |stdin, stdout, stderr|
 						out = stdout.read
 						err = stderr.read
 					end
