@@ -638,7 +638,7 @@ else
 			# Max externals are bundles, and they expect the libs to be in different location
 			distropath = "/usr/local/lib" if project_type == "library"
 		
-		end
+    end
 
 		if ($g_use_yaml_project_files && File.exists?("#{projectdir}/#{projectname}.yml"))
 			yaml = YAML.load_file( "#{projectdir}/#{projectname}.yml")
