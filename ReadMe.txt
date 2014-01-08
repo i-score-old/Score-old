@@ -14,14 +14,11 @@ Installing
 
 1 : First of all you need to download the Gecode framework : http://www.gecode.org/download/Gecode-3.7.3.dmg
 
-2 : Then install libXml2 : http://www.explain.com.au/download/combo-2007-10-07.dmg.gz
-and copy libxml.framework to /Library/Frameworks
+2 : create a jamoma folder inside /usr/local/ and give you a full access (read+write) on this jamoma folder.
 
-3 : create a jamoma folder inside /usr/local/ and give you a full access (read+write) on this jamoma folder.
+3 : give you a full access (read+write) on /usr/local/lib folder.
 
-4 : give you a full access (read+write) on /usr/local/lib folder.
-
-5 : in the terminal run the build script from the Score folder : ./build.rb dev clean
+4 : in the terminal run the build script from the Score folder : ./build.rb dev clean
 
 Documentation / API
 ...
