@@ -158,8 +158,9 @@ TTErr TTTimeEvent::Dispose()
     TTValue none;
     TTErr   err = kTTErrNone;
     
-    // if not pending : do nothing
-    if (mStatus != kTTSym_eventPending)
+    // if already happened or disposed : do nothing
+    if (mStatus == kTTSym_eventDisposed ||
+        mStatus == kTTSym_eventHappened)
         return kTTErrGeneric;
     
     // if not conditionned : do nothing
@@ -168,13 +169,13 @@ TTErr TTTimeEvent::Dispose()
     
     // use container to make the event dispose
     if (mContainer) {
-        
+
         TTValue v = TTObjectBasePtr(this);
-        return mContainer->sendMessage(TTSymbol("TimeEventDispose"), v, none);
+        err = mContainer->sendMessage(TTSymbol("TimeEventDispose"), v, none);
     }
     
     setStatus(kTTSym_eventDisposed);
-    return kTTErrNone;
+    return err;
 }
 
 TTErr TTTimeEvent::Happen()
