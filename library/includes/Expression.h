@@ -66,15 +66,15 @@ public:
     
     /** Get the expression address
      @return                expression address */
-    TTAddress&      getAddress();
+    const TTAddress&      getAddress() const;
     
     /** Get the expression operator
      @return                expression operator */
-    TTSymbol&       getOperator();
+    const TTSymbol&       getOperator() const;
     
     /** Get the expression value
      @return                expression value */
-    TTValue&        getValue();
+    const TTValue&        getValue() const;
     
     /** evaluate the logical expression 
      @param value           the value to evaluate
