@@ -24,7 +24,7 @@
 TT_BASE_OBJECT_CONSTRUCTOR,
 mContainer(NULL),
 mReady(NO),
-mUnreadyCounter(0)
+mPendingCounter(0)
 {
     TT_ASSERT("Correct number of args to create TTTimeCondition", arguments.size() == 1);
     
@@ -198,7 +198,7 @@ TTErr TTTimeCondition::EventRemove(const TTValue& inputValue, TTValue& outputVal
         mCases.erase(it);
 
         // decrement the unready counter
-        mUnreadyCounter--;
+        mPendingCounter--;
         
         // tell the event it is not conditioned anymore
         v = TTObjectBasePtr(NULL);
@@ -459,26 +459,24 @@ TTErr TTTimeCondition::EventDateChanged(const TTValue& inputValue, TTValue& outp
 
 TTErr TTTimeCondition::EventStatusChanged(const TTValue& inputValue, TTValue& outputValue)
 {
-    TT_ASSERT("TTTimeCondition::EventStatusChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
+    TT_ASSERT("TTTimeCondition::EventStatusChanged : inputValue is correct", inputValue.size() == 3 && inputValue[0].type() == kTypeObject);
     
     TTTimeEventPtr          event = TTTimeEventPtr(TTObjectBasePtr(inputValue[0]));
     TTCaseMapIterator       it = mCases.find(event);
-    TTSymbol                status;
+    TTSymbol                newStatus = inputValue[1], oldStatus = inputValue[2];
     TTValue                 v;
+
+    TT_ASSERT("TTTimeCondition::EventStatusChanged : status effectively changed", newStatus != oldStatus);
     
     // if the event exists
     if (it != mCases.end()) {
         
-        // get the status
-        event->getAttributeValue(kTTSym_status, v);
-        status = v[0];
-        
-        if (status == kTTSym_eventPending) {
-            if (--mUnreadyCounter == 0) {
+        if (newStatus == kTTSym_eventPending) {
+            if (--mPendingCounter == 0) {
                 setReady(YES);
             }
-        } else {
-            if (mUnreadyCounter++ == 0) {
+        } else if (oldStatus == kTTSym_eventPending){
+            if (mPendingCounter++ == 0) {
                 setReady(NO);
             }
         }
