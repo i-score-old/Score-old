@@ -118,11 +118,17 @@ TTErr TTTimeEvent::setCondition(const TTValue& value)
 
 TTErr TTTimeEvent::setStatus(const TTValue& value)
 {
+    TTSymbol    lastStatus = mStatus;
+    TTValue     v = TTObjectBasePtr(this);
+    
     // set status
     mStatus = value[0];
     
     // notify each attribute observers
-    sendNotification(kTTSym_EventStatusChanged, TTObjectBasePtr(this));
+    v.append(mStatus);
+    v.append(lastStatus);
+    
+    sendNotification(kTTSym_EventStatusChanged, v);
     
     return kTTErrNone;
 }
