@@ -295,6 +295,9 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
             v = TTBoolean(timeOffset > 0.);
             getStartEvent()->setAttributeValue(kTTSym_mute, v);
             
+            v = TTSymbol(timeOffset > 0. ? kTTSym_eventHappened : kTTSym_eventWaiting);
+            getStartEvent()->setAttributeValue(kTTSym_status, v);
+            
             // mute all the events before the time offset
             for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next()) {
                 
@@ -304,6 +307,9 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
                 
                 v = TTBoolean(date < timeOffset);
                 aTimeEvent->setAttributeValue(kTTSym_mute, v);
+                
+                v = TTSymbol(date < timeOffset ? kTTSym_eventHappened : kTTSym_eventWaiting);
+                aTimeEvent->setAttributeValue(kTTSym_status, v);
                 
                 // merge the event state into the temporary state
                 if (date < timeOffset)
