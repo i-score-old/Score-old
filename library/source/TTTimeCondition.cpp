@@ -63,9 +63,7 @@ mUnreadyCounter(0)
 
 TTTimeCondition::~TTTimeCondition()
 {
-    TTValue         v, keys;
-    TTSymbol        key;
-    TTObjectBasePtr aReceiver;
+    TTValue         v;
     
     // update each event condition
     v = TTObjectBasePtr(NULL);
@@ -73,21 +71,24 @@ TTTimeCondition::~TTTimeCondition()
         TTObjectBasePtr(it->first)->setAttributeValue(kTTSym_condition, v);
     
     // destroy all receivers;
-    mReceivers.getKeys(keys);
-    for (TTUInt8 i = 0; i < keys.size(); i++) {
-        
-        key = keys[i];
-        mReceivers.lookup(key, v);
-        
-        aReceiver = v[0];
-        TTObjectBaseRelease(&aReceiver);
-    }
+    deleteReceivers();
 }
 
 TTErr TTTimeCondition::setReady(const TTValue& value)
 {
     // set the ready value
     mReady = value[0];
+
+    // create the receivers
+    TTCaseMapIterator it;
+    if (mReady) {
+        for(it = mCases.begin() ; it != mCases.end() ; it++) {
+            addReceiver(it->second.trigger.getAddress());
+            addReceiver(it->second.dispose.getAddress());
+        }
+    } else {
+        deleteReceivers();
+    }
     
     // notify each observers
     sendNotification(kTTSym_ConditionReadyChanged, mReady);
@@ -187,12 +188,10 @@ TTErr TTTimeCondition::EventRemove(const TTValue& inputValue, TTValue& outputVal
 {
     TTTimeEventPtr      event = TTTimeEventPtr(TTObjectBasePtr(inputValue[0]));
     TTCaseMapIterator   it = mCases.find(event);
-    TTAddress addr;
     
     // if the event exists
     if (it != mCases.end()) {
         
-        Comportment aComportment = it->second;
         TTValue     v;
         
         // remove the case
@@ -200,12 +199,6 @@ TTErr TTTimeCondition::EventRemove(const TTValue& inputValue, TTValue& outputVal
 
         // decrement the unready counter
         mUnreadyCounter--;
-        
-        // clean receivers
-        if ((addr = aComportment.trigger.getAddress()) != kTTAdrsEmpty)
-            cleanReceiver(addr);
-        if ((addr = aComportment.dispose.getAddress()) != kTTAdrsEmpty)
-            cleanReceiver(addr);
         
         // tell the event it is not conditioned anymore
         v = TTObjectBasePtr(NULL);
@@ -229,24 +222,11 @@ TTErr TTTimeCondition::EventTriggerExpression(const TTValue& inputValue, TTValue
     if (it != mCases.end()) {
         
         // replace the old expression by the new one
-        Expression  oldExpression = it->second.trigger;
-        TTAddress   oldAddress = oldExpression.getAddress();
-        Expression  newExpression;
+        Expression newExpression;
         
         ExpressionParseFromValue(inputValue[1], newExpression);
         
-        TTAddress   newAddress = newExpression.getAddress();
         mCases[it->first].trigger = newExpression;
-        
-        // check if receivers need to be updated
-        if (oldAddress != newAddress) {
-            
-            if (oldAddress != kTTAdrsEmpty)
-                cleanReceiver(oldAddress);
-        
-            if (newAddress != kTTAdrsEmpty)
-                addReceiver(newAddress);
-        }
 
         return kTTErrNone;
     }
@@ -263,24 +243,11 @@ TTErr TTTimeCondition::EventDisposeExpression(const TTValue& inputValue, TTValue
     if (it != mCases.end()) {
 
         // replace the old expression by the new one
-        Expression  oldExpression = it->second.dispose;
-        TTAddress   oldAddress = oldExpression.getAddress();
         Expression  newExpression;
 
         ExpressionParseFromValue(inputValue[1], newExpression);
 
-        TTAddress   newAddress = newExpression.getAddress();
         mCases[it->first].dispose = newExpression;
-
-        // check if receivers need to be updated
-        if (oldAddress != newAddress) {
-
-            if (oldAddress != kTTAdrsEmpty)
-                cleanReceiver(oldAddress);
-
-            if (newAddress != kTTAdrsEmpty)
-                addReceiver(newAddress);
-        }
 
         return kTTErrNone;
     }
@@ -523,38 +490,22 @@ TTErr TTTimeCondition::EventStatusChanged(const TTValue& inputValue, TTValue& ou
     return kTTErrGeneric;
 }
 
-void TTTimeCondition::cleanReceiver(TTAddress anAddress) // TODO : un compteur de réérence sur les receivers ?
+void TTTimeCondition::deleteReceivers()
 {
-    TTBoolean found = false;
+  TTValue          v, keys;
+  TTSymbol         key;
+  TTObjectBasePtr  aReceiver;
 
-    
-    // look for an expression using the address
-    for (TTCaseMapIterator it = mCases.begin(); it != mCases.end(); it++) {
-        
-        Expression anExpression = it->second.trigger;
-        Expression anotherExpression = it->second.dispose;
-        
-        if (anExpression.getAddress() == anAddress || anotherExpression.getAddress() == anAddress) {
-            
-            found = true;
-            break;
-        }
-    }
-    
-    // remove the receiver for this address
-    if (!found) {
-        
-        TTObjectBasePtr aReceiver;
-        TTValue         v;
-        
-        if (!mReceivers.lookup(anAddress, v)) {
-            
-            aReceiver = v[0];
-            TTObjectBaseRelease(&aReceiver);
-            
-            mReceivers.remove(anAddress);
-        }
-    }
+  mReceivers.getKeys(keys); // CB TODO : if possible, more efficient to run through the table than through the keys
+  for (TTUInt8 i = 0; i < keys.size(); i++) {
+
+      key = keys[i];
+      mReceivers.lookup(key, v);
+
+      aReceiver = v[0];
+      TTObjectBaseRelease(&aReceiver);
+  }
+  mReceivers.clear();
 }
 
 void TTTimeCondition::addReceiver(TTAddress anAddress)
@@ -565,7 +516,7 @@ void TTTimeCondition::addReceiver(TTAddress anAddress)
     TTValue         v, none;
     
     // if there is no receiver for the expression address
-    if (mReceivers.lookup(anAddress, v)) {
+    if (anAddress != kTTAdrsEmpty && mReceivers.lookup(anAddress, v)) {
         
         // No callback for the address
         v = TTValue((TTObjectBasePtr)NULL);
