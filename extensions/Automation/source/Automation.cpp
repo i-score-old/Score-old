@@ -316,8 +316,9 @@ TTErr Automation::Goto(const TTValue& inputValue, TTValue& outputValue)
     TTSymbol        key;
     TTObjectBasePtr curve;
     TTUInt32        i, j;
+    TTBoolean       mute = NO;
     
-    if (inputValue.size() == 1) {
+    if (inputValue.size() >= 1) {
         
         if (inputValue[0].type() == kTypeUInt32) {
             
@@ -330,33 +331,47 @@ TTErr Automation::Goto(const TTValue& inputValue, TTValue& outputValue)
             timeOffset = inputValue[0];
             mScheduler->setAttributeValue(kTTSym_offset, TTFloat64(timeOffset));
             
-            // get scheduler progression and realTime
-            mScheduler->getAttributeValue(TTSymbol("progression"), v);
-            progression = TTFloat64(v[0]);
-            
-            mScheduler->getAttributeValue(TTSymbol("realTime"), v);
-            realTime = TTFloat64(v[0]);
-            
-            // reset each curves on its first sample
-            mCurves.getKeys(keys);
-            
-            for (i = 0; i < keys.size(); i++) {
+            // is the scenario is temporary muted ?
+            if (inputValue.size() == 2) {
                 
-                key = keys[i];
-                mCurves.lookup(key, objects);
-                
-                for (j = 0; j < objects.size(); j++) {
+                if (inputValue[1].type() == kTypeBoolean) {
                     
-                    curve = objects[j];
-                    
-                    CurvePtr(curve)->begin();
+                    mute = inputValue[1];
                 }
             }
             
-            v = progression;
-            v.append(realTime);
-            
-            return Process(v, none);
+            if (!mute && !mMute) {
+                
+                // get scheduler progression and realTime
+                mScheduler->getAttributeValue(TTSymbol("progression"), v);
+                progression = TTFloat64(v[0]);
+                
+                mScheduler->getAttributeValue(TTSymbol("realTime"), v);
+                realTime = TTFloat64(v[0]);
+                
+                // reset each curves on its first sample
+                mCurves.getKeys(keys);
+                
+                for (i = 0; i < keys.size(); i++) {
+                    
+                    key = keys[i];
+                    mCurves.lookup(key, objects);
+                    
+                    for (j = 0; j < objects.size(); j++) {
+                        
+                        curve = objects[j];
+                        
+                        CurvePtr(curve)->begin();
+                    }
+                }
+                
+                v = progression;
+                v.append(realTime);
+                
+                return Process(v, none);
+            }
+            else
+                return kTTErrNone;
         }
     }
     
@@ -400,6 +415,7 @@ TTErr Automation::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     TTObjectBasePtr curve = NULL;
     TTAddress       address;
     TTValue         v, none, duration;
+    TTErr           err;
     
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
     
@@ -435,6 +451,9 @@ TTErr Automation::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     
     if (aXmlHandler->mXmlNodeName == TTSymbol("curve")) {
         
+        // get the current duration
+        getAttributeValue(kTTSym_duration, duration);
+        
         TTObjectBaseInstantiate(TTSymbol("Curve"), TTObjectBaseHandle(&curve), none);
         
         mCurrentObjects.append(curve);
@@ -442,7 +461,13 @@ TTErr Automation::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         // Pass the xml handler to the current curve to fill his data structure
         v = TTObjectBasePtr(curve);
         aXmlHandler->setAttributeValue(kTTSym_object, v);
-        return aXmlHandler->sendMessage(kTTSym_Read);
+        err = aXmlHandler->sendMessage(kTTSym_Read);
+        
+        // Sample the curve to be ready to process it
+        if (!err)
+            curve->sendMessage(TTSymbol("Sample"), duration, v);
+        
+        return err;
     }
 	
 	return kTTErrGeneric;

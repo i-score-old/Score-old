@@ -1589,6 +1589,7 @@ else
         #end
         makefile.write("OPTIONS += -stdlib=libc++ # -U__STRICT_ANSI__ -D__STDC_FORMAT_MACROS") if clang
         makefile.write("\n")
+        makefile.write("OPTIONS += -F/Library/Frameworks \n")  # needed under mac OS 10.9
         if mac?
           makefile.write("WARNINGS = -Wall -Wno-unknown-pragmas -Wno-trigraphs")
         else

@@ -90,7 +90,7 @@ private :
     virtual TTErr   ProcessPaused(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
     
     /** Specific go to method to set the process at a date
-     @param	inputValue      a date where to go relative to the duration of the time process
+     @param	inputValue      a date where to go relative to the duration of the time process, an optional boolean to temporary mute the process 
      @param	outputValue     nothing
      @return                an error code if the operation fails */
     virtual TTErr   Goto(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};

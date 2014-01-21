@@ -224,7 +224,7 @@
 			dependencies = (
 			);
 			name = Scenario;
-			passBuildSettingsInEnvironment = 1;
+			passBuildSettingsInEnvironment = 0;
 			productName = Scenario;
 		};
 /* End PBXLegacyTarget section */
