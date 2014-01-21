@@ -284,37 +284,41 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
             timeOffset = inputValue[0];
             mScheduler->setAttributeValue(kTTSym_offset, TTFloat64(timeOffset));
             
-            // create a temporary state to compile all the event states before the time offset
-            state = NULL;
-            TTObjectBaseInstantiate(kTTSym_Script, TTObjectBaseHandle(&state), none);
-            
-            // add the state of the scenario start
-            TTScriptMerge(TTScriptPtr(getTimeEventState(TTTimeEventPtr(getStartEvent()))), TTScriptPtr(state));
-            
-            // mute the start event of the Scenario if there is a timeOffset
-            v = TTBoolean(timeOffset > 0.);
-            getStartEvent()->setAttributeValue(kTTSym_mute, v);
-            
-            // mute all the events before the time offset
-            for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next()) {
+            if (!mMute) {
                 
-                aTimeEvent = mTimeEventList.current()[0];
-                aTimeEvent->getAttributeValue(kTTSym_date, v);
-                date = v[0];
+                // create a temporary state to compile all the event states before the time offset
+                state = NULL;
+                TTObjectBaseInstantiate(kTTSym_Script, TTObjectBaseHandle(&state), none);
                 
-                v = TTBoolean(date < timeOffset);
-                aTimeEvent->setAttributeValue(kTTSym_mute, v);
+                // add the state of the scenario start
+                TTScriptMerge(TTScriptPtr(getTimeEventState(TTTimeEventPtr(getStartEvent()))), TTScriptPtr(state));
                 
-                // merge the event state into the temporary state
-                if (date < timeOffset)
-                    TTScriptMerge(TTScriptPtr(getTimeEventState(TTTimeEventPtr(aTimeEvent))), TTScriptPtr(state));
+                // mute the start event of the Scenario if there is a timeOffset
+                v = TTBoolean(timeOffset > 0.);
+                getStartEvent()->setAttributeValue(kTTSym_mute, v);
+                
+                // mute all the events before the time offset
+                for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next()) {
+                    
+                    aTimeEvent = mTimeEventList.current()[0];
+                    aTimeEvent->getAttributeValue(kTTSym_date, v);
+                    date = v[0];
+                    
+                    v = TTBoolean(date < timeOffset);
+                    aTimeEvent->setAttributeValue(kTTSym_mute, v);
+                    
+                    // merge the event state into the temporary state
+                    if (date < timeOffset)
+                        TTScriptMerge(TTScriptPtr(getTimeEventState(TTTimeEventPtr(aTimeEvent))), TTScriptPtr(state));
+                }
+                
+                // run the temporary state
+                state->sendMessage(kTTSym_Run);
+                
+                // delete the temporary state
+                TTObjectBaseRelease(&state);
+                
             }
-            
-            // run the temporary state
-            state->sendMessage(kTTSym_Run);
-            
-            // delete the temporary state
-            TTObjectBaseRelease(&state);
             
             // prepare the timeOffset of each time process scheduler and mute them if needed
             for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
@@ -323,6 +327,10 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
                 
                 TTTimeEventPtr  startEvent = getTimeProcessStartEvent(TTTimeProcessPtr(aTimeProcess));
                 TTTimeEventPtr  endEvent = getTimeProcessEndEvent(TTTimeProcessPtr(aTimeProcess));
+                
+                // mute if the Scenario is muted or if the end event is before the timeOffset
+                v = TTBoolean(mMute || (getTimeEventDate(endEvent) < timeOffset));
+                aTimeProcess->setAttributeValue(kTTSym_mute, v);
                 
                 // if the date to start is in the middle of a time process
                 if (getTimeEventDate(startEvent) < timeOffset && getTimeEventDate(endEvent) > timeOffset) {
@@ -336,10 +344,6 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
                 
                 else if (getTimeEventDate(endEvent) <= timeOffset)
                     aTimeProcess->sendMessage(kTTSym_Goto, TTUInt32(1.), none);
-                
-                // mute if the end event is before the timeOffset
-                v = TTBoolean(getTimeEventDate(endEvent) < timeOffset);
-                aTimeProcess->setAttributeValue(kTTSym_mute, v);
             }
             
             return kTTErrNone;

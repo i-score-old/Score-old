@@ -330,33 +330,38 @@ TTErr Automation::Goto(const TTValue& inputValue, TTValue& outputValue)
             timeOffset = inputValue[0];
             mScheduler->setAttributeValue(kTTSym_offset, TTFloat64(timeOffset));
             
-            // get scheduler progression and realTime
-            mScheduler->getAttributeValue(TTSymbol("progression"), v);
-            progression = TTFloat64(v[0]);
-            
-            mScheduler->getAttributeValue(TTSymbol("realTime"), v);
-            realTime = TTFloat64(v[0]);
-            
-            // reset each curves on its first sample
-            mCurves.getKeys(keys);
-            
-            for (i = 0; i < keys.size(); i++) {
+            if (!mMute) {
                 
-                key = keys[i];
-                mCurves.lookup(key, objects);
+                // get scheduler progression and realTime
+                mScheduler->getAttributeValue(TTSymbol("progression"), v);
+                progression = TTFloat64(v[0]);
                 
-                for (j = 0; j < objects.size(); j++) {
+                mScheduler->getAttributeValue(TTSymbol("realTime"), v);
+                realTime = TTFloat64(v[0]);
+                
+                // reset each curves on its first sample
+                mCurves.getKeys(keys);
+                
+                for (i = 0; i < keys.size(); i++) {
                     
-                    curve = objects[j];
+                    key = keys[i];
+                    mCurves.lookup(key, objects);
                     
-                    CurvePtr(curve)->begin();
+                    for (j = 0; j < objects.size(); j++) {
+                        
+                        curve = objects[j];
+                        
+                        CurvePtr(curve)->begin();
+                    }
                 }
+                
+                v = progression;
+                v.append(realTime);
+                
+                return Process(v, none);
             }
-            
-            v = progression;
-            v.append(realTime);
-            
-            return Process(v, none);
+            else
+                return kTTErrNone;
         }
     }
     
