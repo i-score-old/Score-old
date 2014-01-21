@@ -267,11 +267,11 @@ TTErr Scenario::ProcessPaused(const TTValue& inputValue, TTValue& outputValue)
 TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
 {
     TTObjectBasePtr aTimeEvent, aTimeProcess, state;
-    TTValue         none;
+    TTValue         v, none;
     TTUInt32        duration, timeOffset, date;
-    TTValue         v;
+    TTBoolean       mute = NO;
     
-    if (inputValue.size() == 1) {
+    if (inputValue.size() >= 1) {
         
         if (inputValue[0].type() == kTypeUInt32) {
             
@@ -284,7 +284,16 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
             timeOffset = inputValue[0];
             mScheduler->setAttributeValue(kTTSym_offset, TTFloat64(timeOffset));
             
-            if (!mMute) {
+            // is the scenario is temporary muted ?
+            if (inputValue.size() == 2) {
+                
+                if (inputValue[1].type() == kTypeBoolean) {
+                    
+                    mute = inputValue[1];
+                }
+            }
+            
+            if (!mute && !mMute) {
                 
                 // create a temporary state to compile all the event states before the time offset
                 state = NULL;
@@ -329,21 +338,25 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
                 TTTimeEventPtr  endEvent = getTimeProcessEndEvent(TTTimeProcessPtr(aTimeProcess));
                 
                 // mute if the Scenario is muted or if the end event is before the timeOffset
-                v = TTBoolean(mMute || (getTimeEventDate(endEvent) < timeOffset));
+                v = TTBoolean(getTimeEventDate(endEvent) < timeOffset);
                 aTimeProcess->setAttributeValue(kTTSym_mute, v);
                 
                 // if the date to start is in the middle of a time process
                 if (getTimeEventDate(startEvent) < timeOffset && getTimeEventDate(endEvent) > timeOffset) {
                     
                     // go to time offset
-                    aTimeProcess->sendMessage(kTTSym_Goto, timeOffset - getTimeEventDate(startEvent), none);
+                    v = timeOffset - getTimeEventDate(startEvent);
                 }
                 
                 else if (getTimeEventDate(startEvent) >= timeOffset)
-                    aTimeProcess->sendMessage(kTTSym_Goto, TTUInt32(0.), none);
+                    v = TTUInt32(0.);
                 
                 else if (getTimeEventDate(endEvent) <= timeOffset)
-                    aTimeProcess->sendMessage(kTTSym_Goto, TTUInt32(1.), none);
+                    v = TTUInt32(1.);
+                
+                v.append(mute);
+                
+                aTimeProcess->sendMessage(kTTSym_Goto, v, none);
             }
             
             return kTTErrNone;

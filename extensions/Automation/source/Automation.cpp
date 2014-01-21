@@ -316,8 +316,9 @@ TTErr Automation::Goto(const TTValue& inputValue, TTValue& outputValue)
     TTSymbol        key;
     TTObjectBasePtr curve;
     TTUInt32        i, j;
+    TTBoolean       mute = NO;
     
-    if (inputValue.size() == 1) {
+    if (inputValue.size() >= 1) {
         
         if (inputValue[0].type() == kTypeUInt32) {
             
@@ -330,7 +331,16 @@ TTErr Automation::Goto(const TTValue& inputValue, TTValue& outputValue)
             timeOffset = inputValue[0];
             mScheduler->setAttributeValue(kTTSym_offset, TTFloat64(timeOffset));
             
-            if (!mMute) {
+            // is the scenario is temporary muted ?
+            if (inputValue.size() == 2) {
+                
+                if (inputValue[1].type() == kTypeBoolean) {
+                    
+                    mute = inputValue[1];
+                }
+            }
+            
+            if (!mute && !mMute) {
                 
                 // get scheduler progression and realTime
                 mScheduler->getAttributeValue(TTSymbol("progression"), v);
