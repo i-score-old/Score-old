@@ -173,6 +173,9 @@ TTErr TTTimeEvent::Dispose()
     if (mCondition == NULL)
         return kTTErrGeneric;
     
+    // change the status before
+    setStatus(kTTSym_eventDisposed);
+    
     // use container to make the event dispose
     if (mContainer) {
 
@@ -180,7 +183,6 @@ TTErr TTTimeEvent::Dispose()
         err = mContainer->sendMessage(TTSymbol("TimeEventDispose"), v, none);
     }
     
-    setStatus(kTTSym_eventDisposed);
     return err;
 }
 
