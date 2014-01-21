@@ -160,8 +160,11 @@ TTErr TTTimeCondition::EventAdd(const TTValue& inputValue, TTValue& outputValue)
             // insert the event with an expression
             mCases.insert({{event, aComportment}});
 
-            // set the event to waiting, incrementing the unready counter via observation
-            event->setAttributeValue(kTTSym_status, kTTSym_eventWaiting);
+            // increment the pending counter
+            mPendingCounter++;
+
+            // set the event to waiting
+            event->setAttributeValue(kTTSym_status, kTTSym_eventWaiting); // CB TODO : Why ?
             
             // tell the event it is conditioned
             v = TTObjectBasePtr(this);
@@ -575,19 +578,15 @@ TTErr TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data)
         triggerExp = it->second.trigger;
         disposeExp = it->second.dispose;
 
-        // if the address is equal to the event trigger expression address
-        if (anAddress == triggerExp.getAddress()) {
-            
-            // is the test of the expression passes ?
-            if (triggerExp.evaluate(data)) {
-                
-                // append the event to the trigger list
-                timeEventToTrigger.append(TTObjectBasePtr(it->first));
-            } else {
+        // if the address is equal to the event trigger expression address and the test of the expression passes
+        if (anAddress == triggerExp.getAddress() && triggerExp.evaluate(data)) {
 
-                // append the event to the dispose list
-                timeEventToDispose.append(TTObjectBasePtr(it->first));
-            }
+            // append the event to the trigger list
+            timeEventToTrigger.append(TTObjectBasePtr(it->first));
+        } else {
+
+            // append the event to the dispose list
+            timeEventToDispose.append(TTObjectBasePtr(it->first));
         }
 
         // if the address is equal to the event dispose expression address
