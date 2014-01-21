@@ -1473,6 +1473,8 @@ void ScenarioGraphTimeEventCallBack(TTPtr arg, TTBoolean active)
     
     if (active)
         aTimeEvent->sendMessage(kTTSym_Happen);
+    
+    // this propagates the disposition to the next events that are connected to a first disposed event
     else
         aTimeEvent->sendMessage(kTTSym_Dispose);
 }
