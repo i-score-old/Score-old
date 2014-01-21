@@ -415,6 +415,7 @@ TTErr Automation::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     TTObjectBasePtr curve = NULL;
     TTAddress       address;
     TTValue         v, none, duration;
+    TTErr           err;
     
 	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
     
@@ -450,6 +451,9 @@ TTErr Automation::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     
     if (aXmlHandler->mXmlNodeName == TTSymbol("curve")) {
         
+        // get the current duration
+        getAttributeValue(kTTSym_duration, duration);
+        
         TTObjectBaseInstantiate(TTSymbol("Curve"), TTObjectBaseHandle(&curve), none);
         
         mCurrentObjects.append(curve);
@@ -457,7 +461,13 @@ TTErr Automation::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         // Pass the xml handler to the current curve to fill his data structure
         v = TTObjectBasePtr(curve);
         aXmlHandler->setAttributeValue(kTTSym_object, v);
-        return aXmlHandler->sendMessage(kTTSym_Read);
+        err = aXmlHandler->sendMessage(kTTSym_Read);
+        
+        // Sample the curve to be ready to process it
+        if (!err)
+            curve->sendMessage(TTSymbol("Sample"), duration, v);
+        
+        return err;
     }
 	
 	return kTTErrGeneric;
