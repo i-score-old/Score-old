@@ -33,6 +33,10 @@ Dir.chdir "#{glibdir}"
 if  win?
     
 elsif mac?
+    # prepare directories
+    FileUtils.mkdir_p("/usr/local/jamoma/extensions") unless File.exist?("/usr/local/jamoma/extensions")
+    FileUtils.mkdir_p("/usr/local/jamoma/includes") unless File.exist?("/usr/local/jamoma/includes")
+    FileUtils.mkdir_p("/usr/local/jamoma/lib") unless File.exist?("/usr/local/jamoma/lib")
     
     # Copy support/jamoma folder into /usr/local/jamoma folder
     `cp -f -p ./support/jamoma/extensions/* /usr/local/jamoma/extensions`
