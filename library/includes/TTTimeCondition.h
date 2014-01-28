@@ -22,12 +22,11 @@
 #include "Expression.h"
 #include "TTTimeEvent.h"
 
-/** Define a struct containing two expressions and a boolean, as the expression to trigger, the one to dispose, and the default comportment */
+/** Define a struct containing an expression and a boolean, as the expression to trigger and the default comportment */
 struct Comportment {
-    Comportment() : trigger(), dispose(), dflt(true) {}
+    Comportment() : trigger(), dflt(true) {}
 
     Expression trigger;
-    Expression dispose;
     TTBoolean dflt;
 };
 
@@ -74,6 +73,8 @@ protected :
     TTHash                          mReceivers;                     ///< a table of receivers stored by address
     TTCaseMap                       mCases;                         ///< a map linking an event to its comportment
 
+    Expression                      mDispose;                       ///< the expression to dispose the condition
+
     TTUInt8                         mPendingCounter;                ///< counting the number of unready events
 
 private :
@@ -111,12 +112,6 @@ private :
      @return                an error code if the operation fails */
     TTErr           EventTriggerExpression(const TTValue& inputValue, TTValue& outputValue);
 
-    /**  Edit the dispose expression associated to an event
-     @param	inputValue      an event and the expression
-     @param	outputValue     nothing
-     @return                an error code if the operation fails */
-    TTErr           EventDisposeExpression(const TTValue& inputValue, TTValue& outputValue);
-
     /**  Edit the default comportment associated to an event
      @param	inputValue      an event and a boolean
      @param	outputValue     nothing
@@ -128,18 +123,22 @@ private :
      @param	outputValue     an expression symbol
      @return                an error code if the operation fails */
     TTErr           TriggerExpressionFind(const TTValue& inputValue, TTValue& outputValue);
-    
-    /**  Find the dispose expression associated to an event
-     @param	inputValue      an event
-     @param	outputValue     an expression symbol
-     @return                an error code if the operation fails */
-    TTErr           DisposeExpressionFind(const TTValue& inputValue, TTValue& outputValue);
 
     /**  Find the default comportment associated to an event
      @param	inputValue      an event
      @param	outputValue     an expression symbol
      @return                an error code if the operation fails */
     TTErr           DefaultFind(const TTValue& inputValue, TTValue& outputValue);
+
+    /**  Get the dispose expression
+     @param value           an expression symbol
+     @return                kTTErrNone */
+    TTErr           getDisposeExpression(TTValue& value);
+
+    /** Set the dispose expression
+     @param	value           the expression
+     @return                kTTErrNone */
+    TTErr           setDisposeExpression(const TTValue& value);
 
     /** Test an expression
      @param inputvalue      an expression value or symbol
