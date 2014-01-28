@@ -549,7 +549,6 @@ TTErr TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data)
     Expression          disposeExp;
     TTList              timeEventToTrigger;
     TTList              timeEventToDispose;
-    TTBoolean           dispose;
     TTValue             v;
 	
 	// unpack baton (condition, address)
@@ -563,11 +562,17 @@ TTErr TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data)
 
     anAddress = (*b)[1];
 
-    dispose = YES;
+    // if the dispose expression is true
+    if (anAddress == disposeExp.getAddress() && disposeExp.evaluate(data)) {
 
-    // if the dispose expression isn't true
-    if (!(anAddress == disposeExp.getAddress() && disposeExp.evaluate(data))) {
-        dispose = NO;
+        // dispose every event
+        aTimeCondition->getEvents(v);
+        for (TTElementIter it = v.begin() ; it != v.end() ; it++) {
+            TTObjectBasePtr(*it)->sendMessage(kTTSym_Dispose);
+        }
+
+    // if didn't dispose
+    } else {
 
         // for each event's expressions matching the incoming address
         for (TTCaseMapIterator it = aTimeCondition->mCases.begin(); it != aTimeCondition->mCases.end(); it++) {
@@ -585,21 +590,21 @@ TTErr TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data)
                 timeEventToDispose.append(TTObjectBasePtr(it->first));
             }
         }
-    }
-    
-    // if at least one event is in the trigger list the dispose expression is true
-    if (!timeEventToTrigger.isEmpty() || dispose) {
-        
-        // trigger all events of the trigger list
-        for (timeEventToTrigger.begin(); timeEventToTrigger.end(); timeEventToTrigger.next())
-            TTObjectBasePtr(timeEventToTrigger.current()[0])->sendMessage(kTTSym_Trigger);
-        
-        // dispose all the other events
-        for (timeEventToDispose.begin(); timeEventToDispose.end(); timeEventToDispose.next())
-            TTObjectBasePtr(timeEventToDispose.current()[0])->sendMessage(kTTSym_Dispose);
-        
-        aTimeCondition->mReady = NO;
-        aTimeCondition->sendNotification(kTTSym_ConditionReadyChanged, aTimeCondition->mReady);
+
+        // if at least one event is in the trigger list
+        if (!timeEventToTrigger.isEmpty()) {
+
+            // trigger all events of the trigger list
+            for (timeEventToTrigger.begin(); timeEventToTrigger.end(); timeEventToTrigger.next())
+              TTObjectBasePtr(timeEventToTrigger.current()[0])->sendMessage(kTTSym_Trigger);
+
+            // dispose all the other events
+            for (timeEventToDispose.begin(); timeEventToDispose.end(); timeEventToDispose.next())
+              TTObjectBasePtr(timeEventToDispose.current()[0])->sendMessage(kTTSym_Dispose);
+
+            aTimeCondition->mReady = NO;
+            aTimeCondition->sendNotification(kTTSym_ConditionReadyChanged, aTimeCondition->mReady);
+        }
     }
 
     return kTTErrNone;
