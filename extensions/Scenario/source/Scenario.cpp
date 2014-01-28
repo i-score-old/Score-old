@@ -293,6 +293,7 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
                 }
             }
             
+            // don't compute a state if it is muted
             if (!mute && !mMute) {
                 
                 // create a temporary state to compile all the event states before the time offset
@@ -301,32 +302,39 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
                 
                 // add the state of the scenario start
                 TTScriptMerge(TTScriptPtr(getTimeEventState(TTTimeEventPtr(getStartEvent()))), TTScriptPtr(state));
+            }
+            
+            // mute the start event of the Scenario if there is a timeOffset
+            v = TTBoolean(timeOffset > 0.);
+            getStartEvent()->setAttributeValue(kTTSym_mute, v);
+            
+            // mute all the events before the time offset
+            for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next()) {
                 
-                // mute the start event of the Scenario if there is a timeOffset
-                v = TTBoolean(timeOffset > 0.);
-                getStartEvent()->setAttributeValue(kTTSym_mute, v);
+                aTimeEvent = mTimeEventList.current()[0];
+                aTimeEvent->getAttributeValue(kTTSym_date, v);
+                date = v[0];
                 
-                // mute all the events before the time offset
-                for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next()) {
-                    
-                    aTimeEvent = mTimeEventList.current()[0];
-                    aTimeEvent->getAttributeValue(kTTSym_date, v);
-                    date = v[0];
-                    
-                    v = TTBoolean(date < timeOffset);
-                    aTimeEvent->setAttributeValue(kTTSym_mute, v);
+                v = TTBoolean(date < timeOffset);
+                aTimeEvent->setAttributeValue(kTTSym_mute, v);
+                
+                // don't compute a state if it is muted
+                if (!mute && !mMute) {
                     
                     // merge the event state into the temporary state
                     if (date < timeOffset)
                         TTScriptMerge(TTScriptPtr(getTimeEventState(TTTimeEventPtr(aTimeEvent))), TTScriptPtr(state));
                 }
+            }
+            
+            // don't compute a state if it is muted
+            if (!mute && !mMute) {
                 
                 // run the temporary state
                 state->sendMessage(kTTSym_Run);
                 
                 // delete the temporary state
                 TTObjectBaseRelease(&state);
-                
             }
             
             // prepare the timeOffset of each time process scheduler and mute them if needed
