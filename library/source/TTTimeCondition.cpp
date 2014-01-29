@@ -23,6 +23,7 @@
 
 TT_BASE_OBJECT_CONSTRUCTOR,
 mContainer(NULL),
+mActive(NO),
 mReady(NO),
 mPendingCounter(0)
 {
@@ -32,7 +33,12 @@ mPendingCounter(0)
         mContainer = arguments[0];
 
     addAttribute(Name, kTypeSymbol);
-    addAttributeWithSetter(Ready, kTypeBoolean);
+    
+    addAttributeWithSetter(Active, kTypeBoolean);
+    
+    addAttribute(Ready, kTypeBoolean);
+    addAttributeProperty(Ready, readOnly, YES);
+    
     addAttributeWithGetterAndSetter(DisposeExpression, kTypeSymbol);
     
     registerAttribute(TTSymbol("expressions"), kTypeLocalValue, NULL, (TTGetterMethod)& TTTimeCondition::getExpressions, NULL);
@@ -62,7 +68,10 @@ mPendingCounter(0)
 
 TTTimeCondition::~TTTimeCondition()
 {
-    TTValue         v;
+    TTValue v;
+    
+    // disable condition
+    mActive = NO;
     
     // update each event condition
     v = TTObjectBasePtr(NULL);
@@ -73,26 +82,42 @@ TTTimeCondition::~TTTimeCondition()
     deleteReceivers();
 }
 
-TTErr TTTimeCondition::setReady(const TTValue& value)
+TTErr TTTimeCondition::setActive(const TTValue& value)
 {
-    // set the ready value
-    mReady = value[0];
+    TTBoolean newActive = value[0];
+    
+    // filter repetitions
+    if (newActive != mActive) {
+        
+        // if the condition is ready to be active
+        if (newActive && mReady) {
+            
+            mActive = YES;
+            
+            // create the receivers
+            TTCaseMapIterator it;
+            
+            // for each trigger case
+            for(it = mCases.begin() ; it != mCases.end() ; it++)
+                addReceiver(it->second.trigger.getAddress());
+            
+            // for dispose case
+            addReceiver(mDispose.getAddress());
 
-    // create the receivers
-    TTCaseMapIterator it;
-    if (mReady) {
-        for(it = mCases.begin() ; it != mCases.end() ; it++) {
-            addReceiver(it->second.trigger.getAddress());
+            return kTTErrNone;
         }
-        addReceiver(mDispose.getAddress());
-    } else {
-        deleteReceivers();
+        
+        if (!newActive) {
+            
+            mActive = NO;
+         
+            deleteReceivers();
+            
+            return kTTErrNone;
+        }
     }
     
-    // notify each observers
-    sendNotification(kTTSym_ConditionReadyChanged, mReady);
-    
-    return kTTErrNone;
+    return kTTErrGeneric;
 }
 
 TTErr TTTimeCondition::getExpressions(TTValue& value)
@@ -481,6 +506,21 @@ TTErr TTTimeCondition::EventStatusChanged(const TTValue& inputValue, TTValue& ou
     return kTTErrGeneric;
 }
 
+TTErr TTTimeCondition::setReady(TTBoolean newReady)
+{
+    // filter repetitions
+    if (newReady != mReady) {
+        
+        // set the ready value
+        mReady = newReady;
+        
+        // notify each observers
+        sendNotification(kTTSym_ConditionReadyChanged, mReady);
+    }
+    
+    return kTTErrGeneric;
+}
+
 void TTTimeCondition::deleteReceivers()
 {
   TTValue          v, keys;
@@ -496,6 +536,7 @@ void TTTimeCondition::deleteReceivers()
       aReceiver = v[0];
       TTObjectBaseRelease(&aReceiver);
   }
+    
   mReceivers.clear();
 }
 
@@ -546,7 +587,6 @@ TTErr TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data)
     TTTimeConditionPtr  aTimeCondition;
     TTAddress           anAddress;
     Expression          triggerExp;
-    Expression          disposeExp;
     TTList              timeEventToTrigger;
     TTList              timeEventToDispose;
     TTValue             v;
@@ -554,16 +594,15 @@ TTErr TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data)
 	// unpack baton (condition, address)
 	b = (TTValuePtr)baton;
 	aTimeCondition = TTTimeConditionPtr(TTObjectBasePtr((*b)[0]));
-    disposeExp = aTimeCondition->mDispose;
 
     // only if the condition is ready
-    aTimeCondition->getAttributeValue(kTTSym_ready, v);
-    if (!v[0]) return kTTErrNone;
+    if (!aTimeCondition->mReady)
+        return kTTErrNone;
 
     anAddress = (*b)[1];
 
     // if the dispose expression is true
-    if (anAddress == disposeExp.getAddress() && disposeExp.evaluate(data)) {
+    if (anAddress == aTimeCondition->mDispose.getAddress() && aTimeCondition->mDispose.evaluate(data)) {
 
         // dispose every event
         aTimeCondition->getEvents(v);
@@ -602,8 +641,7 @@ TTErr TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data)
             for (timeEventToDispose.begin(); timeEventToDispose.end(); timeEventToDispose.next())
               TTObjectBasePtr(timeEventToDispose.current()[0])->sendMessage(kTTSym_Dispose);
 
-            aTimeCondition->mReady = NO;
-            aTimeCondition->sendNotification(kTTSym_ConditionReadyChanged, aTimeCondition->mReady);
+            aTimeCondition->setReady(NO);
         }
     }
 

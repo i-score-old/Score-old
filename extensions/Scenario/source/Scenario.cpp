@@ -185,7 +185,9 @@ TTErr Scenario::ProcessEnd()
 
 TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTFloat64   progression, realTime;
+    TTFloat64       progression, realTime;
+    TTObjectBasePtr aTimeCondition;
+    TTValue         v;
     
     if (inputValue.size() == 2) {
         
@@ -193,6 +195,16 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
             
             progression = inputValue[0];
             realTime = inputValue[1];
+            
+            // enable or disable conditions
+            for (mTimeConditionList.begin(); mTimeConditionList.end(); mTimeConditionList.next()) {
+                
+                aTimeCondition = mTimeConditionList.current()[0];
+                
+                // if a condition is ready we activate it
+                aTimeCondition->getAttributeValue(kTTSym_ready, v);
+                aTimeCondition->setAttributeValue(kTTSym_active, v);
+            }
             
 #ifndef NO_EXECUTION_GRAPH
             // update the mExecutionGraph to process the scenario

@@ -68,7 +68,9 @@ protected :
     
     TTSymbol                        mName;                          ///< the name of the condition
     
-    TTBoolean                       mReady;                         ///< is the condition ready to be tested ?
+    TTBoolean                       mActive;                        ///< enable/disable the condition (if it is ready only)
+    
+    TTBoolean                       mReady;                         ///< is the condition ready to be activated ?
     
     TTHash                          mReceivers;                     ///< a table of receivers stored by address
     TTCaseMap                       mCases;                         ///< a map linking an event to its comportment
@@ -79,11 +81,6 @@ protected :
 
 private :
     
-    /** Enable or disable the time condition to allow it to be tested
-     @param	value           a boolean
-     @return                kTTErrNone */
-    TTErr           setReady(const TTValue& value);
-    
     /** get all expressions symbol associated to each event
      @param	value           a value containing one expression per event
      @return                kTTErrNone */
@@ -93,6 +90,21 @@ private :
      @param value           the time events objects
      @return                kTTErrNone */
     TTErr           getEvents(TTValue& value);
+    
+    /** Set the active state
+     @param	value           a new active state
+     @return                kTTErrNone */
+    TTErr           setActive(const TTValue& value);
+    
+    /**  Get the dispose expression
+     @param value           an expression symbol
+     @return                kTTErrNone */
+    TTErr           getDisposeExpression(TTValue& value);
+    
+    /** Set the dispose expression
+     @param	value           the expression
+     @return                kTTErrNone */
+    TTErr           setDisposeExpression(const TTValue& value);
     
     /**  Add an event to the condition
      @param	inputValue      an event and optionnally the comportment associated
@@ -130,16 +142,6 @@ private :
      @return                an error code if the operation fails */
     TTErr           DefaultFind(const TTValue& inputValue, TTValue& outputValue);
 
-    /**  Get the dispose expression
-     @param value           an expression symbol
-     @return                kTTErrNone */
-    TTErr           getDisposeExpression(TTValue& value);
-
-    /** Set the dispose expression
-     @param	value           the expression
-     @return                kTTErrNone */
-    TTErr           setDisposeExpression(const TTValue& value);
-
     /** Test an expression
      @param inputvalue      an expression value or symbol
      @param outputvalue     the result as a boolean
@@ -165,11 +167,16 @@ private :
      @return                kTTErrNone */
     TTErr           EventStatusChanged(const TTValue& inputValue, TTValue& outputValue);
     
-    /**  Helper functions to manage receivers : add a receiver for to the address if no receiver already exists
+    /** Helper function to set the ready attribute and notify
+     @param	newReady        a boolean
+     @return                kTTErrNone */
+    TTErr           setReady(TTBoolean newReady);
+    
+    /** Helper function to manage receivers : add a receiver for to the address if no receiver already exists
      @param	anAddress      an address to observe */
     void            addReceiver(TTAddress anAddress);
     
-    /**  Helper functions to manage receivers : clear the receivers
+    /** Helper function to manage receivers : clear the receivers
      @param	anAddress      an observed address */
     void            deleteReceivers();
     

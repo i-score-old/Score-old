@@ -25,7 +25,7 @@ TT_BASE_OBJECT_CONSTRUCTOR,
 mContainer(NULL),
 mName(kTTSymEmpty),
 mDate(0),
-mStatus(kEventWaiting),
+mStatus(kTTSym_eventWaiting),
 mMute(NO),
 mState(NULL),
 mCondition(NULL)

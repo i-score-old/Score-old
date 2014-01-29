@@ -42,7 +42,7 @@ protected :
     TTUInt32                        mDurationMin;                   ///< the minimal duration of the time process
     TTUInt32                        mDurationMax;                   ///< the maximal duration of the time process
     
-    TTBoolean                       mMute;                          ///< is the time process muted ?
+    TTBoolean                       mMute;                          ///< to not process anything
     
     TTValue                         mColor;                         ///< the color of the process (useful for gui)
     TTUInt32                        mVerticalPosition;              ///< the Y axe position of the process (useful for gui)

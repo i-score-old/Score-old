@@ -515,25 +515,24 @@ TTErr TTTimeProcess::EventDateChanged(const TTValue& inputValue, TTValue& output
 
 TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outputValue)
 {
-    TT_ASSERT("TTTimeProcess::EventStatusChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
+    TT_ASSERT("TTTimeProcess::EventStatusChanged : inputValue is correct", inputValue.size() == 3 && inputValue[0].type() == kTypeObject);
     
-    TTObjectBasePtr aTimeEvent = inputValue[0];
-    TTSymbol        status;
-    TTValue         v;
+    TTTimeEventPtr          aTimeEvent = TTTimeEventPtr(TTObjectBasePtr(inputValue[0]));
+    TTSymbol                newStatus = inputValue[1], oldStatus = inputValue[2];
+    TTValue                 v;
     
-    aTimeEvent->getAttributeValue(kTTSym_status, v);
-    status = v[0];
+    TT_ASSERT("TTTimeProcess::EventStatusChanged : status effectively changed", newStatus != oldStatus);
     
     // event wainting case :
-    if (status == kTTSym_eventWaiting) {
+    if (newStatus == kTTSym_eventWaiting) {
         return kTTErrNone;
     }
     // event pending case :
-    else if (status == kTTSym_eventPending) {
+    else if (newStatus == kTTSym_eventPending) {
         return kTTErrNone;
     }
     // event happened case :
-    else if (status == kTTSym_eventHappened) {
+    else if (newStatus == kTTSym_eventHappened) {
         
         if (aTimeEvent == mStartEvent) {
             
@@ -578,7 +577,7 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
         return kTTErrGeneric;
     }
     // event disposed case :
-    else if (status == kTTSym_eventDisposed) {
+    else if (newStatus == kTTSym_eventDisposed) {
         return kTTErrNone;
     }
     
