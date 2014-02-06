@@ -21,23 +21,18 @@ elsif mac?
     `rm /usr/local/jamoma/extensions/*.*`
     `rm /usr/local/jamoma/includes/*.*`
     `rm /usr/local/jamoma/lib/*.*`
+    `rm /usr/local/lib/*.ttdylib`
+    `rm /usr/local/lib/Jamoma*.dylib`
     
-end
-
-Dir.chdir "#{glibdir}/support"
-load "build.rb"
-
-puts "post-build..."
-Dir.chdir "#{glibdir}"
-
-if  win?
-    
-elsif mac?
+    # prepare directories
+    FileUtils.mkdir_p("/usr/local/jamoma/extensions") unless File.exist?("/usr/local/jamoma/extensions")
+    FileUtils.mkdir_p("/usr/local/jamoma/includes") unless File.exist?("/usr/local/jamoma/includes")
+    FileUtils.mkdir_p("/usr/local/jamoma/lib") unless File.exist?("/usr/local/jamoma/lib")
     
     # Copy support/jamoma folder into /usr/local/jamoma folder
-    `cp -f -p ./support/jamoma/extensions/* /usr/local/jamoma/extensions`
-    `cp -f -p ./support/jamoma/includes/* /usr/local/jamoma/includes`
-    `cp -f -p ./support/jamoma/lib/* /usr/local/jamoma/lib`
+    `cp -f -p ./jamoma/extensions/* /usr/local/jamoma/extensions`
+    `cp -f -p ./jamoma/includes/* /usr/local/jamoma/includes`
+    `cp -f -p ./jamoma/lib/* /usr/local/jamoma/lib`
     
     # Create alias
     `ln -s /usr/local/jamoma/lib/JamomaFoundation.dylib /usr/local/lib/JamomaFoundation.dylib`
@@ -52,11 +47,28 @@ elsif mac?
     `ln -s /usr/local/jamoma/extensions/Minuit.ttdylib /usr/local/lib/Minuit.ttdylib`
     `ln -s /usr/local/jamoma/extensions/OSC.ttdylib /usr/local/lib/OSC.ttdylib`
     
+end
+
+Dir.chdir "#{glibdir}/support"
+load "build.rb"
+
+puts "post-build..."
+Dir.chdir "#{glibdir}"
+
+if win?
+    
+elsif mac?
+    
     # Copy Score headers to include them into other application
-    # Don't need to copy Score dylibs because the copy step is in the Makefile
     `cp -f -p ./library/includes/*.h /usr/local/jamoma/includes`
     `cp -f -p ./library/tests/*.h /usr/local/jamoma/includes`
     `cp -f -p ./extensions/TimePluginLib.h /usr/local/jamoma/includes`
+    
+    # copy Score dylibs because it seems the copy step in the Makefile doesn't work anymore !
+    `cp -f -p ./library/build/JamomaScore.dylib /usr/local/jamoma/lib`
+    `cp -f -p ./extensions/Interval/build/Interval.ttdylib /usr/local/jamoma/extensions`
+    `cp -f -p ./extensions/Automation/build/Automation.ttdylib /usr/local/jamoma/extensions`
+    `cp -f -p ./extensions/Scenario/build/Scenario.ttdylib /usr/local/jamoma/extensions`
     
     # Create alias
     `ln -s /usr/local/jamoma/lib/JamomaScore.dylib /usr/local/lib/JamomaScore.dylib`
