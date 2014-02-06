@@ -56,43 +56,43 @@ private :
      @param inputvalue      a date
      @param outputvalue     a new time event
      @return                an error code if the creation fails */
-    virtual TTErr   TimeEventCreate(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+	virtual TTErr   TimeEventCreate(const TTValue& /*inputValue*/, TTValue& /*outputValue*/) {return kTTErrGeneric;};
     
     /** Release a time event
      @param inputValue      a time event object to release
      @param outputvalue     nothing
      @return                an error code if the destruction fails */
-    virtual TTErr   TimeEventRelease(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+	virtual TTErr   TimeEventRelease(const TTValue& /*inputValue*/, TTValue& /*outputValue*/) {return kTTErrGeneric;};
     
     /** Move a time event
      @param inputValue      a time event object, new date
      @param outputvalue     nothing
      @return                an error code if the movement fails */
-    virtual TTErr   TimeEventMove(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+	virtual TTErr   TimeEventMove(const TTValue& /*inputValue*/, TTValue& /*outputValue*/) {return kTTErrGeneric;};
     
     /** Link a time event to a condition
      @param inputValue      a time event object, a time condition object
      @param outputvalue     nothing
      @return                an error code if the setting fails */
-    virtual TTErr   TimeEventCondition(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+	virtual TTErr   TimeEventCondition(const TTValue& /*inputValue*/, TTValue& /*outputValue*/) {return kTTErrGeneric;};
     
     /** Trigger a time event to make it happens
      @param inputValue      a time event object
      @param outputvalue     nothing
      @return                an error code if the triggering fails */
-    virtual TTErr   TimeEventTrigger(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+	virtual TTErr   TimeEventTrigger(const TTValue& /*inputValue*/, TTValue& /*outputValue*/) {return kTTErrGeneric;};
 
     /** Dispose a time event
      @param inputValue      a time event object
      @param outputvalue     nothing
      @return                an error code if the disposing fails */
-    virtual TTErr   TimeEventDispose(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+	virtual TTErr   TimeEventDispose(const TTValue& /*inputValue*/, TTValue& /*outputValue*/) {return kTTErrGeneric;};
 
     /** Replace a time event by another one (copying date attribute)
      @param inputValue      a former time event object, a new time event object
      @param outputvalue     nothing
      @return                an error code if the replacement fails */
-    virtual TTErr   TimeEventReplace(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+	virtual TTErr   TimeEventReplace(const TTValue& /*inputValue*/, TTValue& /*outputValue*/) {return kTTErrGeneric;};
     
     /** Look up the time event list to retreive a time event by name
      @param inputValue      the name as symbol
@@ -105,38 +105,38 @@ private :
      @param inputvalue      a time process type, a start event, a end event
      @param outputvalue     a new time process
      @return                an error code if the creation fails */
-    virtual TTErr   TimeProcessCreate(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+	virtual TTErr   TimeProcessCreate(const TTValue& /*inputValue*/, TTValue& /*outputValue*/) {return kTTErrGeneric;};
     
     /** Release a time process
      @param inputValue      a time process object to release
      @param outputvalue     its start and end event
      @return                an error code if the destruction fails */
-    virtual TTErr   TimeProcessRelease(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+	virtual TTErr   TimeProcessRelease(const TTValue& /*inputValue*/, TTValue& /*outputValue*/) {return kTTErrGeneric;};
     
     /** Move a time process
      @param inputValue      a time process object, new start date, new end date
      @param outputvalue     nothing
      @return                an error code if the movement fails */
-    virtual TTErr   TimeProcessMove(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+	virtual TTErr   TimeProcessMove(const TTValue& /*inputValue*/, TTValue& /*outputValue*/) {return kTTErrGeneric;};
     
     /** Limit a time process duration
      @param inputValue      a time process object, new duration min, new duration max
      @param outputvalue     nothing
      @return                an error code if the limitation fails */
-    virtual TTErr   TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+	virtual TTErr   TimeProcessLimit(const TTValue& /*inputValue*/, TTValue& /*outputValue*/) {return kTTErrGeneric;};
     
     
     /** Create a time condition
      @param inputvalue      nothing
      @param outputvalue     a new time condition
      @return                an error code if the creation fails */
-    virtual TTErr   TimeConditionCreate(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+	virtual TTErr   TimeConditionCreate(const TTValue& /*inputValue*/, TTValue& /*outputValue*/) {return kTTErrGeneric;};
     
     /** Release a time process
      @param inputValue      a time condition object to release
      @param outputvalue     nothing
      @return                an error code if the destruction fails */
-    virtual TTErr   TimeConditionRelease(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+	virtual TTErr   TimeConditionRelease(const TTValue& /*inputValue*/, TTValue& /*outputValue*/) {return kTTErrGeneric;};
     
     /** To be notified when athe scheduler speed changed
      @param inputValue      the new speed value

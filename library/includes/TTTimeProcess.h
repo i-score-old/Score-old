@@ -81,26 +81,26 @@ private :
      @param	inputValue      progression and real time of the scheduler
      @param	outputValue     return an error of the processing
      @return                an error code returned by the process method */
-    virtual TTErr   Process(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+	virtual TTErr   Process(const TTValue& /*inputValue*/, TTValue& /*outputValue*/) {return kTTErrGeneric;};
     
     /** Specific process method for pause/resume
      @param	inputValue      boolean paused state of the scheduler
      @param	outputValue     return an error of the processing
      @return                an error code returned by the process paused method */
-    virtual TTErr   ProcessPaused(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+	virtual TTErr   ProcessPaused(const TTValue& /*inputValue*/, TTValue& /*outputValue*/) {return kTTErrGeneric;};
     
     /** Specific go to method to set the process at a date
      @param	inputValue      a date where to go relative to the duration of the time process, an optional boolean to temporary mute the process 
      @param	outputValue     nothing
      @return                an error code if the operation fails */
-    virtual TTErr   Goto(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+	virtual TTErr   Goto(const TTValue& /*inputValue*/, TTValue& /*outputValue*/) {return kTTErrGeneric;};
     
     /**  needed to be handled by a TTXmlHandler
      @param	inputValue      ..
      @param	outputValue     ..
      @return                .. */
-	virtual TTErr	WriteAsXml(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
-	virtual TTErr	ReadFromXml(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+	virtual TTErr	WriteAsXml(const TTValue& /*inputValue*/, TTValue& /*outputValue*/) {return kTTErrGeneric;};
+	virtual TTErr	ReadFromXml(const TTValue& /*inputValue*/, TTValue& /*outputValue*/) {return kTTErrGeneric;};
     
     /** get the time process rigidity
      @param	value           rigidity state
