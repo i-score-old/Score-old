@@ -40,13 +40,14 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 CustomSpace::CustomSpace()
 //TODO: avant ": Space(), _dat(this, 0), _objFuncInitialized(false)"
-: Space(), _dat(*this, 0), _objFuncInitialized(false)
+: Space(), _dat(*this, 0), _objFuncInitialized(false), _home(*this)
 {
 	_lastVal = -1;
 	_cpt = 0;
 }
 
-CustomSpace::CustomSpace(bool share, CustomSpace& s) : Space(share,s)
+CustomSpace::CustomSpace(bool share, CustomSpace& s) : Space(share,s),
+	_home(*this)
 {
 	//TODO: avant "_dat.update(this, share, s._dat);"
 	_dat.update(*this, share, s._dat);
@@ -120,7 +121,7 @@ void
 CustomSpace::doBranching()
 {
 //TODO: avant "	branch(this, _dat, BVAR_MAX_MIN, BVAL_MIN);"
-	//	branch(*this, _dat, INT_VAR_MAX_MIN, INT_VAL_MIN);
+	branch(_home, _dat, INT_VAR_MAX_MIN(), INT_VAL_MIN(), NULL, NULL);
 }
 
 IntVar
