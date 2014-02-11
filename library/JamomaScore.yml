@@ -20,8 +20,13 @@ includes:
   - tests
 
   # to build without having the whole jamoma repository
-  - ../support/jamoma/includes
-
+  #- ../support/jamoma/includes
+  - ../../Foundation/library/includes
+  - ../../DSP/library/includes
+  - ../../Modular/library/includes
+  - ../../Modular/library/ProtocolLib
+  - ../../Modular/library/SchedulerLib
+  - ../../Modular/library/PeerObject
   # to include gecode solver library
   - /Library/Frameworks/gecode.framework
 
