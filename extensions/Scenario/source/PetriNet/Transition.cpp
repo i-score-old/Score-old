@@ -301,13 +301,13 @@ void Transition::crossTransition(bool mustChangeTokenValue, int newTokenValue)
 
 	set<Transition*>  transitionsToReset;
 
-	unsigned int tokenValue = 0;
-    bool activeToken = false;
+        int tokenValue = -1;
+        bool activeToken = false;
 
 	for (unsigned int i = 0 ; i < inGoingArc.size() ; ++i) {
 		tokenValue = inGoingArc[i]->consumeTokenInFrom();
 
-        if (tokenValue != -1) {
+        if (newTokenValue != -1 && tokenValue != -1) {
             activeToken = true;
             if (isStatic()) {
                 tokenValue -= inGoingArc[i]->getRelativeMinValue().getValue();
