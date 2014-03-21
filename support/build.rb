@@ -223,8 +223,8 @@ if File.directory? "#{@svn_root}/library"
   if win?
   	build_project("#{@svn_root}/library", "Jamoma#{@projectName}.vcxproj", configuration, clean, @distropath)
   elsif linux?
+	puts `sudo mkdir -p /usr/local/lib/jamoma/lib`
   	build_project("#{@svn_root}/library", "Makefile", configuration, clean, "#{@distropath}/core")
-  	puts `sudo cp #{@svn_root}/library/build/*.so /usr/lib`
   else
     if (@distropath)
   	  build_project("#{@svn_root}/library", "Jamoma#{@projectName}.xcodeproj", configuration, clean, "#{@distropath}/lib", use_make)
