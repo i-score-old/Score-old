@@ -118,11 +118,11 @@ private :
      @return                an error code if the operation fails */
     TTErr           EventRemove(const TTValue& inputValue, TTValue& outputValue);
     
-    /**  Edit the trigger expression associated to an event
+    /**  Edit the expression associated to an event
      @param	inputValue      an event and the expression
      @param	outputValue     nothing
      @return                an error code if the operation fails */
-    TTErr           EventTriggerExpression(const TTValue& inputValue, TTValue& outputValue);
+    TTErr           EventExpression(const TTValue& inputValue, TTValue& outputValue);
 
     /**  Edit the default comportment associated to an event
      @param	inputValue      an event and a boolean
@@ -130,11 +130,11 @@ private :
      @return                an error code if the operation fails */
     TTErr           EventDefault(const TTValue& inputValue, TTValue& outputValue);
 
-    /**  Find the trigger expression associated to an event
+    /**  Find the expression associated to an event
      @param	inputValue      an event
      @param	outputValue     an expression symbol
      @return                an error code if the operation fails */
-    TTErr           TriggerExpressionFind(const TTValue& inputValue, TTValue& outputValue);
+    TTErr           ExpressionFind(const TTValue& inputValue, TTValue& outputValue);
 
     /**  Find the default comportment associated to an event
      @param	inputValue      an event

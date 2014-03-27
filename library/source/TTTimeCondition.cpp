@@ -46,9 +46,9 @@ mPendingCounter(0)
 
     addMessageWithArguments(EventAdd);
     addMessageWithArguments(EventRemove);
-    addMessageWithArguments(EventTriggerExpression);
+    addMessageWithArguments(EventExpression);
     addMessageWithArguments(EventDefault);
-    addMessageWithArguments(TriggerExpressionFind);
+    addMessageWithArguments(ExpressionFind);
     addMessageWithArguments(DefaultFind);
     addMessageWithArguments(ExpressionTest);
     
@@ -242,7 +242,7 @@ TTErr TTTimeCondition::EventRemove(const TTValue& inputValue, TTValue& outputVal
     return kTTErrValueNotFound;
 }
 
-TTErr TTTimeCondition::EventTriggerExpression(const TTValue& inputValue, TTValue& outputValue)
+TTErr TTTimeCondition::EventExpression(const TTValue& inputValue, TTValue& outputValue)
 {
     TTTimeEventPtr      event = TTTimeEventPtr(TTObjectBasePtr(inputValue[0]));
     TTCaseMapIterator   it = mCases.find(event);
@@ -280,7 +280,7 @@ TTErr TTTimeCondition::EventDefault(const TTValue &inputValue, TTValue &outputVa
     return kTTErrValueNotFound;
 }
 
-TTErr TTTimeCondition::TriggerExpressionFind(const TTValue& inputValue, TTValue& outputValue)
+TTErr TTTimeCondition::ExpressionFind(const TTValue& inputValue, TTValue& outputValue)
 {
     TTTimeEventPtr      event = TTTimeEventPtr(TTObjectBasePtr(inputValue[0]));
     TTCaseMapIterator   it = mCases.find(event);
@@ -438,7 +438,7 @@ TTErr TTTimeCondition::ReadFromXml(const TTValue& inputValue, TTValue& outputVal
                 // get the expressions
                 if (!aXmlHandler->getXmlAttribute(TTSymbol("trigger"), v, YES)) {
                     out.append(v[0]);
-                    EventTriggerExpression(out, v);
+                    EventExpression(out, v);
                     out.pop_back();
                 }
                 if (!aXmlHandler->getXmlAttribute(TTSymbol("default"), v, NO)) {
