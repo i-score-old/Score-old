@@ -489,14 +489,11 @@ TTErr TTTimeCondition::EventStatusChanged(const TTValue& inputValue, TTValue& ou
     // if the event exists
     if (it != mCases.end()) {
         
-        if (newStatus == kTTSym_eventPending) {
-            if (--mPendingCounter == 0) {
-                setReady(YES);
-            }
-        } else if (oldStatus == kTTSym_eventPending){
-            if (mPendingCounter++ == 0) {
-                setReady(NO);
-            }
+        if (newStatus == kTTSym_eventPending && --mPendingCounter == 0) {
+            setReady(YES);
+        } else if (oldStatus == kTTSym_eventPending && mPendingCounter++ == 0 && mReady == YES) {
+            setReady(NO);
+            applyDefaults();
         }
         
         return kTTErrNone;
@@ -576,6 +573,18 @@ void TTTimeCondition::addReceiver(TTAddress anAddress)
     }
 }
 
+void TTTimeCondition::applyDefaults()
+{
+  TTValue v;
+
+  for (TTCaseMapIterator it = mCases.begin() ; it != mCases.end() ; it++) {
+      it->first->getAttributeValue(kTTSym_status, v);
+      if (v[0] != kTTSym_eventDisposed && v[0] != kTTSym_eventHappened) {
+          it->first->sendMessage(it->second.dflt?kTTSym_Happen:kTTSym_Dispose);
+      }
+  }
+}
+
 #if 0
 #pragma mark -
 #pragma mark Some Methods
@@ -603,6 +612,8 @@ TTErr TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data)
 
     // if the dispose expression is true
     if (anAddress == aTimeCondition->mDispose.getAddress() && aTimeCondition->mDispose.evaluate(data)) {
+
+        aTimeCondition->setReady(NO);
 
         // dispose every event
         aTimeCondition->getEvents(v);
@@ -633,6 +644,8 @@ TTErr TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data)
         // if at least one event is in the trigger list
         if (!timeEventToTrigger.isEmpty()) {
 
+            aTimeCondition->setReady(NO);
+
             // trigger all events of the trigger list
             for (timeEventToTrigger.begin(); timeEventToTrigger.end(); timeEventToTrigger.next())
               TTObjectBasePtr(timeEventToTrigger.current()[0])->sendMessage(kTTSym_Trigger);
@@ -640,8 +653,6 @@ TTErr TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data)
             // dispose all the other events
             for (timeEventToDispose.begin(); timeEventToDispose.end(); timeEventToDispose.next())
               TTObjectBasePtr(timeEventToDispose.current()[0])->sendMessage(kTTSym_Dispose);
-
-            aTimeCondition->setReady(NO);
         }
     }
 

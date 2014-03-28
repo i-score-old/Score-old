@@ -49,7 +49,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
 #include "ExtendedInt.hpp"
 
 #define START 1
-#define END 0
+#define END_GO 0
+#define END_DEACTIVATE 2
 
 class Transition;
 

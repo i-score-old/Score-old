@@ -176,10 +176,12 @@ private :
      @param	anAddress      an address to observe */
     void            addReceiver(TTAddress anAddress);
     
-    /** Helper function to manage receivers : clear the receivers
-     @param	anAddress      an observed address */
+    /** Helper function to manage receivers : clear the receivers */
     void            deleteReceivers();
-    
+
+    /** Helper function to apply the default comportment of each event */
+    void            applyDefaults();
+
     friend TTErr TTSCORE_EXPORT TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data);
     
 };

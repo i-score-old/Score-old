@@ -45,6 +45,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 #include "PetriNet.hpp"
+#include "TTTimeEvent.h"
+#include "TTTimeCondition.h"
 
 #include <set>
 
@@ -53,7 +55,7 @@ using namespace std;
 
 Transition::Transition(PetriNet* petriNet)
 :PetriNetNode(petriNet), m_activeArcsBitArray(NULL), m_startDate(MINUS_INFINITY),
-m_endDate(PLUS_INFINITY), m_startAction(NULL), m_endAction(NULL) // TODO : initialisation to NULL is implicit
+m_endDate(PLUS_INFINITY), m_startAction(NULL), m_endAction(NULL)
 {
 	m_events.push_back(STATIC_EVENT);
 	m_mustWaitThePetriNetToEnd = false;
@@ -214,7 +216,15 @@ void Transition::setArcAsActive(Arc* arc, unsigned int timeOffset, bool recalcul
 			m_endAction->disable();
 		}
 
-		m_endAction = new PriorityTransitionAction(this, END, m_endDate);
+		// CB Getting the default comportment from the condition
+		TTValue v;
+		TTTimeEventPtr event = static_cast<TTTimeEventPtr>(m_events.back());
+		event->getAttributeValue(kTTSym_condition, v);
+		TTTimeConditionPtr condition = static_cast<TTTimeConditionPtr>(TTObjectBasePtr(v[0]));
+		condition->sendMessage("DefaultFind", event, v);
+		bool dflt = v[0];
+
+		m_endAction = new PriorityTransitionAction(this, dflt?END_GO:END_DEACTIVATE, m_endDate);
 
 		getPetriNet()->addActionToPriorityQueue(m_endAction);
 	}
@@ -292,6 +302,13 @@ void Transition::crossTransition(bool mustChangeTokenValue, int newTokenValue)
 {
 	if (!areAllInGoingArcsActive()) {
 		throw IncoherentStateException();
+	}
+
+	if (m_startAction) {
+	    m_startAction->disable();
+	}
+	if (m_endAction) {
+	    m_endAction->disable();
 	}
 
 	arcList inGoingArc = inGoingArcsOf();

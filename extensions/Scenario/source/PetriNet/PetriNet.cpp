@@ -124,9 +124,10 @@ bool PetriNet::makeOneStep(unsigned int currentTime)
                         //stop = true;
                     } else { // CB if type END, actually max duration for the interval
                         if (topTransition->areAllInGoingArcsActive()) {
-                            topTransition->crossTransition(true, currentTime - topAction->getDate().getValue()); // CB force the transition
+                            bool activate = topAction->getType() == END_GO; // CB test the default comportment of the transition
+                            topTransition->crossTransition(true, activate?currentTime - topAction->getDate().getValue():-1); // CB force the transition
                             removeTopActionOnPriorityQueue();
-                        } else { // CB should be part of debug, like avery IncoherentStateException actually
+                        } else { // CB should be part of debug, like every IncoherentStateException actually
                             removeTopActionOnPriorityQueue();
                             throw IncoherentStateException();
                         }
