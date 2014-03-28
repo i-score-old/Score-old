@@ -52,6 +52,9 @@ endif()
 
 add_library(${PROJECT_NAME} SHARED ${PROJECT_SRCS})
 
+if(ANDROID)
+target_link_libraries(${PROJECT_NAME} gecodesearch gecodedriver gecodeminimodel gecodeset gecodesupport gecodefloat gecodeint  gecodeflatzinc gecodekernel)
+endif()
 target_link_libraries(${PROJECT_NAME} JamomaFoundation)
 target_link_libraries(${PROJECT_NAME} JamomaDSP)
 target_link_libraries(${PROJECT_NAME} JamomaModular)
