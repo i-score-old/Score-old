@@ -63,3 +63,4 @@ target_link_libraries(${PROJECT_NAME} xml2)
 
 setExtensionSuffix()
 
+INSTALL(TARGETS ${PROJECT_NAME} DESTINATION "extensions")

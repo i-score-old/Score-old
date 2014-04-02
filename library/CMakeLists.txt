@@ -40,3 +40,5 @@ target_link_libraries(${PROJECT_NAME} JamomaModular)
 target_link_libraries(${PROJECT_NAME} xml2)
 
 addAppleFramework(Carbon)
+
+INSTALL(TARGETS ${PROJECT_NAME} DESTINATION "lib")
