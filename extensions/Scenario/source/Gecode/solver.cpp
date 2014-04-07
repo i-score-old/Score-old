@@ -44,6 +44,9 @@ knowledge of the CeCILL-C license and that you accept its terms.
 #include "relations_type.hpp"
 #include "searchEngine.hpp"
 
+#if GECODE_VERSION_NUMBER < 400000
+#define LinIntExpr LinExpr
+#endif
 Solver::Solver()
 {
 	_space = new CustomSpace();

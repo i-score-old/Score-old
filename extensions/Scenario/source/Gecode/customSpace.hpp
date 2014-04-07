@@ -65,8 +65,9 @@ private :
 	int _lastVal;
 	int _cpt;
 
+#if GECODE_VERSION_NUMBER > 400000
 	Home _home;
-
+#endif
 public :
 
 	CustomSpace();
