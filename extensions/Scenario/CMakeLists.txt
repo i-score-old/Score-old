@@ -52,7 +52,7 @@ endif()
 
 add_library(${PROJECT_NAME} SHARED ${PROJECT_SRCS})
 
-if(ANDROID)
+if(ANDROID OR APPLE)
 target_link_libraries(${PROJECT_NAME} gecodesearch gecodedriver gecodeminimodel gecodeset gecodesupport gecodefloat gecodeint  gecodeflatzinc gecodekernel)
 endif()
 target_link_libraries(${PROJECT_NAME} JamomaFoundation)
@@ -61,7 +61,7 @@ target_link_libraries(${PROJECT_NAME} JamomaModular)
 target_link_libraries(${PROJECT_NAME} JamomaScore)
 target_link_libraries(${PROJECT_NAME} xml2)
 
-set(CMAKE_SHARED_LINKER_FLAGS "-F/Library/Frameworks/ -framework gecode")
+#set(CMAKE_SHARED_LINKER_FLAGS "-F/Library/Frameworks/ -framework gecode")
 setExtensionSuffix()
 
 INSTALL(TARGETS ${PROJECT_NAME} DESTINATION "extensions")
