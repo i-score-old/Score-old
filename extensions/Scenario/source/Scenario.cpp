@@ -1095,6 +1095,7 @@ TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue
 
 TTErr Scenario::TimeProcessCreate(const TTValue& inputValue, TTValue& outputValue)
 {
+    TTTimeEventPtr          startEvent, endEvent;
     TTTimeProcessPtr        aTimeProcess = NULL;
     TTValue                 args, aCacheElement;
     TTValue                 duration, scenarioDuration;
@@ -1110,6 +1111,13 @@ TTErr Scenario::TimeProcessCreate(const TTValue& inputValue, TTValue& outputValu
             
             // create a time process of the given type
             if (TTObjectBaseInstantiate(inputValue[0], TTObjectBaseHandle(&aTimeProcess), args))
+                return kTTErrGeneric;
+            
+            // check start and end events are differents
+            startEvent = TTTimeEventPtr(TTObjectBasePtr(inputValue[1])));
+            endEvent = TTTimeEventPtr(TTObjectBasePtr(inputValue[2])));
+            
+            if (startEvent == endEvent)
                 return kTTErrGeneric;
             
             // set the start and end events
