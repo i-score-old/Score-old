@@ -1114,8 +1114,8 @@ TTErr Scenario::TimeProcessCreate(const TTValue& inputValue, TTValue& outputValu
                 return kTTErrGeneric;
             
             // check start and end events are differents
-            startEvent = TTTimeEventPtr(TTObjectBasePtr(inputValue[1])));
-            endEvent = TTTimeEventPtr(TTObjectBasePtr(inputValue[2])));
+            startEvent = TTTimeEventPtr(TTObjectBasePtr(inputValue[1]));
+            endEvent = TTTimeEventPtr(TTObjectBasePtr(inputValue[2]));
             
             if (startEvent == endEvent)
                 return kTTErrGeneric;
