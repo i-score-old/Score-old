@@ -331,7 +331,7 @@ TTErr Automation::Goto(const TTValue& inputValue, TTValue& outputValue)
             timeOffset = inputValue[0];
             mScheduler->setAttributeValue(kTTSym_offset, TTFloat64(timeOffset));
             
-            // is the scenario is temporary muted ?
+            // is the automation is temporary muted ?
             if (inputValue.size() == 2) {
                 
                 if (inputValue[1].type() == kTypeBoolean) {
