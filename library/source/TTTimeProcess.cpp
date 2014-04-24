@@ -421,27 +421,18 @@ TTErr TTTimeProcess::Limit(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr TTTimeProcess::Start()
 {
-    // DEBUG
-    TTLogMessage("TTTimeProcess(%s)::Start\n", mName.c_str());
-    
     return mStartEvent->sendMessage(kTTSym_Happen);
 }
 
 TTErr TTTimeProcess::End()
 {
     return mEndEvent->sendMessage(kTTSym_Happen);
-    
-    // DEBUG
-    TTLogMessage("TTTimeProcess(%s)::End\n", mName.c_str());
 }
 
 TTErr TTTimeProcess::Play()
 {
     TTValue    v;
     TTUInt32   start, end;
-    
-    // DEBUG
-    TTLogMessage("TTTimeProcess(%s)::Play >>>\n", mName.c_str());
     
     // set the running state of the process
     mRunning = YES;
@@ -460,9 +451,6 @@ TTErr TTTimeProcess::Play()
         
         mScheduler->sendMessage(kTTSym_Go);
         
-        // DEBUG
-        TTLogMessage("TTTimeProcess(%s)::Play <<<\n", mName.c_str());
-        
         return kTTErrNone;
     }
     
@@ -473,16 +461,8 @@ TTErr TTTimeProcess::Stop()
 {
     // set the running state of the process
     mRunning = NO;
-    
-    // DEBUG
-    TTLogMessage("TTTimeProcess(%s)::Stop >>>\n", mName.c_str());
-    
-    TTErr err = mScheduler->sendMessage(kTTSym_Stop);
-    
-    // DEBUG
-    TTLogMessage("TTTimeProcess(%s)::Stop <<<\n", mName.c_str());
-    
-    return err;
+
+    return mScheduler->sendMessage(kTTSym_Stop);
 }
 
 TTErr TTTimeProcess::Pause()

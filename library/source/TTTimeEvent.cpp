@@ -120,15 +120,9 @@ TTErr TTTimeEvent::setStatus(const TTValue& value)
 {
     // set status
     mStatus = value[0];
-    
-    // DEBUG
-    TTLogMessage("TTTimeEvent(%s)::setStatus >>>\n", mName.c_str());
-    
+
     // notify each attribute observers
     sendNotification(kTTSym_EventStatusChanged, TTObjectBasePtr(this));
-    
-    // DEBUG
-    TTLogMessage("TTTimeEvent(%s)::setStatus <<<\n", mName.c_str());
     
     return kTTErrNone;
 }
