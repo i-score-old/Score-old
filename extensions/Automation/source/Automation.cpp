@@ -349,6 +349,7 @@ TTErr Automation::Goto(const TTValue& inputValue, TTValue& outputValue)
                 mScheduler->getAttributeValue(TTSymbol("realTime"), v);
                 realTime = TTFloat64(v[0]);
                 
+                // DEBUG : to see if it is faster without this part
                 // reset each curves on its first sample
                 mCurves.getKeys(keys);
                 
@@ -369,6 +370,7 @@ TTErr Automation::Goto(const TTValue& inputValue, TTValue& outputValue)
                 v.append(realTime);
                 
                 return Process(v, none);
+                // */
             }
             else
                 return kTTErrNone;
