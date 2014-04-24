@@ -156,6 +156,9 @@ TTErr Scenario::Compile()
 TTErr Scenario::ProcessStart()
 {
 #ifndef NO_EXECUTION_GRAPH
+    // DEBUG
+    TTLogMessage("Scenario::ProcessStart\n");
+    
     // start the execution graph
     mExecutionGraph->start();
 #else
@@ -171,6 +174,9 @@ TTErr Scenario::ProcessStart()
 TTErr Scenario::ProcessEnd()
 {
     TTObjectBasePtr aTimeProcess;
+    
+    // DEBUG
+    TTLogMessage("Scenario::ProcessEnd\n");
 
     // When a Scenario ends : stop all the time processes
     for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
@@ -190,6 +196,9 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
     if (inputValue.size() == 2) {
         
         if (inputValue[0].type() == kTypeFloat64 && inputValue[0].type() == kTypeFloat64) {
+            
+            // DEBUG
+            TTLogMessage("Scenario::Process %f\n", progression);
             
             progression = inputValue[0];
             realTime = inputValue[1];

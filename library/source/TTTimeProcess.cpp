@@ -421,11 +421,17 @@ TTErr TTTimeProcess::Limit(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr TTTimeProcess::Start()
 {
+    // DEBUG
+    TTLogMessage("TTTimeProcess::Start\n");
+    
     return mStartEvent->sendMessage(kTTSym_Happen);
 }
 
 TTErr TTTimeProcess::End()
 {
+    // DEBUG
+    TTLogMessage("TTTimeProcess::End\n");
+    
     return mEndEvent->sendMessage(kTTSym_Happen);
 }
 
@@ -537,6 +543,9 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
         
         if (aTimeEvent == mStartEvent) {
             
+            // DEBUG
+            TTLogMessage("TTTimeProcess::EventStatusChanged starts\n");
+            
             // if the time process is muted
             if (mMute)
                 return kTTErrNone;
@@ -554,6 +563,9 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
             }
         }
         else if (aTimeEvent == mEndEvent) {
+            
+            // DEBUG
+            TTLogMessage("TTTimeProcess::EventStatusChanged ends\n");
             
             // if the time process is muted
             if (mMute)
