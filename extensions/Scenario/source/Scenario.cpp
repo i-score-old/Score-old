@@ -157,10 +157,13 @@ TTErr Scenario::ProcessStart()
 {
 #ifndef NO_EXECUTION_GRAPH
     // DEBUG
-    TTLogMessage("Scenario::ProcessStart\n");
+    TTLogMessage("Scenario::ProcessStart >>>\n");
     
     // start the execution graph
     mExecutionGraph->start();
+    
+    // DEBUG
+    TTLogMessage("Scenario::ProcessStart <<<\n");
 #else
     
     TTLogMessage("Scenario::ProcessStart : without execution graph\n");

@@ -422,23 +422,26 @@ TTErr TTTimeProcess::Limit(const TTValue& inputValue, TTValue& outputValue)
 TTErr TTTimeProcess::Start()
 {
     // DEBUG
-    TTLogMessage("TTTimeProcess::Start\n");
+    TTLogMessage("TTTimeProcess(%s)::Start\n", mName.c_str());
     
     return mStartEvent->sendMessage(kTTSym_Happen);
 }
 
 TTErr TTTimeProcess::End()
 {
-    // DEBUG
-    TTLogMessage("TTTimeProcess::End\n");
-    
     return mEndEvent->sendMessage(kTTSym_Happen);
+    
+    // DEBUG
+    TTLogMessage("TTTimeProcess(%s)::End\n", mName.c_str());
 }
 
 TTErr TTTimeProcess::Play()
 {
     TTValue    v;
     TTUInt32   start, end;
+    
+    // DEBUG
+    TTLogMessage("TTTimeProcess(%s)::Play >>>\n", mName.c_str());
     
     // set the running state of the process
     mRunning = YES;
@@ -457,6 +460,9 @@ TTErr TTTimeProcess::Play()
         
         mScheduler->sendMessage(kTTSym_Go);
         
+        // DEBUG
+        TTLogMessage("TTTimeProcess(%s)::Play <<<\n", mName.c_str());
+        
         return kTTErrNone;
     }
     
@@ -468,7 +474,15 @@ TTErr TTTimeProcess::Stop()
     // set the running state of the process
     mRunning = NO;
     
-    return mScheduler->sendMessage(kTTSym_Stop);
+    // DEBUG
+    TTLogMessage("TTTimeProcess(%s)::Stop >>>\n", mName.c_str());
+    
+    TTErr err = mScheduler->sendMessage(kTTSym_Stop);
+    
+    // DEBUG
+    TTLogMessage("TTTimeProcess(%s)::Stop <<<\n", mName.c_str());
+    
+    return err;
 }
 
 TTErr TTTimeProcess::Pause()
@@ -543,9 +557,6 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
         
         if (aTimeEvent == mStartEvent) {
             
-            // DEBUG
-            TTLogMessage("TTTimeProcess::EventStatusChanged starts\n");
-            
             // if the time process is muted
             if (mMute)
                 return kTTErrNone;
@@ -554,7 +565,7 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
             
             // use the specific start process method of the time process
             if (!ProcessStart()) {
-                
+
                 // notify start message observers
                 sendNotification(kTTSym_ProcessStarted, TTObjectBasePtr(this));
                 
@@ -563,9 +574,6 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
             }
         }
         else if (aTimeEvent == mEndEvent) {
-            
-            // DEBUG
-            TTLogMessage("TTTimeProcess::EventStatusChanged ends\n");
             
             // if the time process is muted
             if (mMute)
