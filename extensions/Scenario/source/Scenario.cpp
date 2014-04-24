@@ -197,9 +197,6 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
         
         if (inputValue[0].type() == kTypeFloat64 && inputValue[0].type() == kTypeFloat64) {
             
-            // DEBUG
-            TTLogMessage("Scenario::Process %f\n", progression);
-            
             progression = inputValue[0];
             realTime = inputValue[1];
             
