@@ -156,8 +156,14 @@ TTErr Scenario::Compile()
 TTErr Scenario::ProcessStart()
 {
 #ifndef NO_EXECUTION_GRAPH
+    // DEBUG
+    TTLogMessage("Scenario::ProcessStart >>>\n");
+
     // start the execution graph
     mExecutionGraph->start();
+
+    // DEBUG
+    TTLogMessage("Scenario::ProcessStart <<<\n");
 #else
 
     TTLogMessage("Scenario::ProcessStart : without execution graph\n");
@@ -171,6 +177,9 @@ TTErr Scenario::ProcessStart()
 TTErr Scenario::ProcessEnd()
 {
     TTObjectBasePtr aTimeProcess;
+
+    // DEBUG
+    TTLogMessage("Scenario::ProcessEnd\n");
 
     // When a Scenario ends : stop all the time processes
     for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
@@ -1095,6 +1104,7 @@ TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue
 
 TTErr Scenario::TimeProcessCreate(const TTValue& inputValue, TTValue& outputValue)
 {
+    TTTimeEventPtr          startEvent, endEvent;
     TTTimeProcessPtr        aTimeProcess = NULL;
     TTValue                 args, aCacheElement;
     TTValue                 duration, scenarioDuration;
@@ -1110,6 +1120,13 @@ TTErr Scenario::TimeProcessCreate(const TTValue& inputValue, TTValue& outputValu
 
             // create a time process of the given type
             if (TTObjectBaseInstantiate(inputValue[0], TTObjectBaseHandle(&aTimeProcess), args))
+                return kTTErrGeneric;
+
+            // check start and end events are differents
+            startEvent = TTTimeEventPtr(TTObjectBasePtr(inputValue[1]));
+            endEvent = TTTimeEventPtr(TTObjectBasePtr(inputValue[2]));
+
+            if (startEvent == endEvent)
                 return kTTErrGeneric;
 
             // set the start and end events
