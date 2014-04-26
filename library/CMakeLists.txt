@@ -15,7 +15,10 @@ ${CMAKE_CURRENT_SOURCE_DIR}/source/TTTimeProcess.cpp
 
 ${CMAKE_CURRENT_SOURCE_DIR}/tests/TTScore.test.cpp
 )
-file(GLOB_RECURSE PROJECT_HDRS ${CMAKE_CURRENT_SOURCE_DIR}/includes/*.h)
+file(GLOB_RECURSE PROJECT_HDRS
+	${CMAKE_CURRENT_SOURCE_DIR}/includes/*.h
+	${CMAKE_CURRENT_SOURCE_DIR}/tests/*.h
+)
 
 include_directories("${PROJECT_SOURCE_DIR}/includes")
 include_directories("${PROJECT_SOURCE_DIR}/tests")
