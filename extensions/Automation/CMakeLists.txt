@@ -34,6 +34,8 @@ target_link_libraries(${PROJECT_NAME} JamomaModular)
 target_link_libraries(${PROJECT_NAME} JamomaScore)
 target_link_libraries(${PROJECT_NAME} xml2)
 
-setExtensionSuffix()
+### Output ###
+setOutput()
 
-INSTALL(TARGETS ${PROJECT_NAME} DESTINATION "extensions")
+### Tests ###
+addTestTarget()

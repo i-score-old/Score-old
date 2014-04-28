@@ -41,4 +41,8 @@ target_link_libraries(${PROJECT_NAME} xml2)
 
 addAppleFramework(Carbon)
 
-INSTALL(TARGETS ${PROJECT_NAME} DESTINATION "lib")
+### Output ###
+setOutput()
+
+### Tests ###
+addTestTarget()

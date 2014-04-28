@@ -60,6 +60,8 @@ target_link_libraries(${PROJECT_NAME} JamomaScore)
 target_link_libraries(${PROJECT_NAME} xml2)
 
 #set(CMAKE_SHARED_LINKER_FLAGS "-F/Library/Frameworks/ -framework gecode")
-setExtensionSuffix()
+### Output ###
+setOutput()
 
-INSTALL(TARGETS ${PROJECT_NAME} DESTINATION "extensions")
+### Tests ###
+addTestTarget()
