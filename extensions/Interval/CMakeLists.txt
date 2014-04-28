@@ -1,37 +1,42 @@
 cmake_minimum_required(VERSION 2.6)
 project(Interval)
 
+find_package(LibXml2)
+if(NOT LIBXML2_FOUND)
+  message(STATUS "Package libxml2 required, but not found! Won't build extension Interval.")
+  return()
+endif()
+
 set(PROJECT_SRCS
 ${CMAKE_CURRENT_SOURCE_DIR}/../TimePluginLib.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/source/Interval.cpp
 )
+file(GLOB_RECURSE PROJECT_HDRS ${CMAKE_CURRENT_SOURCE_DIR}/includes/*.h)
 
 include_directories("${PROJECT_SOURCE_DIR}/")
 include_directories("${PROJECT_SOURCE_DIR}/..")
 include_directories("${PROJECT_SOURCE_DIR}/includes")
 include_directories("${PROJECT_SOURCE_DIR}/../../library/includes")
 include_directories("${PROJECT_SOURCE_DIR}/../../library/tests")
-include_directories("${PROJECT_SOURCE_DIR}/../../../Modular/library/includes")
-include_directories("${PROJECT_SOURCE_DIR}/../../../Modular/library/ProtocolLib")
-include_directories("${PROJECT_SOURCE_DIR}/../../../Modular/library/SchedulerLib")
-include_directories("${PROJECT_SOURCE_DIR}/../../../Modular/library/PeerObject")
-include_directories("${PROJECT_SOURCE_DIR}/../../../Foundation/library/includes")
-include_directories("${PROJECT_SOURCE_DIR}/../../../DSP/library/includes")
+include_directories("${JAMOMA_MODULAR_INCLUDE_DIR}")
+include_directories("${JAMOMA_MODULAR_PROTOCOLLIB_INCLUDE_DIR}")
+include_directories("${JAMOMA_MODULAR_SCHEDULERLIB_INCLUDE_DIR}")
+include_directories("${JAMOMA_MODULAR_PEEROBJECT_INCLUDE_DIR}")
+include_directories("${JAMOMA_FOUNDATION_INCLUDE_DIR}")
+include_directories("${JAMOMA_DSP_INCLUDE_DIR}")
 
+include_directories(${LIBXML2_INCLUDE_DIR})
 if(ANDROID)
 include_directories("${CMAKE_FIND_ROOT_PATH}/include")
-include_directories("${CMAKE_FIND_ROOT_PATH}/include/libxml2")
-elseif(UNIX)
-include_directories("/usr/include/libxml2")
 endif()
 
-add_library(${PROJECT_NAME} SHARED ${PROJECT_SRCS})
+add_library(${PROJECT_NAME} SHARED ${PROJECT_SRCS} ${PROJECT_HDRS})
 
-target_link_libraries(${PROJECT_NAME} JamomaFoundation)
-target_link_libraries(${PROJECT_NAME} JamomaDSP)
-target_link_libraries(${PROJECT_NAME} JamomaModular)
+target_link_libraries(${PROJECT_NAME} ${JAMOMA_FOUNDATION_LIBRARY})
+target_link_libraries(${PROJECT_NAME} ${JAMOMA_DSP_LIBRARY})
+target_link_libraries(${PROJECT_NAME} ${JAMOMA_MODULAR_LIBRARY})
 target_link_libraries(${PROJECT_NAME} JamomaScore)
-target_link_libraries(${PROJECT_NAME} xml2)
+target_link_libraries(${PROJECT_NAME} ${LIBXML2_LIBRARIES})
 
 ### Output ###
 setOutput()
