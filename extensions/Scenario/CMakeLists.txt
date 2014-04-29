@@ -67,7 +67,11 @@ endif()
 
 add_library(${PROJECT_NAME} SHARED ${PROJECT_SRCS} ${PROJECT_HDRS})
 
+if(ANDROID)
+target_link_libraries(${PROJECT_NAME} gecodesearch gecodedriver gecodeminimodel gecodeset gecodesupport gecodefloat gecodeint gecodeflatzinc gecodekernel)
+else()
 target_link_libraries(${PROJECT_NAME} ${GECODE_LIBRARIES}) # not that gecodefloat is missing in GECODE_LIBRARIES but not required to compile
+endif()
 target_link_libraries(${PROJECT_NAME} ${JAMOMA_FOUNDATION_LIBRARY})
 target_link_libraries(${PROJECT_NAME} ${JAMOMA_DSP_LIBRARY})
 target_link_libraries(${PROJECT_NAME} ${JAMOMA_MODULAR_LIBRARY})
