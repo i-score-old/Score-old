@@ -123,7 +123,7 @@ TTErr TTTimeEvent::setStatus(const TTValue& value)
     
     // set status
     mStatus = value[0];
-    
+
     // notify each attribute observers
     v.append(mStatus);
     v.append(lastStatus);

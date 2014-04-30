@@ -396,6 +396,10 @@ TTTimeProcessPtr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHan
     if (!start || !end)
         return NULL;
     
+    // check start and end events are different
+    if (start == end)
+        return NULL;
+    
     // Create the time process
     v = aXmlHandler->mXmlNodeName;
     v.append(TTObjectBasePtr(start));
