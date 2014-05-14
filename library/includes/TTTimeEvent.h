@@ -18,7 +18,7 @@
 #ifndef __TT_TIME_EVENT_H__
 #define __TT_TIME_EVENT_H__
 
-#include "TTScore.h"
+#include "TTScoreIncludes.h"
 
 /**	a class to define an event
  

@@ -18,9 +18,8 @@
 #ifndef __TT_TIME_CONDITION_H__
 #define __TT_TIME_CONDITION_H__
 
-#include "TTScore.h"
+#include "TTScoreIncludes.h"
 #include "Expression.h"
-#include "TTTimeEvent.h"
 
 /** Define a struct containing an expression and a boolean, as the expression to trigger and the default comportment */
 struct Comportment {

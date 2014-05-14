@@ -28,6 +28,7 @@ Dir.chdir "#{glibdir}"
 `cp "#{glibdir}"/../Modular/extensions/System/build/System.ttdylib "#{glibdir}"/support/jamoma/extensions`
 
 `cp "#{glibdir}"/../Modular/library/includes/TTModular.h "#{glibdir}"/support/jamoma/includes`
+`cp "#{glibdir}"/../Modular/library/includes/TTModularIncludes.h "#{glibdir}"/support/jamoma/includes`
 `cp "#{glibdir}"/../Modular/library/PeerObject/*.h "#{glibdir}"/support/jamoma/includes`
 `cp "#{glibdir}"/../Modular/library/ProtocolLib/Protocol.h "#{glibdir}"/support/jamoma/includes`
 `cp "#{glibdir}"/../Modular/library/SchedulerLib/Scheduler.h "#{glibdir}"/support/jamoma/includes`

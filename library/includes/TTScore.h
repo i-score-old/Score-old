@@ -2,11 +2,11 @@
  *
  * @ingroup scoreLibrary
  *
- * @brief the Score library
+ * @brief the Score Application Programming Interface
  *
- * @details The Score library allows to ... @n@n
+ * @details The Score API allows to use Score inside another application @n@n
  *
- * @see TTTimeEvent, TTTimeProcess
+ * @see TTScore
  *
  * @authors Théo de la Hogue & Clément Bossut
  *
@@ -18,41 +18,14 @@
 #ifndef __TT_SCORE_H__
 #define __TT_SCORE_H__
 
-#define TTSCORE_VERSION_STRING "0.1"
-#define TTSCORE_XML_ENCODING "ISO-8859-1"
+#include "TTScoreIncludes.h"
 
-#ifdef TT_PLATFORM_WIN
-#include "windows.h"
-	#ifdef TTSCORE_EXPORTS
-		#define TTSCORE_EXPORT __declspec(dllexport)
-	#else
-	#ifdef TTSTATIC
-		#define TTSCORE_EXPORT
-	#else
-		#define TTSCORE_EXPORT __declspec(dllimport)
-	#endif
-	#endif // _DLL_EXPORT
-
-#else // TT_PLATFORM_MAC
-	#ifdef TTSCORE_EXPORTS
-		#define TTSCORE_EXPORT __attribute__((visibility("default")))
-	#else
-		#define TTSCORE_EXPORT
-	#endif
+#if 0
+#pragma mark -
+#pragma mark Initialisation
 #endif
 
-#include <math.h>
-#include <unistd.h>
-#include <map>
-#include <libxml/encoding.h>
-#include <libxml/xmlwriter.h>
-#include <libxml/xmlreader.h>
+/** Initialise Score framework */
+void TTSCORE_EXPORT TTScoreInit();
 
-#include "TTFoundationAPI.h"
-#include "TTModular.h"
-
-#include "TTScoreSymbolCache.h"
-
-#include "TTScore.test.h"
-
-#endif // __TT_SCORE_H__
+#endif  // __TT_SCORE_H__

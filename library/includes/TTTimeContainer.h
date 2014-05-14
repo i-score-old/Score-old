@@ -18,7 +18,7 @@
 #ifndef __TT_TIME_CONTAINER_H__
 #define __TT_TIME_CONTAINER_H__
 
-#include "TTTimeProcess.h"
+#include "TTScoreIncludes.h"
 #include "TTTimeCondition.h"
 
 /**	The TTTimeContainer class allows to ...

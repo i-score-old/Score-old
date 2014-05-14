@@ -10,7 +10,7 @@
 		464FE81317F570C300529725 /* TTTimeCondition.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TTTimeCondition.h; path = includes/TTTimeCondition.h; sourceTree = SOURCE_ROOT; };
 		464FE81517F583FC00529725 /* Expression.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Expression.h; path = includes/Expression.h; sourceTree = SOURCE_ROOT; };
 		464FE81617F5840300529725 /* Expression.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Expression.cpp; path = source/Expression.cpp; sourceTree = SOURCE_ROOT; };
-		4659534217870BCC0094F82C /* TTScoreAPI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TTScoreAPI.h; path = includes/TTScoreAPI.h; sourceTree = SOURCE_ROOT; };
+		4659534217870BCC0094F82C /* TTScore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TTScore.h; path = includes/TTScore.h; sourceTree = SOURCE_ROOT; };
 		465A654217F081A200B70364 /* TTTimeCondition.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TTTimeCondition.cpp; path = source/TTTimeCondition.cpp; sourceTree = SOURCE_ROOT; };
 		468EBBFB17847064008BE2AC /* TTTimeContainer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TTTimeContainer.cpp; path = source/TTTimeContainer.cpp; sourceTree = SOURCE_ROOT; };
 		46A0B5D417F9B5070046756C /* TTTimeContainer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TTTimeContainer.h; path = includes/TTTimeContainer.h; sourceTree = SOURCE_ROOT; };
@@ -21,11 +21,8 @@
 		46B55541177B124500F50D89 /* TTTimeProcess.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TTTimeProcess.cpp; path = source/TTTimeProcess.cpp; sourceTree = SOURCE_ROOT; };
 		46BFD37D170DAE9900B99389 /* TTScore.test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TTScore.test.cpp; sourceTree = "<group>"; };
 		46BFD37E170DAE9900B99389 /* TTScore.test.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TTScore.test.h; sourceTree = "<group>"; };
-		46D6FF0C18576004005D49AF /* TTScoreAPI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TTScoreAPI.cpp; path = source/TTScoreAPI.cpp; sourceTree = SOURCE_ROOT; };
-		46F5057A166699BE00CFC3A2 /* TTScore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TTScore.h; path = includes/TTScore.h; sourceTree = SOURCE_ROOT; };
-		46F5057B166699BE00CFC3A2 /* TTScoreSymbolCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TTScoreSymbolCache.h; path = includes/TTScoreSymbolCache.h; sourceTree = SOURCE_ROOT; };
-		46F5059016669CFC00CFC3A2 /* TTScore.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TTScore.cpp; path = source/TTScore.cpp; sourceTree = SOURCE_ROOT; };
-		46F5059116669CFC00CFC3A2 /* TTScoreSymbolCache.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TTScoreSymbolCache.cpp; path = source/TTScoreSymbolCache.cpp; sourceTree = SOURCE_ROOT; };
+		46D6FF0C18576004005D49AF /* TTScore.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TTScore.cpp; path = source/TTScore.cpp; sourceTree = SOURCE_ROOT; };
+		46F5057A166699BE00CFC3A2 /* TTScoreIncludes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TTScoreIncludes.h; path = includes/TTScoreIncludes.h; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -51,9 +48,8 @@
 		46F5056F1666991700CFC3A2 /* includes */ = {
 			isa = PBXGroup;
 			children = (
-				4659534217870BCC0094F82C /* TTScoreAPI.h */,
-				46F5057A166699BE00CFC3A2 /* TTScore.h */,
-				46F5057B166699BE00CFC3A2 /* TTScoreSymbolCache.h */,
+				4659534217870BCC0094F82C /* TTScore.h */,
+				46F5057A166699BE00CFC3A2 /* TTScoreIncludes.h */,
 				464FE81517F583FC00529725 /* Expression.h */,
 				464FE81317F570C300529725 /* TTTimeCondition.h */,
 				46A0B5D417F9B5070046756C /* TTTimeContainer.h */,
@@ -67,9 +63,7 @@
 		46F505731666991700CFC3A2 /* source */ = {
 			isa = PBXGroup;
 			children = (
-				46D6FF0C18576004005D49AF /* TTScoreAPI.cpp */,
-				46F5059016669CFC00CFC3A2 /* TTScore.cpp */,
-				46F5059116669CFC00CFC3A2 /* TTScoreSymbolCache.cpp */,
+				46D6FF0C18576004005D49AF /* TTScore.cpp */,
 				464FE81617F5840300529725 /* Expression.cpp */,
 				465A654217F081A200B70364 /* TTTimeCondition.cpp */,
 				468EBBFB17847064008BE2AC /* TTTimeContainer.cpp */,
