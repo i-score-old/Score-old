@@ -350,7 +350,7 @@ void TTTimeContainer::writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTTimeP
     }
 }
 
-TTTimeProcessPtr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHandler)
+TTErr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHandler, TTObject& aNewTimeProcess)
 {
     TTTimeProcessPtr    aTimeProcess = NULL;
     TTTimeEventPtr      start = NULL;
@@ -505,7 +505,7 @@ void TTTimeContainer::writeTimeConditionAsXml(TTXmlHandlerPtr aXmlHandler, TTTim
     xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
 }
 
-TTTimeConditionPtr TTTimeContainer::readTimeConditionFromXml(TTXmlHandlerPtr aXmlHandler)
+TTErr TTTimeContainer::readTimeConditionFromXml(TTXmlHandlerPtr aXmlHandler, TTObject& aNewTimeCondition)
 {
     TTTimeConditionPtr  aTimeCondition = NULL;
     TTValue             v, out;

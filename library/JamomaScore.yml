@@ -21,7 +21,7 @@ includes:
   - ../support/jamoma/includes
   
   # to include gecode solver library
-  - /Library/Frameworks/gecode.framework
+  #- /Library/Frameworks/gecode.framework
   
   # to use xml file format
   - /usr/include/libxml2

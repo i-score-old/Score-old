@@ -16,7 +16,7 @@
 #ifndef __TT_SCORE_INCLUDES_H__
 #define __TT_SCORE_INCLUDES_H__
 
-#define TTSCORE_VERSION_STRING "0.1"
+#define TTSCORE_VERSION_STRING "0.2"
 #define TTSCORE_XML_ENCODING "ISO-8859-1"
 
 #ifdef TT_PLATFORM_WIN
@@ -49,11 +49,14 @@
 #include "TTFoundationAPI.h"
 #include "TTModular.h"
 
+#include "TTScore.h"
+
 #include "Expression.h"
 #include "TTTimeEvent.h"
 #include "TTTimeProcess.h"
-#include "TTTimeContainer.h"
 #include "TTTimeCondition.h"
+#include "TTTimeContainer.h"
+
 
 #include "TTScore.test.h"
 

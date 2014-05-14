@@ -19,7 +19,6 @@
 #define __TT_TIME_CONTAINER_H__
 
 #include "TTScoreIncludes.h"
-#include "TTTimeCondition.h"
 
 /**	The TTTimeContainer class allows to ...
  
@@ -223,27 +222,29 @@ protected :
      @param aXmlHandler     a xml handler
      @param aTimeProcess    a time process object
      @return                nothing */
-    void            writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTTimeProcessPtr aTimeProcess);
+    void            writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTObject& aTimeProcess);
     
     /** Read basic informations of a time process from Xml
      @param aXmlHandler     a xml handler
-     @return                a new time process object */
-    TTTimeProcessPtr readTimeProcessFromXml(TTXmlHandlerPtr aXmlHandler);
+     @param                 a new time process object 
+     @return                #TTErr */
+    TTErr           readTimeProcessFromXml(TTXmlHandlerPtr aXmlHandler, TTObject& aNewTimeProcess);
     
     
     /** Write basic informations of a time condition as Xml
      @param aXmlHandler     a xml handler
      @param aTimeProcess    a time condition object
      @return                nothing */
-    void            writeTimeConditionAsXml(TTXmlHandlerPtr aXmlHandler, TTTimeConditionPtr aTimeCondition);
+    void            writeTimeConditionAsXml(TTXmlHandlerPtr aXmlHandler, TTObject& aTimeCondition);
     
     /** Read basic informations of a time condition from Xml
      @param aXmlHandler     a xml handler
-     @return                a new time condition */
-    TTTimeConditionPtr  readTimeConditionFromXml(TTXmlHandlerPtr aXmlHandler);
+     @param                 a new time condition
+     @return                #TTErr */
+    TTErr           readTimeConditionFromXml(TTXmlHandlerPtr aXmlHandler, TTObject& aNewTimeCondition);
     
     
-    friend TTErr TTSCORE_EXPORT TTTimeContainerSchedulerSpeedCallback(TTPtr baton, TTValue& data);
+    friend TTErr TTSCORE_EXPORT TTTimeContainerSchedulerSpeedCallback(const TTValue& baton, const TTValue& data);
 };
 
 typedef TTTimeContainer* TTTimeContainerPtr;

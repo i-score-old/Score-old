@@ -33,7 +33,7 @@ class TTSCORE_EXPORT TTTimeEvent : public TTObjectBase {
     friend class TTTimeContainer;
     friend class TTTimeProcess;
     
-    TTObjectBasePtr                 mContainer;                     ///< the container which handles the event
+    TTObject                        mContainer;                     ///< the container which handles the event
     
 protected :
     
@@ -45,9 +45,9 @@ protected :
     
     TTBoolean                       mMute;                          ///< to not push the state
     
-    TTObjectBasePtr                 mState;                         ///< a state handled by the event
+    TTObject                        mState;                         ///< a state handled by the event
     
-    TTObjectBasePtr                 mCondition;                     ///< a pointer to an optional condition object to make the event interactive
+    TTObject                        mCondition;                     ///< a pointer to an optional condition object to make the event interactive
  
 private :
     

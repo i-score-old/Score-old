@@ -32,7 +32,7 @@ class TTSCORE_EXPORT TTTimeProcess : public TTObjectBase {
     
     friend class TTTimeContainer;
 
-    TTObjectBasePtr                 mContainer;                     ///< the container which handles the time process
+    TTObject                        mContainer;                     ///< the container which handles the time process
     
 protected :
     
@@ -47,7 +47,7 @@ protected :
     TTUInt32                        mVerticalPosition;              ///< the Y axe position of the process (useful for gui)
     TTUInt32                        mVerticalSize;                  ///< the Y axe size of the process (useful for gui)
     
-    TTObjectBasePtr                 mScheduler;                     ///< the scheduler object which handles the time process execution
+    TTObject                        mScheduler;                     ///< the scheduler object which handles the time process execution
     
     TTBoolean                       mRunning;                       ///< a boolean to get the running state of the process
                                                                     ///< it is related to the running state of the scheduler
@@ -57,11 +57,11 @@ protected :
     
 private :
     
-    TTObjectBasePtr                 mStartEvent;                    ///< the event object which handles the time process execution start
+    TTObject                        mStartEvent;                    ///< the event object which handles the time process execution start
     
     TTList                          mIntermediateEvents;            ///< the list of all intermediate events
     
-    TTObjectBasePtr                 mEndEvent;                      ///< the event object which handles the time process execution stop
+    TTObject                        mEndEvent;                      ///< the event object which handles the time process execution stop
     
     /** Specific compilation method used to pre-processed data in order to accelarate Process method.
      the compiled attribute allows to know if the process needs to be compiled or not.

@@ -8,8 +8,6 @@
 
 /* Begin PBXFileReference section */
 		464FE81317F570C300529725 /* TTTimeCondition.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TTTimeCondition.h; path = includes/TTTimeCondition.h; sourceTree = SOURCE_ROOT; };
-		464FE81517F583FC00529725 /* Expression.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Expression.h; path = includes/Expression.h; sourceTree = SOURCE_ROOT; };
-		464FE81617F5840300529725 /* Expression.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Expression.cpp; path = source/Expression.cpp; sourceTree = SOURCE_ROOT; };
 		4659534217870BCC0094F82C /* TTScore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TTScore.h; path = includes/TTScore.h; sourceTree = SOURCE_ROOT; };
 		465A654217F081A200B70364 /* TTTimeCondition.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TTTimeCondition.cpp; path = source/TTTimeCondition.cpp; sourceTree = SOURCE_ROOT; };
 		468EBBFB17847064008BE2AC /* TTTimeContainer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TTTimeContainer.cpp; path = source/TTTimeContainer.cpp; sourceTree = SOURCE_ROOT; };
@@ -19,6 +17,9 @@
 		46B5553F177B11FB00F50D89 /* JamomaScore.yml */ = {isa = PBXFileReference; lastKnownFileType = text; path = JamomaScore.yml; sourceTree = "<group>"; };
 		46B55540177B123C00F50D89 /* TTTimeProcess.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TTTimeProcess.h; path = includes/TTTimeProcess.h; sourceTree = SOURCE_ROOT; };
 		46B55541177B124500F50D89 /* TTTimeProcess.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TTTimeProcess.cpp; path = source/TTTimeProcess.cpp; sourceTree = SOURCE_ROOT; };
+		46B9018B192331A700AC93ED /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		46B9018E19233C3300AC93ED /* Expression.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Expression.h; path = includes/Expression.h; sourceTree = SOURCE_ROOT; };
+		46B9018F19233C3B00AC93ED /* Expression.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Expression.cpp; path = source/Expression.cpp; sourceTree = SOURCE_ROOT; };
 		46BFD37D170DAE9900B99389 /* TTScore.test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TTScore.test.cpp; sourceTree = "<group>"; };
 		46BFD37E170DAE9900B99389 /* TTScore.test.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TTScore.test.h; sourceTree = "<group>"; };
 		46D6FF0C18576004005D49AF /* TTScore.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TTScore.cpp; path = source/TTScore.cpp; sourceTree = SOURCE_ROOT; };
@@ -39,6 +40,7 @@
 			isa = PBXGroup;
 			children = (
 				46B5553F177B11FB00F50D89 /* JamomaScore.yml */,
+				46B9018B192331A700AC93ED /* Makefile */,
 				46F5056F1666991700CFC3A2 /* includes */,
 				46F505731666991700CFC3A2 /* source */,
 				46BFD37C170DAE9900B99389 /* tests */,
@@ -50,7 +52,7 @@
 			children = (
 				4659534217870BCC0094F82C /* TTScore.h */,
 				46F5057A166699BE00CFC3A2 /* TTScoreIncludes.h */,
-				464FE81517F583FC00529725 /* Expression.h */,
+				46B9018E19233C3300AC93ED /* Expression.h */,
 				464FE81317F570C300529725 /* TTTimeCondition.h */,
 				46A0B5D417F9B5070046756C /* TTTimeContainer.h */,
 				46B5553D177B043C00F50D89 /* TTTimeEvent.h */,
@@ -64,7 +66,7 @@
 			isa = PBXGroup;
 			children = (
 				46D6FF0C18576004005D49AF /* TTScore.cpp */,
-				464FE81617F5840300529725 /* Expression.cpp */,
+				46B9018F19233C3B00AC93ED /* Expression.cpp */,
 				465A654217F081A200B70364 /* TTTimeCondition.cpp */,
 				468EBBFB17847064008BE2AC /* TTTimeContainer.cpp */,
 				46B5553E177B044500F50D89 /* TTTimeEvent.cpp */,

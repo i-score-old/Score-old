@@ -333,7 +333,7 @@ TTErr TTScoreTimeProcessEndCallbackRelease(TTTimeProcessPtr timeProcess, TTObjec
 #pragma mark some internal functions
 #endif
 
-void internal_TTScoreTimeEventStatusCallback(TTPtr baton, TTValue& data)
+void internal_TTScoreTimeEventStatusCallback(const TTValue& baton, const TTValue& data)
 {
     TTValuePtr          b;
     TTTimeEventPtr      timeEvent;
@@ -348,7 +348,7 @@ void internal_TTScoreTimeEventStatusCallback(TTPtr baton, TTValue& data)
     (*statusCallbackFunction)(timeEvent, TTBoolean(data[0]));
 }
 
-void internal_TTScoreTimeProcessStartCallback(TTPtr baton, TTValue& data)
+void internal_TTScoreTimeProcessStartCallback(const TTValue& baton, const TTValue& data)
 {
     TTValuePtr          b;
     TTTimeProcessPtr    timeProcess;
@@ -363,7 +363,7 @@ void internal_TTScoreTimeProcessStartCallback(TTPtr baton, TTValue& data)
     (*startCallbackFunction)(timeProcess);
 }
 
-void internal_TTScoreTimeProcessEndCallback(TTPtr baton, TTValue& data)
+void internal_TTScoreTimeProcessEndCallback(const TTValue& baton, const TTValue& data)
 {
     TTValuePtr          b;
     TTTimeProcessPtr    timeProcess;

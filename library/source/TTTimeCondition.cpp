@@ -22,7 +22,6 @@
 /****************************************************************************************************/
 
 TT_BASE_OBJECT_CONSTRUCTOR,
-mContainer(NULL),
 mActive(NO),
 mReady(NO),
 mPendingCounter(0)
@@ -149,7 +148,7 @@ TTErr TTTimeCondition::getEvents(TTValue& value)
 
 TTErr TTTimeCondition::EventAdd(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTTimeEventPtr  event = NULL;
+    TTObject        event;
     Comportment     aComportment;
     TTValue         v;
 
@@ -181,7 +180,7 @@ TTErr TTTimeCondition::EventAdd(const TTValue& inputValue, TTValue& outputValue)
                 return kTTErrInvalidType;
 
             // if it's an object : convert it to an event
-            event = TTTimeEventPtr(TTObjectBasePtr(inputValue[0]));
+            event = inputValue[0];
             
             // insert the event with an expression
             mCases.insert({{event, aComportment}});
@@ -590,9 +589,9 @@ void TTTimeCondition::applyDefaults()
 #pragma mark Some Methods
 #endif
 
-TTErr TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data)
+TTErr TTTimeConditionReceiverReturnValueCallback(const TTValue& baton, const TTValue& data)
 {
-    TTValuePtr          b;
+    TTObject            o;
     TTTimeConditionPtr  aTimeCondition;
     TTAddress           anAddress;
     Expression          triggerExp;
@@ -601,14 +600,14 @@ TTErr TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data)
     TTValue             v;
 	
 	// unpack baton (condition, address)
-	b = (TTValuePtr)baton;
-	aTimeCondition = TTTimeConditionPtr(TTObjectBasePtr((*b)[0]));
+	o = baton[0];
+	aTimeCondition = (TTTimeConditionPtr)o.instance();
 
     // only if the condition is ready
     if (!aTimeCondition->mReady)
         return kTTErrNone;
 
-    anAddress = (*b)[1];
+    anAddress = baton[1];
 
     // if the dispose expression is true
     if (anAddress == aTimeCondition->mDispose.getAddress() && aTimeCondition->mDispose.evaluate(data)) {
