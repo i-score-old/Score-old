@@ -19,6 +19,7 @@
 #define __TT_TIME_CONTAINER_H__
 
 #include "TTScoreIncludes.h"
+#include "TTTimeProcess.h"
 
 /**	The TTTimeContainer class allows to ...
  

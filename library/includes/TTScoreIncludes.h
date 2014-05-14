@@ -51,13 +51,6 @@
 
 #include "TTScore.h"
 
-#include "Expression.h"
-#include "TTTimeEvent.h"
-#include "TTTimeProcess.h"
-#include "TTTimeCondition.h"
-#include "TTTimeContainer.h"
-
-
 #include "TTScore.test.h"
 
 #endif // __TT_SCORE_INCLUDES_H__

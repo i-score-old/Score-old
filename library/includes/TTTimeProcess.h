@@ -19,6 +19,7 @@
 #define __TT_TIME_PROCESS_H__
 
 #include "TTScoreIncludes.h"
+#include "TTTimeEvent.h"
 
 /**	a class to define a process
  

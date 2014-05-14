@@ -19,6 +19,7 @@
 #define __TT_TIME_CONDITION_H__
 
 #include "TTScoreIncludes.h"
+#include "Expression.h"
 
 /** Define a struct containing an expression and a boolean, as the expression to trigger and the default comportment */
 struct Comportment {
@@ -33,7 +34,7 @@ struct Comportment {
 #ifdef TT_PLATFORM_WIN
     #include <hash_map>
     using namespace stdext;	// Visual Studio 2008 puts the hash_map in this namespace
-    typedef hash_map<TTObject*,Comportment>    TTCaseMap;
+    typedef hash_map<TTObjectBasePtr,Comportment>    TTCaseMap;
 #else
 //	#ifdef TT_PLATFORM_LINUX
 //  at least for GCC 4.6 on the BeagleBoard, the unordered map is standard
@@ -42,7 +43,7 @@ struct Comportment {
 //		#include "boost/unordered_map.hpp"
 //		using namespace boost;
 //	#endif
-    typedef std::unordered_map<TTObject*,Comportment>	TTCaseMap;
+    typedef std::unordered_map<TTObjectBasePtr,Comportment>	TTCaseMap;
 #endif
 
 typedef	TTCaseMap*                  TTCaseMapPtr;
@@ -174,9 +175,6 @@ private :
     /** Helper function to manage receivers : add a receiver for to the address if no receiver already exists
      @param	anAddress      an address to observe */
     void            addReceiver(TTAddress anAddress);
-    
-    /** Helper function to manage receivers : clear the receivers */
-    void            deleteReceivers();
 
     /** Helper function to apply the default comportment of each event */
     void            applyDefaults();

@@ -16,6 +16,10 @@
  */
 
 #include "TTScore.h"
+#include "TTTimeCondition.h"
+#include "TTTimeContainer.h"
+#include "TTTimeEvent.h"
+#include "TTTimeProcess.h"
 
 #if 0
 #pragma mark -
