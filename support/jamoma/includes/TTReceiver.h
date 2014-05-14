@@ -17,20 +17,20 @@
 #ifndef __TT_RECEIVER_H__
 #define __TT_RECEIVER_H__
 
-#include "TTModular.h"
+#include "TTModularIncludes.h"
 
 /**	TTReceiver ... TODO : an explanation
  
  
  */
 
-class TTMODULAR_EXPORT TTReceiver : public TTDataObjectBase
+class TTMODULAR_EXPORT TTReceiver : public TTObjectBase
 {
 	TTCLASS_SETUP(TTReceiver)
 	
 public:	// use public for quick acces during signal processing
 	
-	TTObjectBasePtr				mSignal;					///< any data structure to receive complex signal
+	TTObject                    mSignal;					///< any data structure to receive complex signal
 	
 private:
 	
@@ -38,10 +38,10 @@ private:
 	TTBoolean					mActive;					///< ATTRIBUTE : if false, received data won't be output without unregister the attribute observer (default true).
 	
 	TTNodeDirectoryPtr			mDirectory;					///< a receiver depends on a directory
-	TTCallbackPtr				mReturnAddressCallback;		///< a way to return received address to the owner of this receiver
-	TTCallbackPtr				mReturnValueCallback;		///< a way to return received value to the owner of this receiver
-	TTCallbackPtr				mAddressObserver;			///< an address life cycle observer
-	TTCallbackPtr				mApplicationObserver;		///< an application life cycle observer
+	TTObject                    mReturnAddressCallback;		///< a way to return received address to the owner of this receiver
+	TTObject                    mReturnValueCallback;		///< a way to return received value to the owner of this receiver
+	TTObject                    mAddressObserver;			///< an address life cycle observer
+	TTObject                    mApplicationObserver;		///< an application life cycle observer
 	TTList                      mNodesObserversCache;		///< a list containing <aNode, anAttrObserver>
 	TTList                      mObjectCache;				///< ATTRIBUTE : a cache containing all binded objects for quick access
 	
@@ -73,9 +73,9 @@ private:
 	/** */
 	TTErr unbindApplication();
 	
-	friend TTErr TTMODULAR_EXPORT TTReceiverDirectoryCallback(TTPtr baton, TTValue& data);
-	friend TTErr TTMODULAR_EXPORT TTReceiverAttributeCallback(TTPtr baton, TTValue& data);
-	friend TTErr TTMODULAR_EXPORT TTReceiverApplicationManagerCallback(TTPtr baton, TTValue& data);
+	friend TTErr TTMODULAR_EXPORT TTReceiverDirectoryCallback(const TTValue& baton, const TTValue& data);
+	friend TTErr TTMODULAR_EXPORT TTReceiverAttributeCallback(const TTValue& baton, const TTValue& data);
+	friend TTErr TTMODULAR_EXPORT TTReceiverApplicationManagerCallback(const TTValue& baton, const TTValue& data);
 	
 };
 
@@ -85,18 +85,18 @@ typedef TTReceiver* TTReceiverPtr;
  @param	baton						..
  @param	data						..
  @return							an error code */
-TTErr TTMODULAR_EXPORT TTReceiverDirectoryCallback(TTPtr baton, TTValue& data);
+TTErr TTMODULAR_EXPORT TTReceiverDirectoryCallback(const TTValue& baton, const TTValue& data);
 
 /**	
  @param	baton						..
  @param	data						..
  @return							an error code */
-TTErr TTMODULAR_EXPORT TTReceiverAttributeCallback(TTPtr baton, TTValue& data);
+TTErr TTMODULAR_EXPORT TTReceiverAttributeCallback(const TTValue& baton, const TTValue& data);
 
 /**	
  @param	baton						..
  @param	data						..
  @return							an error code */
-TTErr TTMODULAR_EXPORT TTReceiverApplicationManagerCallback(TTPtr baton, TTValue& data);
+TTErr TTMODULAR_EXPORT TTReceiverApplicationManagerCallback(const TTValue& baton, const TTValue& data);
 
 #endif // __TT_RECEIVER_H__

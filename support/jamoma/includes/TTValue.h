@@ -26,14 +26,11 @@
 	The types of the elements are defined in the TTDataType enumeration.
 */
 class TTValue : public TTElementVector {
-private:
-	TTBoolean	stringsPresent;	///< are there any values which are strings?  if so they need special handling when it is time to free them.
 
 public:
 
 	/** Constructor for an empty value */
 	TTValue()
-	: stringsPresent(NO)
 	{
 		reserve(1);
 	}
@@ -41,7 +38,6 @@ public:
 	/** Constructor with a single initial element. */
 	template<class T>
 	TTValue(const T& anInitialValue)
-	: stringsPresent(NO)
 	{
 		resize(1);
 		at(0) = anInitialValue;
@@ -50,7 +46,6 @@ public:
 	/** Constructor with two initial elements. */
 	template <class T, class U>
 	TTValue(const T& aFirstElementInitialValue, const U& aSecondElementInitialValue)
-	: stringsPresent(NO)
 	{
 		resize(2);
 		at(0) = aFirstElementInitialValue;
@@ -60,7 +55,6 @@ public:
 	/** Constructor with three initial elements. */
 	template <class T, class U, class V>
 	TTValue(const T& aFirstElementInitialValue, const U& aSecondElementInitialValue, const V& aThirdElementInitialValue)
-	: stringsPresent(NO)
 	{
 		resize(3);
 		at(0) = aFirstElementInitialValue;
@@ -71,7 +65,6 @@ public:
 	/** Constructor with four initial elements. */
 	template <class T, class U, class V, class W>
 	TTValue(const T& aFirstElementInitialValue, const U& aSecondElementInitialValue, const V& aThirdElementInitialValue, const W& aFourthElementInitialValue)
-	: stringsPresent(NO)
 	{
 		resize(4);
 		at(0) = aFirstElementInitialValue;
@@ -100,15 +93,15 @@ public:
 	}
 	
 	/** Return the number of values of this instance. 
-		DEPRECATED -- now just call size() instead.
+		@deprecated instead, please call the size() method
 	 */
 	TT_DEPRECATED( TTUInt16 getSize() const )
 	{
 		return size();
 	}
 	
-	/** Set the number of values, and allocate any needed memory. 
-		DEPRECATED -- now just call resize() instead.
+	/** @deprecated instead, please call the resize() method @n Set the number of values, and allocate any needed memory.
+     
 	 */
 	TT_DEPRECATED( void setSize(const TTUInt16 arg) )
 	{
@@ -134,7 +127,6 @@ public:
 		resize(endIndex - startIndex);
 		for (size_t i=0; i<size(); i++)
 			at(i) = obj[startIndex+i];
-//		stringsPresent = obj.stringsPresent;
 	}
 	
 	
@@ -250,11 +242,13 @@ public:
 		returnedElementValue = at(index);
 	}
 
+	/*
 	TT_DEPRECATED ( void get(const TTUInt16 index, TTObjectBase** value) const )
 	{
 		if (at(index).type() == kTypeObject)
 			*value = at(index);
 	}
+	 */
 
 	TT_DEPRECATED ( void get(const TTUInt16 index, TTPtr* value) const )
 	{
@@ -411,10 +405,12 @@ public:
 		for_each(this->begin(), this->end(), std::mem_fun_ref(&TTElement::booleanize));
 	}
 	
-	
-	void toString()
+	/** Edit the content of the value as a string
+     @param returnString        optionnal argument to not fill the value with the result 
+     @return the content of the value as a string */
+	TTString toString() const
 	{
-		TTString	temp;
+		TTString temp;
 	
 		for (size_t i=0; i<size(); i++) {
 			at(i).string(temp);		// get a string for each item
@@ -422,11 +418,24 @@ public:
 				temp.append(" ");
 		}
 		
-		// now set the value to the new string
-		clear();
-		append(temp);
+        return temp;
 	}
-	
+    
+    /** Edit the content of the value as a string and replace the content */
+	void toString()
+	{
+		TTString temp;
+        
+		for (size_t i=0; i<size(); i++) {
+			at(i).string(temp);		// get a string for each item
+			if (i < (size()-1))		// add a space between each item, but no space at the end
+				temp.append(" ");
+		}
+		
+		// now set the value to the new string
+        clear();
+        append(temp);
+	}
 	
 	void fromString(TTBoolean numberAsSymbol = NO)
 	{

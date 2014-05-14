@@ -59,13 +59,13 @@ public:
 	}
 	
 	
-	TTErr setVector(const TTUInt16 channel, const TTUInt16 vectorSize, const TTSampleValuePtr newVector)
+	TTErr setVector(const TTChannelCount channel, const TTUInt16 vectorSize, const TTSampleValuePtr newVector)
 	{
 		return instance()->setVector(channel, vectorSize, newVector);
 	}
 	
 	
-	TTErr getVectorCopy(const TTUInt16 channel, const TTUInt16 theVectorSize, TTSampleValue* returnedVector)
+	TTErr getVectorCopy(const TTChannelCount channel, const TTUInt16 theVectorSize, TTSampleValue* returnedVector)
 	{
 		return instance()->getVectorCopy(channel, theVectorSize, returnedVector);
 	}
@@ -97,6 +97,44 @@ public:
 	TTAudioObject(const TTSymbol aClassName, const TTValue arguments = kTTValNONE):
 	TTObject(aClassName, arguments)
 	{}
+	
+	// copy constructor is fully implemented in the super-class
+	
+	/** like a copy constructor -- but from TTObject to TTAudioObject */
+	TTAudioObject(const TTObject& anOtherObject) :
+	TTObject(anOtherObject)
+	{}
+	
+	
+	/**	Set the object's sample rate. */
+	TTErr setSampleRate(const TTUInt32& newSampleRate)
+	{
+		return TTAudioObjectBasePtr(mObjectInstance)->setSampleRate(newSampleRate);
+	}
+
+	
+	/** Allocate neccessary memory and make configuration adjustments so the object is able
+		to process additional channels of audio. */
+	TTErr adaptMaxChannelCount(const TTUInt16 aNewChannelCount)
+	{
+		return TTAudioObjectBasePtr(mObjectInstance)->adaptMaxNumChannels(aNewChannelCount);
+	}
+
+
+	TTErr process(TTAudioSignal& out)
+	{
+		return TTAudioObjectBasePtr(mObjectInstance)->process(out);
+	}
+	
+	TTErr process(TTAudio& out)
+	{
+		return process(*out.instance());
+	}
+
+	TTErr process(TTAudioSignalArrayPtr in, TTAudioSignalArrayPtr out)
+	{
+		return TTAudioObjectBasePtr(mObjectInstance)->process(in, out);
+	}
 	
 	TTErr process(TTAudioSignal& in, TTAudioSignal& out)
 	{

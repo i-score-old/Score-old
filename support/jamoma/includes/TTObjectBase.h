@@ -114,7 +114,7 @@ private:
 	TTHash*				messages;			///< The collection of all messages for this object, keyed on the message name.
 	TTHash*				attributes;			///< The collection of all attributes for this object, keyed on the attribute name.
 protected:
-	TTList*				observers;			///< List of all objects watching this object for life-cycle and other changes.
+	TTList				observers;			///< List of all objects watching this object for life-cycle and other changes.
 private:
 	TTList*				messageObservers;	///< List of all objects watching this object for messages sent to it.
 	TTList*				attributeObservers;	///< List of all objects watching this object for changes to attribute values.
@@ -130,7 +130,7 @@ protected:
 	/** Constructor.
 		@param arguments					Arguments to the constructor.
 	 */
-	TTObjectBase(TTValue arguments);
+	TTObjectBase(const TTValue arguments);
 public:
 	/** Destructor.
 	 */
@@ -274,7 +274,12 @@ public:
 	{
 		return getAttributeValue(aName, aReturnedValue);
 	}
-		
+    
+    /** Return the type of an attribute as a symbol.
+     @param name                   The name of the attribute we want the type.
+     @return #TTSymbol : kTTSym__none, kTTSym_uint8, kTTSym_int8, kTTSym_uint16, kTTSym_int16, kTTSym_uint32, kTTSym_int32, kTTSym_uint64, kTTSym_int64, kTTSym_float32, kTTSym_float64, kTTSym__boolean, kTTSym_symbol, kTTSym_string, kTTSym_pointer, kTTSym_object, kTTSym_value. Returns kTTSymEmpty if the attribute doesn't exist.
+	 */
+    TTSymbol getAttributeType(const TTSymbol name);
 	
 	/** Get the getterFlags of an attribute
 		@param name					The name of the attribute that we are querying properies of.
@@ -339,7 +344,6 @@ public:
 	{
 		return findAttribute(name, attributeObject);
 	}
-	
 	
 	/** Search for and locate a message.
 		@param name					The name of the message we want to find.
@@ -419,7 +423,7 @@ public:
 		@param messageName				The name of the message to monitor.
 		@return						#TTErr error code if the method fails to execute, else #kTTErrNone.
 	 */
-	TTErr registerObserverForMessage(const TTObjectBase& observingObject, const TTSymbol messageName);
+	TTErr registerObserverForMessage(const TTObject& observingObject, const TTSymbol messageName);
 	
 	
 	/** Register an observer for an attribute.
@@ -428,7 +432,7 @@ public:
 		@param attributeName			The name of the attribute to monitor.
 		@return						#TTErr error code if the method fails to execute, else #kTTErrNone.
 	 */
-	TTErr registerObserverForAttribute(const TTObjectBase& observingObject, const TTSymbol attributeName);
+	TTErr registerObserverForAttribute(const TTObject& observingObject, const TTSymbol attributeName);
 	
 	
 	/** Register an observer.
@@ -437,7 +441,7 @@ public:
 		@param observingObject			Pointer to the observing object.
 		@return						#TTErr error code if the method fails to execute, else #kTTErrNone.
 	 */
-	TTErr registerObserverForNotifications(const TTObjectBase& observingObject);
+	TTErr registerObserverForNotifications(const TTObject& observingObject);
 	
 	
 	/** Unregister an observer for a message.
@@ -446,7 +450,7 @@ public:
 		@param messageName				The name of the message that no longer will be monitored.
 		@return						#TTErr error code if the method fails to execute, else #kTTErrNone.
 	 */
-	TTErr unregisterObserverForMessage(const TTObjectBase& observingObject, const TTSymbol messageName);
+	TTErr unregisterObserverForMessage(const TTObject& observingObject, const TTSymbol messageName);
 	
 	
 	/** Unregister an observer for an attribute.
@@ -455,7 +459,7 @@ public:
 		@param attributeName			The name of the attribute that no longer will be monitored.
 		@return						#TTErr error code if the method fails to execute, else #kTTErrNone.
 	 */
-	TTErr unregisterObserverForAttribute(const TTObjectBase& observingObject, const TTSymbol attributeName);
+	TTErr unregisterObserverForAttribute(const TTObject& observingObject, const TTSymbol attributeName);
 	
 	
 	/** Unregister an observer for notifications.
@@ -464,7 +468,7 @@ public:
 		@param observingObject			Pointer to the observing object.
 		@return						#TTErr error code if the method fails to execute, else #kTTErrNone.
 	 */
-	TTErr unregisterObserverForNotifications(const TTObjectBase& observingObject);
+	TTErr unregisterObserverForNotifications(const TTObject& observingObject);
 	
 	
 	/** Send a notification.
