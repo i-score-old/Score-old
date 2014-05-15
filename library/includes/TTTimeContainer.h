@@ -20,6 +20,7 @@
 
 #include "TTScoreIncludes.h"
 #include "TTTimeProcess.h"
+#include "TTTimeCondition.h"
 
 /**	The TTTimeContainer class allows to ...
  
@@ -151,73 +152,74 @@ protected :
     /** Getter on event's name protected member
      @param aTimeProcess    a time event object
      @return                a name symbol */
-    TTSymbol        getTimeEventName(TTTimeEventPtr aTimeEvent);
+    TTSymbol        getTimeEventName(TTObject& aTimeEvent);
     
     /** Getter on date time event protected member
      @param aTimeProcess    a time event object
      @return                a date value */
-    TTUInt32        getTimeEventDate(TTTimeEventPtr aTimeEvent);
+    TTUInt32        getTimeEventDate(TTObject& aTimeEvent);
     
     /** Getter on state time event protected member
      @param aTimeProcess    a time event object
-     @return                a state object */
-    TTObjectBasePtr getTimeEventState(TTTimeEventPtr aTimeEvent);
+     @return                a state instance */
+    TTObjectBasePtr getTimeEventState(TTObject& aTimeEvent);
     
     /** Getter on condition time event protected member
      @param aTimeProcess    a time event object
-     @return                a condition object */
-    TTObjectBasePtr getTimeEventCondition(TTTimeEventPtr aTimeEvent);
+     @return                a condition instance */
+    TTTimeConditionPtr getTimeEventCondition(TTObject& aTimeEvent);
     
     /** Write basic informations of a time event as Xml
      @param aXmlHandler     a xml handler
      @param aTimeProcess    a time event object
      @return                nothing */
-    void            writeTimeEventAsXml(TTXmlHandlerPtr aXmlHandler, TTTimeEventPtr aTimeEvent);
+    void            writeTimeEventAsXml(TTXmlHandlerPtr aXmlHandler, TTObject& aTimeEvent);
     
     /** Read basic informations of a time event from Xml
      @param aXmlHandler     a xml handler
-     @return                a new time event */
-    TTTimeEventPtr  readTimeEventFromXml(TTXmlHandlerPtr aXmlHandler);
+     @param                 a new time event 
+     @return                #TTErr*/
+    TTErr            readTimeEventFromXml(TTXmlHandlerPtr aXmlHandler, TTObject& aNewTimeEvent);
     
     /** Getter on process's name protected member
      @param aTimeProcess    a time process object
      @return                a name symbol */
-    TTSymbol        getTimeProcessName(TTTimeProcessPtr aTimeProcess);
+    TTSymbol        getTimeProcessName(TTObject& aTimeProcess);
     
     /** Getter on start event time process protected member
      @param aTimeProcess    a time process object
-     @return                a time event object */
-    TTTimeEventPtr  getTimeProcessStartEvent(TTTimeProcessPtr aTimeProcess);
+     @return                a time event instance */
+    TTTimeEventPtr  getTimeProcessStartEvent(TTObject& aTimeProcess);
     
     /** Setter on start event time process protected member
      @param aTimeProcess    a time process object
      @param aTimeEvent      a time event object */
-    void            setTimeProcessStartEvent(TTTimeProcessPtr aTimeProcess, TTTimeEventPtr aTimeEvent);
+    void            setTimeProcessStartEvent(TTObject& aTimeProcess, TTObject& aTimeEvent);
     
     /** Getter on end event time process protected member
      @param aTimeProcess    a time process object
-     @return                a time event object */
-    TTTimeEventPtr  getTimeProcessEndEvent(TTTimeProcessPtr aTimeProcess);
+     @return                a time event instance */
+    TTTimeEventPtr  getTimeProcessEndEvent(TTObject& aTimeProcess);
     
     /** Setter on end event time process protected member
      @param aTimeProcess    a time process object
      @param aTimeEvent      a time event object */
-    void            setTimeProcessEndEvent(TTTimeProcessPtr aTimeProcess, TTTimeEventPtr aTimeEvent);
+    void            setTimeProcessEndEvent(TTObject& aTimeProcess, TTObject& aTimeEvent);
     
     /** Getter on duration min time process protected member
      @param aTimeProcess    a time process object
      @return                a duration value */
-    TTUInt32        getTimeProcessDurationMin(TTTimeProcessPtr aTimeProcess);
+    TTUInt32        getTimeProcessDurationMin(TTObject& aTimeProcess);
     
     /** Getter on duration max time process protected member
      @param aTimeProcess    a time process object
      @return                a duration value */
-    TTUInt32        getTimeProcessDurationMax(TTTimeProcessPtr aTimeProcess);
+    TTUInt32        getTimeProcessDurationMax(TTObject& aTimeProcess);
     
     /** Getter on running state of time process protected member
      @param aTimeProcess    a time process object
      @return                a boolean value */
-    TTBoolean       getTimeProcessRunning(TTTimeProcessPtr aTimeProcess);
+    TTBoolean       getTimeProcessRunning(TTObject& aTimeProcess);
     
     /** Write basic informations of a time process as Xml
      @param aXmlHandler     a xml handler

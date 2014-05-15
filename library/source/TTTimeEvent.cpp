@@ -27,7 +27,7 @@ mName(kTTSymEmpty),
 mDate(0),
 mStatus(kTTSym_eventWaiting),
 mMute(NO),
-mState(NULL),
+mState(kTTSym_Script),
 mCondition(NULL)
 {
     TTValue none;
@@ -59,9 +59,6 @@ mCondition(NULL)
 	addMessageProperty(WriteAsXml, hidden, YES);
 	addMessageWithArguments(ReadFromXml);
 	addMessageProperty(ReadFromXml, hidden, YES);
-	
-    // create a script
-    TTObjectBaseInstantiate(kTTSym_Script, TTObjectBaseHandle(&mState), none);
     
     // generate a random name
     mName = mName.random();
@@ -69,10 +66,7 @@ mCondition(NULL)
 
 TTTimeEvent::~TTTimeEvent()
 {
-    if (mState) {
-        TTObjectBaseRelease(TTObjectBaseHandle(&mState));
-        mState = NULL;
-    }
+    ;
 }
 
 TTErr TTTimeEvent::setDate(const TTValue& value)
@@ -102,11 +96,11 @@ TTErr TTTimeEvent::setCondition(const TTValue& value)
             mCondition = value[0];
             
             // tell the container the event is becoming (or not) conditioned
-            if (mContainer) {
+            if (mContainer.valid()) {
                 
-                TTValue none, v = TTObjectBasePtr(this);
+                TTValue none, v = TTObject(this);
                 v.append(mCondition);
-                return mContainer->sendMessage(TTSymbol("TimeEventCondition"), v, none);
+                return mContainer.send("TimeEventCondition", v, none);
             }
         }
     }
@@ -140,7 +134,7 @@ TTErr TTTimeEvent::Trigger()
         return kTTErrGeneric;
     
     // if not conditionned : do nothing
-    if (mCondition == NULL)
+    if (!mCondition.valid())
         return kTTErrGeneric;
     
     // if the event muted
@@ -148,10 +142,10 @@ TTErr TTTimeEvent::Trigger()
         return kTTErrNone;
     
     // use container to make the event happen
-    if (mContainer) {
+    if (mContainer.valid()) {
         
-        TTValue none, v = TTObjectBasePtr(this);
-        return mContainer->sendMessage(TTSymbol("TimeEventTrigger"), v, none);
+        TTValue none, v = TTObject(this);
+        return mContainer.send("TimeEventTrigger", v, none);
     }
     
     // otherwise make it happens now
@@ -170,17 +164,17 @@ TTErr TTTimeEvent::Dispose()
         return kTTErrGeneric;
     
     // if not conditionned : do nothing
-    if (mCondition == NULL)
+    if (!mCondition.valid())
         return kTTErrGeneric;
     
     // change the status before
     setStatus(kTTSym_eventDisposed);
     
     // use container to make the event dispose
-    if (mContainer) {
+    if (mContainer.valid()) {
 
-        TTValue v = TTObjectBasePtr(this);
-        err = mContainer->sendMessage(TTSymbol("TimeEventDispose"), v, none);
+        TTValue v = TTObject(this);
+        err = mContainer.send("TimeEventDispose", v, none);
     }
     
     return err;
@@ -194,7 +188,7 @@ TTErr TTTimeEvent::Happen()
     if (!mMute) {
     
         // recall the state
-        err = mState->sendMessage(kTTSym_Run);
+        err = mState.send(kTTSym_Run);
     }
     
     setStatus(kTTSym_eventHappened);
@@ -216,7 +210,7 @@ TTErr TTTimeEvent::StateAddressGetValue(const TTValue& inputValue, TTValue& outp
             address = inputValue[0];
             
             // get the lines of the state
-            mState->getAttributeValue(kTTSym_lines, v);
+            mState.get(kTTSym_lines, v);
             lines = TTListPtr(TTPtr(v[0]));
             
             // find the line at address
@@ -254,7 +248,7 @@ TTErr TTTimeEvent::StateAddressSetValue(const TTValue& inputValue, TTValue& outp
             aValue = TTValuePtr(TTPtr(inputValue[1]));
             
             // get the lines of the state
-            mState->getAttributeValue(kTTSym_lines, v);
+            mState.get(kTTSym_lines, v);
             lines = TTListPtr(TTPtr(v[0]));
             
             // find the line at address
@@ -266,7 +260,7 @@ TTErr TTTimeEvent::StateAddressSetValue(const TTValue& inputValue, TTValue& outp
                 command = *aValue;
                 command.prepend(address);
                 
-                mState->sendMessage(TTSymbol("AppendCommand"), command, v);
+                mState.send("AppendCommand", command, v);
             }
             else {
             
@@ -292,7 +286,7 @@ TTErr TTTimeEvent::StateAddressClear(const TTValue& inputValue, TTValue& outputV
         if (inputValue[0].type() == kTypeSymbol) {
             
             // remove the lines of the state
-            return mState->sendMessage(TTSymbol("RemoveCommand"), inputValue, none);
+            return mState.send("RemoveCommand", inputValue, none);
         }
     }
     
@@ -301,11 +295,13 @@ TTErr TTTimeEvent::StateAddressClear(const TTValue& inputValue, TTValue& outputV
 
 TTErr TTTimeEvent::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 {
-	TTXmlHandlerPtr	aXmlHandler = NULL;
-    TTValue         v;
-    TTString        s;
-	
-	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
+    TTObject o = inputValue[0];
+	TTXmlHandlerPtr aXmlHandler = (TTXmlHandlerPtr)o.instance();
+    if (!aXmlHandler)
+		return kTTErrGeneric;
+    
+    TTValue     v;
+    TTString    s;
 	
     // Write the date
     v = mDate;
@@ -314,17 +310,16 @@ TTErr TTTimeEvent::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
     xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "date", BAD_CAST s.data());
     
     // Write the name of the condition object
-    if (mCondition) {
+    if (mCondition.valid()) {
         
-        mCondition->getAttributeValue(kTTSym_name, v);
+        mCondition.get(kTTSym_name, v);
         v.toString();
         s = TTString(v[0]);
         xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "condition", BAD_CAST s.data());
     }
     
     // Write the state
-    v = TTObjectBasePtr(mState);
-    aXmlHandler->setAttributeValue(kTTSym_object, v);
+    aXmlHandler->setAttributeValue(kTTSym_object, mState);
     aXmlHandler->sendMessage(kTTSym_Write);
     
 	return kTTErrNone;
@@ -332,11 +327,13 @@ TTErr TTTimeEvent::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr TTTimeEvent::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 {
-	TTXmlHandlerPtr	aXmlHandler = NULL;
-    TTValue         v;
-	
-	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
+    TTObject o = inputValue[0];
+	TTXmlHandlerPtr aXmlHandler = (TTXmlHandlerPtr)o.instance();
+    if (!aXmlHandler)
+		return kTTErrGeneric;
     
+    TTValue v;
+	
     // Event node
     if (aXmlHandler->mXmlNodeName == kTTSym_event) {
         
@@ -370,8 +367,7 @@ TTErr TTTimeEvent::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     if (aXmlHandler->mXmlNodeName == kTTSym_command) {
         
         // Pass the xml handler to the current state to fill his data structure
-        v = TTObjectBasePtr(mState);
-        aXmlHandler->setAttributeValue(kTTSym_object, v);
+        aXmlHandler->setAttributeValue(kTTSym_object, mState);
         return aXmlHandler->sendMessage(kTTSym_Read);
     }
 	
@@ -385,8 +381,8 @@ TTErr TTTimeEvent::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 
 TTBoolean TTSCORE_EXPORT TTTimeEventCompareDate(TTValue& v1, TTValue& v2)
 {
-    TTObjectBasePtr timeEvent1 = v1[0];
-    TTObjectBasePtr timeEvent2 = v2[0];
+    TTObject timeEvent1 = v1[0];
+    TTObject timeEvent2 = v2[0];
     
-    return TTTimeEventPtr(timeEvent1)->mDate < TTTimeEventPtr(timeEvent2)->mDate;
+    return TTTimeEventPtr(timeEvent1.instance())->mDate < TTTimeEventPtr(timeEvent2.instance())->mDate;
 }

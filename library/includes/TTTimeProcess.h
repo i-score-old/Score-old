@@ -254,12 +254,12 @@ protected :
     /** set the start event
      @param aTimeEvent      a time event object
      @return                an error code if it fails */
-    TTErr           setStartEvent(TTTimeEventPtr aTimeEvent);
+    TTErr           setStartEvent(TTObject& aTimeEvent);
     
     /** set the end event
      @param aTimeEvent      a time event object
      @return                an error code if it fails */
-    TTErr           setEndEvent(TTTimeEventPtr aTimeProcess);
+    TTErr           setEndEvent(TTObject& aTimeProcess);
     
     friend void TTSCORE_EXPORT TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression, TTFloat64 realTime);
     
@@ -275,11 +275,11 @@ typedef TTTimeProcess* TTTimeProcessPtr;
 void TTSCORE_EXPORT TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression, TTFloat64 realTime);
 
 /** Define some macros to ease the access of events attributes */
-#define mStartDate TTTimeEventPtr(mStartEvent)->mDate
-#define mStartCondition TTTimeEventPtr(mStartEvent)->mCondition
+#define mStartDate TTTimeEventPtr(mStartEvent.instance())->mDate
+#define mStartCondition TTTimeEventPtr(mStartEvent.instance())->mCondition
 
-#define mEndDate TTTimeEventPtr(mEndEvent)->mDate
-#define mEndCondition TTTimeEventPtr(mEndEvent)->mCondition
+#define mEndDate TTTimeEventPtr(mEndEvent.instance())->mDate
+#define mEndCondition TTTimeEventPtr(mEndEvent.instance())->mCondition
 
 #define mDuration mEndDate - mStartDate
 
