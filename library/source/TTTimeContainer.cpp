@@ -161,14 +161,14 @@ TTUInt32 TTTimeContainer::getTimeEventDate(TTObject& aTimeEvent)
     return TTTimeEventPtr(aTimeEvent.instance())->mDate;
 }
 
-TTObjectBasePtr TTTimeContainer::getTimeEventState(TTObject& aTimeEvent)
+TTObject& TTTimeContainer::getTimeEventState(TTObject& aTimeEvent)
 {
-    return TTTimeEventPtr(aTimeEvent.instance())->mState.instance();
+    return TTTimeEventPtr(aTimeEvent.instance())->mState;
 }
 
-TTTimeConditionPtr TTTimeContainer::getTimeEventCondition(TTObject& aTimeEvent)
+TTObject& TTTimeContainer::getTimeEventCondition(TTObject& aTimeEvent)
 {
-    return TTTimeConditionPtr(TTTimeEventPtr(aTimeEvent.instance())->mCondition.instance());
+    return TTTimeEventPtr(aTimeEvent.instance())->mCondition;
 }
 
 void TTTimeContainer::writeTimeEventAsXml(TTXmlHandlerPtr aXmlHandler, TTObject& aTimeEvent)
@@ -202,7 +202,7 @@ TTErr TTTimeContainer::readTimeEventFromXml(TTXmlHandlerPtr aXmlHandler, TTObjec
                 if (v[0].type() == kTypeUInt32) {
                     
                     // an event cannot be created after the end even of its container
-                    if (TTUInt32(v[0]) > getEndEvent()->mDate) {
+                    if (TTUInt32(v[0]) > TTTimeEventPtr(getEndEvent().instance())->mDate) {
                         
                         TTLogError("TTTimeContainer::readTimeEventFromXml : event created after the end event of its container\n");
                         return kTTErrGeneric;
@@ -244,7 +244,7 @@ TTSymbol TTTimeContainer::getTimeProcessName(TTObject& aTimeProcess)
     return TTTimeProcessPtr(aTimeProcess.instance())->mName;
 }
 
-TTTimeEventPtr TTTimeContainer::getTimeProcessStartEvent(TTObject& aTimeProcess)
+TTObject& TTTimeContainer::getTimeProcessStartEvent(TTObject& aTimeProcess)
 {
     return TTTimeProcessPtr(aTimeProcess.instance())->getStartEvent();
 }
@@ -254,7 +254,7 @@ void TTTimeContainer::setTimeProcessStartEvent(TTObject& aTimeProcess, TTObject&
     TTTimeProcessPtr(aTimeProcess.instance())->setStartEvent(aTimeEvent);
 }
 
-TTTimeEventPtr TTTimeContainer::getTimeProcessEndEvent(TTObject& aTimeProcess)
+TTObject& TTTimeContainer::getTimeProcessEndEvent(TTObject& aTimeProcess)
 {
     return TTTimeProcessPtr(aTimeProcess.instance())->getEndEvent();
 }
@@ -299,10 +299,16 @@ void TTTimeContainer::writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTObjec
     if (aTimeProcessInstance->mContainer.valid()) {
     
         // Write the start event name
-        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "start", BAD_CAST aTimeProcessInstance->getStartEvent()->mName.c_str());
+        aTimeProcessInstance->getStartEvent().get("name", v);
+        v.toString();
+        s = TTString(v[0]);
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "start", BAD_CAST s.data());
     
         // Write the end event name
-        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "end", BAD_CAST aTimeProcessInstance->getEndEvent()->mName.c_str());
+        aTimeProcessInstance->getEndEvent().get("name", v);
+        v.toString();
+        s = TTString(v[0]);
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "end", BAD_CAST s.data());
     }
     
     

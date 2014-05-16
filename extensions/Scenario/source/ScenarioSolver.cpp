@@ -15,12 +15,12 @@
 
 #include "ScenarioSolver.h"
 
-SolverVariable::SolverVariable(SolverPtr aSolver, TTTimeEventPtr anEvent, SolverValue max):
+SolverVariable::SolverVariable(SolverPtr aSolver, TTObject& anEvent, SolverValue max):
 event(anEvent), solver(aSolver)
 {
     TTValue v;
     
-    event->getAttributeValue(kTTSym_date, v);
+    event.get(kTTSym_date, v);
     
     // add a variable for date's event in solver
     dateID = solver->addIntVar(1, max, TTUInt32(v[0]), DATE_VARIABLE);
@@ -60,7 +60,7 @@ void SolverVariable::update()
 {
     TTUInt32 value = solver->getVariableValue(dateID);
     
-    event->setAttributeValue(kTTSym_date, value);
+    event.set(kTTSym_date, value);
 }
 
 SolverConstraint::SolverConstraint(SolverPtr aSolver, SolverVariablePtr variableA, SolverVariablePtr variableB, SolverValue durationMin, SolverValue durationMax, SolverValue max):
@@ -70,8 +70,8 @@ solver(aSolver)
     TTUInt32  startDate, endDate;
     
     // we need to order the variables in time
-    variableA->event->getAttributeValue(kTTSym_date, vA);
-    variableB->event->getAttributeValue(kTTSym_date, vB);
+    variableA->event.get(kTTSym_date, vA);
+    variableB->event.get(kTTSym_date, vB);
     
     if (vA < vB) {
         
@@ -150,8 +150,8 @@ solver(aSolver), minBoundID(0), maxBoundID(0)
         return;
     
     // we need to know the time order of the variables
-    variableA->event->getAttributeValue(kTTSym_date, vA);
-    variableB->event->getAttributeValue(kTTSym_date, vB);
+    variableA->event.get(kTTSym_date, vA);
+    variableB->event.get(kTTSym_date, vB);
     
     ordered = vA < vB;
     

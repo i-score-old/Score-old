@@ -572,14 +572,14 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
 #pragma mark Start and End events accessors
 #endif
 
-TTTimeEventPtr TTTimeProcess::getStartEvent()
+TTObject& TTTimeProcess::getStartEvent()
 {
-    return TTTimeEventPtr(mStartEvent.instance());
+    return mStartEvent;
 }
 
-TTTimeEventPtr TTTimeProcess::getEndEvent()
+TTObject& TTTimeProcess::getEndEvent()
 {
-    return TTTimeEventPtr(mEndEvent.instance());
+    return mEndEvent;
 }
 
 TTErr TTTimeProcess::setStartEvent(TTObject& aTimeEvent)

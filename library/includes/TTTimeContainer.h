@@ -161,13 +161,13 @@ protected :
     
     /** Getter on state time event protected member
      @param aTimeProcess    a time event object
-     @return                a state instance */
-    TTObjectBasePtr getTimeEventState(TTObject& aTimeEvent);
+     @return                a state object */
+    TTObject&       getTimeEventState(TTObject& aTimeEvent);
     
     /** Getter on condition time event protected member
      @param aTimeProcess    a time event object
-     @return                a condition instance */
-    TTTimeConditionPtr getTimeEventCondition(TTObject& aTimeEvent);
+     @return                a condition object */
+    TTObject&       getTimeEventCondition(TTObject& aTimeEvent);
     
     /** Write basic informations of a time event as Xml
      @param aXmlHandler     a xml handler
@@ -189,7 +189,7 @@ protected :
     /** Getter on start event time process protected member
      @param aTimeProcess    a time process object
      @return                a time event instance */
-    TTTimeEventPtr  getTimeProcessStartEvent(TTObject& aTimeProcess);
+    TTObject&       getTimeProcessStartEvent(TTObject& aTimeProcess);
     
     /** Setter on start event time process protected member
      @param aTimeProcess    a time process object
@@ -198,8 +198,8 @@ protected :
     
     /** Getter on end event time process protected member
      @param aTimeProcess    a time process object
-     @return                a time event instance */
-    TTTimeEventPtr  getTimeProcessEndEvent(TTObject& aTimeProcess);
+     @return                a time event object */
+    TTObject&       getTimeProcessEndEvent(TTObject& aTimeProcess);
     
     /** Setter on end event time process protected member
      @param aTimeProcess    a time process object

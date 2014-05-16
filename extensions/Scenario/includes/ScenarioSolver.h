@@ -75,13 +75,13 @@ class SolverVariable
 {
 public:
     
-    TTTimeEventPtr    event;
+    TTObject        event;
     
     SolverPtr       solver;
     int             dateID;
     int             rangeID;
     
-    SolverVariable(SolverPtr aSolver, TTTimeEventPtr anEvent, SolverValue max);
+    SolverVariable(SolverPtr aSolver, TTObject& anEvent, SolverValue max);
     
     ~SolverVariable();
     

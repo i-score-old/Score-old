@@ -245,11 +245,11 @@ protected :
     
     /** get the start event
      @return                a time event object */
-    TTTimeEventPtr  getStartEvent();
+    TTObject&       getStartEvent();
     
     /** set the end event
      @return                a time event object */
-    TTTimeEventPtr  getEndEvent();
+    TTObject&       getEndEvent();
     
     /** set the start event
      @param aTimeEvent      a time event object
