@@ -19,7 +19,7 @@ extern "C" TT_EXTENSION_EXPORT TTErr TTLoadJamomaExtension_Interval(void)
 	return kTTErrNone;
 }
 
-TIME_PROCESS_CONSTRUCTOR
+TIME_PROCESS_PLUGIN_CONSTRUCTOR
 {
     TIME_PLUGIN_INITIALIZE
     
@@ -78,10 +78,10 @@ TTErr Interval::Goto(const TTValue& inputValue, TTValue& outputValue)
             
             // TODO : TTTimeProcess should extend Scheduler class
             duration = v[0];
-            mScheduler->setAttributeValue(kTTSym_duration, TTFloat64(duration));
+            mScheduler.set(kTTSym_duration, TTFloat64(duration));
             
             timeOffset = inputValue[0];
-            mScheduler->setAttributeValue(kTTSym_offset, TTFloat64(timeOffset));
+            mScheduler.set(kTTSym_offset, TTFloat64(timeOffset));
             
             return kTTErrNone;
         }
@@ -104,9 +104,10 @@ TTErr Interval::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr Interval::WriteAsText(const TTValue& inputValue, TTValue& outputValue)
 {
-	TTTextHandlerPtr	aTextHandler;
-	
-	aTextHandler = TTTextHandlerPtr((TTObjectBasePtr)inputValue[0]);
+    TTObject o = inputValue[0];
+	TTTextHandlerPtr aTextHandler = (TTTextHandlerPtr)o.instance();
+    if (!aTextHandler)
+		return kTTErrGeneric;
 	
 	// TODO : write the time box attributes, the cue start and end content, start and end receiver, ...
 	
@@ -115,10 +116,10 @@ TTErr Interval::WriteAsText(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr Interval::ReadFromText(const TTValue& inputValue, TTValue& outputValue)
 {
-	TTTextHandlerPtr aTextHandler;
-	TTValue	v;
-	
-	aTextHandler = TTTextHandlerPtr((TTObjectBasePtr)inputValue[0]);
+    TTObject o = inputValue[0];
+	TTTextHandlerPtr aTextHandler = (TTTextHandlerPtr)o.instance();
+    if (!aTextHandler)
+		return kTTErrGeneric;
 	
     // TODO : parse the time box attributes, the cue start and end content, start and end receiver, ...
 	

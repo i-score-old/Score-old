@@ -49,8 +49,4 @@
 #include "TTFoundationAPI.h"
 #include "TTModular.h"
 
-#include "TTScore.h"
-
-#include "TTScore.test.h"
-
 #endif // __TT_SCORE_INCLUDES_H__
