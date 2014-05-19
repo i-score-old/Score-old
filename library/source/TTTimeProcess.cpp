@@ -461,7 +461,7 @@ TTErr TTTimeProcess::Stop()
 {
     // set the running state of the process
     mRunning = NO;
-    
+
     return mScheduler->sendMessage(kTTSym_Stop);
 }
 
@@ -544,7 +544,7 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
             
             // use the specific start process method of the time process
             if (!ProcessStart()) {
-                
+
                 // notify start message observers
                 sendNotification(kTTSym_ProcessStarted, TTObjectBasePtr(this));
                 

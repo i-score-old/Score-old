@@ -331,7 +331,7 @@ TTErr Automation::Goto(const TTValue& inputValue, TTValue& outputValue)
             timeOffset = inputValue[0];
             mScheduler->setAttributeValue(kTTSym_offset, TTFloat64(timeOffset));
             
-            // is the scenario is temporary muted ?
+            // is the automation is temporary muted ?
             if (inputValue.size() == 2) {
                 
                 if (inputValue[1].type() == kTypeBoolean) {
@@ -349,6 +349,7 @@ TTErr Automation::Goto(const TTValue& inputValue, TTValue& outputValue)
                 mScheduler->getAttributeValue(TTSymbol("realTime"), v);
                 realTime = TTFloat64(v[0]);
                 
+                // DEBUG : to see if it is faster without this part
                 // reset each curves on its first sample
                 mCurves.getKeys(keys);
                 
@@ -369,6 +370,7 @@ TTErr Automation::Goto(const TTValue& inputValue, TTValue& outputValue)
                 v.append(realTime);
                 
                 return Process(v, none);
+                // */
             }
             else
                 return kTTErrNone;
