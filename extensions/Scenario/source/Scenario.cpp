@@ -57,15 +57,17 @@ mLoading(NO)
     integer0 = ExtendedInt(INTEGER, 0);
 #endif
     
+    TTObject start, end;
+    
     // it is possible to pass 2 events for the root scenario (which don't need a container by definition)
     if (arguments.size() == 2) {
         
         if (arguments[0].type() == kTypeObject && arguments[1].type() == kTypeObject) {
             
-            TTObject start = arguments[0];
-            this->setStartEvent(start);
+            start = arguments[0];
+            end = arguments[1];
             
-            TTObject end = arguments[1];
+            this->setStartEvent(start);
             this->setEndEvent(end);
         }
     }

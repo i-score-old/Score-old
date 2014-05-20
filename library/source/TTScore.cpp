@@ -32,7 +32,7 @@ int main(void)
 }
 #endif
 
-void TTScoreInit()
+void TTScoreInit(const char* binaries)
 {
     // Initialized Foundation framework
 	TTFoundationInit();
@@ -47,7 +47,7 @@ void TTScoreInit()
         TTTimeEvent::registerClass();
         TTTimeProcess::registerClass();
         
-		TTScoreTest::registerClass();
+		//TTScoreTest::registerClass();
         
 #ifdef TT_DEBUG
 		TTLogMessage("Score -- Version %s -- Debugging Enabled\n", TTSCORE_VERSION_STRING);

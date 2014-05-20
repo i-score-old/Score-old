@@ -14,6 +14,9 @@
  */
 
 #include "TTTimeContainer.h"
+#include <libxml/encoding.h>
+#include <libxml/xmlwriter.h>
+#include <libxml/xmlreader.h>
 
 #define thisTTClass         TTTimeContainer
 #define thisTTClassName     "TimeContainer"

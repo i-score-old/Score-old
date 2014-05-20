@@ -25,14 +25,13 @@
 #include "TTTimeEvent.h"
 #include "TTTimeProcess.h"
 
-#include "TTScore.test.h"
-
 #if 0
 #pragma mark -
 #pragma mark Initialisation
 #endif
 
-/** Initialise Score framework */
-void TTSCORE_EXPORT TTScoreInit();
+/** Initialize the Score library
+ @param binaries                    path to the Jamoma libraries and extensions binaries folder to load them */
+void TTSCORE_EXPORT TTScoreInit(const char* binaries = NULL);
 
 #endif  // __TT_SCORE_H__

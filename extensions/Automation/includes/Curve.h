@@ -20,6 +20,9 @@
 
 #include "TimePluginLib.h"
 #include "Automation.h"
+#include <libxml/encoding.h>
+#include <libxml/xmlwriter.h>
+#include <libxml/xmlreader.h>
 
 /**	The Curve class allows to ...
  

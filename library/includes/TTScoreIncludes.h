@@ -42,9 +42,6 @@
 #include <math.h>
 #include <unistd.h>
 #include <map>
-#include <libxml/encoding.h>
-#include <libxml/xmlwriter.h>
-#include <libxml/xmlreader.h>
 
 #include "TTFoundationAPI.h"
 #include "TTModular.h"

@@ -14,6 +14,9 @@
  */
 
 #include "Automation.h"
+#include <libxml/encoding.h>
+#include <libxml/xmlwriter.h>
+#include <libxml/xmlreader.h>
 
 #define thisTTClass          Automation
 #define thisTTClassName      "Automation"

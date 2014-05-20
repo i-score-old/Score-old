@@ -14,6 +14,9 @@
  */
 
 #include "TTTimeEvent.h"
+#include <libxml/encoding.h>
+#include <libxml/xmlwriter.h>
+#include <libxml/xmlreader.h>
 
 #define thisTTClass         TTTimeEvent
 #define thisTTClassName     "TimeEvent"
@@ -22,13 +25,11 @@
 /****************************************************************************************************/
 
 TT_BASE_OBJECT_CONSTRUCTOR,
-mContainer(NULL),
 mName(kTTSymEmpty),
 mDate(0),
 mStatus(kTTSym_eventWaiting),
 mMute(NO),
-mState(kTTSym_Script),
-mCondition(NULL)
+mState(kTTSym_Script)
 {
     TTValue none;
     

@@ -14,6 +14,9 @@
  */
 
 #include "TTTimeProcess.h"
+#include <libxml/encoding.h>
+#include <libxml/xmlwriter.h>
+#include <libxml/xmlreader.h>
 
 #define thisTTClass         TTTimeProcess
 #define thisTTClassName     "TimeProcess"

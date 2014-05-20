@@ -25,6 +25,10 @@
 #include "ScenarioGraph.h"
 #endif
 
+#include <libxml/encoding.h>
+#include <libxml/xmlwriter.h>
+#include <libxml/xmlreader.h>
+
 /**	The Scenario class allows to ...
  
  @see TimePluginLib, TTTimeProcess, TTTimeContainer

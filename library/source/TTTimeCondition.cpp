@@ -14,6 +14,9 @@
  */
 
 #include "TTTimeCondition.h"
+#include <libxml/encoding.h>
+#include <libxml/xmlwriter.h>
+#include <libxml/xmlreader.h>
 
 #define thisTTClass         TTTimeCondition
 #define thisTTClassName     "TimeCondition"
