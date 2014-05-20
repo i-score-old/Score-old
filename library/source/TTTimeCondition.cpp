@@ -580,7 +580,7 @@ void TTTimeCondition::applyDefaults()
   for (TTCaseMapIterator it = mCases.begin() ; it != mCases.end() ; it++) {
       it->first->getAttributeValue(kTTSym_status, v);
       if (v[0] != kTTSym_eventDisposed && v[0] != kTTSym_eventHappened) {
-          it->first->sendMessage(it->second.dflt?kTTSym_Happen:kTTSym_Dispose);
+          it->first->sendMessage(it->second.dflt?kTTSym_Trigger:kTTSym_Dispose);
       }
   }
 }
