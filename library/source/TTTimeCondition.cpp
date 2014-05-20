@@ -570,6 +570,9 @@ void TTTimeCondition::addReceiver(TTAddress anAddress)
         
         v = TTObjectBasePtr(aReceiver);
         mReceivers.append(anAddress, v);
+        
+        // try to get the current value
+         aReceiver->sendMessage(kTTSym_Get);
     }
 }
 
