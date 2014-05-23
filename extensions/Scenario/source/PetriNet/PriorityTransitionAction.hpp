@@ -63,21 +63,21 @@ class PriorityTransitionAction
 {
 public:
 	/*!
-	 * Constructor specifying the transition, the type (START, END) and the starting date.
+     * Constructor specifying the transition, the type (START, END_GO, END_DEACTIVATE) and the starting date.
 	 *
-	 * Throws IllegalArgumentException if type is not START or END.
+     * Throws IllegalArgumentException if type is not START, END_GO or END_DEACTIVATE.
 	 * Throws IllegalArgumentException if transition is NULL.
 	 *
 	 * \param transition : the transition linked to this action.
-	 * \param type : action type (STARD, END).
+     * \param type : action type (STARD, END_GO, END_DEACTIVATE).
 	 * \param date : action starting date.
 	 */
 	PriorityTransitionAction(Transition* transition, short type, ExtendedInt date);
 
 	/*!
-	 * Gets the action type (START, END).
+     * Gets the action type (START, END_GO, END_DEACTIVATE).
 	 *
-	 * \return the action type (START, END).
+     * \return the action type (START, END_GO, END_DEACTIVATE).
 	 */
 	short getType() const;
 
