@@ -187,13 +187,25 @@ void Transition::setArcAsInactiveByNumber(int arcNumber)
 	m_activeArcsBitArray->setToZero(arcNumber);
 }
 
-void Transition::setArcAsActive(Arc* arc, unsigned int timeOffset, bool recalculateArcTime)
+void Transition::setArcAsActive(Arc* arc, int timeOffset, bool recalculateArcTime)
 {
 	setArcAsActiveByNumber(arc->getNumber());
 
 	unsigned int currentTime = getPetriNet()->getCurrentTimeInMs();
 	ExtendedInt startDate;
 	ExtendedInt endDate;
+
+    if (timeOffset == -1) { // inactive token
+        if (m_endAction != NULL) {
+            m_endAction->disable();
+        }
+
+        m_endAction = new PriorityTransitionAction(this, END_DEACTIVATE, getPetriNet()->getCurrentTimeInMs() - 1);
+
+        getPetriNet()->addActionToPriorityQueue(m_endAction);
+
+        return;
+    }
 
 	if (recalculateArcTime) {
 		startDate = arc->getRelativeMinValue() - timeOffset + currentTime;
@@ -209,7 +221,7 @@ void Transition::setArcAsActive(Arc* arc, unsigned int timeOffset, bool recalcul
 		m_startDate = startDate;
 	}
 
-	if (endDate < m_endDate) {
+    if (endDate < m_endDate) { // if passed validity limit
 		m_endDate = endDate;
 
 		if (m_endAction != NULL) {

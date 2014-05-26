@@ -551,6 +551,9 @@ void TTTimeCondition::addReceiver(TTAddress anAddress)
         aReceiver.set(kTTSym_address, anAddress);
         
         mReceivers.append(anAddress, aReceiver);
+
+		// try to get the current value
+        aReceiver->sendMessage(kTTSym_Get);
     }
 }
 
@@ -565,7 +568,7 @@ void TTTimeCondition::applyDefaults()
         status = v[0];
         
         if (status != kTTSym_eventDisposed && status != kTTSym_eventHappened)
-            it->first->sendMessage(it->second.dflt?kTTSym_Happen:kTTSym_Dispose);
+            it->first->sendMessage(it->second.dflt?kTTSym_Trigger:kTTSym_Dispose);
     }
 }
 
