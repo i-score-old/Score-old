@@ -56,6 +56,7 @@ class Scenario : public TimeContainer {
     TTTimeEventPtr              mCurrentTimeEvent;              ///< an internal pointer to remember the current time event being read
     TTTimeProcessPtr            mCurrentTimeProcess;            ///< an internal pointer to remember the current time process being read
     TTTimeConditionPtr          mCurrentTimeCondition;          ///< an internal pointer to remember the current time condition being read
+    TTTimeProcessPtr            mCurrentScenario;               ///< an internal pointer to remember the current scenario being read
     
     TTBoolean                   mLoading;                       ///< a flag true when the scenario is loading (mainly used to mute the edition solver)
     
