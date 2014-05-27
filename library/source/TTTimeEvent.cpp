@@ -39,6 +39,8 @@ mCondition(NULL)
 
     if (arguments.size() == 2)
         mContainer = arguments[1];
+    
+    addAttribute(Container, kTypeObject);
 
     addAttribute(Name, kTypeSymbol);
    	addAttributeWithSetter(Date, kTypeUInt32);

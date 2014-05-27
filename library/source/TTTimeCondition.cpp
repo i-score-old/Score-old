@@ -31,6 +31,8 @@ mPendingCounter(0)
     
     if (arguments.size() == 1)
         mContainer = arguments[0];
+    
+    addAttribute(Container, kTypeObject);
 
     addAttribute(Name, kTypeSymbol);
     

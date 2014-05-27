@@ -43,6 +43,8 @@ mEndEvent(NULL)
     if (arguments.size() == 1)
         mContainer = arguments[0];
     
+    addAttribute(Container, kTypeObject);
+    
     // the rigid state handles the DurationMin and DurationMax attribute
     registerAttribute(kTTSym_rigid, kTypeBoolean, NULL, (TTGetterMethod)& TTTimeProcess::getRigid, (TTSetterMethod)& TTTimeProcess::setRigid);
     
