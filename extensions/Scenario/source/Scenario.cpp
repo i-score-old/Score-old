@@ -1424,7 +1424,7 @@ TTErr Scenario::TimeConditionCreate(const TTValue& inputValue, TTValue& outputVa
     args = TTValue(TTObjectBasePtr(this));
     
     // create the time condition
-    if(TTObjectBaseInstantiate(TTSymbol("TimeCondition"), TTObjectBaseHandle(&aTimeCondition), args))
+    if (TTObjectBaseInstantiate(TTSymbol("TimeCondition"), TTObjectBaseHandle(&aTimeCondition), args))
         return kTTErrGeneric;
     
     // create all observers
