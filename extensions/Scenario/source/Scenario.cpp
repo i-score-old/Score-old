@@ -224,8 +224,8 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
             if (mExecutionGraph->makeOneStep(realTime))
                 return kTTErrNone;
             
-            else
-                // Make the end happen
+            // For the root Scenario : make the end happen
+            else if (mContainer == NULL)
                 return getEndEvent()->sendMessage(kTTSym_Happen);
 #else
             TTValue     v;
