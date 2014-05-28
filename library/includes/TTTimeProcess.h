@@ -65,7 +65,7 @@ private :
     TTObjectBasePtr                 mEndEvent;                      ///< the event object which handles the time process execution stop
     
     /** Specific compilation method used to pre-processed data in order to accelarate Process method.
-     the compiled attribute allows to know if the process needs to be compiled or not.
+     @details the compiled attribute allows to know if the process needs to be compiled or not.
      @return                an error code returned by the compile method */
     virtual TTErr   Compile() {return kTTErrGeneric;};
     
@@ -123,49 +123,49 @@ private :
     TTErr           setDurationMax(const TTValue& value);
     
     /** get the time process start date
-        this method eases the getting of the start event date
+     @details this method eases the getting of the start event date
      @param	value           the returned start date
      @return                kTTErrNone */
     TTErr           getStartDate(TTValue& value);
     
     /** set the time process start date
-        this method eases the setting of the start event date
+     @details this method eases the setting of the start event date
      @param	value           a new start date
      @return                kTTErrNone */
     TTErr           setStartDate(const TTValue& value);
     
     /** get start event condition object
-        this method eases the getting of the start event condition object
+     @details this method eases the getting of the start event condition object
      @param	value           the returned condition object
      @return                an error code if the event doesn't exist */
     TTErr           getStartCondition(TTValue& value);
     
     /** set start event condition object
-        this method eases the setting of the start event condition object
+     @details this method eases the setting of the start event condition object
      @param	value           a condition object
      @return                an error code if the event doesn't exist */
     TTErr           setStartCondition(const TTValue& value);
     
     /** get the time process end date
-        this method eases the getting of the end event date
+     @details this method eases the getting of the end event date
      @param	value           the returned end date
      @return                kTTErrNone */
     TTErr           getEndDate(TTValue& value);
     
     /** set the time process end date
-        this method eases the setting of the end event date
+     @details this method eases the setting of the end event date
      @param	value           a new end date
      @return                kTTErrNone */
     TTErr           setEndDate(const TTValue& value);
     
     /** get end event condition object
-        this method eases the getting of the end event condition object
+     @details this method eases the getting of the end event condition object
      @param	value           the returned condition object
      @return                an error code if the event doesn't exist */
     TTErr           getEndCondition(TTValue& value);
     
     /** set end event condition object
-        this method eases the setting of the end event condition object
+     @details this method eases the setting of the end event condition object
      @param	value           a condition object
      @return                an error code if the event doesn't exist */
     TTErr           setEndCondition(const TTValue& value);
@@ -179,6 +179,18 @@ private :
      @param	value           8 bit color format <red green blue>
      @return                kTTErrNone */
     TTErr           setColor(const TTValue& value);
+    
+    /** get the speed of the time process
+     @details this method eases the getting of speed of the scheduler object
+     @param	value           the speed as #TTFloat64 value
+     @return                an error code if the speed cannot be get */
+    TTErr           getSpeed(TTValue& value);
+    
+    /** get the speed of the time process
+     @details this method eases the setting of speed of the scheduler object
+     @param	value           the speed as #TTFloat64 value
+     @return                an error code if the speed cannot be set */
+    TTErr           setSpeed(const TTValue& value);
     
     /** Get intermediate events of the time process
      @param	value           returned events

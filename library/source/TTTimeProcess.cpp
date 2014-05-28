@@ -84,6 +84,7 @@ mEndEvent(NULL)
     registerAttribute(TTSymbol("startCondition"), kTypeBoolean, NULL, (TTGetterMethod)& TTTimeProcess::getStartCondition, (TTSetterMethod)& TTTimeProcess::setStartCondition);
     registerAttribute(TTSymbol("endCondition"), kTypeBoolean, NULL, (TTGetterMethod)& TTTimeProcess::getEndCondition, (TTSetterMethod)& TTTimeProcess::setEndCondition);
     registerAttribute(kTTSym_duration, kTypeUInt32, NULL, (TTGetterMethod)& TTTimeProcess::getDuration);
+    registerAttribute(kTTSym_speed, kTypeFloat64, NULL, (TTGetterMethod)& TTTimeProcess::getSpeed, (TTSetterMethod)& TTTimeProcess::setSpeed);
     
     addMessage(Compile);
     addMessageProperty(Compile, hidden, YES);
@@ -365,6 +366,22 @@ TTErr TTTimeProcess::setColor(const TTValue& value)
     mColor = value;
     
     return kTTErrNone;
+}
+
+TTErr TTTimeProcess::getSpeed(TTValue& value)
+{
+    if (mScheduler)
+        return mScheduler->getAttributeValue(kTTSym_speed, value);
+    
+    return kTTErrGeneric;
+}
+
+TTErr TTTimeProcess::setSpeed(const TTValue& value)
+{
+    if (mScheduler)
+        return mScheduler->setAttributeValue(kTTSym_speed, value);
+    
+    return kTTErrGeneric;
 }
 
 TTErr TTTimeProcess::getIntermediateEvents(TTValue& value)
