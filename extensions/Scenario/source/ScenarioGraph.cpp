@@ -109,15 +109,26 @@ void Scenario::compileTimeProcess(TTTimeProcessPtr aTimeProcess, TransitionPtr* 
     TTTimeEventPtr  startEvent = getTimeProcessStartEvent(aTimeProcess);
     TTTimeEventPtr  endEvent = getTimeProcessEndEvent(aTimeProcess);
     
-    // compile start event
-    currentTransition = mExecutionGraph->createTransition();
-    currentPlace = mExecutionGraph->createPlace();
-    startTransition = currentTransition;
-    
-    compileTimeEvent(startEvent, getTimeEventDate(startEvent), *previousTransition, currentTransition, currentPlace);
-    
-    mTransitionsMap[startEvent] = currentTransition;
-    *previousTransition = currentTransition;
+    // if start event not already compiled
+    if (mTransitionsMap.find(startEvent) == mTransitionsMap.end()) {
+        
+        // compile start event
+        currentTransition = mExecutionGraph->createTransition();
+        currentPlace = mExecutionGraph->createPlace();
+        startTransition = currentTransition;
+        
+        compileTimeEvent(startEvent, getTimeEventDate(startEvent), *previousTransition, currentTransition, currentPlace);
+        
+        mTransitionsMap[startEvent] = currentTransition;
+        *previousTransition = currentTransition;
+    }
+    else {
+        
+        // use the start event's transition
+        currentTransition = TransitionPtr(mTransitionsMap[startEvent]);
+        startTransition = currentTransition;
+        *previousTransition = currentTransition;
+    }
     
     // compile intermediate events
 /*
@@ -133,15 +144,26 @@ void Scenario::compileTimeProcess(TTTimeProcessPtr aTimeProcess, TransitionPtr* 
     previousTransition = currentTransition;
 */
     
-    // compile end event
-    currentTransition = mExecutionGraph->createTransition();
-    currentPlace = mExecutionGraph->createPlace();
-    lastTransition = currentTransition;
-    
-    compileTimeEvent(endEvent, getTimeEventDate(endEvent) - getTimeEventDate(startEvent), *previousTransition, currentTransition, currentPlace);  // normally it is not the startDate but the last intermediate event date
-    
-    mTransitionsMap[endEvent] = currentTransition;
-    *previousTransition = currentTransition;
+    // if end event not already compiled
+    if (mTransitionsMap.find(endEvent) == mTransitionsMap.end()) {
+        
+        // compile end event
+        currentTransition = mExecutionGraph->createTransition();
+        currentPlace = mExecutionGraph->createPlace();
+        lastTransition = currentTransition;
+        
+        compileTimeEvent(endEvent, getTimeEventDate(endEvent) - getTimeEventDate(startEvent), *previousTransition, currentTransition, currentPlace);  // normally it is not the startDate but the last intermediate event date
+        
+        mTransitionsMap[endEvent] = currentTransition;
+        *previousTransition = currentTransition;
+    }
+    else {
+        
+        // use the end event's transition
+        currentTransition = TransitionPtr(mTransitionsMap[endEvent]);
+        lastTransition = currentTransition;
+        *previousTransition = currentTransition;
+    }
     
 /* IS THIS RELATIVE TO COMPILATION OF SUB SCENARIO ?
 note : it was in compileEvent
