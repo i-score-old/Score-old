@@ -363,6 +363,12 @@ TTErr TTTimeCondition::Trigger(const TTValue& inputValue, TTValue& outputValue)
     // for each case
     for (TTCaseMapIterator it = mCases.begin(); it != mCases.end(); it++) {
         
+        // if no event are passed : trigger all the events
+        if (inputValue.size() == 0) {
+            timeEventToTrigger.append(TTObjectBasePtr(it->first));
+            continue;
+        }
+        
         TTBoolean found = NO;
         
         // check if the event is part of the inputValue to prepare it to be triggered
@@ -413,6 +419,12 @@ TTErr TTTimeCondition::Dispose(const TTValue& inputValue, TTValue& outputValue)
     
     // for each case
     for (TTCaseMapIterator it = mCases.begin(); it != mCases.end(); it++) {
+        
+        // if no event are passed : dispose all the events
+        if (inputValue.size() == 0) {
+            timeEventToDispose.append(TTObjectBasePtr(it->first));
+            continue;
+        }
         
         TTBoolean found = NO;
         

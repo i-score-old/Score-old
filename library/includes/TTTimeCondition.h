@@ -149,13 +149,13 @@ private :
     TTErr           ExpressionTest(const TTValue& inputValue, TTValue& outputValue);
     
     /**  Tell the events to trigger. All the other events will be disposed
-     @param	inputValue      events to trigger
+     @param	inputValue      events to trigger (if no events are passed all the events will be triggered)
      @param	outputValue     nothing
      @return                an error code if the operation fails */
     TTErr           Trigger(const TTValue& inputValue, TTValue& outputValue);
     
     /**  Tell the events to dispose. All the other events will be triggered
-     @param	inputValue      events to dispose
+     @param	inputValue      events to dispose (if no events are passed all the events will be disposed)
      @param	outputValue     nothing
      @return                an error code if the operation fails */
     TTErr           Dispose(const TTValue& inputValue, TTValue& outputValue);
