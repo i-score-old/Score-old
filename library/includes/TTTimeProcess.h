@@ -78,7 +78,7 @@ private :
     virtual TTErr   ProcessEnd() {return kTTErrGeneric;};
     
     /** Specific process method
-     @param	inputValue      progression and real time of the scheduler
+     @param	inputValue      position and date of the scheduler
      @param	outputValue     return an error of the processing
      @return                an error code returned by the process method */
     virtual TTErr   Process(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
@@ -192,17 +192,17 @@ private :
      @return                an error code if the speed cannot be set */
     TTErr           setSpeed(const TTValue& value);
     
-    /** get the progression of the time process
-     @details this method eases the getting of progression of the scheduler object
-     @param	value           the progression as #TTFloat64 value
-     @return                an error code if the progression cannot be get */
-    TTErr           getProgression(TTValue& value);
+    /** get the position of the time process
+     @details this method eases the getting of position of the scheduler object
+     @param	value           the position as #TTFloat64 value
+     @return                an error code if the position cannot be get */
+    TTErr           getPosition(TTValue& value);
     
-    /** get the real time of the time process
-     @details this method eases the getting of real time of the scheduler object
-     @param	value           the real time as #TTFloat64 value
-     @return                an error code if the real time cannot be get */
-    TTErr           getRealTime(TTValue& value);
+    /** get the date of the time process
+     @details this method eases the getting of date of the scheduler object
+     @param	value           the date as #TTFloat64 value
+     @return                an error code if the date cannot be get */
+    TTErr           getDate(TTValue& value);
     
     /** Get intermediate events of the time process
      @param	value           returned events
@@ -285,18 +285,18 @@ protected :
      @return                an error code if it fails */
     TTErr           setEndEvent(TTTimeEventPtr aTimeProcess);
     
-    friend void TTSCORE_EXPORT TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression, TTFloat64 realTime);
+    friend void TTSCORE_EXPORT TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 position, TTFloat64 date);
     
     friend void TTSCORE_EXPORT TTTimeContainerFindTimeProcessWithTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found);
 };
 
 typedef TTTimeProcess* TTTimeProcessPtr;
 
-/** The scheduler time progression callback
+/** The scheduler time position callback
  @param	object				a time process instance
- @param	progression			the time progression
+ @param	position			the time position
  @return					an error code */
-void TTSCORE_EXPORT TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression, TTFloat64 realTime);
+void TTSCORE_EXPORT TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 position, TTFloat64 date);
 
 /** Define some macros to ease the access of events attributes */
 #define mStartDate TTTimeEventPtr(mStartEvent)->mDate
@@ -307,8 +307,8 @@ void TTSCORE_EXPORT TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progr
 
 #define mDuration mEndDate - mStartDate
 
-/** Define callback function to get progression back from the scheduler */
-typedef void (*TTTimeProcessProgressionCallback)(TTPtr, TTFloat64, TTFloat64);
+/** Define callback function to get position back from the scheduler */
+typedef void (*TTTimeProcessPositionCallback)(TTPtr, TTFloat64, TTFloat64);
 
 /** Define an unordered map to store and retreive a value relative to a TTTimeProcessPtr */
 #ifdef TT_PLATFORM_WIN

@@ -85,8 +85,8 @@ mEndEvent(NULL)
     registerAttribute(TTSymbol("endCondition"), kTypeBoolean, NULL, (TTGetterMethod)& TTTimeProcess::getEndCondition, (TTSetterMethod)& TTTimeProcess::setEndCondition);
     registerAttribute(kTTSym_duration, kTypeUInt32, NULL, (TTGetterMethod)& TTTimeProcess::getDuration);
     registerAttribute(kTTSym_speed, kTypeFloat64, NULL, (TTGetterMethod)& TTTimeProcess::getSpeed, (TTSetterMethod)& TTTimeProcess::setSpeed);
-    registerAttribute(TTSymbol("progression"), kTypeFloat64, NULL, (TTGetterMethod)& TTTimeProcess::getProgression);
-    registerAttribute(TTSymbol("realTime"), kTypeFloat64, NULL, (TTGetterMethod)& TTTimeProcess::getRealTime);
+    registerAttribute(TTSymbol("position"), kTypeFloat64, NULL, (TTGetterMethod)& TTTimeProcess::getPosition);
+    registerAttribute(TTSymbol("date"), kTypeFloat64, NULL, (TTGetterMethod)& TTTimeProcess::getDate);
     
     addMessage(Compile);
     addMessageProperty(Compile, hidden, YES);
@@ -130,7 +130,7 @@ mEndEvent(NULL)
     
     // Creation of a scheduler based on the System scheduler plugin
     // Prepare callback argument to be notified of :
-    //      - the progression
+    //      - the position
     args = TTValue((TTPtr)&TTTimeProcessSchedulerCallback);
     args.append((TTPtr)this);   // we have to store this as a pointer for Scheduler
     
@@ -386,18 +386,18 @@ TTErr TTTimeProcess::setSpeed(const TTValue& value)
     return kTTErrGeneric;
 }
 
-TTErr TTTimeProcess::getProgression(TTValue& value)
+TTErr TTTimeProcess::getPosition(TTValue& value)
 {
     if (mScheduler)
-        return mScheduler->getAttributeValue("progression", value);
+        return mScheduler->getAttributeValue("position", value);
     
     return kTTErrGeneric;
 }
 
-TTErr TTTimeProcess::getRealTime(TTValue& value)
+TTErr TTTimeProcess::getDate(TTValue& value)
 {
     if (mScheduler)
-        return mScheduler->getAttributeValue("realTime", value);
+        return mScheduler->getAttributeValue("date", value);
     
     return kTTErrGeneric;
 }
@@ -674,14 +674,14 @@ TTErr TTTimeProcess::setEndEvent(TTTimeEventPtr aTimeEvent)
 #pragma mark Scheduler callback
 #endif
 
-void TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression, TTFloat64 realTime)
+void TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 position, TTFloat64 date)
 {
 	TTTimeProcessPtr	aTimeProcess = (TTTimeProcessPtr)object;
     TTValue             none;
     
     // use the specific process method
     if (aTimeProcess->mRunning)
-       aTimeProcess->Process(TTValue(progression, realTime), none);
+       aTimeProcess->Process(TTValue(position, date), none);
     //else
     //    std::cout << "TTTimeProcessSchedulerCallback : avoid last scheduler tick" << std::endl;
 }

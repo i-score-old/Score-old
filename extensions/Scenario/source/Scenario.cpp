@@ -191,7 +191,7 @@ TTErr Scenario::ProcessEnd()
 
 TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTFloat64       progression, realTime;
+    TTFloat64       position, date;
     TTObjectBasePtr aTimeCondition;
     TTValue         v;
     
@@ -199,8 +199,8 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
         
         if (inputValue[0].type() == kTypeFloat64 && inputValue[0].type() == kTypeFloat64) {
             
-            progression = inputValue[0];
-            realTime = inputValue[1];
+            position = inputValue[0];
+            date = inputValue[1];
             
             // enable or disable conditions
             for (mTimeConditionList.begin(); mTimeConditionList.end(); mTimeConditionList.next()) {
@@ -214,7 +214,7 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
             
 #ifndef NO_EXECUTION_GRAPH
             // update the mExecutionGraph to process the scenario
-            if (mExecutionGraph->makeOneStep(realTime))
+            if (mExecutionGraph->makeOneStep(date))
                 return kTTErrNone;
             
             // For the root Scenario : make the end happen
@@ -222,7 +222,7 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
                 return getEndEvent()->sendMessage(kTTSym_Happen);
 #else
             TTValue     v;
-            TTUInt32    date;
+            TTUInt32    eventDate;
             
             // if there is more event to process
             if (mTimeEventList.end()) {
@@ -230,10 +230,10 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
                 // get the current time event (as they are sorted by date)
                 TTObjectBasePtr aTimeEvent = mTimeEventList.current()[0];
                 aTimeEvent->getAttributeValue(kTTSym_date, v);
-                date = v[0];
+                eventDate = v[0];
                 
-                // if the event date is lower than the real time
-                if (date < realTime) {
+                // if the event date is lower than the current date
+                if (eventDate < date) {
                     
                     // make the event to happen
                     aTimeEvent->sendMessage(kTTSym_Happen);

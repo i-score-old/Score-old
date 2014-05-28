@@ -90,7 +90,7 @@ class Scenario : public TimeContainer {
     TTErr   ProcessEnd();
     
     /** Specific process method
-     @param	inputValue      progression of the scheduler
+     @param	inputValue      position of the scheduler
      @param	outputValue     return an error of the processing
      @return                an error code returned by the process method */
     TTErr   Process(const TTValue& inputValue, TTValue& outputValue);
