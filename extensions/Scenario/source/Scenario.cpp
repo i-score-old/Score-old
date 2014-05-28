@@ -160,14 +160,10 @@ TTErr Scenario::Compile()
 TTErr Scenario::ProcessStart()
 {
 #ifndef NO_EXECUTION_GRAPH
-    // DEBUG
-    TTLogMessage("Scenario::ProcessStart >>>\n");
-    
+
     // start the execution graph
     mExecutionGraph->start();
-    
-    // DEBUG
-    TTLogMessage("Scenario::ProcessStart <<<\n");
+
 #else
     
     TTLogMessage("Scenario::ProcessStart : without execution graph\n");
@@ -181,9 +177,6 @@ TTErr Scenario::ProcessStart()
 TTErr Scenario::ProcessEnd()
 {
     TTObjectBasePtr aTimeProcess;
-    
-    // DEBUG
-    TTLogMessage("Scenario::ProcessEnd\n");
 
     // When a Scenario ends : stop all the time processes
     for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
