@@ -85,6 +85,8 @@ mEndEvent(NULL)
     registerAttribute(TTSymbol("endCondition"), kTypeBoolean, NULL, (TTGetterMethod)& TTTimeProcess::getEndCondition, (TTSetterMethod)& TTTimeProcess::setEndCondition);
     registerAttribute(kTTSym_duration, kTypeUInt32, NULL, (TTGetterMethod)& TTTimeProcess::getDuration);
     registerAttribute(kTTSym_speed, kTypeFloat64, NULL, (TTGetterMethod)& TTTimeProcess::getSpeed, (TTSetterMethod)& TTTimeProcess::setSpeed);
+    registerAttribute(TTSymbol("progression"), kTypeFloat64, NULL, (TTGetterMethod)& TTTimeProcess::getProgression);
+    registerAttribute(TTSymbol("realTime"), kTypeFloat64, NULL, (TTGetterMethod)& TTTimeProcess::getRealTime);
     
     addMessage(Compile);
     addMessageProperty(Compile, hidden, YES);
@@ -380,6 +382,22 @@ TTErr TTTimeProcess::setSpeed(const TTValue& value)
 {
     if (mScheduler)
         return mScheduler->setAttributeValue(kTTSym_speed, value);
+    
+    return kTTErrGeneric;
+}
+
+TTErr TTTimeProcess::getProgression(TTValue& value)
+{
+    if (mScheduler)
+        return mScheduler->getAttributeValue("progression", value);
+    
+    return kTTErrGeneric;
+}
+
+TTErr TTTimeProcess::getRealTime(TTValue& value)
+{
+    if (mScheduler)
+        return mScheduler->getAttributeValue("realTime", value);
     
     return kTTErrGeneric;
 }

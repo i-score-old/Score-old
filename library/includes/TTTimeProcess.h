@@ -192,6 +192,18 @@ private :
      @return                an error code if the speed cannot be set */
     TTErr           setSpeed(const TTValue& value);
     
+    /** get the progression of the time process
+     @details this method eases the getting of progression of the scheduler object
+     @param	value           the progression as #TTFloat64 value
+     @return                an error code if the progression cannot be get */
+    TTErr           getProgression(TTValue& value);
+    
+    /** get the real time of the time process
+     @details this method eases the getting of real time of the scheduler object
+     @param	value           the real time as #TTFloat64 value
+     @return                an error code if the real time cannot be get */
+    TTErr           getRealTime(TTValue& value);
+    
     /** Get intermediate events of the time process
      @param	value           returned events
      @return                kTTErrNone */
