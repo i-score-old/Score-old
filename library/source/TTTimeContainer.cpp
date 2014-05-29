@@ -491,10 +491,6 @@ TTErr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHandler, TTObj
                 }
             }
         }
-        
-        // Pass the xml handler to the new process to fill specific attributes
-        aXmlHandler->setAttributeValue(kTTSym_object, out);
-        return aXmlHandler->sendMessage(kTTSym_Read);
     }
     
     return err;

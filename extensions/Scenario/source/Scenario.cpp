@@ -34,6 +34,10 @@ mEditionSolver(NULL),
 #ifndef NO_EXECUTION_GRAPH
 mExecutionGraph(NULL),
 #endif
+mCurrentTimeEvent(NULL),
+mCurrentTimeProcess(NULL),
+mCurrentTimeCondition(NULL),
+mCurrentScenario(NULL),
 mLoading(NO)
 {
     TIME_PLUGIN_INITIALIZE
@@ -161,14 +165,10 @@ TTErr Scenario::Compile()
 TTErr Scenario::ProcessStart()
 {
 #ifndef NO_EXECUTION_GRAPH
-    // DEBUG
-    TTLogMessage("Scenario::ProcessStart >>>\n");
-    
+
     // start the execution graph
     mExecutionGraph->start();
-    
-    // DEBUG
-    TTLogMessage("Scenario::ProcessStart <<<\n");
+
 #else
     
     TTLogMessage("Scenario::ProcessStart : without execution graph\n");
@@ -182,9 +182,6 @@ TTErr Scenario::ProcessStart()
 TTErr Scenario::ProcessEnd()
 {
     TTObject aTimeProcess;
-    
-    // DEBUG
-    TTLogMessage("Scenario::ProcessEnd\n");
 
     // When a Scenario ends : stop all the time processes
     for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
@@ -199,16 +196,16 @@ TTErr Scenario::ProcessEnd()
 
 TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTFloat64   progression, realTime;
-    TTObject    aTimeCondition;
-    TTValue     v;
+    TTFloat64       position, date;
+    TTObject 		aTimeCondition;
+    TTValue         v;
     
     if (inputValue.size() == 2) {
         
         if (inputValue[0].type() == kTypeFloat64 && inputValue[0].type() == kTypeFloat64) {
             
-            progression = inputValue[0];
-            realTime = inputValue[1];
+            position = inputValue[0];
+            date = inputValue[1];
             
             // enable or disable conditions
             for (mTimeConditionList.begin(); mTimeConditionList.end(); mTimeConditionList.next()) {
@@ -222,15 +219,15 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
             
 #ifndef NO_EXECUTION_GRAPH
             // update the mExecutionGraph to process the scenario
-            if (mExecutionGraph->makeOneStep(realTime))
+            if (mExecutionGraph->makeOneStep(date))
                 return kTTErrNone;
             
-            else
-                // Make the end happen
+            // For the root Scenario : make the end happen
+            else if (mContainer == NULL)
                 return getEndEvent().send(kTTSym_Happen);
 #else
             TTValue     v;
-            TTUInt32    date;
+            TTUInt32    eventDate;
             
             // if there is more event to process
             if (mTimeEventList.end()) {
@@ -238,10 +235,10 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
                 // get the current time event (as they are sorted by date)
                 TTObject aTimeEvent = mTimeEventList.current()[0];
                 aTimeEvent.get(kTTSym_date, v);
-                date = v[0];
+                eventDate = v[0];
                 
-                // if the event date is lower than the real time
-                if (date < realTime) {
+                // if the event date is lower than the current date
+                if (eventDate < date) {
                     
                     // make the event to happen
                     aTimeEvent.send(kTTSym_Happen);
@@ -299,7 +296,7 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
     
     if (inputValue.size() >= 1) {
         
-        if (inputValue[0].type() == kTypeUInt32) {
+        if (inputValue[0].type() == kTypeUInt32 || inputValue[0].type() == kTypeInt32) {
             
             this->getAttributeValue(kTTSym_duration, v);
             
@@ -506,130 +503,102 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     SolverObjectMapIterator itSolver;
     TTValue                 v;
 	
-	// Switch on the name of the XML node
-	
-    // if the scenario is not handled by a upper scenario (root Scenario case)
-    if (mContainer == NULL) {
+	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
+    
+    // When reading a sub scenario
+    if (mCurrentScenario) {
         
-        // Starts scenario reading
-        if (aXmlHandler->mXmlNodeName == kTTSym_xmlHandlerReadingStarts) {
-            
-            mLoading = YES;
-            
-            mCurrentTimeEvent = TTObject();
-            mCurrentTimeProcess = TTObject();
-            mCurrentTimeCondition = TTObject();
-            
-            // clear all data structures
-            mTimeEventList.clear();
-            mTimeProcessList.clear();
-            
-            for (itSolver = mVariablesMap.begin() ; itSolver != mVariablesMap.end() ; itSolver++)
-                delete (SolverVariablePtr)itSolver->second;
-            
-            mVariablesMap.clear();
-            
-            for (itSolver = mConstraintsMap.begin() ; itSolver != mConstraintsMap.end() ; itSolver++)
-                delete (SolverConstraintPtr)itSolver->second;
-            
-            mConstraintsMap.clear();
-            
-            for (itSolver = mRelationsMap.begin() ; itSolver != mRelationsMap.end() ; itSolver++)
-                delete (SolverRelationPtr)itSolver->second;
-            
-            mRelationsMap.clear();
-            
-            delete mEditionSolver;
-            mEditionSolver = new Solver();
-            
-#ifndef NO_EXECUTION_GRAPH
-            clearGraph();
-#endif
-            
-            return kTTErrNone;
-        }
-        
-        // Ends scenario reading
-        if (aXmlHandler->mXmlNodeName == kTTSym_xmlHandlerReadingEnds) {
-            
-            mLoading = NO;
-            
-            return kTTErrNone;
-        }
-        
-        // Scenario node (root Scenario case)
+        // if this this the end of a scenario node : forget the sub scenario
         if (aXmlHandler->mXmlNodeName == TTSymbol("Scenario")) {
             
-            // Get the scenario name
-            if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES)) {
+            if (!aXmlHandler->mXmlNodeStart) {
                 
-                if (v.size() == 1) {
-                    
-                    if (v[0].type() == kTypeSymbol) {
-                        
-                        mName = v[0];
-                    }
-                }
-            }
-            
-            // Get the scenario color
-            if (!aXmlHandler->getXmlAttribute(kTTSym_color, v, NO)) {
-                
-                if (v.size() == 3) {
-                    
-                    if (v[0].type() == kTypeInt32 && v[1].type() == kTypeInt32 && v[2].type() == kTypeInt32) {
-                        
-                        mColor = v;
-                    }
-                }
+                mCurrentScenario = TTObject();
+                return kTTErrNone;
             }
         }
-        
-        // Start Event node
-        if (aXmlHandler->mXmlNodeName == TTSymbol("startEvent")) {
+        else {
             
-            if (aXmlHandler->mXmlNodeStart) {
-                
-                // Get the date
-                if (!aXmlHandler->getXmlAttribute(kTTSym_date, v, NO))
-                    getStartEvent().set(kTTSym_date, v);
-
-                // Get the name
-                if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES))
-                    getStartEvent().set(kTTSym_name, v);
-                
-                if (!aXmlHandler->mXmlNodeIsEmpty)
-                    mCurrentTimeEvent = getStartEvent();
-            
-            }
-            else
-                mCurrentTimeEvent = TTObject();
-        }
-        
-        // End Event node
-        if (aXmlHandler->mXmlNodeName == TTSymbol("endEvent")) {
-            
-            if (aXmlHandler->mXmlNodeStart) {
-                
-                // Get the date
-                if (!aXmlHandler->getXmlAttribute(kTTSym_date, v, NO))
-                    getEndEvent().set(kTTSym_date, v);
-                
-                // Get the name
-                if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES))
-                    getEndEvent().set(kTTSym_name, v);
-                
-                if (!aXmlHandler->mXmlNodeIsEmpty)
-                    mCurrentTimeEvent = getEndEvent();
-                
-            }
-            else
-                mCurrentTimeEvent = TTObject();
+            // Pass the xml handler to the sub scenario to fill it
+            aXmlHandler->setAttributeValue(kTTSym_object, mCurrentScenario);
+            return aXmlHandler->sendMessage(kTTSym_Read);
         }
     }
+	
+	// Switch on the name of the XML node
+	
+    // Starts scenario reading
+    if (aXmlHandler->mXmlNodeName == kTTSym_xmlHandlerReadingStarts) {
+        
+        mLoading = YES;
+        
+        mCurrentTimeEvent = TTObject();
+        mCurrentTimeProcess = TTObject();
+        mCurrentTimeCondition = TTObject();
+        
+        // clear all data structures
+        mTimeEventList.clear();
+        mTimeProcessList.clear();
+        
+        for (itSolver = mVariablesMap.begin() ; itSolver != mVariablesMap.end() ; itSolver++)
+            delete (SolverVariablePtr)itSolver->second;
+        
+        mVariablesMap.clear();
+        
+        for (itSolver = mConstraintsMap.begin() ; itSolver != mConstraintsMap.end() ; itSolver++)
+            delete (SolverConstraintPtr)itSolver->second;
+        
+        mConstraintsMap.clear();
+        
+        for (itSolver = mRelationsMap.begin() ; itSolver != mRelationsMap.end() ; itSolver++)
+            delete (SolverRelationPtr)itSolver->second;
+        
+        mRelationsMap.clear();
+        
+        delete mEditionSolver;
+        mEditionSolver = new Solver();
+        
+#ifndef NO_EXECUTION_GRAPH
+        clearGraph();
+#endif
+        
+        return kTTErrNone;
+    }
     
-    // Scenario node (sub and root Scenario case)
+    // Ends scenario reading
+    if (aXmlHandler->mXmlNodeName == kTTSym_xmlHandlerReadingEnds) {
+        
+        mLoading = NO;
+        
+        return kTTErrNone;
+    }
+    
+    // Scenario node
     if (aXmlHandler->mXmlNodeName == TTSymbol("Scenario")) {
+        
+        // Get the scenario name
+        if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES)) {
+            
+            if (v.size() == 1) {
+                
+                if (v[0].type() == kTypeSymbol) {
+                    
+                    mName = v[0];
+                }
+            }
+        }
+        
+        // Get the scenario color
+        if (!aXmlHandler->getXmlAttribute(kTTSym_color, v, NO)) {
+            
+            if (v.size() == 3) {
+                
+                if (v[0].type() == kTypeInt32 && v[1].type() == kTypeInt32 && v[2].type() == kTypeInt32) {
+                    
+                    mColor = v;
+                }
+            }
+        }
         
         // Get the scenario viewZoom
         if (!aXmlHandler->getXmlAttribute(kTTSym_viewZoom, v, NO)) {
@@ -654,10 +623,49 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
                 }
             }
         }
-        
-        return kTTErrNone;
     }
-
+    
+    // Start Event node (root Scenario only)
+    if (aXmlHandler->mXmlNodeName == TTSymbol("startEvent")) {
+        
+        if (aXmlHandler->mXmlNodeStart) {
+            
+            // Get the date
+            if (!aXmlHandler->getXmlAttribute(kTTSym_date, v, NO))
+                getStartEvent()->setAttributeValue(kTTSym_date, v);
+            
+            // Get the name
+            if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES))
+                getStartEvent()->setAttributeValue(kTTSym_name, v);
+            
+            if (!aXmlHandler->mXmlNodeIsEmpty)
+                mCurrentTimeEvent = getStartEvent();
+            
+        }
+        else
+            mCurrentTimeEvent = NULL;
+    }
+    
+    // End Event node (root Scenario only)
+    if (aXmlHandler->mXmlNodeName == TTSymbol("endEvent")) {
+        
+        if (aXmlHandler->mXmlNodeStart) {
+            
+            // Get the date
+            if (!aXmlHandler->getXmlAttribute(kTTSym_date, v, NO))
+                getEndEvent()->setAttributeValue(kTTSym_date, v);
+            
+            // Get the name
+            if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES))
+                getEndEvent()->setAttributeValue(kTTSym_name, v);
+            
+            if (!aXmlHandler->mXmlNodeIsEmpty)
+                mCurrentTimeEvent = getEndEvent();
+            
+        }
+        else
+            mCurrentTimeEvent = NULL;
+    }
     
     // Event node
     if (aXmlHandler->mXmlNodeName == kTTSym_event) {
@@ -727,9 +735,17 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     // If there is a current time process
     if (mCurrentTimeProcess.valid()) {
         
-        // Pass the xml handler to the current process to fill his data structure
-        aXmlHandler->setAttributeValue(kTTSym_object, mCurrentTimeProcess);
-        return aXmlHandler->sendMessage(kTTSym_Read);
+        // if the current time process is a sub sceanrio : don't forget it
+        if (mCurrentTimeProcess->getName() == TTSymbol("Scenario")) {
+            mCurrentScenario = mCurrentTimeProcess;
+            
+        }
+        else {
+            
+            // Pass the xml handler to the current process to fill his data structure
+            aXmlHandler->setAttributeValue(kTTSym_object, mCurrentTimeProcess);
+            return aXmlHandler->sendMessage(kTTSym_Read);
+        }
     }
     
     return kTTErrNone;

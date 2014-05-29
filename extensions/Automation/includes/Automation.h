@@ -2,7 +2,7 @@
  *
  * @ingroup scoreExtension
  *
- * @brief Automation time process class manage interpolation between the start event state and end event state depending on the scheduler progression
+ * @brief Automation time process class manage interpolation between the start event state and end event state depending on the scheduler position
  *
  * @details The Automation class allows to ... @n@n
  *
@@ -36,7 +36,7 @@ private :
     TTHash                      mReceivers;						///< a table of TTReceiver to record curves
    
     TTValue                     mCurrentObjects;                ///< useful for file parsing
-    TTFloat64                   mCurrentProgression;            ///< useful for recording
+    TTFloat64                   mCurrentPosition;            ///< useful for recording
     
     /** Get parameters names needed by this time process
      @param	value           the returned parameter names
@@ -62,7 +62,7 @@ private :
     TTErr   ProcessEnd();
     
     /** Specific process method
-     @param	inputValue      progression and real time of the scheduler
+     @param	inputValue      position and date of the scheduler
      @param	outputValue     return an error of the processing
      @return                an error code returned by the process method */
     TTErr   Process(const TTValue& inputValue, TTValue& outputValue);

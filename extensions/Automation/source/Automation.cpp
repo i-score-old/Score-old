@@ -2,7 +2,7 @@
  *
  * @ingroup scoreExtension
  *
- * @brief Automation time process class manage interpolation between the start event state and end event state depending on the scheduler progression
+ * @brief Automation time process class manage interpolation between the start event state and end event state depending on the scheduler position
  *
  * @see TimePluginLib, TTTimeProcess
  *
@@ -216,27 +216,27 @@ TTErr Automation::ProcessEnd()
 
 TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTFloat64   progression, realTime, sample;
-    TTValue     v, keys, objects, valueToSend, none;
-    TTSymbol    key;
-    TTAddress   address;
-    TTObject    curve, sender;
-    TTUInt32    i, j;
-    TTBoolean   redundancy;
-	TTErr       err;
+    TTFloat64       position, date, sample;
+    TTValue         v, keys, objects, valueToSend, none;
+    TTSymbol        key;
+    TTAddress       address;
+    TTObject 		curve, sender;
+    TTUInt32        i, j;
+    TTBoolean       redundancy;
+	TTErr			err;
     
     if (inputValue.size() == 2) {
         
         if (inputValue[0].type() == kTypeFloat64 && inputValue[1].type() == kTypeFloat64) {
             
-            progression = inputValue[0];
-            realTime = inputValue[1];
+            position = inputValue[0];
+            date = inputValue[1];
             
-            // store current progression for recording
-            mCurrentProgression = progression;
+            // store current position for recording
+            mCurrentPosition = position;
             
             // don't process for 0. or 1. to not send the same value twice
-            if (progression == 0. || progression == 1.)
+            if (position == 0. || position == 1.)
                 return kTTErrGeneric;
             
             // calculate the curves
@@ -260,7 +260,7 @@ TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
                     
                     curve = objects[j];
                     
-                    err = CurvePtr(curve.instance())->nextSampleAt(progression, sample);
+                    err = CurvePtr(curve.instance())->nextSampleAt(position, sample);
                     
                     // if no value
                     if (err == kTTErrValueNotFound)
@@ -296,13 +296,13 @@ TTErr Automation::ProcessPaused(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr Automation::Goto(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTUInt32    duration, timeOffset;
-    TTFloat64   progression, realTime;
-    TTValue     v, keys, objects, none;
-    TTSymbol    key;
-    TTObject    curve;
-    TTUInt32    i, j;
-    TTBoolean   mute = NO;
+    TTUInt32        duration, timeOffset;
+    TTFloat64       position, date;
+    TTValue         v, keys, objects, none;
+    TTSymbol        key;
+    TTObject		curve;
+    TTUInt32        i, j;
+    TTBoolean       mute = NO;
     
     if (inputValue.size() >= 1) {
         
@@ -329,10 +329,10 @@ TTErr Automation::Goto(const TTValue& inputValue, TTValue& outputValue)
             if (!mute && !mMute) {
                 
                 // get scheduler progression and realTime
-                mScheduler.get("progression", v);
+                mScheduler.get("position", v);
                 progression = TTFloat64(v[0]);
                 
-                mScheduler.get("realTime", v);
+                mScheduler.get("date", v);
                 realTime = TTFloat64(v[0]);
                 
                 // DEBUG : to see if it is faster without this part
@@ -352,8 +352,8 @@ TTErr Automation::Goto(const TTValue& inputValue, TTValue& outputValue)
                     }
                 }
                 
-                v = progression;
-                v.append(realTime);
+                v = position;
+                v.append(date);
                 
                 return Process(v, none);
             }
@@ -841,8 +841,8 @@ TTErr AutomationReceiverReturnValueCallback(const TTValue& baton, const TTValue&
     // if the automation is running
     if (anAutomation->mRunning) {
         
-        // don't process when progression is equal to 0. or 1.
-        if (anAutomation->mCurrentProgression == 0. || anAutomation->mCurrentProgression == 1.)
+        // don't process when position is equal to 0. or 1.
+        if (anAutomation->mCurrentPosition == 0. || anAutomation->mCurrentPosition == 1.)
             return kTTErrNone;
         
         // for each event's expression matching the incoming address
@@ -854,7 +854,7 @@ TTErr AutomationReceiverReturnValueCallback(const TTValue& baton, const TTValue&
                 curve = objects[i];
                 
                 // store the next point
-                CurvePtr(curve.instance())->append(TTValue(anAutomation->mCurrentProgression, TTFloat64(data[i])));
+                CurvePtr(curve.instance())->append(TTValue(anAutomation->mCurrentPosition, TTFloat64(data[i])));
             }
         }
     }

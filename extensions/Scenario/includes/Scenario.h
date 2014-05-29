@@ -60,6 +60,7 @@ class Scenario : public TimeContainerPlugin {
     TTObject                    mCurrentTimeEvent;              ///< an internal pointer to remember the current time event being read
     TTObject                    mCurrentTimeProcess;            ///< an internal pointer to remember the current time process being read
     TTObject                    mCurrentTimeCondition;          ///< an internal pointer to remember the current time condition being read
+	TTObject           	 		mCurrentScenario;               ///< an internal pointer to remember the current scenario being read
     
     TTBoolean                   mLoading;                       ///< a flag true when the scenario is loading (mainly used to mute the edition solver)
     
@@ -93,7 +94,7 @@ class Scenario : public TimeContainerPlugin {
     TTErr   ProcessEnd();
     
     /** Specific process method
-     @param	inputValue      progression of the scheduler
+     @param	inputValue      position of the scheduler
      @param	outputValue     return an error of the processing
      @return                an error code returned by the process method */
     TTErr   Process(const TTValue& inputValue, TTValue& outputValue);

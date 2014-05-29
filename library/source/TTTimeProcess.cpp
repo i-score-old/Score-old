@@ -39,6 +39,8 @@ mCompiled(NO)
     if (arguments.size() == 1)
         mContainer = arguments[0];
     
+    addAttribute(Container, kTypeObject);
+    
     // the rigid state handles the DurationMin and DurationMax attribute
     registerAttribute(kTTSym_rigid, kTypeBoolean, NULL, (TTGetterMethod)& TTTimeProcess::getRigid, (TTSetterMethod)& TTTimeProcess::setRigid);
     
@@ -78,6 +80,9 @@ mCompiled(NO)
     registerAttribute(TTSymbol("startCondition"), kTypeBoolean, NULL, (TTGetterMethod)& TTTimeProcess::getStartCondition, (TTSetterMethod)& TTTimeProcess::setStartCondition);
     registerAttribute(TTSymbol("endCondition"), kTypeBoolean, NULL, (TTGetterMethod)& TTTimeProcess::getEndCondition, (TTSetterMethod)& TTTimeProcess::setEndCondition);
     registerAttribute(kTTSym_duration, kTypeUInt32, NULL, (TTGetterMethod)& TTTimeProcess::getDuration);
+    registerAttribute(kTTSym_speed, kTypeFloat64, NULL, (TTGetterMethod)& TTTimeProcess::getSpeed, (TTSetterMethod)& TTTimeProcess::setSpeed);
+    registerAttribute(TTSymbol("position"), kTypeFloat64, NULL, (TTGetterMethod)& TTTimeProcess::getPosition);
+    registerAttribute(TTSymbol("date"), kTypeFloat64, NULL, (TTGetterMethod)& TTTimeProcess::getDate);
     
     addMessage(Compile);
     addMessageProperty(Compile, hidden, YES);
@@ -121,7 +126,7 @@ mCompiled(NO)
     
     // Creation of a scheduler based on the System scheduler plugin
     // Prepare callback argument to be notified of :
-    //      - the progression
+    //      - the position
     TTValue args = TTValue((TTPtr)&TTTimeProcessSchedulerCallback);
     args.append((TTPtr)this);   // we have to store this as a pointer for Scheduler
     
@@ -347,6 +352,38 @@ TTErr TTTimeProcess::setColor(const TTValue& value)
     mColor = value;
     
     return kTTErrNone;
+}
+
+TTErr TTTimeProcess::getSpeed(TTValue& value)
+{
+    if (mScheduler)
+        return mScheduler->getAttributeValue(kTTSym_speed, value);
+    
+    return kTTErrGeneric;
+}
+
+TTErr TTTimeProcess::setSpeed(const TTValue& value)
+{
+    if (mScheduler)
+        return mScheduler->setAttributeValue(kTTSym_speed, value);
+    
+    return kTTErrGeneric;
+}
+
+TTErr TTTimeProcess::getPosition(TTValue& value)
+{
+    if (mScheduler)
+        return mScheduler->getAttributeValue("position", value);
+    
+    return kTTErrGeneric;
+}
+
+TTErr TTTimeProcess::getDate(TTValue& value)
+{
+    if (mScheduler)
+        return mScheduler->getAttributeValue("date", value);
+    
+    return kTTErrGeneric;
 }
 
 TTErr TTTimeProcess::getIntermediateEvents(TTValue& value)
@@ -626,14 +663,24 @@ TTErr TTTimeProcess::setEndEvent(TTObject&  aTimeEvent)
 #pragma mark Scheduler callback
 #endif
 
-void TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression, TTFloat64 realTime)
+void TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 position, TTFloat64 date)
 {
 	TTTimeProcessPtr	aTimeProcess = (TTTimeProcessPtr)object;
     TTValue             none;
     
     // use the specific process method
-    if (aTimeProcess->mRunning)
-       aTimeProcess->Process(TTValue(progression, realTime), none);
-    //else
-    //    std::cout << "TTTimeProcessSchedulerCallback : avoid last scheduler tick" << std::endl;
+    if (aTimeProcess->mRunning) {
+        
+        aTimeProcess->Process(TTValue(position, date), none);
+        
+        // notify position observers
+        TTAttributePtr	positionAttribute;
+        aTimeProcess->findAttribute("position", &positionAttribute);
+        positionAttribute->sendNotification(kTTSym_notify, position);
+        
+        // notify date observers
+        TTAttributePtr	dateAttribute;
+        aTimeProcess->findAttribute("date", &dateAttribute);
+        dateAttribute->sendNotification(kTTSym_notify, date);
+    }
 }

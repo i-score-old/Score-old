@@ -34,6 +34,8 @@ mPendingCounter(0)
     if (arguments.size() == 1)
         mContainer = arguments[0];
     
+    addAttribute(Container, kTypeObject);
+
     addAttribute(Name, kTypeSymbol);
     
     addAttributeWithSetter(Active, kTypeBoolean);
@@ -53,6 +55,8 @@ mPendingCounter(0)
     addMessageWithArguments(ExpressionFind);
     addMessageWithArguments(DefaultFind);
     addMessageWithArguments(ExpressionTest);
+    addMessageWithArguments(Trigger);
+    addMessageWithArguments(Dispose);
     
 	// needed to be handled by a TTXmlHandler
 	addMessageWithArguments(WriteAsXml);
@@ -348,6 +352,120 @@ TTErr TTTimeCondition::ExpressionTest(const TTValue& inputValue, TTValue& output
     }
     
     return kTTErrGeneric;
+}
+
+TTErr TTTimeCondition::Trigger(const TTValue& inputValue, TTValue& outputValue)
+{
+    // only if the condition is ready
+    if (!mReady)
+        return kTTErrNone;
+    
+    TTList  timeEventToTrigger;
+    TTList  timeEventToDispose;
+    
+    // for each case
+    for (TTCaseMapIterator it = mCases.begin(); it != mCases.end(); it++) {
+        
+        // if no event are passed : trigger all the events
+        if (inputValue.size() == 0) {
+            timeEventToTrigger.append(TTObjectBasePtr(it->first));
+            continue;
+        }
+        
+        TTBoolean found = NO;
+        
+        // check if the event is part of the inputValue to prepare it to be triggered
+        for (TTUInt32 i = 0; i < inputValue.size(); i++) {
+            
+            if (inputValue[i].type() == kTypeObject) {
+                
+                TTObjectBasePtr event = inputValue[i];
+                
+                if (event == TTObjectBasePtr(it->first)) {
+                    timeEventToTrigger.append(TTObjectBasePtr(it->first));
+                    found = YES;
+                    break;
+                }
+            }
+        }
+        
+        // else prepare it to be disposed
+        if (!found)
+             timeEventToDispose.append(TTObjectBasePtr(it->first));
+    }
+    
+    // if at least one event is in the trigger list
+    if (!timeEventToTrigger.isEmpty()) {
+        
+        setReady(NO);
+        
+        // trigger all events of the trigger list
+        for (timeEventToTrigger.begin(); timeEventToTrigger.end(); timeEventToTrigger.next())
+            TTObjectBasePtr(timeEventToTrigger.current()[0])->sendMessage(kTTSym_Trigger);
+        
+        // dispose all the other events
+        for (timeEventToDispose.begin(); timeEventToDispose.end(); timeEventToDispose.next())
+            TTObjectBasePtr(timeEventToDispose.current()[0])->sendMessage(kTTSym_Dispose);
+    }
+    
+    return kTTErrNone;
+}
+
+TTErr TTTimeCondition::Dispose(const TTValue& inputValue, TTValue& outputValue)
+{
+    // only if the condition is ready
+    if (!mReady)
+        return kTTErrNone;
+    
+    TTList  timeEventToTrigger;
+    TTList  timeEventToDispose;
+    
+    // for each case
+    for (TTCaseMapIterator it = mCases.begin(); it != mCases.end(); it++) {
+        
+        // if no event are passed : dispose all the events
+        if (inputValue.size() == 0) {
+            timeEventToDispose.append(TTObjectBasePtr(it->first));
+            continue;
+        }
+        
+        TTBoolean found = NO;
+        
+        // check if the event is part of the inputValue to prepare it to be disposed
+        for (TTUInt32 i = 0; i < inputValue.size(); i++) {
+            
+            if (inputValue[i].type() == kTypeObject) {
+                
+                TTObjectBasePtr event = inputValue[i];
+                
+                if (event == TTObjectBasePtr(it->first)) {
+                    timeEventToDispose.append(TTObjectBasePtr(it->first));
+                    found = YES;
+                    break;
+                }
+            }
+        }
+        
+        // else prepare it to be triggered
+        if (!found)
+            timeEventToTrigger.append(TTObjectBasePtr(it->first));
+    }
+    
+    // if at least one event is in the trigger list
+    if (!timeEventToTrigger.isEmpty()) {
+        
+        setReady(NO);
+        
+        // trigger all events of the trigger list
+        for (timeEventToTrigger.begin(); timeEventToTrigger.end(); timeEventToTrigger.next())
+            TTObjectBasePtr(timeEventToTrigger.current()[0])->sendMessage(kTTSym_Trigger);
+        
+        // dispose all the other events
+        for (timeEventToDispose.begin(); timeEventToDispose.end(); timeEventToDispose.next())
+            TTObjectBasePtr(timeEventToDispose.current()[0])->sendMessage(kTTSym_Dispose);
+    }
+    
+    return kTTErrNone;
 }
 
 TTErr TTTimeCondition::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
