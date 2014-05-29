@@ -680,8 +680,18 @@ void TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 position, TTFloat64 
     TTValue             none;
     
     // use the specific process method
-    if (aTimeProcess->mRunning)
-       aTimeProcess->Process(TTValue(position, date), none);
-    //else
-    //    std::cout << "TTTimeProcessSchedulerCallback : avoid last scheduler tick" << std::endl;
+    if (aTimeProcess->mRunning) {
+        
+        aTimeProcess->Process(TTValue(position, date), none);
+        
+        // notify position observers
+        TTAttributePtr	positionAttribute;
+        aTimeProcess->findAttribute("position", &positionAttribute);
+        positionAttribute->sendNotification(kTTSym_notify, position);
+        
+        // notify date observers
+        TTAttributePtr	dateAttribute;
+        aTimeProcess->findAttribute("date", &dateAttribute);
+        dateAttribute->sendNotification(kTTSym_notify, date);
+    }
 }
