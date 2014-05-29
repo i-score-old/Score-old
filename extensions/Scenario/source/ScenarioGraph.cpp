@@ -110,7 +110,7 @@ void Scenario::compileTimeProcess(TTObject& aTimeProcess, TransitionPtr* previou
     TTObject  endEvent = getTimeProcessEndEvent(aTimeProcess);
     
     // if start event not already compiled
-    if (mTransitionsMap.find(startEvent) == mTransitionsMap.end()) {
+    if (mTransitionsMap.find(startEvent.instance()) == mTransitionsMap.end()) {
         
         // compile start event
         currentTransition = mExecutionGraph->createTransition();
@@ -119,13 +119,13 @@ void Scenario::compileTimeProcess(TTObject& aTimeProcess, TransitionPtr* previou
         
         compileTimeEvent(startEvent, getTimeEventDate(startEvent), *previousTransition, currentTransition, currentPlace);
         
-        mTransitionsMap[startEvent] = currentTransition;
+        mTransitionsMap[startEvent.instance()] = currentTransition;
         *previousTransition = currentTransition;
     }
     else {
         
         // use the start event's transition
-        currentTransition = TransitionPtr(mTransitionsMap[startEvent]);
+        currentTransition = TransitionPtr(mTransitionsMap[startEvent.instance()]);
         startTransition = currentTransition;
         *previousTransition = currentTransition;
     }
@@ -145,7 +145,7 @@ void Scenario::compileTimeProcess(TTObject& aTimeProcess, TransitionPtr* previou
 */
     
     // if end event not already compiled
-    if (mTransitionsMap.find(endEvent) == mTransitionsMap.end()) {
+    if (mTransitionsMap.find(endEvent.instance()) == mTransitionsMap.end()) {
         
         // compile end event
         currentTransition = mExecutionGraph->createTransition();
@@ -154,13 +154,13 @@ void Scenario::compileTimeProcess(TTObject& aTimeProcess, TransitionPtr* previou
         
         compileTimeEvent(endEvent, getTimeEventDate(endEvent) - getTimeEventDate(startEvent), *previousTransition, currentTransition, currentPlace);  // normally it is not the startDate but the last intermediate event date
         
-        mTransitionsMap[endEvent] = currentTransition;
+        mTransitionsMap[endEvent.instance()] = currentTransition;
         *previousTransition = currentTransition;
     }
     else {
         
         // use the end event's transition
-        currentTransition = TransitionPtr(mTransitionsMap[endEvent]);
+        currentTransition = TransitionPtr(mTransitionsMap[endEvent.instance()]);
         lastTransition = currentTransition;
         *previousTransition = currentTransition;
     }

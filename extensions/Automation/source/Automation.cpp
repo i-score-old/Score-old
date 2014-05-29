@@ -330,10 +330,10 @@ TTErr Automation::Goto(const TTValue& inputValue, TTValue& outputValue)
                 
                 // get scheduler progression and realTime
                 mScheduler.get("position", v);
-                progression = TTFloat64(v[0]);
+                position = TTFloat64(v[0]);
                 
                 mScheduler.get("date", v);
-                realTime = TTFloat64(v[0]);
+                date = TTFloat64(v[0]);
                 
                 // DEBUG : to see if it is faster without this part
                 // reset each curves on its first sample

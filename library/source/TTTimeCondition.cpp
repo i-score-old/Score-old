@@ -379,9 +379,9 @@ TTErr TTTimeCondition::Trigger(const TTValue& inputValue, TTValue& outputValue)
             
             if (inputValue[i].type() == kTypeObject) {
                 
-                TTObjectBasePtr event = inputValue[i];
+                TTObject event = inputValue[i];
                 
-                if (event == TTObjectBasePtr(it->first)) {
+                if (event.instance() == TTObjectBasePtr(it->first)) {
                     timeEventToTrigger.append(TTObjectBasePtr(it->first));
                     found = YES;
                     break;
@@ -399,13 +399,19 @@ TTErr TTTimeCondition::Trigger(const TTValue& inputValue, TTValue& outputValue)
         
         setReady(NO);
         
+        TTObject o;
+        
         // trigger all events of the trigger list
-        for (timeEventToTrigger.begin(); timeEventToTrigger.end(); timeEventToTrigger.next())
-            TTObjectBasePtr(timeEventToTrigger.current()[0])->sendMessage(kTTSym_Trigger);
+        for (timeEventToTrigger.begin(); timeEventToTrigger.end(); timeEventToTrigger.next()) {
+            o = timeEventToTrigger.current()[0];
+            o.send(kTTSym_Trigger);
+        }
         
         // dispose all the other events
-        for (timeEventToDispose.begin(); timeEventToDispose.end(); timeEventToDispose.next())
-            TTObjectBasePtr(timeEventToDispose.current()[0])->sendMessage(kTTSym_Dispose);
+        for (timeEventToDispose.begin(); timeEventToDispose.end(); timeEventToDispose.next()) {
+            o = timeEventToTrigger.current()[0];
+            o.send(kTTSym_Dispose);
+        }
     }
     
     return kTTErrNone;
@@ -436,9 +442,9 @@ TTErr TTTimeCondition::Dispose(const TTValue& inputValue, TTValue& outputValue)
             
             if (inputValue[i].type() == kTypeObject) {
                 
-                TTObjectBasePtr event = inputValue[i];
+                TTObject event = inputValue[i];
                 
-                if (event == TTObjectBasePtr(it->first)) {
+                if (event.instance() == TTObjectBasePtr(it->first)) {
                     timeEventToDispose.append(TTObjectBasePtr(it->first));
                     found = YES;
                     break;
@@ -456,13 +462,19 @@ TTErr TTTimeCondition::Dispose(const TTValue& inputValue, TTValue& outputValue)
         
         setReady(NO);
         
+        TTObject o;
+        
         // trigger all events of the trigger list
-        for (timeEventToTrigger.begin(); timeEventToTrigger.end(); timeEventToTrigger.next())
-            TTObjectBasePtr(timeEventToTrigger.current()[0])->sendMessage(kTTSym_Trigger);
+        for (timeEventToTrigger.begin(); timeEventToTrigger.end(); timeEventToTrigger.next()) {
+            o = timeEventToTrigger.current()[0];
+            o.send(kTTSym_Trigger);
+        }
         
         // dispose all the other events
-        for (timeEventToDispose.begin(); timeEventToDispose.end(); timeEventToDispose.next())
-            TTObjectBasePtr(timeEventToDispose.current()[0])->sendMessage(kTTSym_Dispose);
+        for (timeEventToDispose.begin(); timeEventToDispose.end(); timeEventToDispose.next()) {
+            o = timeEventToTrigger.current()[0];
+            o.send(kTTSym_Dispose);
+        }
     }
     
     return kTTErrNone;
@@ -671,7 +683,7 @@ void TTTimeCondition::addReceiver(TTAddress anAddress)
         mReceivers.append(anAddress, aReceiver);
 
 		// try to get the current value
-        aReceiver->sendMessage(kTTSym_Get);
+        aReceiver.send(kTTSym_Get);
     }
 }
 

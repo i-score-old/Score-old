@@ -356,32 +356,32 @@ TTErr TTTimeProcess::setColor(const TTValue& value)
 
 TTErr TTTimeProcess::getSpeed(TTValue& value)
 {
-    if (mScheduler)
-        return mScheduler->getAttributeValue(kTTSym_speed, value);
+    if (mScheduler.valid())
+        return mScheduler.get(kTTSym_speed, value);
     
     return kTTErrGeneric;
 }
 
 TTErr TTTimeProcess::setSpeed(const TTValue& value)
 {
-    if (mScheduler)
-        return mScheduler->setAttributeValue(kTTSym_speed, value);
+    if (mScheduler.valid())
+        return mScheduler.set(kTTSym_speed, value);
     
     return kTTErrGeneric;
 }
 
 TTErr TTTimeProcess::getPosition(TTValue& value)
 {
-    if (mScheduler)
-        return mScheduler->getAttributeValue("position", value);
+    if (mScheduler.valid())
+        return mScheduler.get("position", value);
     
     return kTTErrGeneric;
 }
 
 TTErr TTTimeProcess::getDate(TTValue& value)
 {
-    if (mScheduler)
-        return mScheduler->getAttributeValue("date", value);
+    if (mScheduler.valid())
+        return mScheduler.get("date", value);
     
     return kTTErrGeneric;
 }

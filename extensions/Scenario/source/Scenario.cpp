@@ -34,10 +34,6 @@ mEditionSolver(NULL),
 #ifndef NO_EXECUTION_GRAPH
 mExecutionGraph(NULL),
 #endif
-mCurrentTimeEvent(NULL),
-mCurrentTimeProcess(NULL),
-mCurrentTimeCondition(NULL),
-mCurrentScenario(NULL),
 mLoading(NO)
 {
     TIME_PLUGIN_INITIALIZE
@@ -502,11 +498,9 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     
     SolverObjectMapIterator itSolver;
     TTValue                 v;
-	
-	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
     
     // When reading a sub scenario
-    if (mCurrentScenario) {
+    if (mCurrentScenario.valid()) {
         
         // if this this the end of a scenario node : forget the sub scenario
         if (aXmlHandler->mXmlNodeName == TTSymbol("Scenario")) {
@@ -632,11 +626,11 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
             
             // Get the date
             if (!aXmlHandler->getXmlAttribute(kTTSym_date, v, NO))
-                getStartEvent()->setAttributeValue(kTTSym_date, v);
+                getStartEvent().set(kTTSym_date, v);
             
             // Get the name
             if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES))
-                getStartEvent()->setAttributeValue(kTTSym_name, v);
+                getStartEvent().set(kTTSym_name, v);
             
             if (!aXmlHandler->mXmlNodeIsEmpty)
                 mCurrentTimeEvent = getStartEvent();
@@ -653,11 +647,11 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
             
             // Get the date
             if (!aXmlHandler->getXmlAttribute(kTTSym_date, v, NO))
-                getEndEvent()->setAttributeValue(kTTSym_date, v);
+                getEndEvent().set(kTTSym_date, v);
             
             // Get the name
             if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES))
-                getEndEvent()->setAttributeValue(kTTSym_name, v);
+                getEndEvent().set(kTTSym_name, v);
             
             if (!aXmlHandler->mXmlNodeIsEmpty)
                 mCurrentTimeEvent = getEndEvent();
@@ -736,7 +730,7 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     if (mCurrentTimeProcess.valid()) {
         
         // if the current time process is a sub sceanrio : don't forget it
-        if (mCurrentTimeProcess->getName() == TTSymbol("Scenario")) {
+        if (mCurrentTimeProcess.name() == TTSymbol("Scenario")) {
             mCurrentScenario = mCurrentTimeProcess;
             
         }
