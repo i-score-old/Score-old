@@ -458,12 +458,12 @@ TTErr TTTimeProcess::Limit(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr TTTimeProcess::Start()
 {
-    return mStartEvent->sendMessage(kTTSym_Happen);
+    return mStartEvent->sendMessage(kTTSym_Trigger);
 }
 
 TTErr TTTimeProcess::End()
 {
-    return mEndEvent->sendMessage(kTTSym_Happen);
+    return mEndEvent->sendMessage(kTTSym_Trigger);
 }
 
 TTErr TTTimeProcess::Play()
@@ -578,6 +578,10 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
                 return kTTErrNone;
             
             // note : don't set start event ready attribute to NO : it is to the container to take this decision
+            
+            // use the specific compiled method of the time process
+            if (!mCompiled)
+                Compile();
             
             // use the specific start process method of the time process
             if (!ProcessStart()) {

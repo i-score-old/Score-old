@@ -224,12 +224,12 @@ private :
     TTErr           Limit(const TTValue& inputValue, TTValue& outputValue);
     
     /** Start the time process
-     this method eases the access of the start event happen message
+     this method eases the access of the start event trigger message
      @return                an error code if the play fails */
     TTErr           Start();
     
     /** End the time process
-     this method eases the access of the end event happen message
+     this method eases the access of the end event trigger message
      @return                an error code if the stop fails */
     TTErr           End();
     
