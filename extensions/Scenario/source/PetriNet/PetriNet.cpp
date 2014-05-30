@@ -93,7 +93,7 @@ bool PetriNet::makeOneStep(unsigned int currentTime)
             } else {
                 PriorityTransitionAction* topAction = getTopActionOnPriorityQueue();
                 
-                if (!topAction->isEnable()) { // CB why disable actions without destructing them ?
+                if (!topAction->isEnable()) { // CB Transition can disable actions sometimes
                     removeTopActionOnPriorityQueue();
                 } else if ((unsigned int) topAction->getDate().getValue() > currentTime) {
                     stop = true; // CB because it's a priority queue, so it is ordered
@@ -124,9 +124,10 @@ bool PetriNet::makeOneStep(unsigned int currentTime)
                         //stop = true;
                     } else { // CB if type END, actually max duration for the interval
                         if (topTransition->areAllInGoingArcsActive()) {
-                            topTransition->crossTransition(true, currentTime - topAction->getDate().getValue()); // CB force the transition
+                            bool activate = (topAction->getType() == END_GO); // CB test the default comportment of the transition
+                            topTransition->crossTransition(true, activate ? currentTime - topAction->getDate().getValue() : -1); // CB force the transition
                             removeTopActionOnPriorityQueue();
-                        } else { // CB should be part of debug, like avery IncoherentStateException actually
+                        } else { // CB should be part of debug, like every IncoherentStateException actually
                             removeTopActionOnPriorityQueue();
                             throw IncoherentStateException();
                         }

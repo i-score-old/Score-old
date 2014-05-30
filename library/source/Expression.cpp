@@ -16,17 +16,17 @@
 #include "Expression.h"
 
 
-TTAddress& Expression::getAddress()
+const TTAddress& Expression::getAddress() const
 {
     return mAddress;
 }
 
-TTSymbol& Expression::getOperator()
+const TTSymbol& Expression::getOperator() const
 {
     return mOperator;
 }
 
-TTValue& Expression::getValue()
+const TTValue& Expression::getValue() const
 {
     return mValue;
 }

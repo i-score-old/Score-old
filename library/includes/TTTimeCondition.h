@@ -22,11 +22,19 @@
 #include "Expression.h"
 #include "TTTimeEvent.h"
 
-/** Define an unordered map to store and retreive an expression relative to a TTTimeEventPtr */
+/** Define a struct containing an expression and a boolean, as the expression to trigger and the default comportment */
+struct Comportment {
+    Comportment() : trigger(), dflt(true) {}
+
+    Expression trigger;
+    TTBoolean dflt;
+};
+
+/** Define an unordered map to store and retreive a comportment relative to a TTTimeEventPtr */
 #ifdef TT_PLATFORM_WIN
     #include <hash_map>
     using namespace stdext;	// Visual Studio 2008 puts the hash_map in this namespace
-    typedef hash_map<TTTimeEventPtr,Expression>    TTCaseMap;
+    typedef hash_map<TTTimeEventPtr,Comportment>    TTCaseMap;
 #else
 //	#ifdef TT_PLATFORM_LINUX
 //  at least for GCC 4.6 on the BeagleBoard, the unordered map is standard
@@ -35,7 +43,7 @@
 //		#include "boost/unordered_map.hpp"
 //		using namespace boost;
 //	#endif
-    typedef std::unordered_map<TTTimeEventPtr,Expression>	TTCaseMap;
+    typedef std::unordered_map<TTTimeEventPtr,Comportment>	TTCaseMap;
 #endif
 
 typedef	TTCaseMap*                  TTCaseMapPtr;
@@ -53,24 +61,25 @@ class TTSCORE_EXPORT TTTimeCondition : public TTObjectBase {
     TTCLASS_SETUP(TTTimeCondition)
     
     friend class TTTimeEvent;
-    
+
     TTObjectBasePtr                 mContainer;                     ///< the container which handles the condition
     
 protected :
     
     TTSymbol                        mName;                          ///< the name of the condition
     
-    TTBoolean                       mReady;                         ///< is the condition ready to be tested ?
+    TTBoolean                       mActive;                        ///< enable/disable the condition (if it is ready only)
+    
+    TTBoolean                       mReady;                         ///< is the condition ready to be activated ?
     
     TTHash                          mReceivers;                     ///< a table of receivers stored by address
-    TTCaseMap                       mCases;                         ///< a map linking an event to its expression
- 
+    TTCaseMap                       mCases;                         ///< a map linking an event to its comportment
+
+    Expression                      mDispose;                       ///< the expression to dispose the condition
+
+    TTUInt8                         mPendingCounter;                ///< counting the number of unready events
+
 private :
-    
-    /** Enable or disable the time condition to allow it to be tested
-     @param	value           a boolean
-     @return                kTTErrNone */
-    TTErr           setReady(const TTValue& value);
     
     /** get all expressions symbol associated to each event
      @param	value           a value containing one expression per event
@@ -82,8 +91,23 @@ private :
      @return                kTTErrNone */
     TTErr           getEvents(TTValue& value);
     
+    /** Set the active state
+     @param	value           a new active state
+     @return                kTTErrNone */
+    TTErr           setActive(const TTValue& value);
+    
+    /**  Get the dispose expression
+     @param value           an expression symbol
+     @return                kTTErrNone */
+    TTErr           getDisposeExpression(TTValue& value);
+    
+    /** Set the dispose expression
+     @param	value           the expression
+     @return                kTTErrNone */
+    TTErr           setDisposeExpression(const TTValue& value);
+    
     /**  Add an event to the condition
-     @param	inputValue      an event and optionnally the expression associated
+     @param	inputValue      an event and optionnally the comportment associated
      @param	outputValue     nothing
      @return                an error code if the operation fails */
     TTErr           EventAdd(const TTValue& inputValue, TTValue& outputValue);
@@ -100,17 +124,41 @@ private :
      @return                an error code if the operation fails */
     TTErr           EventExpression(const TTValue& inputValue, TTValue& outputValue);
 
-    /**  Find an expression associated to an event
+    /**  Edit the default comportment associated to an event
+     @param	inputValue      an event and a boolean
+     @param	outputValue     nothing
+     @return                an error code if the operation fails */
+    TTErr           EventDefault(const TTValue& inputValue, TTValue& outputValue);
+
+    /**  Find the expression associated to an event
      @param	inputValue      an event
      @param	outputValue     an expression symbol
      @return                an error code if the operation fails */
     TTErr           ExpressionFind(const TTValue& inputValue, TTValue& outputValue);
-    
+
+    /**  Find the default comportment associated to an event
+     @param	inputValue      an event
+     @param	outputValue     an expression symbol
+     @return                an error code if the operation fails */
+    TTErr           DefaultFind(const TTValue& inputValue, TTValue& outputValue);
+
     /** Test an expression
      @param inputvalue      an expression value or symbol
      @param outputvalue     the result as a boolean
      @return                an error code if the operation fails */
     TTErr           ExpressionTest(const TTValue& inputValue, TTValue& outputValue);
+    
+    /**  Tell the events to trigger. All the other events will be disposed
+     @param	inputValue      events to trigger (if no events are passed all the events will be triggered)
+     @param	outputValue     nothing
+     @return                an error code if the operation fails */
+    TTErr           Trigger(const TTValue& inputValue, TTValue& outputValue);
+    
+    /**  Tell the events to dispose. All the other events will be triggered
+     @param	inputValue      events to dispose (if no events are passed all the events will be disposed)
+     @param	outputValue     nothing
+     @return                an error code if the operation fails */
+    TTErr           Dispose(const TTValue& inputValue, TTValue& outputValue);
     
     /**  needed to be handled by a TTXmlHandler
      @param	inputValue      ..
@@ -131,14 +179,21 @@ private :
      @return                kTTErrNone */
     TTErr           EventStatusChanged(const TTValue& inputValue, TTValue& outputValue);
     
-    /**  Helper functions to manage receivers : add a receiver for to the address if no receiver already exists
+    /** Helper function to set the ready attribute and notify
+     @param	newReady        a boolean
+     @return                kTTErrNone */
+    TTErr           setReady(TTBoolean newReady);
+    
+    /** Helper function to manage receivers : add a receiver for to the address if no receiver already exists
      @param	anAddress      an address to observe */
     void            addReceiver(TTAddress anAddress);
     
-    /**  Helper functions to manage receivers : clean the receiver associated to the address if no other cases needs the address
-     @param	anAddress      an observed address */
-    void            cleanReceiver(TTAddress anAddress);
-    
+    /** Helper function to manage receivers : clear the receivers */
+    void            deleteReceivers();
+
+    /** Helper function to apply the default comportment of each event */
+    void            applyDefaults();
+
     friend TTErr TTSCORE_EXPORT TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data);
     
 };

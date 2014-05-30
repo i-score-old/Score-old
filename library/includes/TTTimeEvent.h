@@ -20,16 +20,6 @@
 
 #include "TTScore.h"
 
-/** \ingroup enums
- Event status flag
- */
-enum TTTimeEventStatusFlag {
-    kEventWaiting = 0,					///< this flag means the event is not ready to happened
-	kEventPending = 1,					///< this flag means the event is conditionned and ready to happened
-	kEventHappened = 2,                ///< this flag means the event have already happened
-	kEventDisposed = 3					///< this flag means  the event have been disposed
-};
-
 /**	a class to define an event
  
  The TTTimeEvent class allows to ...
@@ -53,7 +43,7 @@ protected :
     
     TTSymbol                        mStatus;                        ///< the status of the event : kTTSym_eventWaiting, kTTSym_eventPending, kTTSym_eventHappened, kTTSym_eventdisposed.
     
-    TTBoolean                       mMute;                          ///< is the time event muted ?
+    TTBoolean                       mMute;                          ///< to not push the state
     
     TTObjectBasePtr                 mState;                         ///< a state handled by the event
     
@@ -85,7 +75,7 @@ private :
     TTErr           Happen();
     
     /** Make the event not happen
-     @return                an error code returned by the happen method */
+     @return                an error code returned by the dispose method */
     TTErr           Dispose();
     
     /**  needed to be handled by a TTXmlHandler
@@ -96,21 +86,21 @@ private :
 	TTErr           ReadFromXml(const TTValue& inputValue, TTValue& outputValue);
 
     /** Get a line value of the state for an address
-        this method eases the access of one state value
+     @details this method eases the access of one state value
      @param	inputValue      an address
      @param	outputValue     the value of the state for an address
      @return                kTTErrNone */
     TTErr           StateAddressGetValue(const TTValue& inputValue, TTValue& outputValue);
     
     /** Set a line value of the state for an address
-     this method eases the access of one state value
+     @details this method eases the access of one state value
      @param	inputValue      an address, value pointer
      @param	outputValue     the value of the state for an address
      @return                kTTErrNone */
     TTErr           StateAddressSetValue(const TTValue& inputValue, TTValue& outputValue);
     
     /** Remove a line to the state for an address
-     this method eases the access of one state value
+     @details this method eases the access of one state value
      @param	inputValue      an address
      @param	outputValue     nothing
      @return                kTTErrNone */

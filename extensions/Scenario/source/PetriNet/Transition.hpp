@@ -134,7 +134,7 @@ public:
 	 * \param recalculateArcTime : True if the arc time must be recalculate. False if we want to use
 	 * 							   the time previously stored into this arc.
 	 */
-	void setArcAsActive(Arc* arc, unsigned int timeOffset, bool recalculateArcTime);
+    void setArcAsActive(Arc* arc, int timeOffset, bool recalculateArcTime);
 
 	/*!
 	 * Sets the arc as inactive.

@@ -23,15 +23,25 @@
 
 TT_BASE_OBJECT_CONSTRUCTOR,
 mContainer(NULL),
-mReady(YES)
+mActive(NO),
+mReady(NO),
+mPendingCounter(0)
 {
     TT_ASSERT("Correct number of args to create TTTimeCondition", arguments.size() == 1);
     
     if (arguments.size() == 1)
         mContainer = arguments[0];
+    
+    addAttribute(Container, kTypeObject);
 
     addAttribute(Name, kTypeSymbol);
-    addAttributeWithSetter(Ready, kTypeBoolean);
+    
+    addAttributeWithSetter(Active, kTypeBoolean);
+    
+    addAttribute(Ready, kTypeBoolean);
+    addAttributeProperty(Ready, readOnly, YES);
+    
+    addAttributeWithGetterAndSetter(DisposeExpression, kTypeSymbol);
     
     registerAttribute(TTSymbol("expressions"), kTypeLocalValue, NULL, (TTGetterMethod)& TTTimeCondition::getExpressions, NULL);
     registerAttribute(TTSymbol("events"), kTypeLocalValue, NULL, (TTGetterMethod)& TTTimeCondition::getEvents, NULL);
@@ -39,8 +49,12 @@ mReady(YES)
     addMessageWithArguments(EventAdd);
     addMessageWithArguments(EventRemove);
     addMessageWithArguments(EventExpression);
+    addMessageWithArguments(EventDefault);
     addMessageWithArguments(ExpressionFind);
+    addMessageWithArguments(DefaultFind);
     addMessageWithArguments(ExpressionTest);
+    addMessageWithArguments(Trigger);
+    addMessageWithArguments(Dispose);
     
 	// needed to be handled by a TTXmlHandler
 	addMessageWithArguments(WriteAsXml);
@@ -58,9 +72,10 @@ mReady(YES)
 
 TTTimeCondition::~TTTimeCondition()
 {
-    TTValue         v, keys;
-    TTSymbol        key;
-    TTObjectBasePtr aReceiver;
+    TTValue v;
+    
+    // disable condition
+    mActive = NO;
     
     // update each event condition
     v = TTObjectBasePtr(NULL);
@@ -68,36 +83,58 @@ TTTimeCondition::~TTTimeCondition()
         TTObjectBasePtr(it->first)->setAttributeValue(kTTSym_condition, v);
     
     // destroy all receivers;
-    mReceivers.getKeys(keys);
-    for (TTUInt8 i = 0; i < keys.size(); i++) {
-        
-        key = keys[i];
-        mReceivers.lookup(key, v);
-        
-        aReceiver = v[0];
-        TTObjectBaseRelease(&aReceiver);
-    }
+    deleteReceivers();
 }
 
-TTErr TTTimeCondition::setReady(const TTValue& value)
+TTErr TTTimeCondition::setActive(const TTValue& value)
 {
-    // set the ready value
-    mReady = value[0];
+    TTBoolean newActive = value[0];
     
-    // notify each observers
-    sendNotification(kTTSym_ConditionReadyChanged, mReady);
+    // filter repetitions
+    if (newActive != mActive) {
+        
+        // if the condition is ready to be active
+        if (newActive && mReady) {
+            
+            mActive = YES;
+            
+            // create the receivers
+            TTCaseMapIterator it;
+            
+            // for each trigger case
+            for(it = mCases.begin() ; it != mCases.end() ; it++)
+                addReceiver(it->second.trigger.getAddress());
+            
+            // for dispose case
+            addReceiver(mDispose.getAddress());
+
+            return kTTErrNone;
+        }
+        
+        if (!newActive) {
+            
+            mActive = NO;
+         
+            deleteReceivers();
+            
+            return kTTErrNone;
+        }
+    }
     
-    return kTTErrNone;
+    return kTTErrGeneric;
 }
 
 TTErr TTTimeCondition::getExpressions(TTValue& value)
 {
     value.clear();
 
-    // for each event, append the associated expression to the result
+    // for each event, append the associated expressions to the result
     for (TTCaseMapIterator it = mCases.begin() ; it != mCases.end() ; it++) {
-        value.append(it->second);
+        value.append(it->second.trigger);
     }
+
+    // append the dispose expression
+    value.append(mDispose);
     
     return kTTErrNone;
 }
@@ -117,10 +154,10 @@ TTErr TTTimeCondition::getEvents(TTValue& value)
 TTErr TTTimeCondition::EventAdd(const TTValue& inputValue, TTValue& outputValue)
 {
     TTTimeEventPtr  event = NULL;
-    Expression      anExpression;
+    Comportment     aComportment;
     TTValue         v;
 
-    switch (inputValue.size()) {
+    switch (inputValue.size()) {/* TODO : don't know how to pass Comportment as TTValue
             
         // if we have two arguments
         case 2 :
@@ -133,7 +170,11 @@ TTErr TTTimeCondition::EventAdd(const TTValue& inputValue, TTValue& outputValue)
             
             // if it's a symbol : convert it to an expression
             ExpressionParseFromValue(inputValue[1], anExpression);
-            
+
+            // add receivers for the address if needed
+            if (anExpression.getAddress() != kTTAdrsEmpty)
+                addReceiver(anExpression.getAddress());
+*/
         // if we have one or two arguments
         case 1 :
             
@@ -147,11 +188,13 @@ TTErr TTTimeCondition::EventAdd(const TTValue& inputValue, TTValue& outputValue)
             event = TTTimeEventPtr(TTObjectBasePtr(inputValue[0]));
             
             // insert the event with an expression
-            mCases.insert({{event, anExpression}});
-            
-            // add receivers for the address if needed
-            if (anExpression.getAddress() != kTTAdrsEmpty)
-                addReceiver(anExpression.getAddress());
+            mCases.insert({{event, aComportment}});
+
+            // increment the pending counter
+            mPendingCounter++;
+
+            // set the event to waiting
+            event->setAttributeValue(kTTSym_status, kTTSym_eventWaiting); // CB TODO : Why ?
             
             // tell the event it is conditioned
             v = TTObjectBasePtr(this);
@@ -182,15 +225,13 @@ TTErr TTTimeCondition::EventRemove(const TTValue& inputValue, TTValue& outputVal
     // if the event exists
     if (it != mCases.end()) {
         
-        Expression  anExpression = it->second;
         TTValue     v;
         
         // remove the case
         mCases.erase(it);
-        
-        // clean receivers
-        if (anExpression.getAddress() != kTTAdrsEmpty)
-            cleanReceiver(anExpression.getAddress());
+
+        // decrement the unready counter
+        mPendingCounter--;
         
         // tell the event it is not conditioned anymore
         v = TTObjectBasePtr(NULL);
@@ -214,28 +255,32 @@ TTErr TTTimeCondition::EventExpression(const TTValue& inputValue, TTValue& outpu
     if (it != mCases.end()) {
         
         // replace the old expression by the new one
-        Expression  oldExpression = it->second;
-        TTAddress   oldAddress = oldExpression.getAddress();
-        Expression  newExpression;
+        Expression newExpression;
         
         ExpressionParseFromValue(inputValue[1], newExpression);
         
-        TTAddress   newAddress = newExpression.getAddress();
-        mCases[it->first] = newExpression;
-        
-        // check if receivers need to be updated
-        if (oldAddress != newAddress) {
-            
-            if (oldAddress != kTTAdrsEmpty)
-                cleanReceiver(oldAddress);
-        
-            if (newAddress != kTTAdrsEmpty)
-                addReceiver(newAddress);
-        }
+        mCases[it->first].trigger = newExpression;
 
         return kTTErrNone;
     }
     
+    return kTTErrValueNotFound;
+}
+
+TTErr TTTimeCondition::EventDefault(const TTValue &inputValue, TTValue &outputValue)
+{
+    TTTimeEventPtr    event = TTTimeEventPtr(TTObjectBasePtr(inputValue[0]));
+    TTCaseMapIterator it = mCases.find(event);
+
+    // if the event exists
+    if (it != mCases.end()) {
+
+        // change its default comportment
+        mCases[it->first].dflt = TTBoolean(inputValue[1]);
+
+        return kTTErrNone;
+    }
+
     return kTTErrValueNotFound;
 }
 
@@ -247,11 +292,42 @@ TTErr TTTimeCondition::ExpressionFind(const TTValue& inputValue, TTValue& output
     // if the event exists
     if (it != mCases.end()) {
         
-        outputValue = it->second;
+        outputValue = it->second.trigger;
         return kTTErrNone;
     }
     
     return kTTErrValueNotFound;
+}
+
+TTErr TTTimeCondition::DefaultFind(const TTValue& inputValue, TTValue& outputValue)
+{
+    TTTimeEventPtr      event = TTTimeEventPtr(TTObjectBasePtr(inputValue[0]));
+    TTCaseMapIterator   it = mCases.find(event);
+
+    // if the event exists
+    if (it != mCases.end()) {
+
+        outputValue = it->second.dflt;
+        return kTTErrNone;
+    }
+
+    return kTTErrValueNotFound;
+}
+
+TTErr TTTimeCondition::getDisposeExpression(TTValue &value)
+{
+    value.clear();
+
+    value.append(mDispose);
+
+    return kTTErrNone;
+}
+
+TTErr TTTimeCondition::setDisposeExpression(const TTValue &value)
+{
+    ExpressionParseFromValue(value, mDispose);
+
+    return kTTErrNone;
 }
 
 TTErr TTTimeCondition::ExpressionTest(const TTValue& inputValue, TTValue& outputValue)
@@ -275,6 +351,120 @@ TTErr TTTimeCondition::ExpressionTest(const TTValue& inputValue, TTValue& output
     return kTTErrGeneric;
 }
 
+TTErr TTTimeCondition::Trigger(const TTValue& inputValue, TTValue& outputValue)
+{
+    // only if the condition is ready
+    if (!mReady)
+        return kTTErrNone;
+    
+    TTList  timeEventToTrigger;
+    TTList  timeEventToDispose;
+    
+    // for each case
+    for (TTCaseMapIterator it = mCases.begin(); it != mCases.end(); it++) {
+        
+        // if no event are passed : trigger all the events
+        if (inputValue.size() == 0) {
+            timeEventToTrigger.append(TTObjectBasePtr(it->first));
+            continue;
+        }
+        
+        TTBoolean found = NO;
+        
+        // check if the event is part of the inputValue to prepare it to be triggered
+        for (TTUInt32 i = 0; i < inputValue.size(); i++) {
+            
+            if (inputValue[i].type() == kTypeObject) {
+                
+                TTObjectBasePtr event = inputValue[i];
+                
+                if (event == TTObjectBasePtr(it->first)) {
+                    timeEventToTrigger.append(TTObjectBasePtr(it->first));
+                    found = YES;
+                    break;
+                }
+            }
+        }
+        
+        // else prepare it to be disposed
+        if (!found)
+             timeEventToDispose.append(TTObjectBasePtr(it->first));
+    }
+    
+    // if at least one event is in the trigger list
+    if (!timeEventToTrigger.isEmpty()) {
+        
+        setReady(NO);
+        
+        // trigger all events of the trigger list
+        for (timeEventToTrigger.begin(); timeEventToTrigger.end(); timeEventToTrigger.next())
+            TTObjectBasePtr(timeEventToTrigger.current()[0])->sendMessage(kTTSym_Trigger);
+        
+        // dispose all the other events
+        for (timeEventToDispose.begin(); timeEventToDispose.end(); timeEventToDispose.next())
+            TTObjectBasePtr(timeEventToDispose.current()[0])->sendMessage(kTTSym_Dispose);
+    }
+    
+    return kTTErrNone;
+}
+
+TTErr TTTimeCondition::Dispose(const TTValue& inputValue, TTValue& outputValue)
+{
+    // only if the condition is ready
+    if (!mReady)
+        return kTTErrNone;
+    
+    TTList  timeEventToTrigger;
+    TTList  timeEventToDispose;
+    
+    // for each case
+    for (TTCaseMapIterator it = mCases.begin(); it != mCases.end(); it++) {
+        
+        // if no event are passed : dispose all the events
+        if (inputValue.size() == 0) {
+            timeEventToDispose.append(TTObjectBasePtr(it->first));
+            continue;
+        }
+        
+        TTBoolean found = NO;
+        
+        // check if the event is part of the inputValue to prepare it to be disposed
+        for (TTUInt32 i = 0; i < inputValue.size(); i++) {
+            
+            if (inputValue[i].type() == kTypeObject) {
+                
+                TTObjectBasePtr event = inputValue[i];
+                
+                if (event == TTObjectBasePtr(it->first)) {
+                    timeEventToDispose.append(TTObjectBasePtr(it->first));
+                    found = YES;
+                    break;
+                }
+            }
+        }
+        
+        // else prepare it to be triggered
+        if (!found)
+            timeEventToTrigger.append(TTObjectBasePtr(it->first));
+    }
+    
+    // if at least one event is in the trigger list
+    if (!timeEventToTrigger.isEmpty()) {
+        
+        setReady(NO);
+        
+        // trigger all events of the trigger list
+        for (timeEventToTrigger.begin(); timeEventToTrigger.end(); timeEventToTrigger.next())
+            TTObjectBasePtr(timeEventToTrigger.current()[0])->sendMessage(kTTSym_Trigger);
+        
+        // dispose all the other events
+        for (timeEventToDispose.begin(); timeEventToDispose.end(); timeEventToDispose.next())
+            TTObjectBasePtr(timeEventToDispose.current()[0])->sendMessage(kTTSym_Dispose);
+    }
+    
+    return kTTErrNone;
+}
+
 TTErr TTTimeCondition::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 {
 	TTXmlHandlerPtr	aXmlHandler = NULL;
@@ -287,11 +477,14 @@ TTErr TTTimeCondition::WriteAsXml(const TTValue& inputValue, TTValue& outputValu
     
     // Write the name
     xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST mName.c_str());
+
+    // Write the dispose expression
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "dispose", BAD_CAST mDispose.c_str());
     
     // Write each case
     for (it = mCases.begin(); it != mCases.end(); it++) {
         
-        Expression anExpression = it->second;
+        Comportment aComportment = it->second;
         
         event = it->first;
         
@@ -303,9 +496,10 @@ TTErr TTTimeCondition::WriteAsXml(const TTValue& inputValue, TTValue& outputValu
         name = v[0];
         xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "event", BAD_CAST name.c_str());
         
-        // Write the expression
-        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "expression", BAD_CAST anExpression.c_str());
-        
+        // Write the comportment
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "trigger", BAD_CAST aComportment.trigger.c_str());
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "default", BAD_CAST (aComportment.dflt ? "1" : "0"));
+
         // Close the case node
         xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
     }
@@ -334,6 +528,18 @@ TTErr TTTimeCondition::ReadFromXml(const TTValue& inputValue, TTValue& outputVal
                 }
             }
         }
+
+        // Get the dispose expression
+        if (!aXmlHandler->getXmlAttribute(TTSymbol("dispose"), v, YES)) {
+
+            if (v.size() == 1) {
+
+                if (v[0].type() == kTypeSymbol) {
+
+                    ExpressionParseFromValue(v, mDispose);
+                }
+            }
+        }
     }
     
     // Case node
@@ -345,11 +551,17 @@ TTErr TTTimeCondition::ReadFromXml(const TTValue& inputValue, TTValue& outputVal
             // Find the event using his name from our container
             if (!mContainer->sendMessage(TTSymbol("TimeEventFind"), v, out)) {
                 
-                // get the expression
-                if (!aXmlHandler->getXmlAttribute(kTTSym_expression, v, YES)) {
-                    
+                EventAdd(out, v); // TODO : better using the second argument
+
+                // get the expressions
+                if (!aXmlHandler->getXmlAttribute(TTSymbol("trigger"), v, YES)) {
                     out.append(v[0]);
-                    return EventAdd(out, v);
+                    EventExpression(out, v);
+                    out.pop_back();
+                }
+                if (!aXmlHandler->getXmlAttribute(TTSymbol("default"), v, NO)) {
+                    out.append(v[0] == 1);
+                    EventDefault(out, v);
                 }
             }
         }
@@ -383,31 +595,23 @@ TTErr TTTimeCondition::EventDateChanged(const TTValue& inputValue, TTValue& outp
 
 TTErr TTTimeCondition::EventStatusChanged(const TTValue& inputValue, TTValue& outputValue)
 {
-    TT_ASSERT("TTTimeCondition::EventStatusChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
+    TT_ASSERT("TTTimeCondition::EventStatusChanged : inputValue is correct", inputValue.size() == 3 && inputValue[0].type() == kTypeObject);
     
     TTTimeEventPtr          event = TTTimeEventPtr(TTObjectBasePtr(inputValue[0]));
     TTCaseMapIterator       it = mCases.find(event);
-    TTSymbol                status;
+    TTSymbol                newStatus = inputValue[1], oldStatus = inputValue[2];
     TTValue                 v;
+
+    TT_ASSERT("TTTimeCondition::EventStatusChanged : status effectively changed", newStatus != oldStatus);
     
     // if the event exists
     if (it != mCases.end()) {
         
-        // get the status
-        event->getAttributeValue(kTTSym_status, v);
-        status = v[0];
-        
-        if (status == kTTSym_eventWaiting) {
-            ;
-        }
-        else if (status == kTTSym_eventPending) {
-            ;
-        }
-        else if (status == kTTSym_eventHappened) {
-            ;
-        }
-        else if (status == kTTSym_eventDisposed) {
-            ;
+        if (newStatus == kTTSym_eventPending && --mPendingCounter == 0) {
+            setReady(YES);
+        } else if (oldStatus == kTTSym_eventPending && mPendingCounter++ == 0 && mReady == YES) {
+            setReady(NO);
+            applyDefaults();
         }
         
         return kTTErrNone;
@@ -417,36 +621,38 @@ TTErr TTTimeCondition::EventStatusChanged(const TTValue& inputValue, TTValue& ou
     return kTTErrGeneric;
 }
 
-void TTTimeCondition::cleanReceiver(TTAddress anAddress) // TODO : un compteur de réérence sur les receivers ?
+TTErr TTTimeCondition::setReady(TTBoolean newReady)
 {
-    TTBoolean found = false;
-    
-    // look for a receiver binding on the address
-    for (TTCaseMapIterator it = mCases.begin(); it != mCases.end(); it++) {
+    // filter repetitions
+    if (newReady != mReady) {
         
-        Expression anExpression = it->second;
+        // set the ready value
+        mReady = newReady;
         
-        if (anExpression.getAddress() == anAddress) {
-            
-            found = true;
-            break;
-        }
+        // notify each observers
+        sendNotification(kTTSym_ConditionReadyChanged, mReady);
     }
     
-    // remove the receiver for this address
-    if (!found) {
-        
-        TTObjectBasePtr aReceiver;
-        TTValue         v;
-        
-        if (!mReceivers.lookup(anAddress, v)) {
-            
-            aReceiver = v[0];
-            TTObjectBaseRelease(&aReceiver);
-            
-            mReceivers.remove(anAddress);
-        }
-    }
+    return kTTErrGeneric;
+}
+
+void TTTimeCondition::deleteReceivers()
+{
+  TTValue          v, keys;
+  TTSymbol         key;
+  TTObjectBasePtr  aReceiver;
+
+  mReceivers.getKeys(keys); // CB TODO : if possible, more efficient to run through the table than through the keys
+  for (TTUInt8 i = 0; i < keys.size(); i++) {
+
+      key = keys[i];
+      mReceivers.lookup(key, v);
+
+      aReceiver = v[0];
+      TTObjectBaseRelease(&aReceiver);
+  }
+    
+  mReceivers.clear();
 }
 
 void TTTimeCondition::addReceiver(TTAddress anAddress)
@@ -457,7 +663,7 @@ void TTTimeCondition::addReceiver(TTAddress anAddress)
     TTValue         v, none;
     
     // if there is no receiver for the expression address
-    if (mReceivers.lookup(anAddress, v)) {
+    if (anAddress != kTTAdrsEmpty && mReceivers.lookup(anAddress, v)) {
         
         // No callback for the address
         v = TTValue((TTObjectBasePtr)NULL);
@@ -482,7 +688,22 @@ void TTTimeCondition::addReceiver(TTAddress anAddress)
         
         v = TTObjectBasePtr(aReceiver);
         mReceivers.append(anAddress, v);
+        
+        // try to get the current value
+         aReceiver->sendMessage(kTTSym_Get);
     }
+}
+
+void TTTimeCondition::applyDefaults()
+{
+  TTValue v;
+
+  for (TTCaseMapIterator it = mCases.begin() ; it != mCases.end() ; it++) {
+      it->first->getAttributeValue(kTTSym_status, v);
+      if (v[0] != kTTSym_eventDisposed && v[0] != kTTSym_eventHappened) {
+          it->first->sendMessage(it->second.dflt?kTTSym_Trigger:kTTSym_Dispose);
+      }
+  }
 }
 
 #if 0
@@ -495,48 +716,65 @@ TTErr TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data)
     TTValuePtr          b;
     TTTimeConditionPtr  aTimeCondition;
     TTAddress           anAddress;
-    Expression          anExpression;
+    Expression          triggerExp;
     TTList              timeEventToTrigger;
     TTList              timeEventToDispose;
+    TTValue             v;
 	
 	// unpack baton (condition, address)
 	b = (TTValuePtr)baton;
 	aTimeCondition = TTTimeConditionPtr(TTObjectBasePtr((*b)[0]));
+
+    // only if the condition is ready
+    if (!aTimeCondition->mReady)
+        return kTTErrNone;
+
     anAddress = (*b)[1];
-    
-    // for each event's expression matching the incoming address
-    for (TTCaseMapIterator it = aTimeCondition->mCases.begin(); it != aTimeCondition->mCases.end(); it++) {
+
+    // if the dispose expression is true
+    if (anAddress == aTimeCondition->mDispose.getAddress() && aTimeCondition->mDispose.evaluate(data)) {
+
+        aTimeCondition->setReady(NO);
+
+        // dispose every event
+        aTimeCondition->getEvents(v);
+        for (TTElementIter it = v.begin() ; it != v.end() ; it++) {
+            TTObjectBasePtr(*it)->sendMessage(kTTSym_Dispose);
+        }
+
+    // if didn't dispose
+    } else {
+
+        // for each event's expressions matching the incoming address
+        for (TTCaseMapIterator it = aTimeCondition->mCases.begin(); it != aTimeCondition->mCases.end(); it++) {
         
-        anExpression = it->second;
-        
-        // if the address is equal to the event expression address
-        if (anAddress == anExpression.getAddress()) {
-            
-            // is the test of the expression passes ?
-            if (anExpression.evaluate(data))
-                
+            triggerExp = it->second.trigger;
+
+            // if the test of the expression passes
+            if (anAddress == triggerExp.getAddress() && triggerExp.evaluate(data)) {
+
                 // append the event to the trigger list
                 timeEventToTrigger.append(TTObjectBasePtr(it->first));
-            else
-                
+            } else {
+
                 // append the event to the dispose list
                 timeEventToDispose.append(TTObjectBasePtr(it->first));
+            }
         }
-    }
-    
-    // if at least one event is in the trigger list
-    if (!timeEventToTrigger.isEmpty()) {
-        
-        // trigger all events of the trigger list
-        for (timeEventToTrigger.begin(); timeEventToTrigger.end(); timeEventToTrigger.next())
-            TTObjectBasePtr(timeEventToTrigger.current()[0])->sendMessage(kTTSym_Trigger);
-        
-        // dispose all events of the dispose list
-        for (timeEventToDispose.begin(); timeEventToDispose.end(); timeEventToDispose.next())
-            TTObjectBasePtr(timeEventToDispose.current()[0])->sendMessage(kTTSym_Trigger);
-        
-        aTimeCondition->mReady = NO;
-        aTimeCondition->sendNotification(kTTSym_ConditionReadyChanged, aTimeCondition->mReady);
+
+        // if at least one event is in the trigger list
+        if (!timeEventToTrigger.isEmpty()) {
+
+            aTimeCondition->setReady(NO);
+
+            // trigger all events of the trigger list
+            for (timeEventToTrigger.begin(); timeEventToTrigger.end(); timeEventToTrigger.next())
+              TTObjectBasePtr(timeEventToTrigger.current()[0])->sendMessage(kTTSym_Trigger);
+
+            // dispose all the other events
+            for (timeEventToDispose.begin(); timeEventToDispose.end(); timeEventToDispose.next())
+              TTObjectBasePtr(timeEventToDispose.current()[0])->sendMessage(kTTSym_Dispose);
+        }
     }
 
     return kTTErrNone;

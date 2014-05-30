@@ -45,6 +45,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 #include "PetriNet.hpp"
+#include "TTTimeEvent.h"
+#include "TTTimeCondition.h"
 
 #include <set>
 
@@ -53,7 +55,7 @@ using namespace std;
 
 Transition::Transition(PetriNet* petriNet)
 :PetriNetNode(petriNet), m_activeArcsBitArray(NULL), m_startDate(MINUS_INFINITY),
-m_endDate(PLUS_INFINITY), m_startAction(NULL), m_endAction(NULL) // TODO : initialisation to NULL is implicit
+m_endDate(PLUS_INFINITY), m_startAction(NULL), m_endAction(NULL)
 {
 	m_events.push_back(STATIC_EVENT);
 	m_mustWaitThePetriNetToEnd = false;
@@ -185,13 +187,25 @@ void Transition::setArcAsInactiveByNumber(int arcNumber)
 	m_activeArcsBitArray->setToZero(arcNumber);
 }
 
-void Transition::setArcAsActive(Arc* arc, unsigned int timeOffset, bool recalculateArcTime)
+void Transition::setArcAsActive(Arc* arc, int timeOffset, bool recalculateArcTime)
 {
 	setArcAsActiveByNumber(arc->getNumber());
 
 	unsigned int currentTime = getPetriNet()->getCurrentTimeInMs();
 	ExtendedInt startDate;
 	ExtendedInt endDate;
+
+    if (timeOffset == -1) { // inactive token
+        if (m_endAction != NULL) {
+            m_endAction->disable();
+        }
+
+        m_endAction = new PriorityTransitionAction(this, END_DEACTIVATE, getPetriNet()->getCurrentTimeInMs() - 1);
+
+        getPetriNet()->addActionToPriorityQueue(m_endAction);
+
+        return;
+    }
 
 	if (recalculateArcTime) {
 		startDate = arc->getRelativeMinValue() - timeOffset + currentTime;
@@ -207,14 +221,22 @@ void Transition::setArcAsActive(Arc* arc, unsigned int timeOffset, bool recalcul
 		m_startDate = startDate;
 	}
 
-	if (endDate < m_endDate) {
+    if (endDate < m_endDate) { // if passed validity limit
 		m_endDate = endDate;
 
 		if (m_endAction != NULL) {
 			m_endAction->disable();
 		}
 
-		m_endAction = new PriorityTransitionAction(this, END, m_endDate);
+		// CB Getting the default comportment from the condition
+		TTValue v;
+		TTTimeEventPtr event = static_cast<TTTimeEventPtr>(m_events.back());
+		event->getAttributeValue(kTTSym_condition, v);
+		TTTimeConditionPtr condition = static_cast<TTTimeConditionPtr>(TTObjectBasePtr(v[0]));
+		condition->sendMessage("DefaultFind", event, v);
+		bool dflt = v[0];
+
+		m_endAction = new PriorityTransitionAction(this, dflt?END_GO:END_DEACTIVATE, m_endDate);
 
 		getPetriNet()->addActionToPriorityQueue(m_endAction);
 	}
@@ -294,6 +316,13 @@ void Transition::crossTransition(bool mustChangeTokenValue, int newTokenValue)
 		throw IncoherentStateException();
 	}
 
+	if (m_startAction) {
+	    m_startAction->disable();
+	}
+	if (m_endAction) {
+	    m_endAction->disable();
+	}
+
 	arcList inGoingArc = inGoingArcsOf();
 	arcList outGoingArc = outGoingArcsOf();
 
@@ -301,13 +330,13 @@ void Transition::crossTransition(bool mustChangeTokenValue, int newTokenValue)
 
 	set<Transition*>  transitionsToReset;
 
-	unsigned int tokenValue = 0;
-    bool activeToken = false;
+        int tokenValue = -1;
+        bool activeToken = false;
 
 	for (unsigned int i = 0 ; i < inGoingArc.size() ; ++i) {
 		tokenValue = inGoingArc[i]->consumeTokenInFrom();
 
-        if (tokenValue != -1) {
+        if (newTokenValue != -1 && tokenValue != -1) {
             activeToken = true;
             if (isStatic()) {
                 tokenValue -= inGoingArc[i]->getRelativeMinValue().getValue();

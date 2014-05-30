@@ -25,7 +25,7 @@ TT_BASE_OBJECT_CONSTRUCTOR,
 mContainer(NULL),
 mName(kTTSymEmpty),
 mDate(0),
-mStatus(kEventWaiting),
+mStatus(kTTSym_eventWaiting),
 mMute(NO),
 mState(NULL),
 mCondition(NULL)
@@ -39,6 +39,8 @@ mCondition(NULL)
 
     if (arguments.size() == 2)
         mContainer = arguments[1];
+    
+    addAttribute(Container, kTypeObject);
 
     addAttribute(Name, kTypeSymbol);
    	addAttributeWithSetter(Date, kTypeUInt32);
@@ -118,62 +120,75 @@ TTErr TTTimeEvent::setCondition(const TTValue& value)
 
 TTErr TTTimeEvent::setStatus(const TTValue& value)
 {
+    TTSymbol    lastStatus = mStatus;
+    TTValue     v = TTObjectBasePtr(this);
+    
     // set status
     mStatus = value[0];
 
     // notify each attribute observers
-    sendNotification(kTTSym_EventStatusChanged, TTObjectBasePtr(this));
+    v.append(mStatus);
+    v.append(lastStatus);
+    
+    sendNotification(kTTSym_EventStatusChanged, v);
     
     return kTTErrNone;
 }
 
 TTErr TTTimeEvent::Trigger()
 {
-    // if not pending : do nothing
-    if (mStatus != kTTSym_eventPending)
-        return kTTErrGeneric;
-    
-    // if not conditionned : do nothing
-    if (mCondition == NULL)
-        return kTTErrGeneric;
-    
-    // if the event muted
-    if (mMute)
-        return kTTErrNone;
-    
-    // use container to make the event happen
+    // an event needs to be into a running container to be triggered
     if (mContainer) {
         
-        TTValue none, v = TTObjectBasePtr(this);
-        return mContainer->sendMessage(TTSymbol("TimeEventTrigger"), v, none);
+        TTValue none, v;
+        
+        mContainer->getAttributeValue("running", v);
+        TTBoolean running = v[0];
+        
+        if (running) {
+            
+            // if not pending : do nothing
+            if (mStatus != kTTSym_eventPending)
+                return kTTErrGeneric;
+            
+            // if the event muted
+            if (mMute)
+                return kTTErrNone;
+            
+            v = TTObjectBasePtr(this);
+            return mContainer->sendMessage(TTSymbol("TimeEventTrigger"), v, none);
+        }
     }
     
     // otherwise make it happens now
-    else
-        return Happen();
+    return Happen();
 }
 
 TTErr TTTimeEvent::Dispose()
 {
-    TTValue none;
-    TTErr   err = kTTErrNone;
-    
-    // if not pending : do nothing
-    if (mStatus != kTTSym_eventPending)
-        return kTTErrGeneric;
-    
-    // if not conditionned : do nothing
-    if (mCondition == NULL)
-        return kTTErrGeneric;
-    
-    // use container to make the event dispose
+    // an event needs to be into a running container to be disposed
     if (mContainer) {
         
-        TTValue v = TTObjectBasePtr(this);
-        return mContainer->sendMessage(TTSymbol("TimeEventDispose"), v, none);
+        TTValue none, v;
+        
+        mContainer->getAttributeValue("running", v);
+        TTBoolean running = v[0];
+        
+        if (running) {
+            
+            // if already happened or disposed : do nothing
+            if (mStatus == kTTSym_eventDisposed ||
+                mStatus == kTTSym_eventHappened)
+                return kTTErrGeneric;
+            
+            // change the status before
+            setStatus(kTTSym_eventDisposed);
+            
+            v = TTObjectBasePtr(this);
+            return mContainer->sendMessage(TTSymbol("TimeEventDispose"), v, none);
+        }
     }
     
-    setStatus(kTTSym_eventDisposed);
     return kTTErrNone;
 }
 
