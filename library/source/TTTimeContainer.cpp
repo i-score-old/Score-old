@@ -42,6 +42,8 @@ TTTimeProcess(arguments)
     registerAttribute(TTSymbol("timeEvents"), kTypeLocalValue, NULL, (TTGetterMethod)& TTTimeContainer::getTimeEvents, NULL);
     registerAttribute(TTSymbol("timeConditions"), kTypeLocalValue, NULL, (TTGetterMethod)& TTTimeContainer::getTimeConditions, NULL);
     
+    addMessageWithArguments(Next);
+    
     addMessageWithArguments(TimeEventCreate);
     addMessageProperty(TimeEventCreate, hidden, YES);
     
@@ -136,6 +138,38 @@ TTErr TTTimeContainer::getTimeConditions(TTValue& value)
     return kTTErrNone;
 }
 
+TTErr TTTimeContainer::Next(const TTValue& inputValue, TTValue& outputValue)
+{
+    TTTimeEventPtr  aTimeEvent;
+    TTBoolean       found = NO;
+    
+    if (!mRunning)
+        return kTTErrGeneric;
+    
+    if (mMute)
+        return kTTErrGeneric;
+    
+    // trigger the first pending time event of the list (as there are sorted by date)
+    for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next()) {
+        
+        aTimeEvent = TTTimeEventPtr(TTObjectBasePtr(mTimeEventList.current()[0]));
+        
+        if (getTimeEventStatus(aTimeEvent) == kTTSym_eventPending) {
+            
+            found = YES;
+            break;
+        }
+    }
+    
+    if (found) {
+        
+        outputValue = TTObjectBasePtr(aTimeEvent);
+        return aTimeEvent->sendMessage("Trigger");
+    }
+    else
+        return kTTErrGeneric;
+}
+
 TTErr TTTimeContainer::TimeEventFind(const TTValue& inputValue, TTValue& outputValue)
 {
     TTValue aCacheElement;
@@ -149,7 +183,7 @@ TTErr TTTimeContainer::TimeEventFind(const TTValue& inputValue, TTValue& outputV
     return kTTErrNone;
 }
 
-TTSymbol TTTimeContainer::getTimeEventName(TTTimeEventPtr aTimeEvent)
+TTSymbol& TTTimeContainer::getTimeEventName(TTTimeEventPtr aTimeEvent)
 {
     return aTimeEvent->mName;
 }
@@ -157,6 +191,11 @@ TTSymbol TTTimeContainer::getTimeEventName(TTTimeEventPtr aTimeEvent)
 TTUInt32 TTTimeContainer::getTimeEventDate(TTTimeEventPtr aTimeEvent)
 {
     return aTimeEvent->mDate;
+}
+
+TTSymbol& TTTimeContainer::getTimeEventStatus(TTTimeEventPtr aTimeEvent)
+{
+    return aTimeEvent->mStatus;
 }
 
 TTObjectBasePtr TTTimeContainer::getTimeEventState(TTTimeEventPtr aTimeEvent)
