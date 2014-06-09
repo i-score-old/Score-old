@@ -158,6 +158,8 @@ TTErr TTTimeEvent::Trigger()
             v = TTObjectBasePtr(this);
             return mContainer->sendMessage(TTSymbol("TimeEventTrigger"), v, none);
         }
+        
+        return kTTErrGeneric;
     }
     
     // otherwise make it happens now
