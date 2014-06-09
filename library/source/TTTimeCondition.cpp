@@ -611,7 +611,7 @@ TTErr TTTimeCondition::EventStatusChanged(const TTValue& inputValue, TTValue& ou
             setReady(YES);
         } else if (oldStatus == kTTSym_eventPending && mPendingCounter++ == 0 && mReady == YES) {
             setReady(NO);
-            applyDefaults();
+            //applyDefaults(); //theo : temporary commented out because it crash.
         }
         
         return kTTErrNone;
