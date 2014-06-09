@@ -358,6 +358,12 @@ void TTTimeContainer::writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTTimeP
         xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "durationMax", BAD_CAST s.data());
     }
     
+    // Write the mute
+    v = aTimeProcess->mMute;
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "mute", BAD_CAST s.data());
+    
     // Write the color
     v = aTimeProcess->mColor;
     v.toString();
@@ -480,6 +486,18 @@ TTTimeProcessPtr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHan
                 if (v[0].type() == kTypeUInt32) {
                     
                     aTimeProcess->setAttributeValue(kTTSym_durationMax, v);
+                }
+            }
+        }
+        
+        // Get the mute
+        if (!aXmlHandler->getXmlAttribute(kTTSym_mute, v, NO)) {
+            
+            if (v.size() == 1) {
+                
+                if (v[0].type() == kTypeInt32) {
+                    
+                    aTimeProcess->setAttributeValue(kTTSym_mute, v);
                 }
             }
         }

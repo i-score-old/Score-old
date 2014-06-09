@@ -319,6 +319,12 @@ TTErr TTTimeEvent::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
     s = TTString(v[0]);
     xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "date", BAD_CAST s.data());
     
+    // Write the mute
+    v = mMute;
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "mute", BAD_CAST s.data());
+    
     // Write the name of the condition object
     if (mCondition) {
         
@@ -354,6 +360,18 @@ TTErr TTTimeEvent::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
                 if (v[0].type() == kTypeUInt32) {
                     
                     this->setDate(v);
+                }
+            }
+        }
+        
+        // get the mute
+        if (!aXmlHandler->getXmlAttribute(kTTSym_mute, v, NO)) {
+            
+            if (v.size() == 1) {
+                
+                if (v[0].type() == kTypeInt32) {
+                    
+                    this->mMute = v[0];
                 }
             }
         }
