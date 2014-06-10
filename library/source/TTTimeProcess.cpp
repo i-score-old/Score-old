@@ -124,6 +124,10 @@ mCompiled(NO)
     addMessageWithArguments(EventStatusChanged);
     addMessageProperty(EventStatusChanged, hidden, YES);
     
+    // needed to be notified by the scheduler
+    addMessageWithArguments(SchedulerRunningChanged);
+    addMessageProperty(SchedulerRunningChanged, hidden, YES);
+    
     // Creation of a scheduler based on the System scheduler plugin
     // Prepare callback argument to be notified of :
     //      - the position
@@ -134,6 +138,13 @@ mCompiled(NO)
     
 	if (!mScheduler.valid())
 		logError("TimeProcess failed to load the System Scheduler");
+    }
+    else {
+    
+        // observe the scheduler
+		TTObject thisObject(this);
+        mScheduler.registerObserverForNotifications(thisObject);
+    }
     
     // generate a random name
     mName = mName.random();
@@ -442,12 +453,12 @@ TTErr TTTimeProcess::Limit(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr TTTimeProcess::Start()
 {
-    return mStartEvent.send(kTTSym_Happen);
+    return mStartEvent.send(kTTSym_Trigger);
 }
 
 TTErr TTTimeProcess::End()
 {
-    return mEndEvent.send(kTTSym_Happen);
+    return mEndEvent.send(kTTSym_Trigger);
 }
 
 TTErr TTTimeProcess::Play()
@@ -538,7 +549,7 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
 {
     TT_ASSERT("TTTimeProcess::EventStatusChanged : inputValue is correct", inputValue.size() == 3 && inputValue[0].type() == kTypeObject);
     
-    TTObject    aTimeEvent = inputValue[0], thisObject(this);
+    TTObject    aTimeEvent = inputValue[0];
     TTSymbol    newStatus = inputValue[1];
     //TTSymbol    oldStatus = inputValue[2];
     TTValue     v;
@@ -562,12 +573,15 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
             if (mMute)
                 return kTTErrNone;
             
-            // note : don't set start event ready attribute to NO : it is to the container to take this decision
+            // use the specific compiled method of the time process
+            if (!mCompiled)
+                Compile();
             
             // use the specific start process method of the time process
             if (!ProcessStart()) {
 
                 // notify start message observers
+				TTObject thisObject(this);
                 sendNotification(kTTSym_ProcessStarted, thisObject);
                 
                 // play the process
@@ -581,18 +595,9 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
                 return kTTErrNone;
             
             // stop the process
-            Stop();
+            return Stop();
             
-            // note : don't set end event ready attribute to NO : it is to the container to take this decision
-            
-            // use the specific process end method of the time process
-            if (!ProcessEnd()) {
-                
-                // notify observers
-                sendNotification(kTTSym_ProcessEnded, thisObject);
-                
-                return kTTErrNone;
-            }
+            // the kTTSym_ProcessEnded notification is sent in TTTimeProcess::SchedulerRunningChanged
         }
         
         TTLogError("TTTimeProcess::EventStatusChanged : wrong event happened\n");
@@ -605,6 +610,31 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
     
     TTLogError("TTTimeProcess::EventStatusChanged : wrong status\n");
     return kTTErrGeneric;
+}
+
+TTErr TTTimeProcess::SchedulerRunningChanged(const TTValue& inputValue, TTValue& outputValue)
+{
+    TT_ASSERT("TTTimeProcess::SchedulerRunningChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeBoolean);
+    
+    TTBoolean running = inputValue[0];
+    
+    if (running) {
+        
+        // the kTTSym_ProcessStarted is sent in TTTimeProcess::EventStatusChanged
+        ;
+    }
+    else {
+        
+        // use the specific process end method of the time process
+        if (!ProcessEnd()) {
+            
+            // notify observers
+			TTObject thisObject(this);
+            sendNotification(kTTSym_ProcessEnded, thisObject);
+            
+            return kTTErrNone;
+        }
+    }
 }
 
 #if 0
@@ -672,6 +702,9 @@ void TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 position, TTFloat64 
     if (aTimeProcess->mRunning) {
         
         aTimeProcess->Process(TTValue(position, date), none);
+        
+        // the notifications below are useful for network observation purpose for exemple
+        // TODO : shouldn't we limit the sending of those observation to not overcrowed the network ?
         
         // notify position observers
         TTAttributePtr	positionAttribute;

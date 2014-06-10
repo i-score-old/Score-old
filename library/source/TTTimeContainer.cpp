@@ -45,6 +45,8 @@ TTTimeProcess(arguments)
     registerAttribute(TTSymbol("timeEvents"), kTypeLocalValue, NULL, (TTGetterMethod)& TTTimeContainer::getTimeEvents, NULL);
     registerAttribute(TTSymbol("timeConditions"), kTypeLocalValue, NULL, (TTGetterMethod)& TTTimeContainer::getTimeConditions, NULL);
     
+    addMessageWithArguments(Next);
+    
     addMessageWithArguments(TimeEventCreate);
     addMessageProperty(TimeEventCreate, hidden, YES);
     
@@ -141,6 +143,38 @@ TTErr TTTimeContainer::getTimeConditions(TTValue& value)
     return kTTErrNone;
 }
 
+TTErr TTTimeContainer::Next(const TTValue& inputValue, TTValue& outputValue)
+{
+    TTTimeEventPtr  aTimeEvent;
+    TTBoolean       found = NO;
+    
+    if (!mRunning)
+        return kTTErrGeneric;
+    
+    if (mMute)
+        return kTTErrGeneric;
+    
+    // trigger the first pending time event of the list (as there are sorted by date)
+    for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next()) {
+        
+        aTimeEvent = TTTimeEventPtr(TTObjectBasePtr(mTimeEventList.current()[0]));
+        
+        if (getTimeEventStatus(aTimeEvent) == kTTSym_eventPending) {
+            
+            found = YES;
+            break;
+        }
+    }
+    
+    if (found) {
+        
+        outputValue = TTObjectBasePtr(aTimeEvent);
+        return aTimeEvent->sendMessage("Trigger");
+    }
+    else
+        return kTTErrGeneric;
+}
+
 TTErr TTTimeContainer::TimeEventFind(const TTValue& inputValue, TTValue& outputValue)
 {
     TTValue aCacheElement;
@@ -154,7 +188,7 @@ TTErr TTTimeContainer::TimeEventFind(const TTValue& inputValue, TTValue& outputV
     return kTTErrNone;
 }
 
-TTSymbol TTTimeContainer::getTimeEventName(TTObject& aTimeEvent)
+TTSymbol& TTTimeContainer::getTimeEventName(TTObject& aTimeEvent)
 {
     return TTTimeEventPtr(aTimeEvent.instance())->mName;
 }
@@ -162,6 +196,11 @@ TTSymbol TTTimeContainer::getTimeEventName(TTObject& aTimeEvent)
 TTUInt32 TTTimeContainer::getTimeEventDate(TTObject& aTimeEvent)
 {
     return TTTimeEventPtr(aTimeEvent.instance())->mDate;
+}
+
+TTSymbol& TTTimeContainer::getTimeEventStatus(TTObject& aTimeEvent)
+{
+    return TTTimeEventPtr(aTimeEvent.instance())->mStatus;
 }
 
 TTObject& TTTimeContainer::getTimeEventState(TTObject& aTimeEvent)
@@ -330,6 +369,12 @@ void TTTimeContainer::writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTObjec
         xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "durationMax", BAD_CAST s.data());
     }
     
+    // Write the mute
+    v = aTimeProcess->mMute;
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "mute", BAD_CAST s.data());
+    
     // Write the color
     v = aTimeProcessInstance->mColor;
     v.toString();
@@ -452,6 +497,18 @@ TTErr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHandler, TTObj
                 if (v[0].type() == kTypeUInt32) {
                     
                     aNewTimeProcess.set(kTTSym_durationMax, v);
+                }
+            }
+        }
+        
+        // Get the mute
+        if (!aXmlHandler->getXmlAttribute(kTTSym_mute, v, NO)) {
+            
+            if (v.size() == 1) {
+                
+                if (v[0].type() == kTypeInt32) {
+                    
+                    aTimeProcess->setAttributeValue(kTTSym_mute, v);
                 }
             }
         }

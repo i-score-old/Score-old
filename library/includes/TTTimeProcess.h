@@ -224,12 +224,12 @@ private :
     TTErr           Limit(const TTValue& inputValue, TTValue& outputValue);
     
     /** Start the time process
-     this method eases the access of the start event happen message
+     this method eases the access of the start event trigger message
      @return                an error code if the play fails */
     TTErr           Start();
     
     /** End the time process
-     this method eases the access of the end event happen message
+     this method eases the access of the end event trigger message
      @return                an error code if the stop fails */
     TTErr           End();
     
@@ -264,6 +264,12 @@ private :
      @param outputValue     nothing
      @return                kTTErrNone */
     TTErr           EventStatusChanged(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** To be notified when the scheduler running status change
+     @param inputValue      the new running status
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr           SchedulerRunningChanged(const TTValue& inputValue, TTValue& outputValue);
     
 protected :
     
