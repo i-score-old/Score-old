@@ -128,6 +128,10 @@ mEndEvent(NULL)
     addMessageWithArguments(EventStatusChanged);
     addMessageProperty(EventStatusChanged, hidden, YES);
     
+    // needed to be notified by the scheduler
+    addMessageWithArguments(SchedulerRunningChanged);
+    addMessageProperty(SchedulerRunningChanged, hidden, YES);
+    
     // Creation of a scheduler based on the System scheduler plugin
     // Prepare callback argument to be notified of :
     //      - the position
@@ -139,6 +143,11 @@ mEndEvent(NULL)
 	if (err) {
         mScheduler = NULL;
 		logError("TimeProcess failed to load the System Scheduler");
+    }
+    else {
+    
+        // observe the scheduler
+        mScheduler->registerObserverForNotifications(*this);
     }
     
     // generate a random name
@@ -577,8 +586,6 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
             if (mMute)
                 return kTTErrNone;
             
-            // note : don't set start event ready attribute to NO : it is to the container to take this decision
-            
             // use the specific compiled method of the time process
             if (!mCompiled)
                 Compile();
@@ -600,18 +607,9 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
                 return kTTErrNone;
             
             // stop the process
-            Stop();
+            return Stop();
             
-            // note : don't set end event ready attribute to NO : it is to the container to take this decision
-            
-            // use the specific process end method of the time process
-            if (!ProcessEnd()) {
-                
-                // notify observers
-                sendNotification(kTTSym_ProcessEnded, TTObjectBasePtr(this));
-                
-                return kTTErrNone;
-            }
+            // the kTTSym_ProcessEnded notification is sent in TTTimeProcess::SchedulerRunningChanged
         }
         
         TTLogError("TTTimeProcess::EventStatusChanged : wrong event happened\n");
@@ -624,6 +622,30 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
     
     TTLogError("TTTimeProcess::EventStatusChanged : wrong status\n");
     return kTTErrGeneric;
+}
+
+TTErr TTTimeProcess::SchedulerRunningChanged(const TTValue& inputValue, TTValue& outputValue)
+{
+    TT_ASSERT("TTTimeProcess::SchedulerRunningChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeBoolean);
+    
+    TTBoolean running = inputValue[0];
+    
+    if (running) {
+        
+        // the kTTSym_ProcessStarted is sent in TTTimeProcess::EventStatusChanged
+        ;
+    }
+    else {
+        
+        // use the specific process end method of the time process
+        if (!ProcessEnd()) {
+            
+            // notify observers
+            sendNotification(kTTSym_ProcessEnded, TTObjectBasePtr(this));
+            
+            return kTTErrNone;
+        }
+    }
 }
 
 #if 0
