@@ -265,6 +265,12 @@ private :
      @return                kTTErrNone */
     TTErr           EventStatusChanged(const TTValue& inputValue, TTValue& outputValue);
     
+    /** To be notified when the scheduler running status change
+     @param inputValue      the new running status
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr           SchedulerRunningChanged(const TTValue& inputValue, TTValue& outputValue);
+    
 protected :
     
     /** get the start event
