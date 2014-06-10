@@ -710,6 +710,9 @@ void TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 position, TTFloat64 
         
         aTimeProcess->Process(TTValue(position, date), none);
         
+        // the notifications below are useful for network observation purpose for exemple
+        // TODO : shouldn't we limit the sending of those observation to not overcrowed the network ?
+        
         // notify position observers
         TTAttributePtr	positionAttribute;
         aTimeProcess->findAttribute("position", &positionAttribute);
