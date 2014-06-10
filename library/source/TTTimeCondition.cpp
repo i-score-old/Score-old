@@ -611,7 +611,14 @@ TTErr TTTimeCondition::EventStatusChanged(const TTValue& inputValue, TTValue& ou
             setReady(YES);
         } else if (oldStatus == kTTSym_eventPending && mPendingCounter++ == 0 && mReady == YES) {
             setReady(NO);
-            applyDefaults();
+            
+            // only apply default behavior when the container run.
+            // otherwise can be called when some events were pending and then we reset them to a waiting status (like in Scenario::Compile)
+            mContainer->getAttributeValue("running", v);
+            TTBoolean running = v[0];
+            
+            if (running)
+                applyDefaults();
         }
         
         return kTTErrNone;
