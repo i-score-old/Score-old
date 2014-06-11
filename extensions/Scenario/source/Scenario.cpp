@@ -142,7 +142,7 @@ TTErr Scenario::Compile()
     compileGraph(timeOffset);
 #endif
     
-    // compile all time processes if they need to be compiled
+    // compile all time processes if they need to be compiled and propagate the externalTick attribute
     for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
         
         aTimeProcess = mTimeProcessList.current()[0];
@@ -152,6 +152,8 @@ TTErr Scenario::Compile()
         
         if (!compiled)
             aTimeProcess->sendMessage(kTTSym_Compile);
+        
+        aTimeProcess->setAttributeValue("externalTick", mExternalTick);
     }
     
     return kTTErrNone;
@@ -192,7 +194,7 @@ TTErr Scenario::ProcessEnd()
 TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
 {
     TTFloat64       position, date;
-    TTObjectBasePtr aTimeCondition;
+    TTObjectBasePtr aTimeCondition, aTimeProcess;
     TTValue         v;
     
     if (inputValue.size() == 2) {
@@ -210,6 +212,17 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
                 // if a condition is ready we activate it
                 aTimeCondition->getAttributeValue(kTTSym_ready, v);
                 aTimeCondition->setAttributeValue(kTTSym_active, v);
+            }
+            
+            // propagate the tick to all the time process
+            if (mExternalTick) {
+                
+                for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
+                
+                    aTimeProcess = mTimeProcessList.current()[0];
+                
+                    aTimeProcess->sendMessage(kTTSym_Tick);
+                }
             }
             
 #ifndef NO_EXECUTION_GRAPH
