@@ -368,17 +368,13 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
                 TTObjectBaseRelease(&state);
             }
             
-            // prepare the timeOffset of each time process scheduler and mute them if needed
+            // prepare the timeOffset of each time process scheduler
             for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
                 
                 aTimeProcess = mTimeProcessList.current()[0];
                 
                 TTTimeEventPtr  startEvent = getTimeProcessStartEvent(TTTimeProcessPtr(aTimeProcess));
                 TTTimeEventPtr  endEvent = getTimeProcessEndEvent(TTTimeProcessPtr(aTimeProcess));
-                
-                // mute if the Scenario is muted or if the end event is before the timeOffset
-                v = TTBoolean(getTimeEventDate(endEvent) < timeOffset);
-                aTimeProcess->setAttributeValue(kTTSym_mute, v);
                 
                 // if the date to start is in the middle of a time process
                 if (getTimeEventDate(startEvent) < timeOffset && getTimeEventDate(endEvent) > timeOffset) {
