@@ -104,7 +104,7 @@ PetriNetNode* Arc::getTo() {
 }
 
 void Arc::changeRelativeMinTime(ExtendedInt minTime) {
-	if (minTime >= m_relativeMaxValue) {
+    if (minTime > m_relativeMaxValue) {
 		throw IllegalArgumentException("Arc : relativeMin > relativeMax");
 	}
 
@@ -112,7 +112,7 @@ void Arc::changeRelativeMinTime(ExtendedInt minTime) {
 }
 
 void Arc::changeRelativeMaxTime(ExtendedInt maxTime) {
-	if (maxTime <= m_relativeMinValue) {
+    if (maxTime < m_relativeMinValue) {
 		throw IllegalArgumentException("Arc : relativeMax < relativeMin");
 	}
 
@@ -120,7 +120,7 @@ void Arc::changeRelativeMaxTime(ExtendedInt maxTime) {
 }
 
 void Arc::changeRelativeTime(ExtendedInt minTime, ExtendedInt maxTime) {
-	if (maxTime <= minTime) {
+    if (maxTime < minTime) {
 		throw IllegalArgumentException("Arc : relativeMin > relativeMax (both)");
 	}
 
@@ -129,7 +129,7 @@ void Arc::changeRelativeTime(ExtendedInt minTime, ExtendedInt maxTime) {
 }
 
 void Arc::changeAbsoluteMinTime(ExtendedInt minTime) {
-	if (minTime >= m_absoluteMaxValue) {
+    if (minTime > m_absoluteMaxValue) {
 		throw IllegalArgumentException("Arc : absoluteMin > absoluteMax");
 	}
 
@@ -137,7 +137,7 @@ void Arc::changeAbsoluteMinTime(ExtendedInt minTime) {
 }
 
 void Arc::changeAbsoluteMaxTime(ExtendedInt maxTime) {
-	if (maxTime <= m_absoluteMinValue) {
+    if (maxTime < m_absoluteMinValue) {
 		throw IllegalArgumentException("Arc : absoluteMax < absoluteMin");
 	}
 
@@ -145,7 +145,7 @@ void Arc::changeAbsoluteMaxTime(ExtendedInt maxTime) {
 }
 
 void Arc::changeAbsoluteTime(ExtendedInt minTime, ExtendedInt maxTime) {
-	if (maxTime <= minTime) {
+    if (maxTime < minTime) {
 		throw IllegalArgumentException("Arc : absoluteMin > absoluteMax (both)");
 	}
 
