@@ -158,8 +158,6 @@ TTErr TTTimeEvent::Trigger()
             v = TTObjectBasePtr(this);
             return mContainer->sendMessage(TTSymbol("TimeEventTrigger"), v, none);
         }
-        
-        return kTTErrGeneric;
     }
     
     // otherwise make it happens now
@@ -250,7 +248,7 @@ TTErr TTTimeEvent::StateAddressSetValue(const TTValue& inputValue, TTValue& outp
     TTValue         v, command;
     TTAddress       address;
     TTValuePtr      aValue;
-    TTListPtr       lines;
+    TTListPtr       flattenedLines;
     TTDictionaryBasePtr aLine;
     TTErr           err;
     
@@ -262,11 +260,11 @@ TTErr TTTimeEvent::StateAddressSetValue(const TTValue& inputValue, TTValue& outp
             aValue = TTValuePtr(TTPtr(inputValue[1]));
             
             // get the lines of the state
-            mState->getAttributeValue(kTTSym_lines, v);
-            lines = TTListPtr(TTPtr(v[0]));
+            mState->getAttributeValue("flattenedLines", v);
+            flattenedLines = TTListPtr(TTPtr(v[0]));
             
             // find the line at address
-            err = lines->find(&TTScriptFindAddress, (TTPtr)&address, v);
+            err = flattenedLines->find(&TTScriptFindAddress, (TTPtr)&address, v);
             
             // if the line doesn't exist : append it to the state
             if (err) {
@@ -274,7 +272,7 @@ TTErr TTTimeEvent::StateAddressSetValue(const TTValue& inputValue, TTValue& outp
                 command = *aValue;
                 command.prepend(address);
                 
-                mState->sendMessage(TTSymbol("AppendCommand"), command, v);
+                mState->sendMessage("AppendCommand", command, v);
             }
             else {
             
@@ -300,7 +298,7 @@ TTErr TTTimeEvent::StateAddressClear(const TTValue& inputValue, TTValue& outputV
         if (inputValue[0].type() == kTypeSymbol) {
             
             // remove the lines of the state
-            return mState->sendMessage(TTSymbol("RemoveCommand"), inputValue, none);
+            return mState->sendMessage("RemoveCommand", inputValue, none);
         }
     }
     

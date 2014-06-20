@@ -244,6 +244,7 @@ private:
 	Transition(PetriNet* petriNet);
 
 	TransitionBitArray* m_activeArcsBitArray;
+    bool m_onlyInactiveTokens;
 
 	eventVector m_events; // Waited event to cross the transition (STATIC_EVENT if no external event is waited).
 

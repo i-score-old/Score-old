@@ -32,6 +32,7 @@ mVerticalSize(1),
 mScheduler(NULL),
 mRunning(NO),
 mCompiled(NO),
+mExternalTick(NO),
 mStartEvent(NULL),
 mEndEvent(NULL)
 {
@@ -60,6 +61,8 @@ mEndEvent(NULL)
     
     addAttribute(Compiled, kTypeBoolean);
     addAttributeProperty(Compiled, readOnly, YES);
+    
+    addAttribute(ExternalTick, kTypeBoolean);
     
     addAttributeWithSetter(Color, kTypeLocalValue);
     addAttribute(VerticalPosition, kTypeUInt32);
@@ -115,6 +118,7 @@ mEndEvent(NULL)
     addMessage(Stop);
     addMessage(Pause);
     addMessage(Resume);
+    addMessage(Tick);
     
 	// needed to be handled by a TTXmlHandler
 	addMessageWithArguments(WriteAsXml);
@@ -495,9 +499,9 @@ TTErr TTTimeProcess::Play()
         v = TTFloat64(end - start);
         mScheduler->setAttributeValue(kTTSym_duration, v);
         
-        mScheduler->sendMessage(kTTSym_Go);
+        mScheduler->setAttributeValue("externalTick", mExternalTick);
         
-        return kTTErrNone;
+        return mScheduler->sendMessage(kTTSym_Go);
     }
     
     return kTTErrGeneric;
@@ -527,6 +531,14 @@ TTErr TTTimeProcess::Resume()
     mScheduler->sendMessage(kTTSym_Resume);
     
     return ProcessPaused(TTBoolean(NO), none);
+}
+
+TTErr TTTimeProcess::Tick()
+{
+    if (mExternalTick && mRunning)
+        return mScheduler->sendMessage(kTTSym_Tick);
+    else
+        return kTTErrGeneric;
 }
 
 #if 0
@@ -709,6 +721,9 @@ void TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 position, TTFloat64 
     if (aTimeProcess->mRunning) {
         
         aTimeProcess->Process(TTValue(position, date), none);
+        
+        // the notifications below are useful for network observation purpose for exemple
+        // TODO : shouldn't we limit the sending of those observation to not overcrowed the network ?
         
         // notify position observers
         TTAttributePtr	positionAttribute;
