@@ -57,19 +57,26 @@ mLoading(NO)
     integer0 = ExtendedInt(INTEGER, 0);
 #endif
     
-    TTObject start, end;
-    
     // it is possible to pass 2 events for the root scenario (which don't need a container by definition)
     if (arguments.size() == 2) {
         
         if (arguments[0].type() == kTypeObject && arguments[1].type() == kTypeObject) {
             
-            start = arguments[0];
-            end = arguments[1];
+            TTObject start = arguments[0];
+            TTObject end = arguments[1];
             
             this->setStartEvent(start);
             this->setEndEvent(end);
         }
+    }
+    // else create 2 time events with the end at 1 hour (in millisecond)
+    else {
+        
+        TTObject start("TimeEvent");
+        TTObject end("TimeEvent", 36000000);
+        
+        this->setStartEvent(start);
+        this->setEndEvent(end);
     }
     
     mScheduler.set("granularity", TTFloat64(1.));
