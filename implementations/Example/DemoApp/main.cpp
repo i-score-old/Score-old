@@ -21,15 +21,10 @@ public:
     
 private:
     
-    // Declare the application manager, our application and another one
+    // Declare the application manager and our application
     TTObject mApplicationManager;
     TTObject mApplicationDemo;
-    TTObject mApplicationRemote;
     
-    // Declare protocol units to use
-    TTObject mProtocolMinuit;
-    TTObject mProtocolWebSocket;
- 
 public:
     
     // Declare publicly all datas of our application to retreive them from the callback function
@@ -117,80 +112,6 @@ DemoApp::SetupModular()
         mApplicationDemo = out[0];
     
     
-    // Create a distant application called "max" and get it back
-    err = mApplicationManager.send("ApplicationInstantiateDistant", "Jamoma", out);
-    
-    if (err) {
-        TTLogError("Error : can't create Max application \n");
-        return;
-    }
-    else
-        mApplicationRemote = out[0];
-    
-    // Get registered application names
-    mApplicationManager.get("applicationNames", out);
-    for (TTElementIter it = out.begin() ; it != out.end() ; it++) {
-        TTSymbol name = TTElement(*it);
-        TTLogMessage("%s application is well registered into the application manager \n", name.c_str());
-    }
-    
-
-    TTLogMessage("\n*** Enable Minuit communication ***\n");
-    ////////////////////////////////////////////////////////////////////////
-    
-    // Create a Minuit protocol unit
-    err = mApplicationManager.send("ProtocolInstantiate", "Minuit", out);
-    
-    if (err) {
-        TTLogError("Error : can't create Minuit protocol unit \n");
-        return;
-    }
-    else
-        mProtocolMinuit = out[0];
-    
-    // Get Minuit Protocol attribute names and types
-    mProtocolMinuit.get("parameterNames", out);
-    for (TTElementIter it = out.begin() ; it != out.end() ; it++) {
-        TTSymbol name = TTElement(*it);
-        TTSymbol type = mProtocolMinuit.attributeType(name);
-        TTLogMessage("Minuit %s parameter is a %s \n", name.c_str(), type.c_str());
-    }
-    
-    // Register mApplicationDemo and mApplicationRemote to the Minuit protocol
-    mProtocolMinuit.send("ApplicationRegister", "demo", out);
-    mProtocolMinuit.send("ApplicationRegister", "Jamoma", out);
-    
-    // Select mApplicationDemo to set its protocol parameters
-    mProtocolMinuit.send("ApplicationSelect", "demo", out);
-    mProtocolMinuit.set("port", 13579);
-    mProtocolMinuit.set("ip", "127.0.0.1");
-    
-    // Select mApplicationRemote to set its protocol parameters
-    mProtocolMinuit.send("ApplicationSelect", "Jamoma", out);
-    mProtocolMinuit.set("port", 9998);
-    mProtocolMinuit.set("ip", "127.0.0.1");
-    
-    // Get Minuit parameters for each registered application
-    mProtocolMinuit.get("applicationNames", out);
-    for (TTElementIter it = out.begin() ; it != out.end() ; it++) {
-        TTSymbol name = TTElement(*it);
-        
-        mProtocolMinuit.send("ApplicationSelect", name, out);
-        TTLogMessage("Minuit setup for %s application : \n", name.c_str());
-        
-        mProtocolMinuit.get("ip", v);
-        TTSymbol ip = v[0];
-        TTLogMessage("- ip = %s \n", ip.c_str());
-        
-        mProtocolMinuit.get("port", v);
-        TTUInt16 port = v[0];
-        TTLogMessage("- port = %d \n", port);
-    }
-    
-    // Enable Minuit communication
-    mProtocolMinuit.send("Run");
-    
-    
 	TTLogMessage("\n*** Creation of mApplicationDemo datas ***\n");
     /////////////////////////////////////////////////////////
     
@@ -246,18 +167,14 @@ DemoApp::SetupModular()
     // Register the return data into mApplicationDemo at an address
     args = TTValue("/time", mDataDemoReturn);
     mApplicationDemo.send("ObjectRegister", args, out);
-
-    
-	TTLogMessage("\n*** Exploration of mApplicationRemote datas ***\n");
-    /////////////////////////////////////////////////////////
-    
-    // Explore the mApplicationRemote
-    mApplicationRemote.send("DirectoryBuild");
 }
 
 void
 DemoApp::SetupScore()
 {
+    TTValue     out;
+    TTObject    xmlHandler("XmlHandler");
+    
     TTLogMessage("\n*** Initialisation of Score environnement ***\n");
     /////////////////////////////////////////////////////////////////////
     
@@ -265,42 +182,15 @@ DemoApp::SetupScore()
     TTScoreInit("/usr/local/jamoma");
     
     
-    TTLogMessage("\n*** Creation of an interactive scenario ***\n");
+    TTLogMessage("\n*** Reading of an interactive scenario file ***\n");
     ////////////////////////////////////////////////////////////////////////////////
     
-    // Create two events for the start and an end at 1 minute
-    TTObject start("TimeEvent");
-    start.set("name", TTSymbol("start of the demonstration"));
+    // Create an empty Scenario
+    mScenario = TTObject("Scenario");
     
-    TTObject end("TimeEvent", 60000u);
-    end.set("name", TTSymbol("end of the demonstration"));
-    
-    // Create a Scenario passing the start and end events
-    TTValue args(start, end);
-    mScenario = TTObject("Scenario", args);
-    
-    
-    TTLogMessage("\n*** Creation of events inside a scenario ***\n");
-    ////////////////////////////////////////////////////////////////////////////////
-    TTObject    event1, event2;
-    TTValue     out;
-    
-    // edit an event at 2 seconds
-    mScenario.send("TimeEventCreate", 2000u, out);
-    event1 = out[0];
-    event1.set("name", TTSymbol("start of a fade in"));
-    
-    // edit an event at 6 seconds
-    mScenario.send("TimeEventCreate", 6000u, out);
-    event2 = out[0];
-    event2.set("name", TTSymbol("end of the fade in"));
-    
-    
-    TTLogMessage("\n*** Edit state of each event ***\n");
-    ////////////////////////////////////////////////////////////////////////////////
-    TTObject    state;
- 
-    
+    // Read DemoScenario.score file to fill mScenario
+    xmlHandler.set("object", mScenario);
+    xmlHandler.send("Read", "../DemoScenario.score", out);
 }
 
 void
@@ -367,17 +257,9 @@ DemoApp::Quit()
         TTLogError("Error : can't unregister data at /myReturn address \n");
     
     
-    TTLogMessage("\n*** Release protocols ***\n");
-    ///////////////////////////////////////////////
-    
-    mApplicationManager.send("ProtocolRelease", "Minuit", out);
-    //mApplicationManager.send("ProtocolRelease", "WebSocket", out);
-    
-    
-    TTLogMessage("\n*** Release applications ***\n");
+    TTLogMessage("\n*** Release application ***\n");
     //////////////////////////////////////////////////
     
-    mApplicationManager.send("ApplicationRelease", "i-score", out);
     mApplicationManager.send("ApplicationRelease", "demo", out);
 }
 
