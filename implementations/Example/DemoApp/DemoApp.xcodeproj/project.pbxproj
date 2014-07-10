@@ -31,6 +31,7 @@
 		469AAAB419248EEC00209C77 /* JamomaFoundation.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = JamomaFoundation.dylib; path = ../../../support/jamoma/lib/JamomaFoundation.dylib; sourceTree = "<group>"; };
 		469AAAB519248EEC00209C77 /* JamomaModular.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = JamomaModular.dylib; path = ../../../support/jamoma/lib/JamomaModular.dylib; sourceTree = "<group>"; };
 		469AAAB919248F0900209C77 /* JamomaScore.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = JamomaScore.dylib; path = ../../../library/build/JamomaScore.dylib; sourceTree = "<group>"; };
+		469E1F0D196F42A900CF1396 /* DemoScenario.score */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = DemoScenario.score; sourceTree = SOURCE_ROOT; };
 		B5B16FA41816B30800F939C5 /* DemoApp */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = DemoApp; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5B16FB01816B41300F939C5 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -74,6 +75,7 @@
 			isa = PBXGroup;
 			children = (
 				B5B16FB01816B41300F939C5 /* main.cpp */,
+				469E1F0D196F42A900CF1396 /* DemoScenario.score */,
 			);
 			path = DemoApp;
 			sourceTree = "<group>";
