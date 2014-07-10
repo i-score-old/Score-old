@@ -15,8 +15,8 @@ public:
     // This application is divided into four main functions
     void SetupModular();
     void SetupScore();
-    void Export();
-    void Execute(std::string command);
+    void Start();
+    void Parse(std::string command);
     void Quit();
     
 private:
@@ -67,15 +67,15 @@ main(int argc, char **argv)
             TTLogMessage("\n*** End of Jamoma Modular and Score demonstration ***\n");
             return EXIT_SUCCESS;
         }
-        // dump informations about the application
-        else if (!s.compare("export")) {
+        // run the interactive scenario
+        else if (!s.compare("start")) {
             
-             app.Export();
+            app.Start();
         }
         // parse a command and execute it
         else {
             
-            app.Execute(s);
+            app.Parse(s);
         }
     }
     while (YES);
@@ -131,7 +131,7 @@ DemoApp::SetupModular()
     mDataDemoParameter.set("description", "control the speed of the scenario");
     
     // Register the parameter data into mApplicationDemo at an address
-    args = TTValue("/rate", mDataDemoParameter);
+    args = TTValue("/myParameter", mDataDemoParameter);
     mApplicationDemo.send("ObjectRegister", args, out);
     
     
@@ -148,7 +148,7 @@ DemoApp::SetupModular()
     mDataDemoMessage.set("description", "start the playing of the scenario from the beginning");
     
     // Register the message data into mApplicationDemo at an address
-    args = TTValue("/play", mDataDemoMessage);
+    args = TTValue("/myMessage", mDataDemoMessage);
     mApplicationDemo.send("ObjectRegister", args, out);
     
     
@@ -165,7 +165,7 @@ DemoApp::SetupModular()
     mDataDemoReturn.set("description", "return the time progression in millis second");
     
     // Register the return data into mApplicationDemo at an address
-    args = TTValue("/time", mDataDemoReturn);
+    args = TTValue("/myReturn", mDataDemoReturn);
     mApplicationDemo.send("ObjectRegister", args, out);
 }
 
@@ -194,19 +194,13 @@ DemoApp::SetupScore()
 }
 
 void
-DemoApp::Export()
+DemoApp::Start()
 {
-    TTValue     args, out;
-    TTObject    xmlHandler("XmlHandler");
-    
-    // export Modular setup and the Score scenario
-    args = TTValue(mApplicationManager, mScenario);
-    xmlHandler.set("object", mApplicationDemo);
-    xmlHandler.send("Write", "./mApplicationDemo.xml", out);
+    mScenario.send("Start");
 }
 
 void
-DemoApp::Execute(std::string command)
+DemoApp::Parse(std::string command)
 {
     // parse the command : address value
     TTValue v = TTString(command);
@@ -273,21 +267,21 @@ DemoAppDataReturnValueCallback(const TTValue& baton, const TTValue& value)
     if (anObject.instance() == demoApp->mDataDemoParameter.instance()) {
         
         // print the returned value
-        TTLogMessage("/speed has been updated to %s \n", value.toString().data());
+        TTLogMessage("/myParameter has been updated to %s \n", value.toString().data());
         return kTTErrNone;
     }
     
     if (anObject.instance() == demoApp->mDataDemoMessage.instance()) {
         
         // print the returned value
-        TTLogMessage("/play has been updated to %s \n", value.toString().data());
+        TTLogMessage("/myMessage has been updated to %s \n", value.toString().data());
         return kTTErrNone;
     }
     
     if (anObject.instance() == demoApp->mDataDemoReturn.instance()) {
         
         // print the returned value
-        TTLogMessage("/time has been updated to %s \n", value.toString().data());
+        TTLogMessage("/myReturn has been updated to %s \n", value.toString().data());
         return kTTErrNone;
     }
     
