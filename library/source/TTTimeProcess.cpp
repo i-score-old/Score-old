@@ -179,7 +179,7 @@ TTErr TTTimeProcess::setRigid(const TTValue& value)
         
         if (value[0].type() == kTypeBoolean) {
             
-            v = TTObjectBasePtr(this);
+            v = TTObject(this);
             
             // rigid means Limit(duration, duration)
             if (TTBoolean(value[0])) {

@@ -83,7 +83,7 @@ TTErr TTTimeEvent::setDate(const TTValue& value)
         mDate = newDate;
         
         // notify each date attribute observers
-        sendNotification(kTTSym_EventDateChanged, TTObjectBasePtr(this));
+        sendNotification(kTTSym_EventDateChanged, TTObject(this));
     }
     
     return kTTErrNone;
@@ -116,7 +116,7 @@ TTErr TTTimeEvent::setCondition(const TTValue& value)
 TTErr TTTimeEvent::setStatus(const TTValue& value)
 {
     TTSymbol    lastStatus = mStatus;
-    TTValue     v = TTObjectBasePtr(this);
+    TTValue     v = TTObject(this);
     
     // set status
     mStatus = value[0];
