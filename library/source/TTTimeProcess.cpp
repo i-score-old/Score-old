@@ -140,7 +140,7 @@ mExternalTick(NO)
     
     mScheduler = TTObject("System", args);
     
-	if (!mScheduler.valid())
+	if (!mScheduler.valid()) {
 		logError("TimeProcess failed to load the System Scheduler");
     }
     else {
@@ -522,7 +522,7 @@ TTErr TTTimeProcess::Resume()
 TTErr TTTimeProcess::Tick()
 {
     if (mExternalTick && mRunning)
-        return mScheduler->sendMessage(kTTSym_Tick);
+        return mScheduler.send(kTTSym_Tick);
     else
         return kTTErrGeneric;
 }

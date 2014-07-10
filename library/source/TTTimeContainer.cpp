@@ -145,9 +145,9 @@ TTErr TTTimeContainer::getTimeConditions(TTValue& value)
 
 TTErr TTTimeContainer::Next(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTTimeEventPtr  aTimeEvent;
-    TTList          eventsToTrigger;
-    TTUInt32        found = 0;
+    TTObject    aTimeEvent;
+    TTList      eventsToTrigger;
+    TTUInt32    found = 0;
     
     if (!mRunning)
         return kTTErrGeneric;
@@ -158,7 +158,7 @@ TTErr TTTimeContainer::Next(const TTValue& inputValue, TTValue& outputValue)
     // trigger the first pending time event of the list (as there are sorted by date)
     for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next()) {
         
-        aTimeEvent = TTTimeEventPtr(TTObjectBasePtr(mTimeEventList.current()[0]));
+        aTimeEvent = mTimeEventList.current()[0];
         
         if (getTimeEventStatus(aTimeEvent) == kTTSym_eventPending) {
             
@@ -166,7 +166,7 @@ TTErr TTTimeContainer::Next(const TTValue& inputValue, TTValue& outputValue)
             if (inputValue.size() == 0) {
                 
                 found = 1;
-                eventsToTrigger.append(TTObjectBasePtr(aTimeEvent));
+                eventsToTrigger.append(aTimeEvent);
                 break;
             }
             // else : is this event part of the events to trigger ?
@@ -180,7 +180,7 @@ TTErr TTTimeContainer::Next(const TTValue& inputValue, TTValue& outputValue)
                     
                     if (id == found) {
                         
-                        eventsToTrigger.append(TTObjectBasePtr(aTimeEvent));
+                        eventsToTrigger.append(aTimeEvent);
                         break;
                     }
                 }
@@ -193,10 +193,10 @@ TTErr TTTimeContainer::Next(const TTValue& inputValue, TTValue& outputValue)
     
     for (eventsToTrigger.begin(); eventsToTrigger.end(); eventsToTrigger.next()) {
         
-        aTimeEvent = TTTimeEventPtr(TTObjectBasePtr(eventsToTrigger.current()[0]));
+        aTimeEvent = eventsToTrigger.current()[0];
         
-        outputValue.append(TTObjectBasePtr(aTimeEvent));
-        aTimeEvent->sendMessage("Trigger");
+        outputValue.append(aTimeEvent);
+        aTimeEvent.send("Trigger");
     }
 
     return kTTErrNone;
@@ -397,7 +397,7 @@ void TTTimeContainer::writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTObjec
     }
     
     // Write the mute
-    v = aTimeProcess->mMute;
+    v = aTimeProcessInstance->mMute;
     v.toString();
     s = TTString(v[0]);
     xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "mute", BAD_CAST s.data());
@@ -535,7 +535,7 @@ TTErr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHandler, TTObj
                 
                 if (v[0].type() == kTypeInt32) {
                     
-                    aTimeProcess->setAttributeValue(kTTSym_mute, v);
+                    aNewTimeProcess.set(kTTSym_mute, v);
                 }
             }
         }

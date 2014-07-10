@@ -353,34 +353,35 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
                 
                 // run the temporary state
                 state.send(kTTSym_Run);
-            
-            // prepare the timeOffset of each time process scheduler
-            for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
                 
-                aTimeProcess = mTimeProcessList.current()[0];
-                
-                TTObject  startEvent = getTimeProcessStartEvent(aTimeProcess);
-                TTObject  endEvent = getTimeProcessEndEvent(aTimeProcess);
-                
-                // if the date to start is in the middle of a time process
-                if (getTimeEventDate(startEvent) < timeOffset && getTimeEventDate(endEvent) > timeOffset) {
+                // prepare the timeOffset of each time process scheduler
+                for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
                     
-                    // go to time offset
-                    v = timeOffset - getTimeEventDate(startEvent);
+                    aTimeProcess = mTimeProcessList.current()[0];
+                    
+                    TTObject  startEvent = getTimeProcessStartEvent(aTimeProcess);
+                    TTObject  endEvent = getTimeProcessEndEvent(aTimeProcess);
+                    
+                    // if the date to start is in the middle of a time process
+                    if (getTimeEventDate(startEvent) < timeOffset && getTimeEventDate(endEvent) > timeOffset) {
+                        
+                        // go to time offset
+                        v = timeOffset - getTimeEventDate(startEvent);
+                    }
+                    
+                    else if (getTimeEventDate(startEvent) >= timeOffset)
+                        v = TTUInt32(0.);
+                    
+                    else if (getTimeEventDate(endEvent) <= timeOffset)
+                        v = TTUInt32(1.);
+                    
+                    v.append(muteRecall);
+                    
+                    aTimeProcess.send(kTTSym_Goto, v, none);
                 }
                 
-                else if (getTimeEventDate(startEvent) >= timeOffset)
-                    v = TTUInt32(0.);
-                
-                else if (getTimeEventDate(endEvent) <= timeOffset)
-                    v = TTUInt32(1.);
-                
-                v.append(muteRecall);
-                
-                aTimeProcess.send(kTTSym_Goto, v, none);
+                return kTTErrNone;
             }
-            
-            return kTTErrNone;
         }
     }
     

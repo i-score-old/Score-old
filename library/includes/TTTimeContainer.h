@@ -156,27 +156,27 @@ protected :
     /* a time container can access too the protected members of any time event or time process */
     
     /** Getter on event's name protected member
-     @param aTimeProcess    a time event object
+     @param aTimeEvent      a time event object
      @return                a name symbol */
     TTSymbol&       getTimeEventName(TTObject& aTimeEvent);
     
     /** Getter on date time event protected member
-     @param aTimeProcess    a time event object
+     @param aTimeEvent      a time event object
      @return                a date value */
     TTUInt32        getTimeEventDate(TTObject& aTimeEvent);
     
     /** Getter on event's status protected member
-     @param aTimeProcess    a time event object
+     @param aTimeEvent      a time event object
      @return                a status symbol */
-    TTSymbol&       getTimeEventStatus(TTTimeEventPtr aTimeEvent);
+    TTSymbol&       getTimeEventStatus(TTObject& aTimeEvent);
     
     /** Getter on state time event protected member
-     @param aTimeProcess    a time event object
+     @param aTimeEvent      a time event object
      @return                a state object */
     TTObject&       getTimeEventState(TTObject& aTimeEvent);
     
     /** Getter on condition time event protected member
-     @param aTimeProcess    a time event object
+     @param aTimeEvent      a time event object
      @return                a condition object */
     TTObject&       getTimeEventCondition(TTObject& aTimeEvent);
     
@@ -190,7 +190,7 @@ protected :
      @param aXmlHandler     a xml handler
      @param                 a new time event 
      @return                #TTErr*/
-    TTErr            readTimeEventFromXml(TTXmlHandlerPtr aXmlHandler, TTObject& aNewTimeEvent);
+    TTErr           readTimeEventFromXml(TTXmlHandlerPtr aXmlHandler, TTObject& aNewTimeEvent);
     
     /** Getter on process's name protected member
      @param aTimeProcess    a time process object

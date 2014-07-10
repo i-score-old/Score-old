@@ -633,7 +633,7 @@ TTErr TTTimeCondition::EventStatusChanged(const TTValue& inputValue, TTValue& ou
             
             // only apply default behavior when the container run.
             // otherwise can be called when some events were pending and then we reset them to a waiting status (like in Scenario::Compile)
-            mContainer->getAttributeValue("running", v);
+            mContainer.get("running", v);
             TTBoolean running = v[0];
             
             if (running)
