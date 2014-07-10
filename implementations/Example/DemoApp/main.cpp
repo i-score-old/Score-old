@@ -15,8 +15,7 @@ public:
     // This application is divided into four main functions
     void SetupModular();
     void SetupScore();
-    void Start();
-    void Parse(std::string command);
+    void Execute(std::string command);
     void Quit();
     
 private:
@@ -67,15 +66,10 @@ main(int argc, char **argv)
             TTLogMessage("\n*** End of Jamoma Modular and Score demonstration ***\n");
             return EXIT_SUCCESS;
         }
-        // run the interactive scenario
-        else if (!s.compare("start")) {
-            
-            app.Start();
-        }
         // parse a command and execute it
         else {
             
-            app.Parse(s);
+            app.Execute(s);
         }
     }
     while (YES);
@@ -98,7 +92,7 @@ DemoApp::SetupModular()
     mApplicationManager = TTObject("ApplicationManager");
     
     
-    TTLogMessage("\n*** Creation of mApplicationDemo and mApplicationRemote applications ***\n");
+    TTLogMessage("\n*** Creation of mApplicationDemo application ***\n");
     ////////////////////////////////////////////////////////////////////////////////
     
     // Create a local application called "demo" and get it back
@@ -172,7 +166,7 @@ DemoApp::SetupModular()
 void
 DemoApp::SetupScore()
 {
-    TTValue     out;
+    TTValue     args, out;
     TTObject    xmlHandler("XmlHandler");
     
     TTLogMessage("\n*** Initialisation of Score environnement ***\n");
@@ -188,30 +182,29 @@ DemoApp::SetupScore()
     // Create an empty Scenario
     mScenario = TTObject("Scenario");
     
+    // Register the Scenario
+    args = TTValue("/myScenario", mScenario);
+    mApplicationDemo.send("ObjectRegister", args, out);
+    
     // Read DemoScenario.score file to fill mScenario
     xmlHandler.set("object", mScenario);
     xmlHandler.send("Read", "../DemoScenario.score", out);
 }
 
 void
-DemoApp::Start()
-{
-    mScenario.send("Start");
-}
-
-void
-DemoApp::Parse(std::string command)
+DemoApp::Execute(std::string command)
 {
     // parse the command : address value
     TTValue v = TTString(command);
     v.fromString();
     
     // a command have to start by a symbol
-    if (v.size() > 1) {
+    if (v.size() >
+        0) {
         
         if (v[0].type() == kTypeSymbol) {
             
-            TTSymbol    address = v[0];
+            TTAddress   address = v[0];
             TTValue     args, out, none;
             
             args.copyFrom(v, 1);
@@ -221,10 +214,22 @@ DemoApp::Parse(std::string command)
             
             if (!err) {
                 
-                TTObject aData = out[0];
+                TTObject anObject = out[0];
                 
-                // Set data's value and check his validity
-                aData.send("Command", args, none);
+                // Special case for Data object
+                if (anObject.name() == TTSymbol("Data")) {
+                
+                    // Set data's value and check his validity
+                    anObject.send("Command", args, none);
+                }
+                else {
+                    
+                    // try to send a message to the object
+                    if (anObject.send(address.getAttribute(), args, none))
+                        
+                        // or to access an attribute
+                        anObject.set(address.getAttribute(), args);
+                }
             }
         }
     }
