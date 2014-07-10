@@ -60,6 +60,7 @@ m_endDate(PLUS_INFINITY), m_startAction(NULL), m_endAction(NULL)
 	m_events.push_back(STATIC_EVENT);
 	m_mustWaitThePetriNetToEnd = false;
 	m_petriNetToEnd = NULL;
+    m_onlyInactiveTokens = true;
 }
 
 bool Transition::isStatic()
@@ -84,6 +85,7 @@ void Transition::createBitArray() // TODO : Should be called in addInGoingArcs
 		delete m_activeArcsBitArray;
 		m_activeArcsBitArray = NULL;
 	}
+    m_onlyInactiveTokens = true;
 
 	arcList inGoingArcs = inGoingArcsOf();
 
@@ -100,6 +102,7 @@ void Transition::resetBitArray()
 	for (unsigned int i = 0 ; i < m_activeArcsBitArray->getSize() ; ++i) {
 		m_activeArcsBitArray->setToZero(i); // CB TODO : eraseArray() do that
 	}
+    m_onlyInactiveTokens = true;
 
 	if (m_startAction != NULL) {
 		m_startAction->disable();
@@ -119,6 +122,7 @@ void Transition::resetBitArray()
 void Transition::resetIncomingArcsState()
 {
 	arcList inGoingArcs = inGoingArcsOf();
+    m_onlyInactiveTokens = true;
 
 	for (unsigned int i = 0; i < inGoingArcs.size(); ++i) {
 		if(inGoingArcs[i]->isActive()) {
@@ -196,16 +200,24 @@ void Transition::setArcAsActive(Arc* arc, int timeOffset, bool recalculateArcTim
 	ExtendedInt endDate;
 
     if (timeOffset == -1) { // inactive token
-        if (m_endAction != NULL) {
-            m_endAction->disable();
+
+        if (m_onlyInactiveTokens && areAllInGoingArcsActive()) {
+
+            if (m_endAction != NULL) {
+                m_endAction->disable();
+            }
+
+            m_endAction = new PriorityTransitionAction(this, END_DEACTIVATE, 0); // date 0 for immediate action
+
+            getPetriNet()->addActionToPriorityQueue(m_endAction);
         }
-
-        m_endAction = new PriorityTransitionAction(this, END_DEACTIVATE, getPetriNet()->getCurrentTimeInMs() - 1);
-
-        getPetriNet()->addActionToPriorityQueue(m_endAction);
 
         return;
     }
+
+    // active token
+
+    m_onlyInactiveTokens = false;
 
 	if (recalculateArcTime) {
 		startDate = arc->getRelativeMinValue() - timeOffset + currentTime;
@@ -331,13 +343,13 @@ void Transition::crossTransition(bool mustChangeTokenValue, int newTokenValue)
 	set<Transition*>  transitionsToReset;
 
         int tokenValue = -1;
-        bool activeToken = false;
+//        bool activeToken = false;
 
 	for (unsigned int i = 0 ; i < inGoingArc.size() ; ++i) {
 		tokenValue = inGoingArc[i]->consumeTokenInFrom();
 
         if (newTokenValue != -1 && tokenValue != -1) {
-            activeToken = true;
+//            activeToken = true;
             if (isStatic()) {
                 tokenValue -= inGoingArc[i]->getRelativeMinValue().getValue();
             } else {
@@ -372,15 +384,15 @@ void Transition::crossTransition(bool mustChangeTokenValue, int newTokenValue)
 
 	if (m_externActions.size() > 0) {
 		for (unsigned int i = 0 ; i < m_externActions.size() ; ++i) {
-            m_externActions[i]->m_transitionAction(m_externActions[i]->m_transitionActionArgument, activeToken);
+            m_externActions[i]->m_transitionAction(m_externActions[i]->m_transitionActionArgument, newTokenValue != -1);
 		}
 	}
 
-    if (!activeToken) {
-        tokenValue = -1;
-    } else if (mustChangeTokenValue) {
+//    if (!activeToken) {
+//        tokenValue = -1;
+//    } else if (mustChangeTokenValue) {
         tokenValue = newTokenValue;
-    }
+//    }
 
 	for (unsigned int i = 0 ; i < outGoingArc.size() ; ++i) {
 		outGoingArc[i]->produceTokenInTo(tokenValue);

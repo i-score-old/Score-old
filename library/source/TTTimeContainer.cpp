@@ -146,7 +146,8 @@ TTErr TTTimeContainer::getTimeConditions(TTValue& value)
 TTErr TTTimeContainer::Next(const TTValue& inputValue, TTValue& outputValue)
 {
     TTTimeEventPtr  aTimeEvent;
-    TTBoolean       found = NO;
+    TTList          eventsToTrigger;
+    TTUInt32        found = 0;
     
     if (!mRunning)
         return kTTErrGeneric;
@@ -161,18 +162,44 @@ TTErr TTTimeContainer::Next(const TTValue& inputValue, TTValue& outputValue)
         
         if (getTimeEventStatus(aTimeEvent) == kTTSym_eventPending) {
             
-            found = YES;
-            break;
+            // if no argument : trigger the first pending event
+            if (inputValue.size() == 0) {
+                
+                found = 1;
+                eventsToTrigger.append(TTObjectBasePtr(aTimeEvent));
+                break;
+            }
+            // else : is this event part of the events to trigger ?
+            else {
+                
+                found++;
+                
+                for (TTUInt32 i = 0; i < inputValue.size(); i++) {
+                
+                    TTUInt32 id = inputValue[i];
+                    
+                    if (id == found) {
+                        
+                        eventsToTrigger.append(TTObjectBasePtr(aTimeEvent));
+                        break;
+                    }
+                }
+            }
         }
     }
     
-    if (found) {
-        
-        outputValue = TTObjectBasePtr(aTimeEvent);
-        return aTimeEvent->sendMessage("Trigger");
-    }
-    else
+    if (eventsToTrigger.isEmpty())
         return kTTErrGeneric;
+    
+    for (eventsToTrigger.begin(); eventsToTrigger.end(); eventsToTrigger.next()) {
+        
+        aTimeEvent = TTTimeEventPtr(TTObjectBasePtr(eventsToTrigger.current()[0]));
+        
+        outputValue.append(TTObjectBasePtr(aTimeEvent));
+        aTimeEvent->sendMessage("Trigger");
+    }
+
+    return kTTErrNone;
 }
 
 TTErr TTTimeContainer::TimeEventFind(const TTValue& inputValue, TTValue& outputValue)

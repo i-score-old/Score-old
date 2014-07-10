@@ -53,9 +53,9 @@ private :
      @return                kTTErrGeneric if mTimeConditionList is empty */
     TTErr           getTimeConditions(TTValue& value);
     
-    /** Trigger the next pending time event
-     @param inputvalue      nothing
-     @param outputvalue     the triggered time event
+    /** Trigger next pending time events
+     @param inputvalue      nothing or any event pending passing there position in the list of pending event (ex : 1 3 if there is 3 or more pending events and we want to trigger the first and the third events)
+     @param outputvalue     the triggered time events
      @return                an error code if there is no next pending time event */
     TTErr           Next(const TTValue& inputValue, TTValue& outputValue);
     

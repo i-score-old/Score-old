@@ -56,6 +56,8 @@ protected :
     
     TTBoolean                       mCompiled;                      ///< a boolean flag to know if the compile method needs to be called or not (uselly after an event date change)
     
+    TTBoolean                       mExternalTick;                  ///< a boolean flag to ease the access to the scheduler externalTick attribute
+    
 private :
     
     TTObject                        mStartEvent;                    ///< the event object which handles the time process execution start
@@ -252,6 +254,11 @@ private :
         this method eases the managment of the scheduler object
      @return                an error code if the resume fails */
     TTErr           Resume();
+    
+    /** Drive the time process progression
+     this method eases the managment of the scheduler object
+     @return                an error code if the tick fails */
+    TTErr           Tick();
     
     /** To be notified when an event date changed
      @param inputValue      the event which have changed his date

@@ -32,7 +32,8 @@ mMute(NO),
 mVerticalPosition(0),
 mVerticalSize(1),
 mRunning(NO),
-mCompiled(NO)
+mCompiled(NO),
+mExternalTick(NO)
 {
     TT_ASSERT("Correct number of args to create TTTimeProcess", arguments.size() == 1);
     
@@ -56,6 +57,8 @@ mCompiled(NO)
     
     addAttribute(Compiled, kTypeBoolean);
     addAttributeProperty(Compiled, readOnly, YES);
+    
+    addAttribute(ExternalTick, kTypeBoolean);
     
     addAttributeWithSetter(Color, kTypeLocalValue);
     addAttribute(VerticalPosition, kTypeUInt32);
@@ -111,6 +114,7 @@ mCompiled(NO)
     addMessage(Stop);
     addMessage(Pause);
     addMessage(Resume);
+    addMessage(Tick);
     
 	// needed to be handled by a TTXmlHandler
 	addMessageWithArguments(WriteAsXml);
@@ -481,9 +485,9 @@ TTErr TTTimeProcess::Play()
         v = TTFloat64(end - start);
         mScheduler.set(kTTSym_duration, v);
         
-        mScheduler.send(kTTSym_Go);
+        mScheduler.set("externalTick", mExternalTick);
         
-        return kTTErrNone;
+        return mScheduler.send(kTTSym_Go);
     }
     
     return kTTErrGeneric;
@@ -513,6 +517,14 @@ TTErr TTTimeProcess::Resume()
     mScheduler.send(kTTSym_Resume);
     
     return ProcessPaused(TTBoolean(NO), none);
+}
+
+TTErr TTTimeProcess::Tick()
+{
+    if (mExternalTick && mRunning)
+        return mScheduler->sendMessage(kTTSym_Tick);
+    else
+        return kTTErrGeneric;
 }
 
 #if 0
