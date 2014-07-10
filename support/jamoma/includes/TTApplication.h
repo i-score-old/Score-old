@@ -63,6 +63,7 @@ private:
 	
 	TTBoolean					mActivity;			///< ATTRIBUTE : enable the activity mechanism
     TTBoolean					mDebug;				///< ATTRIBUTE : to enable the debug mode for the application (default : NO)
+	TTBoolean					mLearn;             ///< ATTRIBUTE : enable the learning mechanism (see in UpdateAttribute)
 
 	TTHash                      mCachedAttributes;  ///< ATTRIBUTE : all attribute names which need to be cached by a mirror application to reduce the number of network requests
     
@@ -211,6 +212,12 @@ private:
      @param outputValue     the registered object
      @return #TTErr error code */
 	TTErr ObjectRetreive(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Send any value to a registered object into the application directory at an address
+     @param inputValue      an address:attribute followed by any value
+     @param outputValue     nothing
+     @return #TTErr error code */
+    TTErr ObjectSend(const TTValue& inputValue, TTValue& outputValue);
 
 #if 0
 #pragma mark -
@@ -265,14 +272,22 @@ private:
      @param aXmlHandler     a xml handler object
      @seealso ReadFromXml */
     void readNodeFromXml(TTXmlHandlerPtr aXmlHandler);
+
+	/* Instantiate and register a #TTData object
+     note : this a temporary message to allow proxy data creation
+     @param inputValue      an address, service of the data
+     @param outputValue     the new object 
+	 @return #TTErr error code */
+    TTErr ProxyDataInstantiate(const TTValue& inputValue, TTValue& outputValue);
     
     /**  Convenient method used to create a mirror object
      @param aProtocol       a protocol object
      @param anAddress       where to register the mirror object
      @param objectName      object type to mirror
+     @param attributesName  attributes of the object to mirror
      @return #TTObjectBasePtr
      @seealso readNodeFromXml */
-    TTObjectBasePtr appendMirrorObject(ProtocolPtr aProtocol, TTAddress anAddress, TTSymbol objectName);
+    TTObjectBasePtr appendMirrorObject(ProtocolPtr aProtocol, TTAddress anAddress, TTSymbol objectName, TTValue& attributesName);
     
     /**  Convenient method used to create a data object
      @param aProtocol       a protocol object
