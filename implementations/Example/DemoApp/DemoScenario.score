@@ -18,10 +18,14 @@
     <curve active="1" redundancy="0" sampleRate="40u" function="0.000000 0.000000 1.000000 1.000000 1.000000 1.000000"/>
    </indexedCurves>
   </Automation>
+  <Interval name="Wait before to Fade Out" start="End Fade In" end="Start Fade Out"/>
   <Automation name="Fade Out" start="Start Fade Out" end="End Fade Out">
    <indexedCurves address="demo:/myParameter">
     <curve active="1" redundancy="0" sampleRate="40u" function="0.000000 1.000000 1.000000 1.000000 0.000000 1.000000"/>
    </indexedCurves>
   </Automation>
+  <condition name="Wait for a key">
+      <case event="Start Fade Out" trigger="demo:/myMessage == a" default="1"/>
+  </condition>
  </Scenario>
 </jamoma>
