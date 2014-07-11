@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
 <jamoma version="0.6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jamoma.org/ file:jamoma.xsd">
- <Scenario name="Main">
+ <Scenario name="Demo Scenario">
   <event name="Start Fade In" date="1000u">
    <command address="demo:/myParameter">0</command>
   </event>
@@ -25,7 +25,7 @@
    </indexedCurves>
   </Automation>
   <condition name="Wait for a key">
-      <case event="Start Fade Out" trigger="demo:/myMessage == a" default="1"/>
+    <case event="Start Fade Out" trigger="demo:/myMessage == a" default="1"/>
   </condition>
  </Scenario>
 </jamoma>
