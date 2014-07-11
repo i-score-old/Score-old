@@ -219,7 +219,7 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
                 
                 // if a condition is ready we activate it
                 aTimeCondition.get(kTTSym_ready, v);
-                aTimeCondition.get(kTTSym_active, v);
+                aTimeCondition.set(kTTSym_active, v);
             }
             
             // propagate the tick to all the time process
