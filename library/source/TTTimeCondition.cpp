@@ -758,11 +758,11 @@ TTErr TTTimeConditionReceiverReturnValueCallback(const TTValue& baton, const TTV
             if (anAddress == triggerExp.getAddress() && triggerExp.evaluate(data)) {
                 
                 // append the event to the trigger list
-                timeEventToTrigger.append(TTObjectBasePtr(it->first));
+                timeEventToTrigger.append(TTObject(it->first));
             } else {
                 
                 // append the event to the dispose list
-                timeEventToDispose.append(TTObjectBasePtr(it->first));
+                timeEventToDispose.append(TTObject(it->first));
             }
         }
         
