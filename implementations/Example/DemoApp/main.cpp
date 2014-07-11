@@ -15,7 +15,7 @@ public:
     // This application is divided into four main functions
     void SetupModular();
     void SetupScore();
-    void Execute(std::string command);
+    void SetMessage(std::string s);
     void Quit();
     
 private:
@@ -23,6 +23,9 @@ private:
     // Declare the application manager and our application
     TTObject mApplicationManager;
     TTObject mApplicationDemo;
+    
+    // Declare callbacks used to observe scenario execution
+    TTObject mEventStatusChangedCallback;
     
 public:
     
@@ -34,12 +37,16 @@ public:
     // Declare publicly the scenario to retreive it from the callback function
     TTObject mScenario;
     
-    // Be friend with the callback function
-    friend TTErr DemoAppDataReturnValueCallback(const TTValue& baton, const TTValue& v);
+    // Be friend with each callback function
+    friend TTErr DemoAppDataReturnValueCallback(const TTValue& baton, const TTValue& value);
+    friend TTErr DemoAppEventStatusChangedCallback(const TTValue& baton, const TTValue& value);
 };
 
 // Callback function to get data's value back
-TTErr DemoAppDataReturnValueCallback(const TTValue& baton, const TTValue& v);
+TTErr DemoAppDataReturnValueCallback(const TTValue& baton, const TTValue& value);
+
+// Callback function to be notified when an event status is changing
+TTErr DemoAppEventStatusChangedCallback(const TTValue& baton, const TTValue& value);
 
 int
 main(int argc, char **argv) 
@@ -66,10 +73,10 @@ main(int argc, char **argv)
             TTLogMessage("\n*** End of Jamoma Modular and Score demonstration ***\n");
             return EXIT_SUCCESS;
         }
-        // parse a command and execute it
+        // update mDataDemoMessage data with the command
         else {
             
-            app.Execute(s);
+            app.SetMessage(s);
         }
     }
     while (YES);
@@ -93,7 +100,7 @@ DemoApp::SetupModular()
     
     
     TTLogMessage("\n*** Creation of mApplicationDemo application ***\n");
-    ////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////
     
     // Create a local application called "demo" and get it back
     err = mApplicationManager.send("ApplicationInstantiateLocal", "demo", out);
@@ -107,7 +114,7 @@ DemoApp::SetupModular()
     
     
 	TTLogMessage("\n*** Creation of mApplicationDemo datas ***\n");
-    /////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////
     
     // Create a parameter data and set its callback function and baton and some attributes
     mDataDemoParameter = TTObject("Data", "parameter");
@@ -121,8 +128,7 @@ DemoApp::SetupModular()
     mDataDemoParameter.set("type", "decimal");
     mDataDemoParameter.set("rangeBounds", TTValue(0., 1.));
     mDataDemoParameter.set("rangeClipmode", "low");
-    mDataDemoParameter.set("rampDrive", "System");
-    mDataDemoParameter.set("description", "control the speed of the scenario");
+    mDataDemoParameter.set("description", "any information relative to the state of the application");
     
     // Register the parameter data into mApplicationDemo at an address
     args = TTValue("/myParameter", mDataDemoParameter);
@@ -138,8 +144,8 @@ DemoApp::SetupModular()
     mDataDemoMessage.set("function", TTPtr(&DemoAppDataReturnValueCallback));
     
     // Setup the data attributes depending of its use inside the application
-    mDataDemoMessage.set("type", "none");
-    mDataDemoMessage.set("description", "start the playing of the scenario from the beginning");
+    mDataDemoMessage.set("type", "string");
+    mDataDemoMessage.set("description", "any information to provide to the application");
     
     // Register the message data into mApplicationDemo at an address
     args = TTValue("/myMessage", mDataDemoMessage);
@@ -156,7 +162,7 @@ DemoApp::SetupModular()
 
     // Setup the data attributes depending of its use inside the application
     mDataDemoReturn.set("type", "integer");
-    mDataDemoReturn.set("description", "return the time progression in millis second");
+    mDataDemoReturn.set("description", "any information the application returns back");
     
     // Register the return data into mApplicationDemo at an address
     args = TTValue("/myReturn", mDataDemoReturn);
@@ -177,62 +183,52 @@ DemoApp::SetupScore()
     
     
     TTLogMessage("\n*** Reading of an interactive scenario file ***\n");
-    ////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////
     
     // Create an empty Scenario
     mScenario = TTObject("Scenario");
     
-    // Register the Scenario
-    args = TTValue("/myScenario", mScenario);
-    mApplicationDemo.send("ObjectRegister", args, out);
-    
     // Read DemoScenario.score file to fill mScenario
     xmlHandler.set("object", mScenario);
     xmlHandler.send("Read", "../DemoScenario.score", out);
+    
+    
+    TTLogMessage("\n*** Prepare scenario observation ***\n");
+    /////////////////////////////////////////////////////////////////////
+    
+    // Create a callback for the "EventStatusChanged" notification sent by each event
+    mEventStatusChangedCallback = TTObject("callback");
+    mEventStatusChangedCallback.set("baton", TTPtr(this));
+    mEventStatusChangedCallback.set("function", TTPtr(&DemoAppEventStatusChangedCallback));
+    mEventStatusChangedCallback.set("notification", TTSymbol("EventStatusChanged"));
+    
+    // Get all events of the scenario and attach a callback to them
+    TTValue timeEvents;
+    mScenario.get("timeEvents", timeEvents);
+    
+    for (TTElementIter it = timeEvents.begin() ; it != timeEvents.end() ; it++) {
+        TTObject event = TTElement(*it);
+        event.registerObserverForNotifications(mEventStatusChangedCallback);
+    }
+    
+    
+    TTLogMessage("\n*** Start scenario execution ***\n");
+    /////////////////////////////////////////////////////////////////////
+    
+    // Set the execution speed of the scenario
+    mScenario.set("speed", 0.5);
+    
+    // Start the scenario
+    mScenario.send("Start");
 }
 
 void
-DemoApp::Execute(std::string command)
+DemoApp::SetMessage(std::string s)
 {
-    // parse the command : address value
-    TTValue v = TTString(command);
-    v.fromString();
+    TTSymbol message(s);
+    TTValue out;
     
-    // a command have to start by a symbol
-    if (v.size() >
-        0) {
-        
-        if (v[0].type() == kTypeSymbol) {
-            
-            TTAddress   address = v[0];
-            TTValue     args, out, none;
-            
-            args.copyFrom(v, 1);
-            
-            // Retreive a data object
-            TTErr err = mApplicationDemo.send("ObjectRetreive", address, out);
-            
-            if (!err) {
-                
-                TTObject anObject = out[0];
-                
-                // Special case for Data object
-                if (anObject.name() == TTSymbol("Data")) {
-                
-                    // Set data's value and check his validity
-                    anObject.send("Command", args, none);
-                }
-                else {
-                    
-                    // try to send a message to the object
-                    if (anObject.send(address.getAttribute(), args, none))
-                        
-                        // or to access an attribute
-                        anObject.set(address.getAttribute(), args);
-                }
-            }
-        }
-    }
+    mDataDemoMessage.send("Command", message, out);
 }
 
 void
@@ -241,7 +237,7 @@ DemoApp::Quit()
     TTValue out;
 
     TTLogMessage("\n*** Release mApplicationDemo datas ***\n");
-    /////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////
     
     // Unregister the parameter
     if ( mApplicationDemo.send("ObjectUnregister", "/myParameter", out))
@@ -257,7 +253,7 @@ DemoApp::Quit()
     
     
     TTLogMessage("\n*** Release application ***\n");
-    //////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////
     
     mApplicationManager.send("ApplicationRelease", "demo", out);
 }
@@ -291,4 +287,23 @@ DemoAppDataReturnValueCallback(const TTValue& baton, const TTValue& value)
     }
     
     return kTTErrGeneric;
+}
+
+TTErr
+DemoAppEventStatusChangedCallback(const TTValue& baton, const TTValue& value)
+{
+    DemoApp*    demoApp = (DemoApp*)TTPtr(baton[0]);
+    
+    TTObject    event = value[0];
+    TTSymbol    newStatus = value[1];
+    TTSymbol    oldStatus = value[2];
+    
+    // get the name of the event
+    TTSymbol    name;
+    event.get("name", name);
+    
+    // print the event status
+    TTLogMessage("%s status : %s \n", name.c_str(), newStatus.c_str());
+    
+    return kTTErrNone;
 }
