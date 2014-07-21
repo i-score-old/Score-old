@@ -18,7 +18,7 @@ Installing
 
 3 : give you a full access (read+write) on /usr/local/lib folder.
 
-4 : in the terminal run the build script from the Score folder : 
+4 : in the terminal run the build script from the Score folder :     
     ./build.rb dev clean
 
 Documentation / API
