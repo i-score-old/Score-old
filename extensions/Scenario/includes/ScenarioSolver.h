@@ -25,7 +25,7 @@ typedef Solver* SolverPtr;
 
 using namespace std;
 
-/** A type to define an unordered map to store and retreive Solver objects */
+/** A type to define an unordered map to store and retrieve Solver objects */
 #ifdef TT_PLATFORM_WIN
     #include <hash_map>
     using namespace stdext;	// Visual Studio 2008 puts the hash_map in this namespace
