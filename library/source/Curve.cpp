@@ -137,7 +137,7 @@ TTErr Curve::setFunctionParameters(const TTValue& value)
         mRecorded = NO;
         
         // set function curve list
-        mFunction.get("curveList", curveList);
+        mFunction.set("curveList", curveList);
         
         // sample the curve
         mSampled = NO;
