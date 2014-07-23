@@ -18,8 +18,8 @@
 #ifndef __CURVE_H__
 #define __CURVE_H__
 
-#include "TimePluginLib.h"
-#include "Automation.h"
+#include "TTScoreIncludes.h"
+
 #include <libxml/encoding.h>
 #include <libxml/xmlwriter.h>
 #include <libxml/xmlreader.h>

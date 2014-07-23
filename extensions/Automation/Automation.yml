@@ -2,9 +2,9 @@
 #  - TIME_PROCESS_DEBUG
 
 sources:
-  - ../TimePluginLib.cpp	
+  - ../TimePluginLib.cpp
   - source/Automation.cpp
-  - source/Curve.cpp
+  - ../../library/source/Curve.cpp
   
 includes:
   - "."

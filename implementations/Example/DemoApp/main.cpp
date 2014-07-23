@@ -167,6 +167,10 @@ DemoApp::SetupModular()
     // Register the return data into mApplicationDemo at an address
     args = TTValue("/myReturn", mDataDemoReturn);
     mApplicationDemo.send("ObjectRegister", args, out);
+    
+    mDataDemoReturn.send("Command", 0, out);
+    
+    mApplicationDemo.send("Init");
 }
 
 void
