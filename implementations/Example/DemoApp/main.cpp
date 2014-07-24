@@ -162,14 +162,14 @@ DemoApp::SetupModular()
 
     // Setup the data attributes depending of its use inside the application
     mDataDemoReturn.set("type", "integer");
+    mDataDemoReturn.set("defaultValue", 0);
     mDataDemoReturn.set("description", "any information the application returns back");
     
     // Register the return data into mApplicationDemo at an address
     args = TTValue("/myReturn", mDataDemoReturn);
     mApplicationDemo.send("ObjectRegister", args, out);
     
-    mDataDemoReturn.send("Command", 0, out);
-    
+    // Initialise the application and all datas inside (using defaultValue attribute)
     mApplicationDemo.send("Init");
 }
 
