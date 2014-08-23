@@ -138,7 +138,7 @@ mExternalTick(NO)
     TTValue args = TTValue((TTPtr)&TTTimeProcessSchedulerCallback);
     args.append((TTPtr)this);   // we have to store this as a pointer for Scheduler
     
-    mScheduler = TTObject("System", args);
+    mScheduler = TTObject("system", args);
     
 	if (!mScheduler.valid()) {
 		logError("TimeProcess failed to load the System Scheduler");
