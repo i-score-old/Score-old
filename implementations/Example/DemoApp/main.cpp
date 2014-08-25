@@ -220,7 +220,7 @@ DemoApp::SetupScore()
     /////////////////////////////////////////////////////////////////////
     
     // Set the execution speed of the scenario
-    mScenario.set("speed", 0.5);
+    mScenario.set("speed", 2.);
     
     // Start the scenario
     mScenario.send("Start");
