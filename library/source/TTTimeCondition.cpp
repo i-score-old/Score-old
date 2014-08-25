@@ -85,7 +85,20 @@ TTTimeCondition::~TTTimeCondition()
             TTObjectBasePtr(it->first)->setAttributeValue(kTTSym_condition, empty);
     }
     
-    // destroy all receivers;
+    // remove all receivers
+    TTValue     keys, v;
+    TTSymbol    key;
+    TTObject    aReceiver;
+    
+    mReceivers.getKeys(keys);
+    for (TTUInt32 i = 0; i < keys.size(); i++) {
+        
+        key = keys[i];
+        mReceivers.lookup(key, v);
+        aReceiver = v[0];
+        
+        aReceiver.set(kTTSym_address, kTTAdrsEmpty);
+    }
     mReceivers.clear();
 }
 
@@ -118,6 +131,20 @@ TTErr TTTimeCondition::setActive(const TTValue& value)
             
             mActive = NO;
             
+            // remove all receivers
+            TTValue     keys, v;
+            TTSymbol    key;
+            TTObject    aReceiver;
+            
+            mReceivers.getKeys(keys);
+            for (TTUInt32 i = 0; i < keys.size(); i++) {
+                
+                key = keys[i];
+                mReceivers.lookup(key, v);
+                aReceiver = v[0];
+                
+                aReceiver.set(kTTSym_address, kTTAdrsEmpty);
+            }
             mReceivers.clear();
             
             return kTTErrNone;
@@ -684,13 +711,11 @@ void TTTimeCondition::addReceiver(TTAddress anAddress)
         
         aReceiver = TTObject(kTTSym_Receiver, v);
         
-        // set the address of the receiver
-        aReceiver.set(kTTSym_address, anAddress);
-        
+        // register the receiver
         mReceivers.append(anAddress, aReceiver);
-
-		// try to get the current value
-        aReceiver.send(kTTSym_Get);
+        
+        // set the address of the receiver (and this will try to get the current vaalue)
+        aReceiver.set(kTTSym_address, anAddress);
     }
 }
 
