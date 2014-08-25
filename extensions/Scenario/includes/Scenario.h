@@ -19,7 +19,10 @@
 #define __SCENARIO_H__
 
 #include "TimePluginLib.h"
+
+#ifndef NO_EDITION_SOLVER
 #include "ScenarioSolver.h"
+#endif
 
 #ifndef NO_EXECUTION_GRAPH
 #include "ScenarioGraph.h"
@@ -41,11 +44,12 @@ class Scenario : public TimeContainerPlugin {
     
     TTValue                     mViewZoom;                      ///< the zoom factor (x and y) into the scenario view (useful for gui)
     TTValue                     mViewPosition;                  ///< the position (x and y) of the scenario view (useful for gui)
-    
+#ifndef NO_EDITION_SOLVER
     SolverPtr                   mEditionSolver;                 ///< an internal gecode solver to assist scenario edition
     SolverObjectMap             mVariablesMap;                  ///< an internal map to store and retreive SolverVariablePtr using TTTimeEventPtr
     SolverObjectMap             mConstraintsMap;                ///< an internal map to store and retreive SolverConstraintPtr using TTTimeProcessPtr
     SolverObjectMap             mRelationsMap;                  ///< an internal map to store and retreive SolverRelationPtr using TTTimeProcessPtr
+#endif
 #ifndef NO_EXECUTION_GRAPH
     GraphPtr                    mExecutionGraph;                ///< an internal petri net to execute the scenario according time event relations
 

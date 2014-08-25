@@ -15,6 +15,8 @@
  * http://www.cecill.info
  */
 
+#ifndef NO_EDITION_SOLVER
+
 #ifndef __SCENARIO_SOLVER_H__
 #define __SCENARIO_SOLVER_H__
 
@@ -171,3 +173,5 @@ typedef SolverRelation* SolverRelationPtr;
 
 
 #endif // __SCENARIO_SOLVER_H__
+
+#endif // NO_EDITION_SOLVER

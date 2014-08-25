@@ -30,7 +30,9 @@ TIME_CONTAINER_PLUGIN_CONSTRUCTOR,
 mNamespace(NULL),
 mViewZoom(TTValue(1., 1.)),
 mViewPosition(TTValue(0, 0)),
+#ifndef NO_EDITION_SOLVER
 mEditionSolver(NULL),
+#endif
 #ifndef NO_EXECUTION_GRAPH
 mExecutionGraph(NULL),
 #endif
@@ -46,10 +48,10 @@ mLoading(NO)
 #ifndef NO_EXECUTION_GRAPH
     addMessage(Compile);
 #endif
-    
+#ifndef NO_EDITION_SOLVER
     // Create the edition solver
     mEditionSolver = new Solver();
-
+#endif
 #ifndef NO_EXECUTION_GRAPH
     // Create extended int
     plusInfinity = ExtendedInt(PLUS_INFINITY, 0);
@@ -88,12 +90,12 @@ Scenario::~Scenario()
         delete mNamespace;
         mNamespace = NULL;
     }
-    
+#ifndef NO_EDITION_SOLVER
     if (mEditionSolver) {
         delete mEditionSolver;
         mEditionSolver = NULL;
     }
-    
+#endif
 #ifndef NO_EXECUTION_GRAPH
     if (mExecutionGraph) {
         delete mExecutionGraph;
@@ -501,8 +503,9 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 	TTXmlHandlerPtr aXmlHandler = (TTXmlHandlerPtr)o.instance();
     if (!aXmlHandler)
 		return kTTErrGeneric;
-    
+#ifndef NO_EDITION_SOLVER
     SolverObjectMapIterator itSolver;
+#endif
     TTValue                 v;
     
     // When reading a sub scenario
@@ -539,7 +542,7 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         // clear all data structures
         mTimeEventList.clear();
         mTimeProcessList.clear();
-        
+#ifndef NO_EDITION_SOLVER
         for (itSolver = mVariablesMap.begin() ; itSolver != mVariablesMap.end() ; itSolver++)
             delete (SolverVariablePtr)itSolver->second;
         
@@ -557,7 +560,7 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         
         delete mEditionSolver;
         mEditionSolver = new Solver();
-        
+#endif
 #ifndef NO_EXECUTION_GRAPH
         clearGraph();
 #endif
@@ -780,13 +783,13 @@ TTErr Scenario::TimeEventCreate(const TTValue& inputValue, TTValue& outputValue)
             // store time event object and observers
             mTimeEventList.append(aCacheElement);
             mTimeEventList.sort(&TTTimeEventCompareDate);
-            
+#ifndef NO_EDITION_SOLVER
             // add variable to the solver
             SolverVariablePtr variable = new SolverVariable(mEditionSolver, aTimeEvent, TTUInt32(scenarioDuration[0]));
             
             // store the variable relative to the time event
             mVariablesMap.emplace(aTimeEvent.instance(), variable);
-            
+#endif
             // return the time event
             outputValue = aTimeEvent;
             
@@ -801,9 +804,11 @@ TTErr Scenario::TimeEventRelease(const TTValue& inputValue, TTValue& outputValue
 {
     TTObject                aTimeEvent;
     TTValue                 v, aCacheElement;
+#ifndef NO_EDITION_SOLVER
     TTBoolean               found;
     SolverVariablePtr       variable;
     SolverObjectMapIterator it;
+#endif
     
     if (inputValue.size() == 1) {
         
@@ -830,7 +835,7 @@ TTErr Scenario::TimeEventRelease(const TTValue& inputValue, TTValue& outputValue
                     
                     // delete all observers
                     deleteTimeEventCacheElement(aCacheElement);
-                    
+#ifndef NO_EDITION_SOLVER
                     // retreive solver variable relative to each event
                     it = mVariablesMap.find(aTimeEvent.instance());
                     variable = SolverVariablePtr(it->second);
@@ -858,7 +863,7 @@ TTErr Scenario::TimeEventRelease(const TTValue& inputValue, TTValue& outputValue
                         mVariablesMap.erase(aTimeEvent.instance());
                         delete variable;
                     }
-                    
+#endif
                     return kTTErrNone;
                 }
             }
@@ -871,9 +876,11 @@ TTErr Scenario::TimeEventRelease(const TTValue& inputValue, TTValue& outputValue
 TTErr Scenario::TimeEventMove(const TTValue& inputValue, TTValue& outputValue)
 {
     TTObject                aTimeEvent, thisObject(this);
+#ifndef NO_EDITION_SOLVER
     SolverVariablePtr       variable;
     SolverObjectMapIterator it;
     SolverError             sErr;
+#endif
     TTValue                 scenarioDuration;
     
     // can't move an event during a load
@@ -894,7 +901,7 @@ TTErr Scenario::TimeEventMove(const TTValue& inputValue, TTValue& outputValue)
                 TTLogError("Scenario::TimeEventMove : event moved beyond the duration of its container\n");
                 return kTTErrGeneric;
             }
-            
+#ifndef NO_EDITION_SOLVER
             // retreive solver variable relative to the time event
             it = mVariablesMap.find(aTimeEvent.instance());
             variable = SolverVariablePtr(it->second);
@@ -921,6 +928,7 @@ TTErr Scenario::TimeEventMove(const TTValue& inputValue, TTValue& outputValue)
                 
                 return kTTErrNone;
             }
+#endif
         }
     }
     
@@ -933,8 +941,9 @@ TTErr Scenario::TimeEventCondition(const TTValue& inputValue, TTValue& outputVal
     TTObject    aTimeCondition;
     TTObject    aTimeProcess;
     TTValue     v, aCacheElement;
+#ifndef NO_EDITION_SOLVER
     SolverObjectMapIterator it;
-    
+#endif
     if (inputValue.size() == 2) {
         
         if (inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeObject) {
@@ -1050,8 +1059,9 @@ TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue
     TTObject    aFormerTimeEvent, aNewTimeEvent;
     TTObject    aTimeProcess;
     TTValue     v, aCacheElement;
+#ifndef NO_EDITION_SOLVER
     SolverObjectMapIterator it;
-    
+#endif
     if (inputValue.size() == 2) {
         
         if (inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeObject) {
@@ -1102,7 +1112,7 @@ TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue
                     aTimeProcess.set(kTTSym_rigid, v);
                 }
             }
-            
+#ifndef NO_EDITION_SOLVER
             // retreive solver variable relative to the time event
             it = mVariablesMap.find(aFormerTimeEvent.instance());
             SolverVariablePtr variable = SolverVariablePtr(it->second);
@@ -1117,7 +1127,7 @@ TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue
             // update the variables map
             mVariablesMap.erase(aFormerTimeEvent.instance());
             mVariablesMap.emplace(aNewTimeEvent.instance(), variable);
-            
+#endif
             return kTTErrNone;
         }
     }
@@ -1131,9 +1141,10 @@ TTErr Scenario::TimeProcessCreate(const TTValue& inputValue, TTValue& outputValu
     TTObject    aTimeProcess;
     TTValue     args, aCacheElement;
     TTValue     duration, scenarioDuration;
+#ifndef NO_EDITION_SOLVER
     SolverVariablePtr       startVariable, endVariable;
     SolverObjectMapIterator it;
-    
+#endif
     if (inputValue.size() == 3) {
         
         if (inputValue[0].type() == kTypeSymbol && inputValue[1].type() == kTypeObject && inputValue[2].type() == kTypeObject) {
@@ -1165,10 +1176,10 @@ TTErr Scenario::TimeProcessCreate(const TTValue& inputValue, TTValue& outputValu
                 
                 // store time process object and observers
                 mTimeProcessList.append(aCacheElement);
-                
+#ifndef NO_EDITION_SOLVER
                 // get scenario duration
                 this->getAttributeValue(kTTSym_duration, scenarioDuration);
-                
+
                 // retreive solver variable relative to each event
                 it = mVariablesMap.find(getTimeProcessStartEvent(aTimeProcess).instance());
                 startVariable = SolverVariablePtr(it->second);
@@ -1184,7 +1195,7 @@ TTErr Scenario::TimeProcessCreate(const TTValue& inputValue, TTValue& outputValu
                     
                     // store the relation relative to this time process
                     mRelationsMap.emplace(aTimeProcess.instance(), relation);
-                    
+
                 }
                 else {
                     
@@ -1199,7 +1210,7 @@ TTErr Scenario::TimeProcessCreate(const TTValue& inputValue, TTValue& outputValu
                     mConstraintsMap.emplace(aTimeProcess.instance(), constraint);
                     
                 }
-                
+#endif
                 // return the time process
                 outputValue = aTimeProcess;
                 
@@ -1215,8 +1226,9 @@ TTErr Scenario::TimeProcessRelease(const TTValue& inputValue, TTValue& outputVal
 {
     TTObject    aTimeProcess;
     TTValue     aCacheElement;
+#ifndef NO_EDITION_SOLVER
     SolverObjectMapIterator it;
-    
+#endif
     if (inputValue.size() == 1) {
         
         if (inputValue[0].type() == kTypeObject) {
@@ -1237,7 +1249,7 @@ TTErr Scenario::TimeProcessRelease(const TTValue& inputValue, TTValue& outputVal
                 
                 // delete all observers
                 deleteTimeProcessCacheElement(aCacheElement);
-                
+#ifndef NO_EDITION_SOLVER
                 // update the Solver depending on the type of the time process
                 if (aTimeProcess.name() == TTSymbol("Interval")) {
                     
@@ -1257,7 +1269,7 @@ TTErr Scenario::TimeProcessRelease(const TTValue& inputValue, TTValue& outputVal
                     mConstraintsMap.erase(aTimeProcess.instance());
                     delete constraint;
                 }
-                
+#endif
                 // fill outputValue with start and event
                 outputValue.resize(2);
                 outputValue[0] = getTimeProcessStartEvent(aTimeProcess);
@@ -1277,9 +1289,10 @@ TTErr Scenario::TimeProcessMove(const TTValue& inputValue, TTValue& outputValue)
     TTValue     v;
     TTValue     duration, scenarioDuration;
     TTSymbol    timeProcessType;
+#ifndef NO_EDITION_SOLVER
     SolverObjectMapIterator it;
     SolverError             sErr;
-    
+#endif
     // can't move a process during a load
     if (mLoading)
         return kTTErrGeneric;
@@ -1302,7 +1315,7 @@ TTErr Scenario::TimeProcessMove(const TTValue& inputValue, TTValue& outputValue)
                 TTLogError("Scenario::TimeProcessMove : process moved beyond the duration of its container\n");
                 return kTTErrGeneric;
             }
-            
+#ifndef NO_EDITION_SOLVER
             // update the Solver depending on the type of the time process
             timeProcessType = aTimeProcess.name();
             
@@ -1339,6 +1352,9 @@ TTErr Scenario::TimeProcessMove(const TTValue& inputValue, TTValue& outputValue)
                 
                 return kTTErrNone;
             }
+#else
+            return kTTErrNone;
+#endif
         }
     }
     
@@ -1350,15 +1366,16 @@ TTErr Scenario::TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue
     TTObject    aTimeProcess;
     TTValue     durationMin, durationMax;
     TTSymbol    timeProcessType;
+#ifndef NO_EDITION_SOLVER
     SolverObjectMapIterator it;
     SolverError             sErr;
-    
+#endif
     if (inputValue.size() == 3) {
         
         if (inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeUInt32 && inputValue[2].type() == kTypeUInt32) {
             
             aTimeProcess =inputValue[0];
-            
+#ifndef NO_EDITION_SOLVER
             // update the Solver depending on the type of the time process
             timeProcessType = aTimeProcess.name();
             
@@ -1388,6 +1405,9 @@ TTErr Scenario::TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue
                 
                 return kTTErrNone;
             }
+#else
+            return kTTErrNone;
+#endif
         }
     }
     

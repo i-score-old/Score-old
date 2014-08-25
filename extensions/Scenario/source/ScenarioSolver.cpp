@@ -13,6 +13,8 @@
  * http://www.cecill.info
  */
 
+#ifndef NO_EDITION_SOLVER
+
 #include "ScenarioSolver.h"
 
 SolverVariable::SolverVariable(SolverPtr aSolver, TTObject& anEvent, SolverValue max):
@@ -237,3 +239,5 @@ SolverError SolverRelation::limit(SolverValue newDurationMin, SolverValue newDur
     
     return SolverErrorNone;
 }
+
+#endif // NO_EDITION_SOLVER
