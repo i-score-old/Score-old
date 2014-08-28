@@ -393,9 +393,11 @@ TTErr TTTimeCondition::Trigger(const TTValue& inputValue, TTValue& outputValue)
     // for each case
     for (TTCaseMapIterator it = mCases.begin(); it != mCases.end(); it++) {
         
+        TTObject caseEvent = TTObjectBasePtr(it->first);
+        
         // if no event are passed : trigger all the events
         if (inputValue.size() == 0) {
-            timeEventToTrigger.append(TTObjectBasePtr(it->first));
+            timeEventToTrigger.append(caseEvent);
             continue;
         }
         
@@ -408,8 +410,8 @@ TTErr TTTimeCondition::Trigger(const TTValue& inputValue, TTValue& outputValue)
                 
                 TTObject event = inputValue[i];
                 
-                if (event.instance() == TTObjectBasePtr(it->first)) {
-                    timeEventToTrigger.append(TTObjectBasePtr(it->first));
+                if (event == caseEvent) {
+                    timeEventToTrigger.append(caseEvent);
                     found = YES;
                     break;
                 }
@@ -418,7 +420,7 @@ TTErr TTTimeCondition::Trigger(const TTValue& inputValue, TTValue& outputValue)
         
         // else prepare it to be disposed
         if (!found)
-             timeEventToDispose.append(TTObjectBasePtr(it->first));
+             timeEventToDispose.append(caseEvent);
     }
     
     // if at least one event is in the trigger list
@@ -436,7 +438,7 @@ TTErr TTTimeCondition::Trigger(const TTValue& inputValue, TTValue& outputValue)
         
         // dispose all the other events
         for (timeEventToDispose.begin(); timeEventToDispose.end(); timeEventToDispose.next()) {
-            o = timeEventToTrigger.current()[0];
+            o = timeEventToDispose.current()[0];
             o.send(kTTSym_Dispose);
         }
     }
@@ -456,9 +458,11 @@ TTErr TTTimeCondition::Dispose(const TTValue& inputValue, TTValue& outputValue)
     // for each case
     for (TTCaseMapIterator it = mCases.begin(); it != mCases.end(); it++) {
         
+        TTObject caseEvent = TTObjectBasePtr(it->first);
+        
         // if no event are passed : dispose all the events
         if (inputValue.size() == 0) {
-            timeEventToDispose.append(TTObjectBasePtr(it->first));
+            timeEventToDispose.append(caseEvent);
             continue;
         }
         
@@ -471,8 +475,8 @@ TTErr TTTimeCondition::Dispose(const TTValue& inputValue, TTValue& outputValue)
                 
                 TTObject event = inputValue[i];
                 
-                if (event.instance() == TTObjectBasePtr(it->first)) {
-                    timeEventToDispose.append(TTObjectBasePtr(it->first));
+                if (event == caseEvent) {
+                    timeEventToDispose.append(caseEvent);
                     found = YES;
                     break;
                 }
@@ -481,7 +485,7 @@ TTErr TTTimeCondition::Dispose(const TTValue& inputValue, TTValue& outputValue)
         
         // else prepare it to be triggered
         if (!found)
-            timeEventToTrigger.append(TTObjectBasePtr(it->first));
+            timeEventToTrigger.append(caseEvent);
     }
     
     // if at least one event is in the trigger list
