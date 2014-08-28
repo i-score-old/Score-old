@@ -27,6 +27,9 @@ private:
     // Declare callbacks used to observe scenario execution
     TTObject mEventStatusChangedCallback;
     
+    // Declare a thread used to poll information about scenario execution at another rate
+    TTThread* mPollingThread;
+    
 public:
     
     // Declare publicly all datas of our application to retreive them from the callback function
@@ -37,9 +40,10 @@ public:
     // Declare publicly the scenario to retreive it from the callback function
     TTObject mScenario;
     
-    // Be friend with each callback function
+    // Be friend with each callback or function
     friend TTErr DemoAppDataReturnValueCallback(const TTValue& baton, const TTValue& value);
     friend TTErr DemoAppEventStatusChangedCallback(const TTValue& baton, const TTValue& value);
+    friend void DemoAppScenarioPollingThread(DemoApp* demoApp);
 };
 
 // Callback function to get data's value back
@@ -47,6 +51,9 @@ TTErr DemoAppDataReturnValueCallback(const TTValue& baton, const TTValue& value)
 
 // Callback function to be notified when an event status is changing
 TTErr DemoAppEventStatusChangedCallback(const TTValue& baton, const TTValue& value);
+
+// Function to poll information about scenario execution at another rate
+void DemoAppScenarioPollingThread(DemoApp* demoApp);
 
 int
 main(int argc, char **argv) 
@@ -192,7 +199,7 @@ DemoApp::SetupScore()
     // Create an empty Scenario
     mScenario = TTObject("Scenario");
     
-    // Read DemoScenario.score file to fill mScenario
+    // Read DemoScenario1.score file to fill mScenario
     xmlHandler.set("object", mScenario);
     xmlHandler.send("Read", "../DemoScenario.score", out);
     
@@ -224,6 +231,9 @@ DemoApp::SetupScore()
     
     // Start the scenario
     mScenario.send("Start");
+    
+    // Poll Scenario information
+    mPollingThread = new TTThread(TTThreadCallbackType(DemoAppScenarioPollingThread), this);
 }
 
 void
@@ -260,6 +270,12 @@ DemoApp::Quit()
     /////////////////////////////////////////////////////////////////////
     
     mApplicationManager.send("ApplicationRelease", "demo", out);
+    
+    // delete the polling thread
+    if (mPollingThread)
+        mPollingThread->wait();
+    
+    delete mPollingThread;
 }
 
 TTErr
@@ -310,4 +326,21 @@ DemoAppEventStatusChangedCallback(const TTValue& baton, const TTValue& value)
     TTLogMessage("%s status : %s \n", name.c_str(), newStatus.c_str());
     
     return kTTErrNone;
+}
+
+void DemoAppScenarioPollingThread(DemoApp* demoApp)
+{
+    TTBoolean isRunning;
+    
+    do {
+        // wait
+        demoApp->mPollingThread->sleep(1);
+        
+        // look at the running state of the scnario
+        demoApp->mScenario.get("running", isRunning);
+    }
+    while (isRunning);
+        
+    // quit DemoApp
+    demoApp->Quit();
 }
