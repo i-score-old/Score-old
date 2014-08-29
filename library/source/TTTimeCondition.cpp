@@ -696,13 +696,13 @@ TTErr TTTimeCondition::setReady(TTBoolean newReady)
 void TTTimeCondition::addReceiver(TTAddress anAddress)
 {
     TTObject    aReceiver, aReceiverCallback;
-    TTValue     v, baton;
+    TTValue     args, baton, none;
     
     // if there is no receiver for the expression address
-    if (anAddress != kTTAdrsEmpty && mReceivers.lookup(anAddress, v)) {
+    if (anAddress != kTTAdrsEmpty && mReceivers.lookup(anAddress, none)) {
         
         // no callback to get the received address back
-        v = TTObject();
+        args = TTObject();
         
         // a callback to get the received value back
         aReceiverCallback = TTObject("callback");
@@ -711,9 +711,9 @@ void TTTimeCondition::addReceiver(TTAddress anAddress)
         aReceiverCallback.set(kTTSym_baton, baton);
         aReceiverCallback.set(kTTSym_function, TTPtr(&TTTimeConditionReceiverReturnValueCallback));
         
-        v.append(aReceiverCallback);
+        args.append(aReceiverCallback);
         
-        aReceiver = TTObject(kTTSym_Receiver, v);
+        aReceiver = TTObject(kTTSym_Receiver, args);
         
         // register the receiver
         mReceivers.append(anAddress, aReceiver);

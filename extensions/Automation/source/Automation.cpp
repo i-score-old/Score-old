@@ -782,20 +782,27 @@ void Automation::addSender(TTAddress anAddress)
 
 void Automation::removeSender(TTAddress anAddress)
 {
-    // remove the sender for this address
-    mSenders.remove(anAddress);
+    TTValue v;
+    
+    if (!mSenders.lookup(anAddress, v)) {
+        
+        TTObject aSender = v[0];
+        aSender.set(kTTSym_address, kTTAdrsEmpty);
+        
+        mSenders.remove(anAddress);
+    }
 }
 
 void Automation::addReceiver(TTAddress anAddress)
 {
     TTObject    aReceiver, aReceiverCallback, empty, thisObject(this);
-    TTValue     v, baton, none;
+    TTValue     args, baton, none;
     
     // if there is no receiver for the address
-    if (mReceivers.lookup(anAddress, v)) {
+    if (mReceivers.lookup(anAddress, none)) {
         
         // No callback for the address
-        v = empty;
+        args = empty;
         
         // Create a receiver callback to get the expression address value back
         aReceiverCallback = TTObject("callback");
@@ -804,9 +811,9 @@ void Automation::addReceiver(TTAddress anAddress)
         aReceiverCallback.set(kTTSym_baton, baton);
         aReceiverCallback.set(kTTSym_function, TTPtr(&AutomationReceiverReturnValueCallback));
         
-        v.append(aReceiverCallback);
+        args.append(aReceiverCallback);
         
-        aReceiver = TTObject(kTTSym_Receiver);
+        aReceiver = TTObject(kTTSym_Receiver, args);
         
         // set the address of the receiver
         aReceiver.set(kTTSym_address, anAddress);
@@ -817,7 +824,15 @@ void Automation::addReceiver(TTAddress anAddress)
 
 void Automation::removeReceiver(TTAddress anAddress)
 {
-    mReceivers.remove(anAddress);
+    TTValue v;
+    
+    if (!mReceivers.lookup(anAddress, v)) {
+        
+        TTObject aReceiver = v[0];
+        aReceiver.set(kTTSym_address, kTTAdrsEmpty);
+        
+        mReceivers.remove(anAddress);
+    }
 }
 
 #if 0
