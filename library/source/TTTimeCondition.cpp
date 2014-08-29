@@ -781,17 +781,19 @@ TTErr TTTimeConditionReceiverReturnValueCallback(const TTValue& baton, const TTV
         // for each event's expressions matching the incoming address
         for (TTCaseMapIterator it = aTimeCondition->mCases.begin(); it != aTimeCondition->mCases.end(); it++) {
             
+            TTObject caseEvent = TTObjectBasePtr(it->first);
+
             triggerExp = it->second.trigger;
             
             // if the test of the expression passes
             if (anAddress == triggerExp.getAddress() && triggerExp.evaluate(data)) {
                 
                 // append the event to the trigger list
-                timeEventToTrigger.append(TTObject(it->first));
+                timeEventToTrigger.append(caseEvent);
             } else {
                 
                 // append the event to the dispose list
-                timeEventToDispose.append(TTObject(it->first));
+                timeEventToDispose.append(caseEvent);
             }
         }
         
@@ -808,7 +810,7 @@ TTErr TTTimeConditionReceiverReturnValueCallback(const TTValue& baton, const TTV
             
             // dispose all the other events
             for (timeEventToDispose.begin(); timeEventToDispose.end(); timeEventToDispose.next()) {
-                o = timeEventToTrigger.current()[0];
+                o = timeEventToDispose.current()[0];
                 o.send(kTTSym_Dispose);
             }
         }
