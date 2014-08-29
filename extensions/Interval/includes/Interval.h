@@ -24,7 +24,7 @@
  
  @see TimePluginLib, TTTimeProcess
  */
-class Interval : public TimeProcess
+class Interval : public TimeProcessPlugin
 {
 	TTCLASS_SETUP(Interval)
 	

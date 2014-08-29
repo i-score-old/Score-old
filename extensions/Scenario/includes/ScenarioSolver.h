@@ -15,6 +15,8 @@
  * http://www.cecill.info
  */
 
+#ifndef NO_EDITION_SOLVER
+
 #ifndef __SCENARIO_SOLVER_H__
 #define __SCENARIO_SOLVER_H__
 
@@ -25,7 +27,7 @@ typedef Solver* SolverPtr;
 
 using namespace std;
 
-/** A type to define an unordered map to store and retreive Solver objects */
+/** A type to define an unordered map to store and retrieve Solver objects */
 #ifdef TT_PLATFORM_WIN
     #include <hash_map>
     using namespace stdext;	// Visual Studio 2008 puts the hash_map in this namespace
@@ -74,23 +76,23 @@ enum SolverRelationType { EQ_RELATION = 0, NQ_RELATION = 1, LQ_RELATION = 2, LE_
 class SolverVariable
 {
 public:
-
-    TTTimeEventPtr    event;
-
+    
+    TTObject        event;
+    
     SolverPtr       solver;
     int             dateID;
     int             rangeID;
-
-    SolverVariable(SolverPtr aSolver, TTTimeEventPtr anEvent, SolverValue max);
-
+    
+    SolverVariable(SolverPtr aSolver, TTObject& anEvent, SolverValue max);
+    
     ~SolverVariable();
-
+    
     /** Get the variable value from the solver */
     SolverValue get();
-
+    
     /** Set the range bounds of the variable */
     void limit(SolverValue min, SolverValue max);
-
+    
     /** Update the variable value from the solver */
     void update();
 };
@@ -105,26 +107,26 @@ typedef SolverVariable* SolverVariablePtr;
 class SolverConstraint
 {
 public:
-
+    
     SolverPtr           solver;
     int                 ID;
-
+    
     SolverVariablePtr   startVariable;
     SolverVariablePtr   endVariable;
-
+    
     SolverConstraint(SolverPtr aSolver, SolverVariablePtr variableA, SolverVariablePtr variableB, SolverValue durationMin, SolverValue durationMax, SolverValue max);
-
+    
     ~SolverConstraint();
-
+    
     /** Move a constraint into the solver (then each variable needs to be updated)
-
+     
      @newStart              a new start date
      @newEnd                a new end date
      @return                an error code if movement fails */
     SolverError move(SolverValue newStart, SolverValue newEnd);
-
+    
     /** Change duration bounds of the constraint (then each variable needs to be updated)
-
+     
      @newStart              a new durationMin
      @newEnd                a new durationMax
      @return                an error code if update fails */
@@ -141,27 +143,27 @@ typedef SolverConstraint* SolverConstraintPtr;
 class SolverRelation
 {
 public:
-
+    
     SolverPtr           solver;
     int                 minBoundID;
     int                 maxBoundID;
-
+    
     SolverVariablePtr   startVariable;
     SolverVariablePtr   endVariable;
-
+    
     SolverRelation(SolverPtr aSolver, SolverVariablePtr variableA, SolverVariablePtr variableB, SolverValue durationMin=0, SolverValue durationMax=0);
-
+    
     ~SolverRelation();
-
+    
     /** Move a constraint into the solver (then each variable needs to be updated)
-
+     
      @newStart              a new start date
      @newEnd                a new end date
      @return                an error code movement fails */
     SolverError move(SolverValue newStart, SolverValue newEnd);
-
+    
     /** Change duration bounds of the relation (then each variable needs to be updated)
-
+     
      @newStart              a new durationMin
      @newEnd                a new durationMax
      @return                an error code if update fails */
@@ -171,3 +173,5 @@ typedef SolverRelation* SolverRelationPtr;
 
 
 #endif // __SCENARIO_SOLVER_H__
+
+#endif // NO_EDITION_SOLVER

@@ -72,7 +72,7 @@ ExtendedInt PriorityTransitionAction::getDate() const
 	return m_date;
 }
 
-ExtendedInt PriorityTransitionAction::setDate(unsigned int date)
+void PriorityTransitionAction::setDate(unsigned int date)
 {
 	m_date.setAsInteger(date);
 }

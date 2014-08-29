@@ -4,24 +4,18 @@
 sources:
   - ../TimePluginLib.cpp
   - source/Automation.cpp
-  - source/Curve.cpp
-
+  - ../../library/source/Curve.cpp
+  
 includes:
   - "."
   - ".."
   - "includes"
   - "../../library/includes"
   - "../../library/tests"
-
+  
   # to build without having the whole jamoma repository
-  #- ../support/jamoma/includes
-  - ../../../Foundation/library/includes
-  - ../../../DSP/library/includes
-  - ../../../Modular/library/includes
-  - ../../../Modular/library/ProtocolLib
-  - ../../../Modular/library/SchedulerLib
-  - ../../../Modular/library/PeerObject
-
+  - ../../support/jamoma/includes
+  
   # to use xml file format
   - /usr/include/libxml2
 
@@ -29,12 +23,8 @@ libraries:
   - FOUNDATION
   - DSP
   - MODULAR
-  - mac ../../library/build/JamomaScore.dylib
-  - linux JamomaScore
-
+  - ../../library/build/JamomaScore.dylib
+  
   # to link with the xml library
   - mac /usr/lib/libxml2.dylib
-  #- win
-
-# This project is not available for most architectures (cause of the Gecode 64-bit only dependency)
-arch: "x86_64"
+  #- win 

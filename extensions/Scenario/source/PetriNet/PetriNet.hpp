@@ -396,7 +396,6 @@ private:
 	Place* m_startPlace;
 	Place* m_endPlace;
 
-	pthread_t m_thread;
 	bool m_mustStop;
 
 	ThreadSafeList m_incomingEvents; // list of events (pointer).

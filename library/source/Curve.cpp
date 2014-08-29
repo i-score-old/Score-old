@@ -23,7 +23,6 @@ TT_BASE_OBJECT_CONSTRUCTOR,
 mActive(YES),
 mRedundancy(NO),
 mSampleRate(20),
-mFunction(NULL),
 mRecorded(NO),
 mSampled(NO),
 mLastSample(0.)
@@ -52,12 +51,12 @@ mLastSample(0.)
 	addMessageWithArguments(ReadFromText);
 	addMessageProperty(ReadFromText, hidden, YES);
     
-    TTObjectBaseInstantiate(TTSymbol("freehand"), TTObjectBaseHandle(&mFunction), 1); // for 1 channel only
+    mFunction = TTObject("freehand", 1); // for 1 channel only
 }
 
 Curve::~Curve()
 {
-    TTObjectBaseRelease(&mFunction);
+    ;
 }
 
 TTErr Curve::getFunctionParameters(TTValue& value)
@@ -68,7 +67,7 @@ TTErr Curve::getFunctionParameters(TTValue& value)
     if (mRecorded)
         return kTTErrGeneric;
     
-    if (!mFunction->getAttributeValue(TTSymbol("curveList"), curveList)) {
+    if (!mFunction.get("curveList", curveList)) {
         
         // edit function value
         // curveList    : x1 y1 exponential base b1 x2 y2 exponential base b2 . . . . .
@@ -138,7 +137,7 @@ TTErr Curve::setFunctionParameters(const TTValue& value)
         mRecorded = NO;
         
         // set function curve list
-        mFunction->setAttributeValue(TTSymbol("curveList"), curveList);
+        mFunction.set("curveList", curveList);
         
         // sample the curve
         mSampled = NO;
@@ -242,7 +241,7 @@ TTErr Curve::Sample(const TTValue& inputValue, TTValue& outputValue)
                 for (i = 0; i < nbPoints; i++) {
                     
                     x = TTFloat64(i) / TTFloat64(nbPoints);
-                    TTAudioObjectBasePtr(mFunction)->calculate(x, y);
+                    TTAudioObjectBasePtr(mFunction.instance())->calculate(x, y);
                     
                     append(TTValue(x, y));
                     outputValue.append(y);
@@ -260,12 +259,14 @@ TTErr Curve::Sample(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr Curve::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 {
-	TTXmlHandlerPtr	aXmlHandler = NULL;
-    TTValue         v;
-    TTString        s;
-	
-	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
+    TTObject o = inputValue[0];
+	TTXmlHandlerPtr aXmlHandler = (TTXmlHandlerPtr)o.instance();
+    if (!aXmlHandler)
+		return kTTErrGeneric;
     
+    TTValue     v;
+    TTString    s;
+	
     xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "curve");
 	
     // Write if it is active
@@ -316,11 +317,13 @@ TTErr Curve::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr Curve::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 {
-	TTXmlHandlerPtr	aXmlHandler = NULL;
-    TTValue         v;
-	
-	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
+    TTObject o = inputValue[0];
+	TTXmlHandlerPtr aXmlHandler = (TTXmlHandlerPtr)o.instance();
+    if (!aXmlHandler)
+		return kTTErrGeneric;
     
+    TTValue v;
+	
     // get the active state
     if (!aXmlHandler->getXmlAttribute(kTTSym_active, v, NO)) {
         
@@ -381,10 +384,11 @@ TTErr Curve::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr Curve::WriteAsText(const TTValue& inputValue, TTValue& outputValue)
 {
-	TTTextHandlerPtr	aTextHandler;
-	
-	aTextHandler = TTTextHandlerPtr((TTObjectBasePtr)inputValue[0]);
-	
+    TTObject o = inputValue[0];
+	TTTextHandlerPtr aTextHandler = (TTTextHandlerPtr)o.instance();
+    if (!aTextHandler)
+		return kTTErrGeneric;
+    
 	// TODO : write the curve attributes
 	
 	return kTTErrGeneric;
@@ -392,11 +396,11 @@ TTErr Curve::WriteAsText(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr Curve::ReadFromText(const TTValue& inputValue, TTValue& outputValue)
 {
-	TTTextHandlerPtr aTextHandler;
-	TTValue	v;
-	
-	aTextHandler = TTTextHandlerPtr((TTObjectBasePtr)inputValue[0]);
-	
+    TTObject o = inputValue[0];
+	TTTextHandlerPtr aTextHandler = (TTTextHandlerPtr)o.instance();
+    if (!aTextHandler)
+		return kTTErrGeneric;
+    
     // TODO : parse the curve attributes
 	
 	return kTTErrGeneric;

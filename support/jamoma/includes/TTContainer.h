@@ -17,14 +17,14 @@
 #ifndef __TT_CONTAINER_H__
 #define __TT_CONTAINER_H__
 
-#include "TTModular.h"
+#include "TTModularIncludes.h"
 
 /** TTContainer ... TODO : an explanation
 	In Max j.view and j.model are based on this class.
  
  */
 
-class TTMODULAR_EXPORT TTContainer : public TTDataObjectBase
+class TTMODULAR_EXPORT TTContainer : public TTObjectBase
 {
 	TTCLASS_SETUP(TTContainer)
 	
@@ -33,16 +33,16 @@ private:
 	TTUInt8				mPriority;						///< ATTRIBUTE : does this container have a priority over other containers ?
 	TTSymbol			mDescription;					///< ATTRIBUTE : a text label to describe the role of this container
     TTSymbol			mService;                       ///< ATTRIBUTE : a symbol used to type the container (this is mainly for Max to say if it is a view or a model)
-	TTValue				mTag;							///< ATTRIBUTE : tag list for this container
+	TTValue				mTags;							///< ATTRIBUTE : tag list for this container
 	TTBoolean			mInitialized;					///< ATTRIBUTE : is it initialized ?
 	TTAddress           mAddress;						///< ATTRIBUTE : the address of the container in the directory
 	TTAddress           mAlias;							///< ATTRIBUTE : an alias address to retrieve the container using another address
 	TTValue				mActivity;                      ///< ATTRIBUTE : a local value to allow observation of outputing data
     TTValue             mContent;                       ///< ATTRIBUTE : a local value to allow observation of all address handled by the container
-	TTCallbackPtr		mReturnAddressCallback;			///< a way to return back address to the owner of this container
-	TTCallbackPtr		mReturnValueCallback;			///< a way to return back value to the owner of this container
-	TTHashPtr			mObjectsObserversCache;			///< a hash table containing all <relativeAddress : Objects, ValueObserver, InitializedObserver> for quick access
-	TTCallbackPtr		mObserver;						///< a life cycle observer
+	TTObject            mReturnAddressCallback;			///< a way to return back address to the owner of this container
+	TTObject            mReturnValueCallback;			///< a way to return back value to the owner of this container
+	TTHash              mObjectsObserversCache;			///< a hash table containing all <relativeAddress : Objects, ValueObserver, InitializedObserver> for quick access
+	TTObject            mObserver;						///< a life cycle observer
 	TTBoolean			mIsSending;						///< a flag to lock the object in case of infinite loop
     
     TTAttributePtr      activityAttribute;              ///< cache activity attribute for observer notification
@@ -67,8 +67,8 @@ private:
 	/** */
 	TTErr setAlias(const TTValue& value);
 	
-	/**	Setter for mTag attribute. */
-	TTErr setTag(const TTValue& value);
+	/**	Setter for mTags attribute. */
+	TTErr setTags(const TTValue& value);
 	
 	/**	Setter for mPriority attribute. */
 	TTErr setPriority(const TTValue& value);
@@ -92,8 +92,8 @@ private:
 	void cssDefinition(TTString *buffer);
 	
 	
-	friend TTErr TTMODULAR_EXPORT TTContainerDirectoryCallback(TTPtr baton, TTValue& data);
-	friend TTErr TTMODULAR_EXPORT TTContainerValueAttributeCallback(TTPtr baton, TTValue& data);
+	friend TTErr TTMODULAR_EXPORT TTContainerDirectoryCallback(const TTValue& baton, const TTValue& data);
+	friend TTErr TTMODULAR_EXPORT TTContainerValueAttributeCallback(const TTValue& baton, const TTValue& data);
 };
 
 typedef TTContainer* TTContainerPtr;
@@ -102,19 +102,19 @@ typedef TTContainer* TTContainerPtr;
  @param	baton						..
  @param	data						..
  @return							an error code */
-TTErr TTMODULAR_EXPORT TTContainerDirectoryCallback(TTPtr baton, TTValue& data);
+TTErr TTMODULAR_EXPORT TTContainerDirectoryCallback(const TTValue& baton, const TTValue& data);
 
 /**	
  @param	baton						..
  @param	data						..
  @return							an error code */
-TTErr TTMODULAR_EXPORT TTContainerValueAttributeCallback(TTPtr baton, TTValue& data);
+TTErr TTMODULAR_EXPORT TTContainerValueAttributeCallback(const TTValue& baton, const TTValue& data);
 
 /**	
  @param	baton						..
  @param	data						..
  @return							an error code */
-TTErr TTMODULAR_EXPORT TTContainerInitializedAttributeCallback(TTPtr baton, TTValue& data);
+TTErr TTMODULAR_EXPORT TTContainerInitializedAttributeCallback(const TTValue& baton, const TTValue& data);
 
 /**	
  @param	baton						..
@@ -123,8 +123,8 @@ TTErr TTMODULAR_EXPORT TTContainerInitializedAttributeCallback(TTPtr baton, TTVa
 TTBoolean TTMODULAR_EXPORT TTContainerTestObjectAndContext(TTNodePtr n, TTPtr args);
 
 /** compare priority attribute of object's
- @param	v1							< relativeAddress, a pointer to a value containing a pointer to a TTObjectBase >
- @param	v2							< relativeAddress, a pointer to a value containing a pointer to a TTObjectBase >
+ @param	v1							< relativeAddress, a pointer to a value containing a #TTObject >
+ @param	v2							< relativeAddress, a pointer to a value containing a #TTObject >
  @return							is the priority of v1 is smaller than v2 (except if equal 0) ? */ 
 TTBoolean TTMODULAR_EXPORT	TTContainerCompareObjectPriority(TTValue& v1, TTValue& v2);
 

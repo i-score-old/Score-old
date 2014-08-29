@@ -242,10 +242,10 @@ void Transition::setArcAsActive(Arc* arc, int timeOffset, bool recalculateArcTim
 
 		// CB Getting the default comportment from the condition
 		TTValue v;
-		TTTimeEventPtr event = static_cast<TTTimeEventPtr>(m_events.back());
-		event->getAttributeValue(kTTSym_condition, v);
-		TTTimeConditionPtr condition = static_cast<TTTimeConditionPtr>(TTObjectBasePtr(v[0]));
-		condition->sendMessage("DefaultFind", event, v);
+		TTObject event = static_cast<TTObjectBasePtr>(m_events.back());
+		event.get(kTTSym_condition, v);
+		TTObject condition = v[0];
+		condition.send("DefaultFind", event, v);
 		bool dflt = v[0];
 
 		m_endAction = new PriorityTransitionAction(this, dflt?END_GO:END_DEACTIVATE, m_endDate);

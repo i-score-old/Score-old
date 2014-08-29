@@ -19,17 +19,24 @@
 #define __SCENARIO_H__
 
 #include "TimePluginLib.h"
+
+#ifndef NO_EDITION_SOLVER
 #include "ScenarioSolver.h"
+#endif
 
 #ifndef NO_EXECUTION_GRAPH
 #include "ScenarioGraph.h"
 #endif
 
+#include <libxml/encoding.h>
+#include <libxml/xmlwriter.h>
+#include <libxml/xmlreader.h>
+
 /**	The Scenario class allows to ...
  
  @see TimePluginLib, TTTimeProcess, TTTimeContainer
  */
-class Scenario : public TimeContainer {
+class Scenario : public TimeContainerPlugin {
     
 	TTCLASS_SETUP(Scenario)
 	
@@ -37,11 +44,12 @@ class Scenario : public TimeContainer {
     
     TTValue                     mViewZoom;                      ///< the zoom factor (x and y) into the scenario view (useful for gui)
     TTValue                     mViewPosition;                  ///< the position (x and y) of the scenario view (useful for gui)
-    
+#ifndef NO_EDITION_SOLVER
     SolverPtr                   mEditionSolver;                 ///< an internal gecode solver to assist scenario edition
     SolverObjectMap             mVariablesMap;                  ///< an internal map to store and retreive SolverVariablePtr using TTTimeEventPtr
     SolverObjectMap             mConstraintsMap;                ///< an internal map to store and retreive SolverConstraintPtr using TTTimeProcessPtr
     SolverObjectMap             mRelationsMap;                  ///< an internal map to store and retreive SolverRelationPtr using TTTimeProcessPtr
+#endif
 #ifndef NO_EXECUTION_GRAPH
     GraphPtr                    mExecutionGraph;                ///< an internal petri net to execute the scenario according time event relations
 
@@ -53,10 +61,10 @@ class Scenario : public TimeContainer {
 	ExtendedInt                 minusInfinity;
 	ExtendedInt                 integer0;
 #endif     
-    TTTimeEventPtr              mCurrentTimeEvent;              ///< an internal pointer to remember the current time event being read
-    TTTimeProcessPtr            mCurrentTimeProcess;            ///< an internal pointer to remember the current time process being read
-    TTTimeConditionPtr          mCurrentTimeCondition;          ///< an internal pointer to remember the current time condition being read
-    TTTimeProcessPtr            mCurrentScenario;               ///< an internal pointer to remember the current scenario being read
+    TTObject                    mCurrentTimeEvent;              ///< an internal pointer to remember the current time event being read
+    TTObject                    mCurrentTimeProcess;            ///< an internal pointer to remember the current time process being read
+    TTObject                    mCurrentTimeCondition;          ///< an internal pointer to remember the current time condition being read
+	TTObject           	 		mCurrentScenario;               ///< an internal pointer to remember the current scenario being read
     
     TTBoolean                   mLoading;                       ///< a flag true when the scenario is loading (mainly used to mute the edition solver)
     
@@ -200,19 +208,19 @@ class Scenario : public TimeContainer {
     
     
     /** an internal method used to create all time process attribute observers */
-    void    makeTimeProcessCacheElement(TTTimeProcessPtr aTimeProcess, TTValue& newCacheElement);
+    void    makeTimeProcessCacheElement(TTObject& aTimeProcess, TTValue& newCacheElement);
     
     /** an internal method used to delete all time process attribute observers */
     void    deleteTimeProcessCacheElement(const TTValue& oldCacheElement);
     
     /** an internal method used to create all time event attribute observers */
-    void    makeTimeEventCacheElement(TTTimeEventPtr aTimeEvent, TTValue& newCacheElement);
+    void    makeTimeEventCacheElement(TTObject& aTimeEvent, TTValue& newCacheElement);
     
     /** an internal method used to delete all time event attribute observers */
     void    deleteTimeEventCacheElement(const TTValue& oldCacheElement);
     
     /** an internal method used to create all time condition attribute observers */
-    void    makeTimeConditionCacheElement(TTTimeConditionPtr aTimeCondition, TTValue& newCacheElement);
+    void    makeTimeConditionCacheElement(TTObject& aTimeCondition, TTValue& newCacheElement);
     
     /** an internal method used to delete all time condition attribute observers */
     void    deleteTimeConditionCacheElement(const TTValue& oldCacheElement);
@@ -222,10 +230,10 @@ class Scenario : public TimeContainer {
     /** internal methods used to compile the execution graph */
     void    clearGraph();
     void    compileGraph(TTUInt32 timeOffset);
-    void    compileTimeProcess(TTTimeProcessPtr aTimeProcess, TransitionPtr *previousTransition, TransitionPtr endTransition, TTUInt32 timeOffset);
-    void    compileInterval(TTTimeProcessPtr aTimeProcess);
-    void    compileTimeEvent(TTTimeEventPtr aTimeEvent, TTUInt32 time, TransitionPtr previousTransition, TransitionPtr currentTransition, Place* currentPlace);
-    void    compileInteractiveEvent(TTTimeEventPtr aTimeEvent, TTUInt32 timeOffset);
+    void    compileTimeProcess(TTObject& aTimeProcess, TransitionPtr *previousTransition, TransitionPtr endTransition, TTUInt32 timeOffset);
+    void    compileInterval(TTObject& aTimeProcess);
+    void    compileTimeEvent(TTObject& aTimeEvent, TTUInt32 time, TransitionPtr previousTransition, TransitionPtr currentTransition, Place* currentPlace);
+    void    compileInteractiveEvent(TTObject& aTimeEvent, TTUInt32 timeOffset);
     
     friend void TT_EXTENSION_EXPORT ScenarioGraphTimeEventCallBack(TTPtr arg, TTBoolean active);
     friend void TT_EXTENSION_EXPORT ScenarioGraphIsEventReadyCallBack(TTPtr arg, TTBoolean isReady);

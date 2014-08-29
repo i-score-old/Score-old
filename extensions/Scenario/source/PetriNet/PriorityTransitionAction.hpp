@@ -88,7 +88,7 @@ public:
 	 */
 	ExtendedInt getDate() const;
 
-	ExtendedInt setDate(unsigned int date);
+	void setDate(unsigned int date);
 
 	/*!
 	 * Gets the linked transition.

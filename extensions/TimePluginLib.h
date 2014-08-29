@@ -18,22 +18,22 @@
 #ifndef __TIME_PLUGIN_H__
 #define __TIME_PLUGIN_H__
 
-#include "TTScoreAPI.h"
+#include "TTScore.h"
 
-#define TIME_PROCESS_CONSTRUCTOR \
-TTObjectBasePtr thisTTClass :: instantiate (TTSymbol name, const TTValue arguments) {return new thisTTClass (arguments);} \
+#define TIME_PROCESS_PLUGIN_CONSTRUCTOR \
+TTObjectBasePtr thisTTClass :: instantiate (TTSymbol name, TTValue arguments) {return new thisTTClass (arguments);} \
 \
 extern "C" void thisTTClass :: registerClass () {TTClassRegister( TTSymbol(thisTTClassName), thisTTClassTags, thisTTClass :: instantiate );} \
 \
-thisTTClass :: thisTTClass (const TTValue& arguments) : TimeProcess(arguments)
+thisTTClass :: thisTTClass (const TTValue& arguments) : TimeProcessPlugin(arguments)
 
-/**	The TimeProcess class allows to create specific time process plugin
+/**	The TimeProcessPlugin class allows to create specific time process plugin
  
  @see TimePluginLib, TTTimeProcess
  */
-class TimeProcess : public TTTimeProcess {
+class TimeProcessPlugin : public TTTimeProcess {
     
-    TTCLASS_SETUP(TimeProcess)
+    TTCLASS_SETUP(TimeProcessPlugin)
     
 public:
 	
@@ -45,20 +45,20 @@ public:
 
 
 
-#define TIME_CONTAINER_CONSTRUCTOR \
-TTObjectBasePtr thisTTClass :: instantiate (TTSymbol name, const TTValue arguments) {return new thisTTClass (arguments);} \
+#define TIME_CONTAINER_PLUGIN_CONSTRUCTOR \
+TTObjectBasePtr thisTTClass :: instantiate (TTSymbol name, TTValue arguments) {return new thisTTClass (arguments);} \
 \
 extern "C" void thisTTClass :: registerClass () {TTClassRegister( TTSymbol(thisTTClassName), thisTTClassTags, thisTTClass :: instantiate );} \
 \
-thisTTClass :: thisTTClass (const TTValue& arguments) : TimeContainer(arguments)
+thisTTClass :: thisTTClass (const TTValue& arguments) : TimeContainerPlugin(arguments)
 
-/**	The TimeContainer class allows to create specific time container plugin
+/**	The TimeContainerPlugin class allows to create specific time container plugin
  
  @see TimePluginLib, TTTimeProcess
  */
-class TimeContainer : public TTTimeContainer {
+class TimeContainerPlugin : public TTTimeContainer {
     
-    TTCLASS_SETUP(TimeContainer)
+    TTCLASS_SETUP(TimeContainerPlugin)
     
 public:
 	

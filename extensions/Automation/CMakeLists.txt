@@ -10,7 +10,7 @@ endif()
 set(PROJECT_SRCS
 ${CMAKE_CURRENT_SOURCE_DIR}/../TimePluginLib.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/source/Automation.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/source/Curve.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/../../library/source/Curve.cpp
 )
 file(GLOB_RECURSE PROJECT_HDRS ${CMAKE_CURRENT_SOURCE_DIR}/includes/*.h)
 

@@ -18,7 +18,7 @@
 #ifndef __TT_TIME_PROCESS_H__
 #define __TT_TIME_PROCESS_H__
 
-#include "TTScore.h"
+#include "TTScoreIncludes.h"
 #include "TTTimeEvent.h"
 
 /**	a class to define a process
@@ -33,7 +33,7 @@ class TTSCORE_EXPORT TTTimeProcess : public TTObjectBase {
     
     friend class TTTimeContainer;
 
-    TTObjectBasePtr                 mContainer;                     ///< the container which handles the time process
+    TTObject                        mContainer;                     ///< the container which handles the time process
     
 protected :
     
@@ -48,7 +48,7 @@ protected :
     TTUInt32                        mVerticalPosition;              ///< the Y axe position of the process (useful for gui)
     TTUInt32                        mVerticalSize;                  ///< the Y axe size of the process (useful for gui)
     
-    TTObjectBasePtr                 mScheduler;                     ///< the scheduler object which handles the time process execution
+    TTObject                        mScheduler;                     ///< the scheduler object which handles the time process execution
     
     TTBoolean                       mRunning;                       ///< a boolean to get the running state of the process
                                                                     ///< it is related to the running state of the scheduler
@@ -60,11 +60,11 @@ protected :
     
 private :
     
-    TTObjectBasePtr                 mStartEvent;                    ///< the event object which handles the time process execution start
+    TTObject                        mStartEvent;                    ///< the event object which handles the time process execution start
     
     TTList                          mIntermediateEvents;            ///< the list of all intermediate events
     
-    TTObjectBasePtr                 mEndEvent;                      ///< the event object which handles the time process execution stop
+    TTObject                        mEndEvent;                      ///< the event object which handles the time process execution stop
     
     /** Specific compilation method used to pre-processed data in order to accelarate Process method.
      @details the compiled attribute allows to know if the process needs to be compiled or not.
@@ -83,26 +83,26 @@ private :
      @param	inputValue      position and date of the scheduler
      @param	outputValue     return an error of the processing
      @return                an error code returned by the process method */
-	virtual TTErr   Process(const TTValue& /*inputValue*/, TTValue& /*outputValue*/) {return kTTErrGeneric;};
+    virtual TTErr   Process(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
     
     /** Specific process method for pause/resume
      @param	inputValue      boolean paused state of the scheduler
      @param	outputValue     return an error of the processing
      @return                an error code returned by the process paused method */
-	virtual TTErr   ProcessPaused(const TTValue& /*inputValue*/, TTValue& /*outputValue*/) {return kTTErrGeneric;};
+    virtual TTErr   ProcessPaused(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
     
     /** Specific go to method to set the process at a date
      @param	inputValue      a date where to go relative to the duration of the time process, an optional boolean to temporary mute the process 
      @param	outputValue     nothing
      @return                an error code if the operation fails */
-	virtual TTErr   Goto(const TTValue& /*inputValue*/, TTValue& /*outputValue*/) {return kTTErrGeneric;};
+    virtual TTErr   Goto(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
     
     /**  needed to be handled by a TTXmlHandler
      @param	inputValue      ..
      @param	outputValue     ..
      @return                .. */
-	virtual TTErr	WriteAsXml(const TTValue& /*inputValue*/, TTValue& /*outputValue*/) {return kTTErrGeneric;};
-	virtual TTErr	ReadFromXml(const TTValue& /*inputValue*/, TTValue& /*outputValue*/) {return kTTErrGeneric;};
+	virtual TTErr	WriteAsXml(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
+	virtual TTErr	ReadFromXml(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
     
     /** get the time process rigidity
      @param	value           rigidity state
@@ -282,21 +282,21 @@ protected :
     
     /** get the start event
      @return                a time event object */
-    TTTimeEventPtr  getStartEvent();
+    TTObject&       getStartEvent();
     
     /** set the end event
      @return                a time event object */
-    TTTimeEventPtr  getEndEvent();
+    TTObject&       getEndEvent();
     
     /** set the start event
      @param aTimeEvent      a time event object
      @return                an error code if it fails */
-    TTErr           setStartEvent(TTTimeEventPtr aTimeEvent);
+    TTErr           setStartEvent(TTObject& aTimeEvent);
     
     /** set the end event
      @param aTimeEvent      a time event object
      @return                an error code if it fails */
-    TTErr           setEndEvent(TTTimeEventPtr aTimeProcess);
+    TTErr           setEndEvent(TTObject& aTimeProcess);
     
     friend void TTSCORE_EXPORT TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 position, TTFloat64 date);
     
@@ -312,11 +312,11 @@ typedef TTTimeProcess* TTTimeProcessPtr;
 void TTSCORE_EXPORT TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 position, TTFloat64 date);
 
 /** Define some macros to ease the access of events attributes */
-#define mStartDate TTTimeEventPtr(mStartEvent)->mDate
-#define mStartCondition TTTimeEventPtr(mStartEvent)->mCondition
+#define mStartDate TTTimeEventPtr(mStartEvent.instance())->mDate
+#define mStartCondition TTTimeEventPtr(mStartEvent.instance())->mCondition
 
-#define mEndDate TTTimeEventPtr(mEndEvent)->mDate
-#define mEndCondition TTTimeEventPtr(mEndEvent)->mCondition
+#define mEndDate TTTimeEventPtr(mEndEvent.instance())->mDate
+#define mEndCondition TTTimeEventPtr(mEndEvent.instance())->mCondition
 
 #define mDuration mEndDate - mStartDate
 

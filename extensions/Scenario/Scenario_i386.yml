@@ -1,0 +1,47 @@
+defines:
+#  - TIME_PLUGIN_DEBUG
+   - NO_EDITION_SOLVER
+
+sources:
+  - ../TimePluginLib.cpp
+
+  - source/PetriNet/Arc.cpp
+  - source/PetriNet/ExtendedInt.cpp
+  - source/PetriNet/PetriNet.cpp
+  - source/PetriNet/PetriNetItem.cpp                    # is it needed ?
+  - source/PetriNet/PetriNetNode.cpp                    # is it needed ?
+  - source/PetriNet/Place.cpp
+  - source/PetriNet/PriorityTransitionAction.cpp        # is it needed ?
+  - source/PetriNet/ThreadSafeList.cpp                  # is it needed ?
+  - source/PetriNet/Token.cpp
+  - source/PetriNet/Transition.cpp
+  - source/PetriNet/TransitionAction.cpp                # is it needed ?
+  - source/PetriNet/TransitionBitArray.cpp              # is it needed ?
+  
+  - source/Scenario.cpp
+  - source/ScenarioGraph.cpp
+
+includes:
+  - "."
+  - ".."
+  - "includes"
+  - "../../library/includes"
+  - "../../library/tests"
+
+  - "source/PetriNet"
+  
+  # to build without having the whole jamoma repository
+  - ../../support/jamoma/includes
+  
+  # to use xml file format
+  - /usr/include/libxml2
+
+libraries:
+  - FOUNDATION
+  - DSP
+  - MODULAR
+  - ../../library/build/JamomaScore.dylib
+  
+  # to link with the xml library
+  - mac /usr/lib/libxml2.dylib
+  #- win

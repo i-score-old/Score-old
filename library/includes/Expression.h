@@ -18,7 +18,7 @@
 #ifndef __EXPRESSION_H__
 #define __EXPRESSION_H__
 
-#include "TTScore.h"
+#include "TTScoreIncludes.h"
 
 /**	The Expression class allows to retreive easily each part of a logical expression symbol
  

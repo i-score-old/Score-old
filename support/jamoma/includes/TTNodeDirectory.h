@@ -57,9 +57,9 @@ private:
 
 	TTSymbol		name;					///< the name of the tree
 	TTNodePtr		root;					///< the root of the tree
-	TTHashPtr		directory;				///< a pointer to a global hashtab which reference all address of the tree
-	TTHashPtr		aliases;				///< a pointer to a global hashtab which reference all aliases of the tree
-	TTHashPtr		observers;				///< a pointer to a hashtab which register all life cycle observers below that node
+	TTHash          directory;				///< a pointer to a global hashtab which reference all address of the tree
+	TTHash          aliases;				///< a pointer to a global hashtab which reference all aliases of the tree
+	TTHash          observers;				///< a pointer to a hashtab which register all life cycle observers below that node
 											///< (address/relative/to/this/node, TTList of all observers below that address)
 											///< e.g. so that you can receive notifications of changes to the tree of TTNodes
 	TTMutexPtr		mutex;					///< a Mutex to protect the mObservers hash table.
@@ -129,8 +129,9 @@ public:
 	 @param	firstReturnedTTNode		If non-null, the address of the first TTNode object pointer that is found for the given pattern is returned here.
 									The value of the pointer will be set upon return.
 	 @param	depthLimit				Precise the depth limit of the exploration (0 means no limit)
+     @param comparisonfunction      To sort the children at each level
 	 @return						An error code. */
-	TTErr			LookFor(TTListPtr whereToSearch, TTBoolean(testFunction)(TTNodePtr node, TTPtr args), void *argument, TTList& returnedTTNodes, TTNodePtr *firstReturnedTTNode, TTUInt8 depthLimit=0);
+	TTErr			LookFor(TTListPtr whereToSearch, TTBoolean(testFunction)(TTNodePtr node, TTPtr args), void *argument, TTList& returnedTTNodes, TTNodePtr *firstReturnedTTNode, TTUInt8 depthLimit=0, TTBoolean(comparisonFunction)(TTValue& v1, TTValue& v2)=NULL);
 	
 	/**	Is there is one TTNode or more that respect a test below an address 
 	 @param	whereToSearch			A TTNode list from where to start the research
@@ -141,7 +142,7 @@ public:
 	 @param	firstReturnedTTNode		If non-null, the address of the first TTNode object pointer that is found for the given pattern is returned here.
 									The value of the pointer will be set upon return.
 	 @return						An error code. */
-	TTErr			IsThere(TTListPtr whereToSearch, bool(testFunction)(TTNodePtr node, void*args), void *argument, bool *isThere, TTNodePtr *firstTTNode);
+	TTErr			IsThere(TTListPtr whereToSearch, TTBoolean(testFunction)(TTNodePtr node, void*args), void *argument, bool *isThere, TTNodePtr *firstTTNode);
 	
 	/**	Create a new TTNode, at the given location in the tree.
 	 @param	anAddress				The address for which you wish to create a TTNode.
@@ -154,7 +155,7 @@ public:
 	 @param	returnedTTNode			A pointer to the TTNode at the given address 
 	 @param	nodeCreated				A boolean : true if a TTNode have been created, else false
 	 @return						An error code. */
-	TTErr			TTNodeCreate(TTAddress& anAddress, TTObjectBasePtr newObject, void *aContext, TTNodePtr *returnedTTNode, TTBoolean *nodeCreated);
+	TTErr			TTNodeCreate(TTAddress& anAddress, TTObject newObject, void *aContext, TTNodePtr *returnedTTNode, TTBoolean *nodeCreated);
 	
 	/**	Remove a TTNodefrom the directory.
 	 @param	anAddress				The address for which you wish to remove the TTNode.
@@ -175,16 +176,16 @@ public:
 	
 	/** Add a TTCallback as a life cycle observer of all nodes below this one
 	 @param anAddress				an address to observe
-	 @param observer				a TTCallbackPtr to add
+	 @param observer				a #TTCallback object to add
 	 @param maxDepthDifference		precise the max depth difference to filter nodes which are below this limit
 	 @return						an error code */
-	TTErr			addObserverForNotifications(TTAddress anAddress, TTCallbackPtr anObserver, TTInt8 maxDepthDifference=-1);
+	TTErr			addObserverForNotifications(TTAddress anAddress, TTObject& anObserver, TTInt8 maxDepthDifference=-1);
 	
 	/** Remove a TTCallback as a life cycle observer of all nodes below this one
 	 @param anAddress				an address
-	 @param observer				a TTCallbackPtr to remove
+	 @param observer				a #TTCallback object to remove
 	 @return						a kTTErrGeneric if there isn't observer */
-	TTErr			removeObserverForNotifications(TTAddress anAddress, TTCallbackPtr anObserver);
+	TTErr			removeObserverForNotifications(TTAddress anAddress, TTObject& anObserver);
 	
 	/** Notify life cycle observers that something appends below this TTNode
 	 @param data					an address where something append
@@ -192,9 +193,6 @@ public:
 	 @param flag					a flag to notify about creation or destruction (or anything else)
 	 @return						a kTTErrGeneric if there isn't observer	*/
 	TTErr			notifyObservers(TTAddress anAddress, TTNodePtr aNode, TTAddressNotificationFlag flag);
-	
-	TTErr			dumpObservers(TTValue& value);
-
 };
 
 /**	An test tool : test the type of the object stored inside the node. 

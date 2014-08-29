@@ -18,8 +18,11 @@
 #ifndef __CURVE_H__
 #define __CURVE_H__
 
-#include "TimePluginLib.h"
-#include "Automation.h"
+#include "TTScoreIncludes.h"
+
+#include <libxml/encoding.h>
+#include <libxml/xmlwriter.h>
+#include <libxml/xmlreader.h>
 
 /**	The Curve class allows to ...
  
@@ -34,7 +37,7 @@ private :
     TTBoolean                           mActive;                        ///< is the curve ready to run ?
     TTBoolean                           mRedundancy;                    ///< is the curve allow repetitions ?
     TTUInt32                            mSampleRate;                    ///< time precision of the curve
-    TTObjectBasePtr                     mFunction;						///< a freehand function unit
+    TTObject                            mFunction;						///< a freehand function unit
     TTBoolean                           mRecorded;                      ///< is the curve based on a record or not ?
     TTBoolean                           mSampled;                       ///< is the curve already sampled ?
     TTFloat64                           mLastSample;                    ///< used internally to avoid redundancy

@@ -58,8 +58,8 @@ PetriNetNode::PetriNetNode(PetriNet* petriNet)
 	int nbColors = getPetriNet()->nbOfPossibleColors();
 
 	//m_inGoingArcs.assign(nbColors, std::vector<Arc*>(NULL));
-	m_inGoingArcs.assign(nbColors, arcList(NULL));
-	m_outGoingArcs.assign(nbColors, arcList(NULL));
+	m_inGoingArcs.assign(nbColors, arcList(0));
+	m_outGoingArcs.assign(nbColors, arcList(0));
 }
 
 //TODO : regarder le comportement de back_inserter;
@@ -289,8 +289,8 @@ petriNetNodeList PetriNetNode::returnPredecessors(int colorLabel) {
 }
 
 void PetriNetNode::changeNbOfColors(int newNbColors) {
-	m_inGoingArcs.resize(newNbColors, arcList(NULL));
-	m_outGoingArcs.resize(newNbColors, arcList(NULL));
+	m_inGoingArcs.resize(newNbColors, arcList(0));
+	m_outGoingArcs.resize(newNbColors, arcList(0));
 }
 
 PetriNetNode::~PetriNetNode() {
