@@ -102,7 +102,7 @@ void Place::produceTokens(unsigned int nbOfTokens, unsigned int colorLabel, int 
 		m_tokenByColor[colorLabel - 1].push_back(token);
 	}
 
-    if(tokensTime < 0){tokensTime = 0;}
+//    if(tokensTime < 0){tokensTime = 0;} // CB incompatible with deactivation (tokenTime = -1)
 
 	if ((oldNumberOfTokens < NB_OF_TOKEN_TO_ACTIVE_ARC) && (getNbOfTokens(colorLabel) >= NB_OF_TOKEN_TO_ACTIVE_ARC)) { // CB WTF : Si un token et deux arcs sortant, bug ?
 		arcList outGoingArcs = outGoingArcsOf(colorLabel);

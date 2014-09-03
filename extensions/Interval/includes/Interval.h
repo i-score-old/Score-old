@@ -49,7 +49,7 @@ private :
     TTErr   ProcessEnd();
     
     /** Specific process method
-     @param	inputValue      progression and real time of the scheduler
+     @param	inputValue      position and date of the scheduler
      @param	outputValue     return an error of the processing
      @return                an error code returned by the process method */
     TTErr   Process(const TTValue& inputValue, TTValue& outputValue);

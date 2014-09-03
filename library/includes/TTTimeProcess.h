@@ -42,7 +42,7 @@ protected :
     TTUInt32                        mDurationMin;                   ///< the minimal duration of the time process
     TTUInt32                        mDurationMax;                   ///< the maximal duration of the time process
     
-    TTBoolean                       mMute;                          ///< is the time process muted ?
+    TTBoolean                       mMute;                          ///< to not process anything
     
     TTValue                         mColor;                         ///< the color of the process (useful for gui)
     TTUInt32                        mVerticalPosition;              ///< the Y axe position of the process (useful for gui)
@@ -56,6 +56,8 @@ protected :
     
     TTBoolean                       mCompiled;                      ///< a boolean flag to know if the compile method needs to be called or not (uselly after an event date change)
     
+    TTBoolean                       mExternalTick;                  ///< a boolean flag to ease the access to the scheduler externalTick attribute
+    
 private :
     
     TTObjectBasePtr                 mStartEvent;                    ///< the event object which handles the time process execution start
@@ -65,7 +67,7 @@ private :
     TTObjectBasePtr                 mEndEvent;                      ///< the event object which handles the time process execution stop
     
     /** Specific compilation method used to pre-processed data in order to accelarate Process method.
-     the compiled attribute allows to know if the process needs to be compiled or not.
+     @details the compiled attribute allows to know if the process needs to be compiled or not.
      @return                an error code returned by the compile method */
     virtual TTErr   Compile() {return kTTErrGeneric;};
     
@@ -78,7 +80,7 @@ private :
     virtual TTErr   ProcessEnd() {return kTTErrGeneric;};
     
     /** Specific process method
-     @param	inputValue      progression and real time of the scheduler
+     @param	inputValue      position and date of the scheduler
      @param	outputValue     return an error of the processing
      @return                an error code returned by the process method */
     virtual TTErr   Process(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
@@ -123,49 +125,49 @@ private :
     TTErr           setDurationMax(const TTValue& value);
     
     /** get the time process start date
-        this method eases the getting of the start event date
+     @details this method eases the getting of the start event date
      @param	value           the returned start date
      @return                kTTErrNone */
     TTErr           getStartDate(TTValue& value);
     
     /** set the time process start date
-        this method eases the setting of the start event date
+     @details this method eases the setting of the start event date
      @param	value           a new start date
      @return                kTTErrNone */
     TTErr           setStartDate(const TTValue& value);
     
     /** get start event condition object
-        this method eases the getting of the start event condition object
+     @details this method eases the getting of the start event condition object
      @param	value           the returned condition object
      @return                an error code if the event doesn't exist */
     TTErr           getStartCondition(TTValue& value);
     
     /** set start event condition object
-        this method eases the setting of the start event condition object
+     @details this method eases the setting of the start event condition object
      @param	value           a condition object
      @return                an error code if the event doesn't exist */
     TTErr           setStartCondition(const TTValue& value);
     
     /** get the time process end date
-        this method eases the getting of the end event date
+     @details this method eases the getting of the end event date
      @param	value           the returned end date
      @return                kTTErrNone */
     TTErr           getEndDate(TTValue& value);
     
     /** set the time process end date
-        this method eases the setting of the end event date
+     @details this method eases the setting of the end event date
      @param	value           a new end date
      @return                kTTErrNone */
     TTErr           setEndDate(const TTValue& value);
     
     /** get end event condition object
-        this method eases the getting of the end event condition object
+     @details this method eases the getting of the end event condition object
      @param	value           the returned condition object
      @return                an error code if the event doesn't exist */
     TTErr           getEndCondition(TTValue& value);
     
     /** set end event condition object
-        this method eases the setting of the end event condition object
+     @details this method eases the setting of the end event condition object
      @param	value           a condition object
      @return                an error code if the event doesn't exist */
     TTErr           setEndCondition(const TTValue& value);
@@ -179,6 +181,30 @@ private :
      @param	value           8 bit color format <red green blue>
      @return                kTTErrNone */
     TTErr           setColor(const TTValue& value);
+    
+    /** get the speed of the time process
+     @details this method eases the getting of speed of the scheduler object
+     @param	value           the speed as #TTFloat64 value
+     @return                an error code if the speed cannot be get */
+    TTErr           getSpeed(TTValue& value);
+    
+    /** get the speed of the time process
+     @details this method eases the setting of speed of the scheduler object
+     @param	value           the speed as #TTFloat64 value
+     @return                an error code if the speed cannot be set */
+    TTErr           setSpeed(const TTValue& value);
+    
+    /** get the position of the time process
+     @details this method eases the getting of position of the scheduler object
+     @param	value           the position as #TTFloat64 value
+     @return                an error code if the position cannot be get */
+    TTErr           getPosition(TTValue& value);
+    
+    /** get the date of the time process
+     @details this method eases the getting of date of the scheduler object
+     @param	value           the date as #TTFloat64 value
+     @return                an error code if the date cannot be get */
+    TTErr           getDate(TTValue& value);
     
     /** Get intermediate events of the time process
      @param	value           returned events
@@ -200,12 +226,12 @@ private :
     TTErr           Limit(const TTValue& inputValue, TTValue& outputValue);
     
     /** Start the time process
-     this method eases the access of the start event happen message
+     this method eases the access of the start event trigger message
      @return                an error code if the play fails */
     TTErr           Start();
     
     /** End the time process
-     this method eases the access of the end event happen message
+     this method eases the access of the end event trigger message
      @return                an error code if the stop fails */
     TTErr           End();
     
@@ -229,6 +255,11 @@ private :
      @return                an error code if the resume fails */
     TTErr           Resume();
     
+    /** Drive the time process progression
+     this method eases the managment of the scheduler object
+     @return                an error code if the tick fails */
+    TTErr           Tick();
+    
     /** To be notified when an event date changed
      @param inputValue      the event which have changed his date
      @param outputValue     nothing
@@ -240,6 +271,12 @@ private :
      @param outputValue     nothing
      @return                kTTErrNone */
     TTErr           EventStatusChanged(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** To be notified when the scheduler running status change
+     @param inputValue      the new running status
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr           SchedulerRunningChanged(const TTValue& inputValue, TTValue& outputValue);
     
 protected :
     
@@ -261,18 +298,18 @@ protected :
      @return                an error code if it fails */
     TTErr           setEndEvent(TTTimeEventPtr aTimeProcess);
     
-    friend void TTSCORE_EXPORT TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression, TTFloat64 realTime);
+    friend void TTSCORE_EXPORT TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 position, TTFloat64 date);
     
     friend void TTSCORE_EXPORT TTTimeContainerFindTimeProcessWithTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found);
 };
 
 typedef TTTimeProcess* TTTimeProcessPtr;
 
-/** The scheduler time progression callback
+/** The scheduler time position callback
  @param	object				a time process instance
- @param	progression			the time progression
+ @param	position			the time position
  @return					an error code */
-void TTSCORE_EXPORT TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progression, TTFloat64 realTime);
+void TTSCORE_EXPORT TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 position, TTFloat64 date);
 
 /** Define some macros to ease the access of events attributes */
 #define mStartDate TTTimeEventPtr(mStartEvent)->mDate
@@ -283,8 +320,8 @@ void TTSCORE_EXPORT TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 progr
 
 #define mDuration mEndDate - mStartDate
 
-/** Define callback function to get progression back from the scheduler */
-typedef void (*TTTimeProcessProgressionCallback)(TTPtr, TTFloat64, TTFloat64);
+/** Define callback function to get position back from the scheduler */
+typedef void (*TTTimeProcessPositionCallback)(TTPtr, TTFloat64, TTFloat64);
 
 /** Define an unordered map to store and retreive a value relative to a TTTimeProcessPtr */
 #ifdef TT_PLATFORM_WIN

@@ -52,6 +52,12 @@ private :
      @return                kTTErrGeneric if mTimeConditionList is empty */
     TTErr           getTimeConditions(TTValue& value);
     
+    /** Trigger next pending time events
+     @param inputvalue      nothing or any event pending passing there position in the list of pending event (ex : 1 3 if there is 3 or more pending events and we want to trigger the first and the third events)
+     @param outputvalue     the triggered time events
+     @return                an error code if there is no next pending time event */
+    TTErr           Next(const TTValue& inputValue, TTValue& outputValue);
+    
     /** Create a time event
      @param inputvalue      a date
      @param outputvalue     a new time event
@@ -151,12 +157,17 @@ protected :
     /** Getter on event's name protected member
      @param aTimeProcess    a time event object
      @return                a name symbol */
-    TTSymbol        getTimeEventName(TTTimeEventPtr aTimeEvent);
+    TTSymbol&       getTimeEventName(TTTimeEventPtr aTimeEvent);
     
     /** Getter on date time event protected member
      @param aTimeProcess    a time event object
      @return                a date value */
     TTUInt32        getTimeEventDate(TTTimeEventPtr aTimeEvent);
+    
+    /** Getter on event's status protected member
+     @param aTimeProcess    a time event object
+     @return                a status symbol */
+    TTSymbol&       getTimeEventStatus(TTTimeEventPtr aTimeEvent);
     
     /** Getter on state time event protected member
      @param aTimeProcess    a time event object

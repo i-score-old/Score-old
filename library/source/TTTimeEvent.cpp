@@ -25,7 +25,7 @@ TT_BASE_OBJECT_CONSTRUCTOR,
 mContainer(NULL),
 mName(kTTSymEmpty),
 mDate(0),
-mStatus(kEventWaiting),
+mStatus(kTTSym_eventWaiting),
 mMute(NO),
 mState(NULL),
 mCondition(NULL)
@@ -39,6 +39,8 @@ mCondition(NULL)
 
     if (arguments.size() == 2)
         mContainer = arguments[1];
+    
+    addAttribute(Container, kTypeObject);
 
     addAttribute(Name, kTypeSymbol);
    	addAttributeWithSetter(Date, kTypeUInt32);
@@ -118,62 +120,75 @@ TTErr TTTimeEvent::setCondition(const TTValue& value)
 
 TTErr TTTimeEvent::setStatus(const TTValue& value)
 {
+    TTSymbol    lastStatus = mStatus;
+    TTValue     v = TTObjectBasePtr(this);
+    
     // set status
     mStatus = value[0];
 
     // notify each attribute observers
-    sendNotification(kTTSym_EventStatusChanged, TTObjectBasePtr(this));
+    v.append(mStatus);
+    v.append(lastStatus);
+    
+    sendNotification(kTTSym_EventStatusChanged, v);
     
     return kTTErrNone;
 }
 
 TTErr TTTimeEvent::Trigger()
 {
-    // if not pending : do nothing
-    if (mStatus != kTTSym_eventPending)
-        return kTTErrGeneric;
-    
-    // if not conditionned : do nothing
-    if (mCondition == NULL)
-        return kTTErrGeneric;
-    
-    // if the event muted
-    if (mMute)
-        return kTTErrNone;
-    
-    // use container to make the event happen
+    // an event needs to be into a running container to be triggered
     if (mContainer) {
         
-        TTValue none, v = TTObjectBasePtr(this);
-        return mContainer->sendMessage(TTSymbol("TimeEventTrigger"), v, none);
+        TTValue none, v;
+        
+        mContainer->getAttributeValue("running", v);
+        TTBoolean running = v[0];
+        
+        if (running) {
+            
+            // if not pending : do nothing
+            if (mStatus != kTTSym_eventPending)
+                return kTTErrGeneric;
+            
+            // if the event muted
+            if (mMute)
+                return kTTErrNone;
+            
+            v = TTObjectBasePtr(this);
+            return mContainer->sendMessage(TTSymbol("TimeEventTrigger"), v, none);
+        }
     }
     
     // otherwise make it happens now
-    else
-        return Happen();
+    return Happen();
 }
 
 TTErr TTTimeEvent::Dispose()
 {
-    TTValue none;
-    TTErr   err = kTTErrNone;
-    
-    // if not pending : do nothing
-    if (mStatus != kTTSym_eventPending)
-        return kTTErrGeneric;
-    
-    // if not conditionned : do nothing
-    if (mCondition == NULL)
-        return kTTErrGeneric;
-    
-    // use container to make the event dispose
+    // an event needs to be into a running container to be disposed
     if (mContainer) {
         
-        TTValue v = TTObjectBasePtr(this);
-        return mContainer->sendMessage(TTSymbol("TimeEventDispose"), v, none);
+        TTValue none, v;
+        
+        mContainer->getAttributeValue("running", v);
+        TTBoolean running = v[0];
+        
+        if (running) {
+            
+            // if already happened or disposed : do nothing
+            if (mStatus == kTTSym_eventDisposed ||
+                mStatus == kTTSym_eventHappened)
+                return kTTErrGeneric;
+            
+            // change the status before
+            setStatus(kTTSym_eventDisposed);
+            
+            v = TTObjectBasePtr(this);
+            return mContainer->sendMessage(TTSymbol("TimeEventDispose"), v, none);
+        }
     }
     
-    setStatus(kTTSym_eventDisposed);
     return kTTErrNone;
 }
 
@@ -233,7 +248,7 @@ TTErr TTTimeEvent::StateAddressSetValue(const TTValue& inputValue, TTValue& outp
     TTValue         v, command;
     TTAddress       address;
     TTValuePtr      aValue;
-    TTListPtr       lines;
+    TTListPtr       flattenedLines;
     TTDictionaryBasePtr aLine;
     TTErr           err;
     
@@ -245,11 +260,11 @@ TTErr TTTimeEvent::StateAddressSetValue(const TTValue& inputValue, TTValue& outp
             aValue = TTValuePtr(TTPtr(inputValue[1]));
             
             // get the lines of the state
-            mState->getAttributeValue(kTTSym_lines, v);
-            lines = TTListPtr(TTPtr(v[0]));
+            mState->getAttributeValue("flattenedLines", v);
+            flattenedLines = TTListPtr(TTPtr(v[0]));
             
             // find the line at address
-            err = lines->find(&TTScriptFindAddress, (TTPtr)&address, v);
+            err = flattenedLines->find(&TTScriptFindAddress, (TTPtr)&address, v);
             
             // if the line doesn't exist : append it to the state
             if (err) {
@@ -257,7 +272,7 @@ TTErr TTTimeEvent::StateAddressSetValue(const TTValue& inputValue, TTValue& outp
                 command = *aValue;
                 command.prepend(address);
                 
-                mState->sendMessage(TTSymbol("AppendCommand"), command, v);
+                mState->sendMessage("AppendCommand", command, v);
             }
             else {
             
@@ -283,7 +298,7 @@ TTErr TTTimeEvent::StateAddressClear(const TTValue& inputValue, TTValue& outputV
         if (inputValue[0].type() == kTypeSymbol) {
             
             // remove the lines of the state
-            return mState->sendMessage(TTSymbol("RemoveCommand"), inputValue, none);
+            return mState->sendMessage("RemoveCommand", inputValue, none);
         }
     }
     
@@ -303,6 +318,12 @@ TTErr TTTimeEvent::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
     v.toString();
     s = TTString(v[0]);
     xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "date", BAD_CAST s.data());
+    
+    // Write the mute
+    v = mMute;
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "mute", BAD_CAST s.data());
     
     // Write the name of the condition object
     if (mCondition) {
@@ -339,6 +360,18 @@ TTErr TTTimeEvent::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
                 if (v[0].type() == kTypeUInt32) {
                     
                     this->setDate(v);
+                }
+            }
+        }
+        
+        // get the mute
+        if (!aXmlHandler->getXmlAttribute(kTTSym_mute, v, NO)) {
+            
+            if (v.size() == 1) {
+                
+                if (v[0].type() == kTypeInt32) {
+                    
+                    this->mMute = v[0];
                 }
             }
         }
