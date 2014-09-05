@@ -35,7 +35,7 @@ int main(void)
 void TTScoreInit(const char* binaries)
 {
     // Initialized Foundation framework
-	TTFoundationInit();
+	TTFoundationInit(binaries);
     
 	if (!TTScoreInitialized) {
 		
