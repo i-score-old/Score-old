@@ -48,16 +48,14 @@ knowledge of the CeCILL-C license and that you accept its terms.
 #include <sstream>
 
 TriggerPoint::TriggerPoint(unsigned int triggerId)
+  : _relatedControlPoint(NULL),
+    _triggerMessage(" "),
+    _id(triggerId),
+    _type(TRIGGER_DEFAULT),
+    _previousTriggerId(NO_ID),
+    _isMute(false),
+    
 {
-	_relatedControlPoint = NULL;
-	_triggerMessage = " ";
-
-	_type = TRIGGER_DEFAULT;
-	_previousTriggerId = NO_ID;
-	
-	_isMute = false;
-
-	setTriggerId(triggerId);
 }
 
 void TriggerPoint::setType(int type) 

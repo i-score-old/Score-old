@@ -47,7 +47,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
 #include "CSPLinearConstraint.hpp"
 
 BinaryTemporalRelation::BinaryTemporalRelation(ConstrainedTemporalEntity *ent1, ConstrainedTemporalEntity *ent2)
-: BinaryRelation(ent1, ent2)
+  : BinaryRelation(ent1, ent2), 
+    m_id(0)
 {
 }
 
