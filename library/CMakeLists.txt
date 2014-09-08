@@ -8,7 +8,7 @@ find_package(LibXml2 REQUIRED)
 set(PROJECT_SRCS
 ${CMAKE_CURRENT_SOURCE_DIR}/../extensions/TimePluginLib.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/source/TTScore.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/source/Curve.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/source/TTCurve.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/source/Expression.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/source/TTTimeCondition.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/source/TTTimeContainer.cpp
