@@ -111,6 +111,10 @@ public:
 	 */
 	unsigned int getSize();
 
+private:
+  TransitionBitArray(const TransitionBitArray&);
+  TransitionBitArray &operator=(const TransitionBitArray&);
+
 private :
 	unsigned int m_size; // BitArray size.
 	unsigned int m_maxIndexInBitArray; // Max index of the BitArray.

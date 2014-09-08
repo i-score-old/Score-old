@@ -117,6 +117,11 @@ public :
 	void removeOptionalArgument(std::string key);
 	std::map<std::string, std::string> getOptionalArguments();
 
+private:
+
+  ConstrainedBox(const ConstrainedBox&);
+  ConstrainedBox &operator=(const ConstrainedBox&);
+
 private :
 	//std::string _ipAddress;
 	//unsigned int _port;

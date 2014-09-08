@@ -166,7 +166,7 @@ TTTimeProcess::~TTTimeProcess()
 
 TTErr TTTimeProcess::getRigid(TTValue& value)
 {
-    value = mDurationMin && mDurationMin && mDurationMin == mDurationMax;
+    value = mDurationMin && mDurationMax && mDurationMin == mDurationMax;
     
     return kTTErrNone;
 }

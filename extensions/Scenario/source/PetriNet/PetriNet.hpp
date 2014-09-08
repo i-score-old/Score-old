@@ -384,7 +384,7 @@ private:
 	std::map<PetriNet*, PetriNet*> m_activeChildPetriNet;
     
     unsigned int m_currentTime; // we need to store it because transitions ask for
-    unsigned int m_isRunning;   // we need to store it because transitions ask for
+    unsigned int m_isRunning;   // we need to store it because transitions ask for //B: why unsigned int and not bool ???
 
 	unsigned int m_nbColors; // number of colors.
 
@@ -411,7 +411,7 @@ private:
 //	 */
 //	transitionList m_activeTransitions; // list of actives transitions.
 	transitionList m_sensitizedTransitions;	// list of sensitized transitions.
-    transitionList m_deactivatedTransitions; // list of deactivated transitions.
+        transitionList m_deactivatedTransitions; // list of deactivated transitions.
 	transitionList m_transitionsToCrossWhenAcceleration;
 
 	priorityTransitionActionQueue m_priorityTransitionsActionQueue;
@@ -419,6 +419,7 @@ private:
 	bool m_mustCrossAllTransitionWithoutWaitingEvent;
 
 	void (*m_isEventReadyCallback)(void*, bool);
+private:
 
 	// Private function only used to factorize the program.
 	Arc* newArc(PetriNetNode* from, PetriNetNode* to, int color);
