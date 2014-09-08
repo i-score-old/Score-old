@@ -4,7 +4,6 @@
 sources:
   - ../TimePluginLib.cpp
   - source/Automation.cpp
-  - ../../library/source/Curve.cpp
   
 includes:
   - "."
