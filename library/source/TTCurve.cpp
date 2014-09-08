@@ -15,6 +15,10 @@
 
 #include "TTCurve.h"
 
+#include <libxml/encoding.h>
+#include <libxml/xmlwriter.h>
+#include <libxml/xmlreader.h>
+
 #define thisTTClass                 TTCurve
 #define thisTTClassName             "Curve"
 #define thisTTClassTags             "curve"
