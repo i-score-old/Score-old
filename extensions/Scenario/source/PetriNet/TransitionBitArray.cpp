@@ -46,7 +46,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 TransitionBitArray::TransitionBitArray(unsigned int size)
-:m_size(size), m_maxIndexInBitArray((size - 1)/INT_SIZE)
+  :m_size(size), m_maxIndexInBitArray((size - 1)/INT_SIZE), m_bitArray(NULL)
 {
 	if (size == 0) {
 		throw OutOfBoundException();

@@ -102,6 +102,11 @@ public :
 	
 	void changeMax(Solver* solver, int newValue);
 
+private:
+  
+  ConstrainedTemporalEntity(const ConstrainedTemporalEntity &);
+  ConstrainedTemporalEntity &operator=(const ConstrainedTemporalEntity &);
+
 protected :
 	unsigned int _id;
 

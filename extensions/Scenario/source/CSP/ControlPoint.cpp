@@ -50,7 +50,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 using namespace std;
 
 ControlPoint::ControlPoint(CSPConstrainedVariable *beg,  CSPConstrainedVariable *length, unsigned int containingBoxID)
-: ConstrainedTemporalEntity(beg, length)
+  : ConstrainedTemporalEntity(beg, length), _processStepID(0), _relatedTriggerPoint(NULL)
 {
 	_relatedTriggerPoint = NULL;
 

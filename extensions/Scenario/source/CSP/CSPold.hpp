@@ -358,6 +358,10 @@ public :
 
 	void changeAllBoxMaxSceneWidth(int newValue);
 
+private:
+  CSPold(const CSPold &);
+  CSPold &operator=(const CSPold &);
+  
 private :
 
 	Solver *_solver;

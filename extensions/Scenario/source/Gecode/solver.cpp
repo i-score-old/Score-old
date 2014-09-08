@@ -48,14 +48,15 @@ knowledge of the CeCILL-C license and that you accept its terms.
 #define LinIntExpr LinExpr
 #endif
 Solver::Solver()
+  : _space(new CustomSpace()),
+    _integerVariablesMap(new map<int, IntegerVariable*>),
+    _constraintsMap(new map<int, LinearConstraint*>),
+    _engine(new SearchEngine(_space)),
+    _strongVars(NULL),
+    _suggest(false),
+    _maxModification(NO_MAX_MODIFICATION)
 {
-	_space = new CustomSpace();
-	_integerVariablesMap = new map<int, IntegerVariable*>;
-	_constraintsMap = new map<int, LinearConstraint*>;
-	_engine = new SearchEngine(_space);
-	_suggest = false;
 
-	_maxModification = NO_MAX_MODIFICATION;
 }
 
 Solver::~Solver()

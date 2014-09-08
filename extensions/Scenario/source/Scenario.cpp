@@ -209,7 +209,7 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
     
     if (inputValue.size() == 2) {
         
-        if (inputValue[0].type() == kTypeFloat64 && inputValue[0].type() == kTypeFloat64) {
+        if (inputValue[0].type() == kTypeFloat64 && inputValue[1].type() == kTypeFloat64) {
             
             position = inputValue[0];
             date = inputValue[1];
