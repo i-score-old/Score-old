@@ -3,7 +3,7 @@ defines:
   
 sources:
   - source/TTScore.cpp
-  - source/Curve.cpp
+  - source/TTCurve.cpp
   - source/Expression.cpp
   - source/TTTimeCondition.cpp
   - source/TTTimeContainer.cpp

@@ -4,7 +4,7 @@
  *
  * @brief a curve samples a freehand function unit at a sample rate
  *
- * @details The Curve class allows to ... @n@n
+ * @details The TTCurve class allows to ... @n@n
  *
  * @see Automation
  *
@@ -24,13 +24,13 @@
 #include <libxml/xmlwriter.h>
 #include <libxml/xmlreader.h>
 
-/**	The Curve class allows to ...
+/**	The TTCurve class allows to ...
  
  @see Automation
  */
-class Curve : public TTObjectBase, public TTList
+class TTCurve : public TTObjectBase, public TTList
 {
-	TTCLASS_SETUP(Curve)
+	TTCLASS_SETUP(TTCurve)
 	
 private :
     
@@ -82,16 +82,17 @@ private :
 	TTErr	WriteAsText(const TTValue& inputValue, TTValue& outputValue);
 	TTErr	ReadFromText(const TTValue& inputValue, TTValue& outputValue);
     
-public:
-    
-    /** Get the next sample values for a given x.
-     a call TTList::begin() method before to use this method could be needed
-     @param x               a float64 between [0. :: 1.]
-     @param y               a float64 between [min :: max]
-     @return                an error code if the operation fails */
-    TTErr   nextSampleAt(TTFloat64& x, TTFloat64& y);
+    friend TTErr TTSCORE_EXPORT TTCurveNextSampleAt(TTCurve* aCurve, TTFloat64& x, TTFloat64& y);
+
 };
 
-typedef Curve* CurvePtr;
+typedef TTCurve* TTCurvePtr;
+
+/** Get the next sample values for a given x.
+ a call TTList::begin() method before to use this method could be needed
+ @param x               a float64 between [0. :: 1.]
+ @param y               a float64 between [min :: max]
+ @return                an error code if the operation fails */
+TTErr TTSCORE_EXPORT TTCurveNextSampleAt(TTCurve* aCurve, TTFloat64& x, TTFloat64& y);
 
 #endif // __CURVE_H__

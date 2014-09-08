@@ -42,6 +42,7 @@ void TTScoreInit(const char* binaries)
 		TTScoreInitialized = true;
 		
 		// register classes -- both internal and external
+        TTCurve::registerClass();
         TTTimeCondition::registerClass();
         TTTimeContainer::registerClass();
         TTTimeEvent::registerClass();

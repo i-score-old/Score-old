@@ -14,6 +14,7 @@
  */
 
 #include "Automation.h"
+#include "TTCurve.h"
 #include <libxml/encoding.h>
 #include <libxml/xmlwriter.h>
 #include <libxml/xmlreader.h>
@@ -26,7 +27,6 @@ extern "C" TT_EXTENSION_EXPORT TTErr TTLoadJamomaExtension_Automation(void)
 {
 	TTFoundationInit();
 	Automation::registerClass();
-    Curve::registerClass();
 	return kTTErrNone;
 }
 
@@ -118,7 +118,7 @@ TTErr Automation::ProcessStart()
         for (j = 0; j < objects.size(); j++) {
             
             curve = objects[j];
-            CurvePtr(curve.instance())->begin();
+            TTCurvePtr(curve.instance())->begin();
         }
         
         // a curve with a receiver is recording
@@ -145,7 +145,7 @@ TTErr Automation::ProcessStart()
                     curve = TTObject("Curve");
                     
                     // store the first point
-                    CurvePtr(curve.instance())->append(TTValue(0., vStart[j]));
+                    TTCurvePtr(curve.instance())->append(TTValue(0., vStart[j]));
                     
                     // index the curve
                     objects[j] = curve;
@@ -193,7 +193,7 @@ TTErr Automation::ProcessEnd()
                     curve = objects[j];
                     
                     // store the last point
-                    CurvePtr(curve.instance())->append(TTValue(1., vEnd[j]));
+                    TTCurvePtr(curve.instance())->append(TTValue(1., vEnd[j]));
                     
                     // set the curve in record mode
                     curve.set(kTTSym_recorded, YES);
@@ -260,7 +260,7 @@ TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
                     
                     curve = objects[j];
                     
-                    err = CurvePtr(curve.instance())->nextSampleAt(position, sample);
+                    err = TTCurveNextSampleAt(TTCurvePtr(curve.instance()), position, sample);
                     
                     // if no value
                     if (err == kTTErrValueNotFound)
@@ -348,7 +348,7 @@ TTErr Automation::Goto(const TTValue& inputValue, TTValue& outputValue)
                         
                         curve = objects[j];
                         
-                        CurvePtr(curve.instance())->begin();
+                        TTCurvePtr(curve.instance())->begin();
                     }
                 }
                 
@@ -869,7 +869,7 @@ TTErr AutomationReceiverReturnValueCallback(const TTValue& baton, const TTValue&
                 curve = objects[i];
                 
                 // store the next point
-                CurvePtr(curve.instance())->append(TTValue(anAutomation->mCurrentPosition, TTFloat64(data[i])));
+                TTCurvePtr(curve.instance())->append(TTValue(anAutomation->mCurrentPosition, TTFloat64(data[i])));
             }
         }
     }
