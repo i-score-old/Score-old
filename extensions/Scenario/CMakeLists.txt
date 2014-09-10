@@ -69,9 +69,11 @@ include_directories("${JAMOMA_DSP_INCLUDE_DIR}")
 
 
 # TODO make FindPthreadWin32.cmake
-SET(PTHREAD_WIN32_PATH "C:\\Program Files (x86)\\pthread-win32" )
-FILE(TO_CMAKE_PATH ${PTHREAD_WIN32_PATH} PTHREAD_WIN32_PATH_CMAKE)
-include_directories("${PTHREAD_WIN32_PATH_CMAKE}/include")
+if(WIN32)
+	SET(PTHREAD_WIN32_PATH "C:\\Program Files (x86)\\pthread-win32" )
+	FILE(TO_CMAKE_PATH ${PTHREAD_WIN32_PATH} PTHREAD_WIN32_PATH_CMAKE)
+	include_directories("${PTHREAD_WIN32_PATH_CMAKE}/include")
+endif()
 
 include_directories(${LIBXML2_INCLUDE_DIR})
 if(ANDROID)
@@ -96,8 +98,9 @@ target_link_libraries(${PROJECT_NAME} JamomaScore)
 target_link_libraries(${PROJECT_NAME} ${LIBXML2_LIBRARIES})
 
 # TODO make FindPthreadWin32.cmake
-target_link_libraries(${PROJECT_NAME} "${PTHREAD_WIN32_PATH_CMAKE}/lib/x86/pthreadVC2.lib")
-
+if(WIN32)
+	target_link_libraries(${PROJECT_NAME} "${PTHREAD_WIN32_PATH_CMAKE}/lib/x86/pthreadVC2.lib")
+endif()
 ### Output ###
 setOutput()
 
