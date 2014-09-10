@@ -36,8 +36,7 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
 */
 
-#ifndef PETRINETITEM_H_
-#define PETRINETITEM_H_
+#pragma once
 
 /*!
  * \file PetriNetItem.hpp
@@ -105,4 +104,3 @@ private :
 	PetriNet* m_petriNet; // PetriNet containing this PetriNetItem.
 };
 
-#endif /*PETRINETITEM_H_*/

@@ -36,7 +36,6 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
 */
 
-#include "PetriNet.hpp"
 
 /*!
  * \file PetriNet.cpp
@@ -44,14 +43,24 @@ knowledge of the CeCILL-C license and that you accept its terms.
  * \date 2008-2009
  */
 
+#include "PetriNetNode.hpp"
 #include <stdio.h>
 #include <stdlib.h>
 
+#if !defined(TT_PLATFORM_WIN)
 #include <sys/time.h>
+#else
+#include <winsock2.h>
+#endif
 
 #include <iostream>
 #include <algorithm>
 
+
+#include "Arc.hpp"
+#include "Transition.hpp"
+#include "PetriNet.hpp"
+#include "Place.hpp"
 using namespace std;
 
 PetriNet::PetriNet(unsigned int nbColors):
@@ -323,23 +332,23 @@ Transition* PetriNet::createTransition()
 	return newTransition;
 }
 
-Arc* PetriNet::newArc(PetriNetNode* from, PetriNetNode* to, int color)
+PetriNetArc* PetriNet::newArc(PetriNetNode* from, PetriNetNode* to, int color)
 {
-	Arc* existArc = to->haveArcFrom(from,color);
+	PetriNetArc* existArc = to->haveArcFrom(from,color);
 
 	if (existArc != NULL) {
 		return existArc;
 	}
 
-	return new Arc(this, from, to, color);
+	return new PetriNetArc(this, from, to, color);
 }
 
-Arc* PetriNet::createArc(Place* from, Transition* to, int color)
+PetriNetArc* PetriNet::createArc(Place* from, Transition* to, int color)
 {
 	return newArc(from, to, color);
 }
 
-Arc* PetriNet::createArc(Transition* from, Place* to, int color)
+PetriNetArc* PetriNet::createArc(Transition* from, Place* to, int color)
 {
 	return newArc(from, to, color);
 }
@@ -347,7 +356,7 @@ Arc* PetriNet::createArc(Transition* from, Place* to, int color)
 void PetriNet::deleteArc(PetriNetNode* from, PetriNetNode* to)
 {
 	for (unsigned int i = 1; i <= nbOfPossibleColors(); i++) {
-		Arc* arcToDelete = to->haveArcFrom(from, i);
+		PetriNetArc* arcToDelete = to->haveArcFrom(from, i);
 
 		if (arcToDelete != NULL) {
 			to->removeInGoingArcs(arcToDelete, i);
@@ -360,7 +369,7 @@ void PetriNet::deleteArc(PetriNetNode* from, PetriNetNode* to)
 
 void PetriNet::deleteArc(PetriNetNode* from, PetriNetNode* to, int color)
 {
-	Arc* arcToDelete = to->haveArcFrom(from, color);
+	PetriNetArc* arcToDelete = to->haveArcFrom(from, color);
 
 	if (arcToDelete == NULL) {
 		return;

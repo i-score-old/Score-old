@@ -24,6 +24,7 @@ include_directories("${JAMOMA_MODULAR_SCHEDULERLIB_INCLUDE_DIR}")
 include_directories("${JAMOMA_MODULAR_PEEROBJECT_INCLUDE_DIR}")
 include_directories("${JAMOMA_FOUNDATION_INCLUDE_DIR}")
 include_directories("${JAMOMA_DSP_INCLUDE_DIR}")
+include_directories("${JAMOMA_FOUNDATION_INCLUDE_DIR}/../libiconv/include")
 
 include_directories(${LIBXML2_INCLUDE_DIR})
 if(ANDROID)

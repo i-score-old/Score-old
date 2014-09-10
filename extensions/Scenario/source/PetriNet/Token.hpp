@@ -36,8 +36,7 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
 */
 
-#ifndef TOKEN_HPP_
-#define TOKEN_HPP_
+#pragma once
 
 /*!
  * \file Token.hpp
@@ -61,4 +60,3 @@ public:
 
 };
 
-#endif /*TOKEN_HPP_*/

@@ -36,8 +36,7 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
 */
 
-#ifndef TRANSITION_H_
-#define TRANSITION_H_
+#pragma once
 
 /*!
  * \file Transition.hpp
@@ -45,7 +44,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  * \date 2008-2009
  */
 
-#include "Arc.hpp"
 #include "PetriNetNode.hpp"
 #include "TransitionBitArray.hpp"
 #include "PriorityTransitionAction.hpp"
@@ -134,7 +132,7 @@ public:
 	 * \param recalculateArcTime : True if the arc time must be recalculate. False if we want to use
 	 * 							   the time previously stored into this arc.
 	 */
-    void setArcAsActive(Arc* arc, int timeOffset, bool recalculateArcTime);
+	void setArcAsActive(PetriNetArc* arc, int timeOffset, bool recalculateArcTime);
 
 	/*!
 	 * Sets the arc as inactive.
@@ -143,7 +141,7 @@ public:
 	 *
 	 * \param arcNumber : the arc to be set as inactive.
 	 */
-	void setArcAsInactive(Arc* arc);
+	void setArcAsInactive(PetriNetArc* arc);
 
 	/*!
 	 * Tests if all ingoing arcs are actives.
@@ -208,7 +206,7 @@ public:
 	 *
 	 * \return the in-going arc which comes from a place with enough token to be crossable. NULL if not.
 	 */
-	Arc* hasATokenInPredecessors();
+	PetriNetArc* hasATokenInPredecessors();
 
 	void print();
 
@@ -265,4 +263,3 @@ private:
 
 };
 
-#endif /*TRANSITION_H_*/

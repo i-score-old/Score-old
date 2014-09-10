@@ -45,6 +45,12 @@ file(GLOB_RECURSE PROJECT_HDRS
     ${CMAKE_CURRENT_SOURCE_DIR}/source/PetriNet/*.hpp                # is it needed ?
 )
 
+if(WIN32)
+	set(PROJECT_SRCS ${PROJECT_SRCS}
+		${CMAKE_CURRENT_SOURCE_DIR}/../TimePluginLib.cpp
+		)
+endif()
+
 include_directories("${PROJECT_SOURCE_DIR}/")
 include_directories("${PROJECT_SOURCE_DIR}/..")
 include_directories("${PROJECT_SOURCE_DIR}/includes")
@@ -58,11 +64,22 @@ include_directories("${JAMOMA_MODULAR_PROTOCOLLIB_INCLUDE_DIR}")
 include_directories("${JAMOMA_MODULAR_SCHEDULERLIB_INCLUDE_DIR}")
 include_directories("${JAMOMA_MODULAR_PEEROBJECT_INCLUDE_DIR}")
 include_directories("${JAMOMA_FOUNDATION_INCLUDE_DIR}")
+include_directories("${JAMOMA_FOUNDATION_INCLUDE_DIR}/../libiconv/include")
 include_directories("${JAMOMA_DSP_INCLUDE_DIR}")
+
+
+# TODO make FindPthreadWin32.cmake
+SET(PTHREAD_WIN32_PATH "C:\\Program Files (x86)\\pthread-win32" )
+FILE(TO_CMAKE_PATH ${PTHREAD_WIN32_PATH} PTHREAD_WIN32_PATH_CMAKE)
+include_directories("${PTHREAD_WIN32_PATH_CMAKE}/include")
 
 include_directories(${LIBXML2_INCLUDE_DIR})
 if(ANDROID)
 include_directories("${CMAKE_FIND_ROOT_PATH}/include")
+endif()
+
+if(WIN32)
+	add_definitions("/DNOMINMAX")
 endif()
 
 add_library(${PROJECT_NAME} SHARED ${PROJECT_SRCS} ${PROJECT_HDRS})
@@ -77,6 +94,9 @@ target_link_libraries(${PROJECT_NAME} ${JAMOMA_DSP_LIBRARY})
 target_link_libraries(${PROJECT_NAME} ${JAMOMA_MODULAR_LIBRARY})
 target_link_libraries(${PROJECT_NAME} JamomaScore)
 target_link_libraries(${PROJECT_NAME} ${LIBXML2_LIBRARIES})
+
+# TODO make FindPthreadWin32.cmake
+target_link_libraries(${PROJECT_NAME} "${PTHREAD_WIN32_PATH_CMAKE}/lib/x86/pthreadVC2.lib")
 
 ### Output ###
 setOutput()

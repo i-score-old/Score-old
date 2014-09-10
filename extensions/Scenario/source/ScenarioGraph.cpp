@@ -50,11 +50,11 @@ void Scenario::compileGraph(TTUInt32 timeOffset)
 	// start the graph
 	Place*          startPlace = mExecutionGraph->createPlace();
 	TransitionPtr   startTransition = mExecutionGraph->createTransition();
-	Arc*            startArc = mExecutionGraph->createArc(startPlace, startTransition);
+	PetriNetArc*            startArc = mExecutionGraph->createArc(startPlace, startTransition);
     
 	Place*          endPlace = mExecutionGraph->createPlace();
 	TransitionPtr   endTransition = mExecutionGraph->createTransition();
-	Arc*            endArc = mExecutionGraph->createArc(endTransition, endPlace);
+	PetriNetArc*            endArc = mExecutionGraph->createArc(endTransition, endPlace);
     
 	mExecutionGraph->setStartPlace(startPlace);
 	mExecutionGraph->setEndPlace(endPlace);
@@ -103,8 +103,8 @@ void Scenario::compileTimeProcess(TTObject& aTimeProcess, TransitionPtr* previou
     TransitionPtr   startTransition = NULL;
     TransitionPtr   lastTransition = NULL;
     Place*          currentPlace;
-    Arc*            arcFromPreviousTransitionToCurrentPlace;
-    Arc*            arcFromCurrentPlaceToTheEnd;
+    PetriNetArc*            arcFromPreviousTransitionToCurrentPlace;
+    PetriNetArc*            arcFromCurrentPlaceToTheEnd;
     
     TTObject  startEvent = getTimeProcessStartEvent(aTimeProcess);
     TTObject  endEvent = getTimeProcessEndEvent(aTimeProcess);
@@ -224,8 +224,8 @@ void Scenario::compileInterval(TTObject& aTimeProcess)
     TransitionPtr           startTransition;
     TransitionPtr           endTransition;
     Place*                  currentPlace;
-    Arc*                    arcFromstartTransitionToCurrentPlace;
-    Arc*                    arcFromCurrentPlaceToendTransition;
+    PetriNetArc*                    arcFromstartTransitionToCurrentPlace;
+    PetriNetArc*                    arcFromCurrentPlaceToendTransition;
     
     ExtendedInt             intervalValue;
     
@@ -309,7 +309,7 @@ void Scenario::compileInterval(TTObject& aTimeProcess)
 void Scenario::compileTimeEvent(TTObject& aTimeEvent, TTUInt32 time, TransitionPtr previousTransition, TransitionPtr currentTransition, Place* currentPlace)
 {
     ExtendedInt timeValue;
-    Arc*        arcFromCurrentPlaceToCurrentTransition = mExecutionGraph->createArc(currentPlace, currentTransition);
+    PetriNetArc*        arcFromCurrentPlaceToCurrentTransition = mExecutionGraph->createArc(currentPlace, currentTransition);
     
     // create arc from previous transition to current place
     mExecutionGraph->createArc(previousTransition, currentPlace);
@@ -324,7 +324,7 @@ void Scenario::compileTimeEvent(TTObject& aTimeEvent, TTUInt32 time, TransitionP
 void Scenario::compileInteractiveEvent(TTObject& aTimeEvent, TTUInt32 timeOffset)
 {
     TransitionPtr currentTransition;
-    Arc*          currentArc;
+    PetriNetArc*          currentArc;
     
     TTBoolean     mute;
     

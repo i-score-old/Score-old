@@ -36,7 +36,6 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
 */
 
-#include "PetriNetNode.hpp"
 
 /*!
  * \file PetriNetNode.cpp
@@ -47,6 +46,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
 #include "PetriNet.hpp"
 
 #include <set>
+#include "Arc.hpp"
+#include "PetriNetNode.hpp"
 
 using namespace std;
 
@@ -57,7 +58,7 @@ PetriNetNode::PetriNetNode(PetriNet* petriNet)
 :PetriNetItem(petriNet) {
 	int nbColors = getPetriNet()->nbOfPossibleColors();
 
-	//m_inGoingArcs.assign(nbColors, std::vector<Arc*>(NULL));
+	//m_inGoingArcs.assign(nbColors, std::vector<PetriNetArc*>(NULL));
 	m_inGoingArcs.assign(nbColors, arcList(0));
 	m_outGoingArcs.assign(nbColors, arcList(0));
 }
@@ -116,7 +117,7 @@ void PetriNetNode::setOutGoingArcs(arcList list, int colorLabel) {
 	m_outGoingArcs[colorLabel - 1] = list;
 }
 
-void PetriNetNode::addInGoingArcs(Arc* arcToAdd, int colorLabel) {
+void PetriNetNode::addInGoingArcs(PetriNetArc* arcToAdd, int colorLabel) {
 	if (!isColorValid(colorLabel)) {
 		throw OutOfBoundException();
 	}
@@ -126,7 +127,7 @@ void PetriNetNode::addInGoingArcs(Arc* arcToAdd, int colorLabel) {
 	m_inGoingArcs[colorLabel].push_back(arcToAdd);
 }
 
-void PetriNetNode::addOutGoingArcs(Arc* arcToAdd, int colorLabel) {
+void PetriNetNode::addOutGoingArcs(PetriNetArc* arcToAdd, int colorLabel) {
 	if (!isColorValid(colorLabel)) {
 		throw OutOfBoundException();
 	}
@@ -136,19 +137,19 @@ void PetriNetNode::addOutGoingArcs(Arc* arcToAdd, int colorLabel) {
 	m_outGoingArcs[colorLabel].push_back(arcToAdd);
 }
 
-void PetriNetNode::removeInGoingArcs(Arc* arcToRemove) {
+void PetriNetNode::removeInGoingArcs(PetriNetArc* arcToRemove) {
 	for (unsigned int i = 1; i <= nbOfPossibleColors(); i++) {
 		removeInGoingArcs(arcToRemove, i);
 	}
 }
 
-void PetriNetNode::removeOutGoingArcs(Arc* arcToRemove) {
+void PetriNetNode::removeOutGoingArcs(PetriNetArc* arcToRemove) {
 	for (unsigned int i = 1; i <= nbOfPossibleColors(); i++) {
 		removeOutGoingArcs(arcToRemove, i);
 	}
 }
 
-void PetriNetNode::removeInGoingArcs(Arc* arcToRemove, int colorLabel) {
+void PetriNetNode::removeInGoingArcs(PetriNetArc* arcToRemove, int colorLabel) {
 	if (!isColorValid(colorLabel)) {
 		throw OutOfBoundException();
 	}
@@ -168,7 +169,7 @@ void PetriNetNode::removeInGoingArcs(Arc* arcToRemove, int colorLabel) {
 	}
 }
 
-void PetriNetNode::removeOutGoingArcs(Arc* arcToRemove, int colorLabel) {
+void PetriNetNode::removeOutGoingArcs(PetriNetArc* arcToRemove, int colorLabel) {
 	if (!isColorValid(colorLabel)) {
 		throw OutOfBoundException();
 	}
@@ -188,7 +189,7 @@ void PetriNetNode::removeOutGoingArcs(Arc* arcToRemove, int colorLabel) {
 	}
 }
 
-Arc* haveArc(PetriNetNode* from, PetriNetNode* to, int colorLabel) {
+PetriNetArc* haveArc(PetriNetNode* from, PetriNetNode* to, int colorLabel) {
 	arcList outGoingsArcs = from->outGoingArcsOf(colorLabel);
 
 	for (unsigned int i = 0; i < outGoingsArcs.size(); i++) {
@@ -200,7 +201,7 @@ Arc* haveArc(PetriNetNode* from, PetriNetNode* to, int colorLabel) {
 	return NULL;
 }
 
-Arc* haveArc(PetriNetNode* from, PetriNetNode* to) {
+PetriNetArc* haveArc(PetriNetNode* from, PetriNetNode* to) {
 	arcList outGoingsArcs = from->outGoingArcsOf();
 
 	for (unsigned int i = 0; i < outGoingsArcs.size(); i++) {
@@ -212,19 +213,19 @@ Arc* haveArc(PetriNetNode* from, PetriNetNode* to) {
 	return NULL;
 }
 
-Arc* PetriNetNode::haveArcFrom(PetriNetNode* from) {
+PetriNetArc* PetriNetNode::haveArcFrom(PetriNetNode* from) {
 	return haveArc(from, this);
 }
 
-Arc* PetriNetNode::haveArcFrom(PetriNetNode* from, int colorLabel) {
+PetriNetArc* PetriNetNode::haveArcFrom(PetriNetNode* from, int colorLabel) {
 	return haveArc(from, this, colorLabel);
 }
 
-Arc* PetriNetNode::haveArcTo(PetriNetNode* to) {
+PetriNetArc* PetriNetNode::haveArcTo(PetriNetNode* to) {
 	return haveArc(this, to);
 }
 
-Arc* PetriNetNode::haveArcTo(PetriNetNode* to, int colorLabel) {
+PetriNetArc* PetriNetNode::haveArcTo(PetriNetNode* to, int colorLabel) {
 	return haveArc(this, to, colorLabel);
 }
 
