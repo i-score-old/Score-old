@@ -42,6 +42,7 @@ mLastSample(0.)
     addAttribute(Sampled, kTypeBoolean);
     
     addMessageWithArguments(Sample);
+    addMessageWithArguments(ValueAt);
     
 	// needed to be handled by a TTXmlHandler
 	addMessageWithArguments(WriteAsXml);
@@ -258,6 +259,27 @@ TTErr TTCurve::Sample(const TTValue& inputValue, TTValue& outputValue)
         }
     }
 
+    return kTTErrGeneric;
+}
+
+TTErr TTCurve::ValueAt(const TTValue& inputValue, TTValue& outputValue)
+{
+    if (inputValue.size() == 1) {
+        
+        if (inputValue[0].type() == kTypeFloat64) {
+            
+            TTFloat64 x, y;
+            
+            x = inputValue[0];
+            
+            TTCurveNextSampleAt(this, x, y);
+            
+            outputValue = y;
+            
+            return kTTErrNone;
+        }
+    }
+    
     return kTTErrGeneric;
 }
 
