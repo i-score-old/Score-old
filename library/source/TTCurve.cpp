@@ -32,7 +32,7 @@ mSampled(NO),
 mLastSample(0.)
 {
 	TT_ASSERT("Correct number of args to create TTCurve", arguments.size() == 0);
-	/*
+	
     registerAttribute(TTSymbol("functionParameters"), kTypeLocalValue, NULL, (TTGetterMethod)& TTCurve::getFunctionParameters, (TTSetterMethod)& TTCurve::setFunctionParameters);
     
     addAttribute(Active, kTypeBoolean);
@@ -56,7 +56,7 @@ mLastSample(0.)
 	addMessageWithArguments(ReadFromText);
 	addMessageProperty(ReadFromText, hidden, YES);
     
-    mFunction = TTObject("freehand", 1); // for 1 channel only*/
+    mFunction = TTObject("freehand", 1); // for 1 channel only
 }
 
 TTCurve::~TTCurve()
