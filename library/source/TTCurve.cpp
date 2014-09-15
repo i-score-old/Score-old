@@ -272,7 +272,13 @@ TTErr TTCurve::ValueAt(const TTValue& inputValue, TTValue& outputValue)
             
             x = inputValue[0];
             
-            TTCurveNextSampleAt(this, x, y);
+            if (mRecorded) {
+                
+                begin();
+                TTCurveNextSampleAt(this, x, y);
+            }
+            else
+                TTAudioObjectBasePtr(mFunction.instance())->calculate(x, y);
             
             outputValue = y;
             
