@@ -424,7 +424,7 @@ void TTTimeContainer::writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTObjec
         xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "verticalSize", BAD_CAST s.data());
         
         // Pass the xml handler to the process to fill his attribute
-        aXmlHandler->setAttributeValue(kTTSym_object, v);
+        aXmlHandler->setAttributeValue(kTTSym_object, aTimeProcess);
         aXmlHandler->sendMessage(kTTSym_Write);
         
         // Close the process node
