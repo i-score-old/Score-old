@@ -34,6 +34,11 @@ elsif mac?
     `cp -f -p ./jamoma/includes/* /usr/local/jamoma/includes`
     `cp -f -p ./jamoma/lib/* /usr/local/jamoma/lib`
     
+    # Clean .orig files
+    `rm /usr/local/jamoma/extensions/*.orig`
+    `rm /usr/local/jamoma/includes/*.orig`
+    `rm /usr/local/jamoma/lib/*.orig`
+    
     # Create alias
     `ln -s /usr/local/jamoma/lib/JamomaFoundation.dylib /usr/local/lib/JamomaFoundation.dylib`
     `ln -s /usr/local/jamoma/lib/JamomaDSP.dylib /usr/local/lib/JamomaDSP.dylib`

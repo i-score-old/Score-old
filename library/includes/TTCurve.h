@@ -20,10 +20,6 @@
 
 #include "TTScoreIncludes.h"
 
-#include <libxml/encoding.h>
-#include <libxml/xmlwriter.h>
-#include <libxml/xmlreader.h>
-
 /**	The TTCurve class allows to ...
  
  @see Automation
@@ -67,6 +63,12 @@ private :
      @param outputvalue     all x y point of the curve
      @return                an error code if the operation fails */
     TTErr   Sample(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Get curve's value at a position
+     @param inputvalue      position
+     @param outputvalue     value of the curve at the given position
+     @return                an error code if the operation fails */
+    TTErr   ValueAt(const TTValue& inputValue, TTValue& outputValue);
     
     /**  needed to be handled by a TTXmlHandler
      @param	inputValue      ..

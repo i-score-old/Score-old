@@ -15,6 +15,10 @@
 
 #include "TTCurve.h"
 
+#include <libxml/encoding.h>
+#include <libxml/xmlwriter.h>
+#include <libxml/xmlreader.h>
+
 #define thisTTClass                 TTCurve
 #define thisTTClassName             "Curve"
 #define thisTTClassTags             "curve"
@@ -28,7 +32,7 @@ mSampled(NO),
 mLastSample(0.)
 {
 	TT_ASSERT("Correct number of args to create TTCurve", arguments.size() == 0);
-	/*
+	
     registerAttribute(TTSymbol("functionParameters"), kTypeLocalValue, NULL, (TTGetterMethod)& TTCurve::getFunctionParameters, (TTSetterMethod)& TTCurve::setFunctionParameters);
     
     addAttribute(Active, kTypeBoolean);
@@ -38,6 +42,7 @@ mLastSample(0.)
     addAttribute(Sampled, kTypeBoolean);
     
     addMessageWithArguments(Sample);
+    addMessageWithArguments(ValueAt);
     
 	// needed to be handled by a TTXmlHandler
 	addMessageWithArguments(WriteAsXml);
@@ -51,7 +56,7 @@ mLastSample(0.)
 	addMessageWithArguments(ReadFromText);
 	addMessageProperty(ReadFromText, hidden, YES);
     
-    mFunction = TTObject("freehand", 1); // for 1 channel only*/
+    mFunction = TTObject("freehand", 1); // for 1 channel only
 }
 
 TTCurve::~TTCurve()
@@ -254,6 +259,33 @@ TTErr TTCurve::Sample(const TTValue& inputValue, TTValue& outputValue)
         }
     }
 
+    return kTTErrGeneric;
+}
+
+TTErr TTCurve::ValueAt(const TTValue& inputValue, TTValue& outputValue)
+{
+    if (inputValue.size() == 1) {
+        
+        if (inputValue[0].type() == kTypeFloat64) {
+            
+            TTFloat64 x, y;
+            
+            x = inputValue[0];
+            
+            if (mRecorded) {
+                
+                begin();
+                TTCurveNextSampleAt(this, x, y);
+            }
+            else
+                TTAudioObjectBasePtr(mFunction.instance())->calculate(x, y);
+            
+            outputValue = y;
+            
+            return kTTErrNone;
+        }
+    }
+    
     return kTTErrGeneric;
 }
 
