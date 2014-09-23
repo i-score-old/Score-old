@@ -354,8 +354,11 @@ TTErr TTTimeProcess::getDuration(TTValue& value)
     // the end must be after the start
     if (mEndDate >= mStartDate) {
             
+        #ifndef TT_PLATFORM_WIN
         value = TTValue( TTUInt32( std::abs<int32_t>(mDuration) ) );
-        
+        #else
+        value = TTValue(mDuration);
+        #endif
         return kTTErrNone;
     }
     
