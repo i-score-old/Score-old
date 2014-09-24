@@ -15,6 +15,8 @@
  * http://www.cecill.info
  */
 
+#ifndef NO_EDITION_SOLVER
+
 #ifndef __SCENARIO_SOLVER_H__
 #define __SCENARIO_SOLVER_H__
 
@@ -25,7 +27,7 @@ typedef Solver* SolverPtr;
 
 using namespace std;
 
-/** A type to define an unordered map to store and retreive Solver objects */
+/** A type to define an unordered map to store and retrieve Solver objects */
 #ifdef TT_PLATFORM_WIN
     #include <hash_map>
     using namespace stdext;	// Visual Studio 2008 puts the hash_map in this namespace
@@ -75,13 +77,13 @@ class SolverVariable
 {
 public:
     
-    TTTimeEventPtr    event;
+    TTObject        event;
     
     SolverPtr       solver;
     int             dateID;
     int             rangeID;
     
-    SolverVariable(SolverPtr aSolver, TTTimeEventPtr anEvent, SolverValue max);
+    SolverVariable(SolverPtr aSolver, TTObject& anEvent, SolverValue max);
     
     ~SolverVariable();
     
@@ -171,3 +173,5 @@ typedef SolverRelation* SolverRelationPtr;
 
 
 #endif // __SCENARIO_SOLVER_H__
+
+#endif // NO_EDITION_SOLVER

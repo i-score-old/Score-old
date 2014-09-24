@@ -60,6 +60,10 @@ public:
 	void clear();
 
 private:
+  ThreadSafeList(const ThreadSafeList&);
+  ThreadSafeList &operator=(const ThreadSafeList&);
+
+private:
 	std::list<void*> m_list;
 
 	pthread_mutex_t* m_mutex;

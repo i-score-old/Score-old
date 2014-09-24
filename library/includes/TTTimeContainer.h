@@ -18,6 +18,7 @@
 #ifndef __TT_TIME_CONTAINER_H__
 #define __TT_TIME_CONTAINER_H__
 
+#include "TTScoreIncludes.h"
 #include "TTTimeProcess.h"
 #include "TTTimeCondition.h"
 
@@ -62,43 +63,43 @@ private :
      @param inputvalue      a date
      @param outputvalue     a new time event
      @return                an error code if the creation fails */
-    virtual TTErr   TimeEventCreate(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+    virtual TTErr   TimeEventCreate(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
     
     /** Release a time event
      @param inputValue      a time event object to release
      @param outputvalue     nothing
      @return                an error code if the destruction fails */
-    virtual TTErr   TimeEventRelease(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+    virtual TTErr   TimeEventRelease(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
     
     /** Move a time event
      @param inputValue      a time event object, new date
      @param outputvalue     nothing
      @return                an error code if the movement fails */
-    virtual TTErr   TimeEventMove(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+    virtual TTErr   TimeEventMove(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
     
     /** Link a time event to a condition
      @param inputValue      a time event object, a time condition object
      @param outputvalue     nothing
      @return                an error code if the setting fails */
-    virtual TTErr   TimeEventCondition(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+    virtual TTErr   TimeEventCondition(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
     
     /** Trigger a time event to make it happens
      @param inputValue      a time event object
      @param outputvalue     nothing
      @return                an error code if the triggering fails */
-    virtual TTErr   TimeEventTrigger(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+    virtual TTErr   TimeEventTrigger(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
 
     /** Dispose a time event
      @param inputValue      a time event object
      @param outputvalue     nothing
      @return                an error code if the disposing fails */
-    virtual TTErr   TimeEventDispose(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+    virtual TTErr   TimeEventDispose(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
 
     /** Replace a time event by another one (copying date attribute)
      @param inputValue      a former time event object, a new time event object
      @param outputvalue     nothing
      @return                an error code if the replacement fails */
-    virtual TTErr   TimeEventReplace(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+    virtual TTErr   TimeEventReplace(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
     
     /** Look up the time event list to retreive a time event by name
      @param inputValue      the name as symbol
@@ -111,38 +112,38 @@ private :
      @param inputvalue      a time process type, a start event, a end event
      @param outputvalue     a new time process
      @return                an error code if the creation fails */
-    virtual TTErr   TimeProcessCreate(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+    virtual TTErr   TimeProcessCreate(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
     
     /** Release a time process
      @param inputValue      a time process object to release
      @param outputvalue     its start and end event
      @return                an error code if the destruction fails */
-    virtual TTErr   TimeProcessRelease(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+    virtual TTErr   TimeProcessRelease(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
     
     /** Move a time process
      @param inputValue      a time process object, new start date, new end date
      @param outputvalue     nothing
      @return                an error code if the movement fails */
-    virtual TTErr   TimeProcessMove(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+    virtual TTErr   TimeProcessMove(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
     
     /** Limit a time process duration
      @param inputValue      a time process object, new duration min, new duration max
      @param outputvalue     nothing
      @return                an error code if the limitation fails */
-    virtual TTErr   TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+    virtual TTErr   TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
     
     
     /** Create a time condition
      @param inputvalue      nothing
      @param outputvalue     a new time condition
      @return                an error code if the creation fails */
-    virtual TTErr   TimeConditionCreate(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+    virtual TTErr   TimeConditionCreate(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
     
     /** Release a time process
      @param inputValue      a time condition object to release
      @param outputvalue     nothing
      @return                an error code if the destruction fails */
-    virtual TTErr   TimeConditionRelease(const TTValue& inputValue, TTValue& outputValue) {return kTTErrGeneric;};
+    virtual TTErr   TimeConditionRelease(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
     
     /** To be notified when athe scheduler speed changed
      @param inputValue      the new speed value
@@ -155,106 +156,109 @@ protected :
     /* a time container can access too the protected members of any time event or time process */
     
     /** Getter on event's name protected member
-     @param aTimeProcess    a time event object
+     @param aTimeEvent      a time event object
      @return                a name symbol */
-    TTSymbol&       getTimeEventName(TTTimeEventPtr aTimeEvent);
+    TTSymbol&       getTimeEventName(TTObject& aTimeEvent);
     
     /** Getter on date time event protected member
-     @param aTimeProcess    a time event object
+     @param aTimeEvent      a time event object
      @return                a date value */
-    TTUInt32        getTimeEventDate(TTTimeEventPtr aTimeEvent);
+    TTUInt32        getTimeEventDate(TTObject& aTimeEvent);
     
     /** Getter on event's status protected member
-     @param aTimeProcess    a time event object
+     @param aTimeEvent      a time event object
      @return                a status symbol */
-    TTSymbol&       getTimeEventStatus(TTTimeEventPtr aTimeEvent);
+    TTSymbol&       getTimeEventStatus(TTObject& aTimeEvent);
     
     /** Getter on state time event protected member
-     @param aTimeProcess    a time event object
+     @param aTimeEvent      a time event object
      @return                a state object */
-    TTObjectBasePtr getTimeEventState(TTTimeEventPtr aTimeEvent);
+    TTObject&       getTimeEventState(TTObject& aTimeEvent);
     
     /** Getter on condition time event protected member
-     @param aTimeProcess    a time event object
+     @param aTimeEvent      a time event object
      @return                a condition object */
-    TTObjectBasePtr getTimeEventCondition(TTTimeEventPtr aTimeEvent);
+    TTObject&       getTimeEventCondition(TTObject& aTimeEvent);
     
     /** Write basic informations of a time event as Xml
      @param aXmlHandler     a xml handler
      @param aTimeProcess    a time event object
      @return                nothing */
-    void            writeTimeEventAsXml(TTXmlHandlerPtr aXmlHandler, TTTimeEventPtr aTimeEvent);
+    void            writeTimeEventAsXml(TTXmlHandlerPtr aXmlHandler, TTObject& aTimeEvent);
     
     /** Read basic informations of a time event from Xml
      @param aXmlHandler     a xml handler
-     @return                a new time event */
-    TTTimeEventPtr  readTimeEventFromXml(TTXmlHandlerPtr aXmlHandler);
+     @param                 a new time event 
+     @return                #TTErr*/
+    TTErr           readTimeEventFromXml(TTXmlHandlerPtr aXmlHandler, TTObject& aNewTimeEvent);
     
     /** Getter on process's name protected member
      @param aTimeProcess    a time process object
      @return                a name symbol */
-    TTSymbol        getTimeProcessName(TTTimeProcessPtr aTimeProcess);
+    TTSymbol        getTimeProcessName(TTObject& aTimeProcess);
     
     /** Getter on start event time process protected member
      @param aTimeProcess    a time process object
-     @return                a time event object */
-    TTTimeEventPtr  getTimeProcessStartEvent(TTTimeProcessPtr aTimeProcess);
+     @return                a time event instance */
+    TTObject&       getTimeProcessStartEvent(TTObject& aTimeProcess);
     
     /** Setter on start event time process protected member
      @param aTimeProcess    a time process object
      @param aTimeEvent      a time event object */
-    void            setTimeProcessStartEvent(TTTimeProcessPtr aTimeProcess, TTTimeEventPtr aTimeEvent);
+    void            setTimeProcessStartEvent(TTObject& aTimeProcess, TTObject& aTimeEvent);
     
     /** Getter on end event time process protected member
      @param aTimeProcess    a time process object
      @return                a time event object */
-    TTTimeEventPtr  getTimeProcessEndEvent(TTTimeProcessPtr aTimeProcess);
+    TTObject&       getTimeProcessEndEvent(TTObject& aTimeProcess);
     
     /** Setter on end event time process protected member
      @param aTimeProcess    a time process object
      @param aTimeEvent      a time event object */
-    void            setTimeProcessEndEvent(TTTimeProcessPtr aTimeProcess, TTTimeEventPtr aTimeEvent);
+    void            setTimeProcessEndEvent(TTObject& aTimeProcess, TTObject& aTimeEvent);
     
     /** Getter on duration min time process protected member
      @param aTimeProcess    a time process object
      @return                a duration value */
-    TTUInt32        getTimeProcessDurationMin(TTTimeProcessPtr aTimeProcess);
+    TTUInt32        getTimeProcessDurationMin(TTObject& aTimeProcess);
     
     /** Getter on duration max time process protected member
      @param aTimeProcess    a time process object
      @return                a duration value */
-    TTUInt32        getTimeProcessDurationMax(TTTimeProcessPtr aTimeProcess);
+    TTUInt32        getTimeProcessDurationMax(TTObject& aTimeProcess);
     
     /** Getter on running state of time process protected member
      @param aTimeProcess    a time process object
      @return                a boolean value */
-    TTBoolean       getTimeProcessRunning(TTTimeProcessPtr aTimeProcess);
+    TTBoolean       getTimeProcessRunning(TTObject& aTimeProcess);
     
     /** Write basic informations of a time process as Xml
      @param aXmlHandler     a xml handler
      @param aTimeProcess    a time process object
      @return                nothing */
-    void            writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTTimeProcessPtr aTimeProcess);
+    void            writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTObject& aTimeProcess);
     
     /** Read basic informations of a time process from Xml
      @param aXmlHandler     a xml handler
-     @return                a new time process object */
-    TTTimeProcessPtr readTimeProcessFromXml(TTXmlHandlerPtr aXmlHandler);
+     @param                 a new time process object 
+     @return                #TTErr */
+    TTErr           readTimeProcessFromXml(TTXmlHandlerPtr aXmlHandler, TTObject& aNewTimeProcess);
     
     
     /** Write basic informations of a time condition as Xml
      @param aXmlHandler     a xml handler
      @param aTimeProcess    a time condition object
      @return                nothing */
-    void            writeTimeConditionAsXml(TTXmlHandlerPtr aXmlHandler, TTTimeConditionPtr aTimeCondition);
+    void            writeTimeConditionAsXml(TTXmlHandlerPtr aXmlHandler, TTObject& aTimeCondition);
     
     /** Read basic informations of a time condition from Xml
      @param aXmlHandler     a xml handler
-     @return                a new time condition */
-    TTTimeConditionPtr  readTimeConditionFromXml(TTXmlHandlerPtr aXmlHandler);
+     @param                 a new time condition
+     @return                #TTErr */
+    TTErr           readTimeConditionFromXml(TTXmlHandlerPtr aXmlHandler, TTObject& aNewTimeCondition);
     
     
-    friend TTErr TTSCORE_EXPORT TTTimeContainerSchedulerSpeedCallback(TTPtr baton, TTValue& data);
+    friend TTErr TTSCORE_EXPORT TTTimeContainerSchedulerSpeedCallback(const TTValue& baton, const TTValue& data);
 };
 
 typedef TTTimeContainer* TTTimeContainerPtr;

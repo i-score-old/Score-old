@@ -75,6 +75,7 @@ private :
 	// The search engine to find a solution
 	SearchEngine *_engine;
 
+private:
 	// Reloads all variables and constraints
 	void updateState();
 
@@ -88,6 +89,7 @@ private :
 	// Launch the search engine
 	CustomSpace *run();
 
+private:
 	// To put strong variables when edition
 	vector<int> *_strongVars ;
 
@@ -138,6 +140,10 @@ public :
 	int getVariableMax(int varID) const;
 
 	int getMemoryPeak();
+
+private:
+  Solver(const Solver &);
+  Solver &operator=(const Solver &);
 };
 
 

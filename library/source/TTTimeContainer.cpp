@@ -14,6 +14,9 @@
  */
 
 #include "TTTimeContainer.h"
+#include <libxml/encoding.h>
+#include <libxml/xmlwriter.h>
+#include <libxml/xmlreader.h>
 
 #define thisTTClass         TTTimeContainer
 #define thisTTClassName     "TimeContainer"
@@ -91,12 +94,14 @@ TTTimeProcess(arguments)
     addMessageWithArguments(SchedulerSpeedChanged);
     addMessageProperty(SchedulerSpeedChanged, hidden, YES);
     
-    mScheduler->registerObserverForNotifications(*this);
+    TTObject thisObject(this);
+    mScheduler.registerObserverForNotifications(thisObject);
 }
 
 TTTimeContainer::~TTTimeContainer()
 {
-    mScheduler->unregisterObserverForNotifications(*this);
+    TTObject thisObject(this);
+    mScheduler.unregisterObserverForNotifications(thisObject);
 }
 
 TTErr TTTimeContainer::getTimeProcesses(TTValue& value)
@@ -140,9 +145,9 @@ TTErr TTTimeContainer::getTimeConditions(TTValue& value)
 
 TTErr TTTimeContainer::Next(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTTimeEventPtr  aTimeEvent;
-    TTList          eventsToTrigger;
-    TTUInt32        found = 0;
+    TTObject    aTimeEvent;
+    TTList      eventsToTrigger;
+    TTUInt32    found = 0;
     
     if (!mRunning)
         return kTTErrGeneric;
@@ -153,7 +158,7 @@ TTErr TTTimeContainer::Next(const TTValue& inputValue, TTValue& outputValue)
     // trigger the first pending time event of the list (as there are sorted by date)
     for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next()) {
         
-        aTimeEvent = TTTimeEventPtr(TTObjectBasePtr(mTimeEventList.current()[0]));
+        aTimeEvent = mTimeEventList.current()[0];
         
         if (getTimeEventStatus(aTimeEvent) == kTTSym_eventPending) {
             
@@ -161,7 +166,7 @@ TTErr TTTimeContainer::Next(const TTValue& inputValue, TTValue& outputValue)
             if (inputValue.size() == 0) {
                 
                 found = 1;
-                eventsToTrigger.append(TTObjectBasePtr(aTimeEvent));
+                eventsToTrigger.append(aTimeEvent);
                 break;
             }
             // else : is this event part of the events to trigger ?
@@ -175,7 +180,7 @@ TTErr TTTimeContainer::Next(const TTValue& inputValue, TTValue& outputValue)
                     
                     if (id == found) {
                         
-                        eventsToTrigger.append(TTObjectBasePtr(aTimeEvent));
+                        eventsToTrigger.append(aTimeEvent);
                         break;
                     }
                 }
@@ -188,10 +193,10 @@ TTErr TTTimeContainer::Next(const TTValue& inputValue, TTValue& outputValue)
     
     for (eventsToTrigger.begin(); eventsToTrigger.end(); eventsToTrigger.next()) {
         
-        aTimeEvent = TTTimeEventPtr(TTObjectBasePtr(eventsToTrigger.current()[0]));
+        aTimeEvent = eventsToTrigger.current()[0];
         
-        outputValue.append(TTObjectBasePtr(aTimeEvent));
-        aTimeEvent->sendMessage("Trigger");
+        outputValue.append(aTimeEvent);
+        aTimeEvent.send("Trigger");
     }
 
     return kTTErrNone;
@@ -210,54 +215,51 @@ TTErr TTTimeContainer::TimeEventFind(const TTValue& inputValue, TTValue& outputV
     return kTTErrNone;
 }
 
-TTSymbol& TTTimeContainer::getTimeEventName(TTTimeEventPtr aTimeEvent)
+TTSymbol& TTTimeContainer::getTimeEventName(TTObject& aTimeEvent)
 {
-    return aTimeEvent->mName;
+    return TTTimeEventPtr(aTimeEvent.instance())->mName;
 }
 
-TTUInt32 TTTimeContainer::getTimeEventDate(TTTimeEventPtr aTimeEvent)
+TTUInt32 TTTimeContainer::getTimeEventDate(TTObject& aTimeEvent)
 {
-    return aTimeEvent->mDate;
+    return TTTimeEventPtr(aTimeEvent.instance())->mDate;
 }
 
-TTSymbol& TTTimeContainer::getTimeEventStatus(TTTimeEventPtr aTimeEvent)
+TTSymbol& TTTimeContainer::getTimeEventStatus(TTObject& aTimeEvent)
 {
-    return aTimeEvent->mStatus;
+    return TTTimeEventPtr(aTimeEvent.instance())->mStatus;
 }
 
-TTObjectBasePtr TTTimeContainer::getTimeEventState(TTTimeEventPtr aTimeEvent)
+TTObject& TTTimeContainer::getTimeEventState(TTObject& aTimeEvent)
 {
-    return aTimeEvent->mState;
+    return TTTimeEventPtr(aTimeEvent.instance())->mState;
 }
 
-TTObjectBasePtr TTTimeContainer::getTimeEventCondition(TTTimeEventPtr aTimeEvent)
+TTObject& TTTimeContainer::getTimeEventCondition(TTObject& aTimeEvent)
 {
-    return aTimeEvent->mCondition;
+    return TTTimeEventPtr(aTimeEvent.instance())->mCondition;
 }
 
-void TTTimeContainer::writeTimeEventAsXml(TTXmlHandlerPtr aXmlHandler, TTTimeEventPtr aTimeEvent)
+void TTTimeContainer::writeTimeEventAsXml(TTXmlHandlerPtr aXmlHandler, TTObject& aTimeEvent)
 {
-    TTValue v;
-    
     // Start an event node
     xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "event");
     
     // Write the name
-    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST aTimeEvent->mName.c_str());
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST TTTimeEventPtr(aTimeEvent.instance())->mName.c_str());
     
     // Pass the xml handler to the event to fill his attribute
-    v = TTObjectBasePtr(aTimeEvent);
-    aXmlHandler->setAttributeValue(kTTSym_object, v);
+    aXmlHandler->setAttributeValue(kTTSym_object, aTimeEvent);
     aXmlHandler->sendMessage(kTTSym_Write);
     
     // Close the event node
     xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
 }
 
-TTTimeEventPtr TTTimeContainer::readTimeEventFromXml(TTXmlHandlerPtr aXmlHandler)
+TTErr TTTimeContainer::readTimeEventFromXml(TTXmlHandlerPtr aXmlHandler, TTObject& aNewTimeEvent)
 {
-    TTTimeEventPtr  aTimeEvent = NULL;
-    TTValue         v, out;
+    TTValue v, out;
+    TTErr   err = kTTErrGeneric;
     
     if (aXmlHandler->mXmlNodeStart) {
         
@@ -269,16 +271,18 @@ TTTimeEventPtr TTTimeContainer::readTimeEventFromXml(TTXmlHandlerPtr aXmlHandler
                 if (v[0].type() == kTypeUInt32) {
                     
                     // an event cannot be created after the end even of its container
-                    if (TTUInt32(v[0]) > getEndEvent()->mDate) {
+                    if (TTUInt32(v[0]) > TTTimeEventPtr(getEndEvent().instance())->mDate) {
                         
                         TTLogError("TTTimeContainer::readTimeEventFromXml : event created after the end event of its container\n");
-                        return NULL;
+                        return kTTErrGeneric;
                     }
                     
                     // Create the time event
-                    if (!this->TimeEventCreate(v, out)) {
+                    err = this->TimeEventCreate(v, out);
+                    
+                    if (!err) {
                         
-                        aTimeEvent = TTTimeEventPtr(TTObjectBasePtr(out[0]));
+                        aNewTimeEvent = out[0];
                         
                         // Get the name
                         if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES)) {
@@ -287,134 +291,140 @@ TTTimeEventPtr TTTimeContainer::readTimeEventFromXml(TTXmlHandlerPtr aXmlHandler
                                 
                                 if (v[0].type() == kTypeSymbol) {
                                     
-                                    aTimeEvent->mName = v[0];
+                                    aNewTimeEvent.set(kTTSym_name, v);
                                 }
                             }
                         }
                         
                         // Pass the xml handler to the new event to fill his attribute
                         aXmlHandler->setAttributeValue(kTTSym_object, out);
-                        aXmlHandler->sendMessage(kTTSym_Read);
+                        return aXmlHandler->sendMessage(kTTSym_Read);
                     }
                 }
             }
         }
     }
     
-    return aTimeEvent;
+    return err;
 }
 
-TTSymbol TTTimeContainer::getTimeProcessName(TTTimeProcessPtr aTimeProcess)
+TTSymbol TTTimeContainer::getTimeProcessName(TTObject& aTimeProcess)
 {
-    return aTimeProcess->mName;
+    return TTTimeProcessPtr(aTimeProcess.instance())->mName;
 }
 
-TTTimeEventPtr TTTimeContainer::getTimeProcessStartEvent(TTTimeProcessPtr aTimeProcess)
+TTObject& TTTimeContainer::getTimeProcessStartEvent(TTObject& aTimeProcess)
 {
-    return aTimeProcess->getStartEvent();
+    return TTTimeProcessPtr(aTimeProcess.instance())->getStartEvent();
 }
 
-void TTTimeContainer::setTimeProcessStartEvent(TTTimeProcessPtr aTimeProcess, TTTimeEventPtr aTimeEvent)
+void TTTimeContainer::setTimeProcessStartEvent(TTObject& aTimeProcess, TTObject& aTimeEvent)
 {
-    aTimeProcess->setStartEvent(aTimeEvent);
+    TTTimeProcessPtr(aTimeProcess.instance())->setStartEvent(aTimeEvent);
 }
 
-TTTimeEventPtr TTTimeContainer::getTimeProcessEndEvent(TTTimeProcessPtr aTimeProcess)
+TTObject& TTTimeContainer::getTimeProcessEndEvent(TTObject& aTimeProcess)
 {
-    return aTimeProcess->getEndEvent();
+    return TTTimeProcessPtr(aTimeProcess.instance())->getEndEvent();
 }
 
-void TTTimeContainer::setTimeProcessEndEvent(TTTimeProcessPtr aTimeProcess, TTTimeEventPtr aTimeEvent)
+void TTTimeContainer::setTimeProcessEndEvent(TTObject& aTimeProcess, TTObject& aTimeEvent)
 {
-    aTimeProcess->setEndEvent(aTimeEvent);
+    TTTimeProcessPtr(aTimeProcess.instance())->setEndEvent(aTimeEvent);
 }
 
-TTUInt32 TTTimeContainer::getTimeProcessDurationMin(TTTimeProcessPtr aTimeProcess)
+TTUInt32 TTTimeContainer::getTimeProcessDurationMin(TTObject& aTimeProcess)
 {
-    return aTimeProcess->mDurationMin;
+    return TTTimeProcessPtr(aTimeProcess.instance())->mDurationMin;
 }
 
-TTUInt32 TTTimeContainer::getTimeProcessDurationMax(TTTimeProcessPtr aTimeProcess)
+TTUInt32 TTTimeContainer::getTimeProcessDurationMax(TTObject& aTimeProcess)
 {
-    return aTimeProcess->mDurationMax;
+    return TTTimeProcessPtr(aTimeProcess.instance())->mDurationMax;
 }
 
-TTBoolean TTTimeContainer::getTimeProcessRunning(TTTimeProcessPtr aTimeProcess)
+TTBoolean TTTimeContainer::getTimeProcessRunning(TTObject& aTimeProcess)
 {
-    return aTimeProcess->mRunning;
+    return TTTimeProcessPtr(aTimeProcess.instance())->mRunning;
 }
 
-void TTTimeContainer::writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTTimeProcessPtr aTimeProcess)
+void TTTimeContainer::writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTObject& aTimeProcess)
 {
+    TTTimeProcessPtr aTimeProcessInstance = TTTimeProcessPtr(aTimeProcess.instance());
     TTValue     v;
     TTString    s;
     
     // If the process is handled by a upper scenario
-    if (aTimeProcess->mContainer != NULL) {
+    if (aTimeProcessInstance->mContainer.valid()) {
         
         // Start a node with the type of the process
-        xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST aTimeProcess->getName().c_str());
+        xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST aTimeProcessInstance->getName().c_str());
     }
     
     // Write the name
-    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST aTimeProcess->mName.c_str());
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST aTimeProcessInstance->mName.c_str());
     
     // If the process is handled by a upper scenario
-    if (aTimeProcess->mContainer != NULL) {
+    if (aTimeProcessInstance->mContainer.valid()) {
     
         // Write the start event name
-        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "start", BAD_CAST aTimeProcess->getStartEvent()->mName.c_str());
+        aTimeProcessInstance->getStartEvent().get("name", v);
+        v.toString();
+        s = TTString(v[0]);
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "start", BAD_CAST s.data());
     
         // Write the end event name
-        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "end", BAD_CAST aTimeProcess->getEndEvent()->mName.c_str());
+        aTimeProcessInstance->getEndEvent().get("name", v);
+        v.toString();
+        s = TTString(v[0]);
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "end", BAD_CAST s.data());
     }
     
     
-    if (aTimeProcess->mDurationMin > 0 || aTimeProcess->mDurationMax > 0) {
+    if (aTimeProcessInstance->mDurationMin > 0 || aTimeProcessInstance->mDurationMax > 0) {
         
         // Write the duration min
-        v = aTimeProcess->mDurationMin;
+        v = aTimeProcessInstance->mDurationMin;
         v.toString();
         s = TTString(v[0]);
         xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "durationMin", BAD_CAST s.data());
         
         // Write the duration max
-        v = aTimeProcess->mDurationMax;
+        v = aTimeProcessInstance->mDurationMax;
         v.toString();
         s = TTString(v[0]);
         xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "durationMax", BAD_CAST s.data());
     }
     
     // Write the mute
-    v = aTimeProcess->mMute;
+    v = aTimeProcessInstance->mMute;
     v.toString();
     s = TTString(v[0]);
     xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "mute", BAD_CAST s.data());
     
     // Write the color
-    v = aTimeProcess->mColor;
+    v = aTimeProcessInstance->mColor;
     v.toString();
     s = TTString(v[0]);
     xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "color", BAD_CAST s.data());
     
     // If the process is handled by a upper scenario
-    if (aTimeProcess->mContainer != NULL) {
+    if (aTimeProcessInstance->mContainer.valid()) {
         
         // Write the vertical position
-        v = aTimeProcess->mVerticalPosition;
+        v = aTimeProcessInstance->mVerticalPosition;
         v.toString();
         s = TTString(v[0]);
         xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "verticalPosition", BAD_CAST s.data());
         
         // Write the vertical size
-        v = aTimeProcess->mVerticalSize;
+        v = aTimeProcessInstance->mVerticalSize;
         v.toString();
         s = TTString(v[0]);
         xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "verticalSize", BAD_CAST s.data());
         
         // Pass the xml handler to the process to fill his attribute
-        v = TTObjectBasePtr(aTimeProcess);
-        aXmlHandler->setAttributeValue(kTTSym_object, v);
+        aXmlHandler->setAttributeValue(kTTSym_object, aTimeProcess);
         aXmlHandler->sendMessage(kTTSym_Write);
         
         // Close the process node
@@ -422,12 +432,12 @@ void TTTimeContainer::writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTTimeP
     }
 }
 
-TTTimeProcessPtr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHandler)
+TTErr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHandler, TTObject& aNewTimeProcess)
 {
-    TTTimeProcessPtr    aTimeProcess = NULL;
-    TTTimeEventPtr      start = NULL;
-    TTTimeEventPtr      end = NULL;
-    TTValue             v, out, aCacheElement;
+    TTObject    start;
+    TTObject    end;
+    TTValue     v, out, aCacheElement;
+    TTErr       err;
     
     // Get the name of the start event
     if (!aXmlHandler->getXmlAttribute(kTTSym_start, v, YES)) {
@@ -440,9 +450,9 @@ TTTimeProcessPtr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHan
                 mTimeEventList.find(&TTTimeContainerFindTimeEventWithName, (TTPtr)&v, aCacheElement);
                 
                 if (aCacheElement.size() == 0)
-                    return NULL;
+                    return kTTErrGeneric;
                 
-                start = TTTimeEventPtr(TTObjectBasePtr(aCacheElement[0]));
+                start = aCacheElement[0];
             }
         }
     }
@@ -458,28 +468,29 @@ TTTimeProcessPtr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHan
                 mTimeEventList.find(&TTTimeContainerFindTimeEventWithName, (TTPtr)&v, aCacheElement);
                 
                 if (aCacheElement.size() == 0)
-                    return NULL;
+                    return kTTErrGeneric;
                 
-                end = TTTimeEventPtr(TTObjectBasePtr(aCacheElement[0]));
+                end = aCacheElement[0];
             }
         }
     }
     
-    if (!start || !end)
-        return NULL;
+    if (!start.valid() || !end.valid())
+        return kTTErrGeneric;
     
     // check start and end events are different
     if (start == end)
-        return NULL;
+        return kTTErrGeneric;
     
     // Create the time process
-    v = aXmlHandler->mXmlNodeName;
-    v.append(TTObjectBasePtr(start));
-    v.append(TTObjectBasePtr(end));
+    v = TTValue(aXmlHandler->mXmlNodeName, start, end);
+    err = this->TimeProcessCreate(v, out);
     
-    if (!this->TimeProcessCreate(v, out)) {
+    if (!err) {
         
-        aTimeProcess = TTTimeProcessPtr(TTObjectBasePtr(out[0]));
+        aNewTimeProcess = out[0];
+        
+        // Get all generic time process atttributes
         
         // Get the time process name
         if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES)) {
@@ -488,7 +499,7 @@ TTTimeProcessPtr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHan
                 
                 if (v[0].type() == kTypeSymbol) {
                     
-                    aTimeProcess->setAttributeValue(kTTSym_name, v);
+                    aNewTimeProcess.set(kTTSym_name, v);
                 }
             }
         }
@@ -500,7 +511,7 @@ TTTimeProcessPtr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHan
                 
                 if (v[0].type() == kTypeUInt32) {
                     
-                    aTimeProcess->setAttributeValue(kTTSym_durationMin, v);
+                    aNewTimeProcess.set(kTTSym_durationMin, v);
                 }
             }
         }
@@ -512,7 +523,7 @@ TTTimeProcessPtr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHan
                 
                 if (v[0].type() == kTypeUInt32) {
                     
-                    aTimeProcess->setAttributeValue(kTTSym_durationMax, v);
+                    aNewTimeProcess.set(kTTSym_durationMax, v);
                 }
             }
         }
@@ -524,7 +535,7 @@ TTTimeProcessPtr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHan
                 
                 if (v[0].type() == kTypeInt32) {
                     
-                    aTimeProcess->setAttributeValue(kTTSym_mute, v);
+                    aNewTimeProcess.set(kTTSym_mute, v);
                 }
             }
         }
@@ -536,7 +547,7 @@ TTTimeProcessPtr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHan
                 
                 if (v[0].type() == kTypeInt32 && v[1].type() == kTypeInt32 && v[2].type() == kTypeInt32) {
                     
-                    aTimeProcess->setAttributeValue(kTTSym_color, v);
+                    aNewTimeProcess.set(kTTSym_color, v);
                 }
             }
         }
@@ -548,7 +559,7 @@ TTTimeProcessPtr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHan
                 
                 if (v[0].type() == kTypeUInt32) {
                     
-                    aTimeProcess->setAttributeValue(kTTSym_verticalPosition, v);
+                    aNewTimeProcess.set(kTTSym_verticalPosition, v);
                 }
             }
         }
@@ -560,50 +571,49 @@ TTTimeProcessPtr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHan
                 
                 if (v[0].type() == kTypeUInt32) {
                     
-                    aTimeProcess->setAttributeValue(kTTSym_verticalSize, v);
+                    aNewTimeProcess.set(kTTSym_verticalSize, v);
                 }
             }
         }
     }
     
-    return aTimeProcess;
+    return err;
 }
 
-void TTTimeContainer::writeTimeConditionAsXml(TTXmlHandlerPtr aXmlHandler, TTTimeConditionPtr aTimeCondition)
+void TTTimeContainer::writeTimeConditionAsXml(TTXmlHandlerPtr aXmlHandler, TTObject& aTimeCondition)
 {
-    TTValue v;
-    
     // Start a condition node
     xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "condition");
     
     // Pass the xml handler to the condition to fill his attribute
-    v = TTObjectBasePtr(aTimeCondition);
-    aXmlHandler->setAttributeValue(kTTSym_object, v);
+    aXmlHandler->setAttributeValue(kTTSym_object, aTimeCondition);
     aXmlHandler->sendMessage(kTTSym_Write);
     
     // Close the condition node
     xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
 }
 
-TTTimeConditionPtr TTTimeContainer::readTimeConditionFromXml(TTXmlHandlerPtr aXmlHandler)
+TTErr TTTimeContainer::readTimeConditionFromXml(TTXmlHandlerPtr aXmlHandler, TTObject& aNewTimeCondition)
 {
-    TTTimeConditionPtr  aTimeCondition = NULL;
-    TTValue             v, out;
+    TTValue v, out;
+    TTErr   err = kTTErrGeneric;
     
     if (aXmlHandler->mXmlNodeStart) {
         
         // Create the time condition
-        if (!this->TimeConditionCreate(v, out)) {
+        err = this->TimeConditionCreate(v, out);
+        
+        if (!err) {
             
-            aTimeCondition = TTTimeConditionPtr(TTObjectBasePtr(out[0]));
+            aNewTimeCondition = out[0];
             
             // Pass the xml handler to the new condition to fill his attribute
             aXmlHandler->setAttributeValue(kTTSym_object, out);
-            aXmlHandler->sendMessage(kTTSym_Read);
+            return aXmlHandler->sendMessage(kTTSym_Read);
         }
     }
     
-    return aTimeCondition;
+    return err;
 }
 
 #if 0
@@ -615,9 +625,9 @@ TTErr TTTimeContainer::SchedulerSpeedChanged(const TTValue& inputValue, TTValue&
 {
     TT_ASSERT("TTTimeContainer::SchedulerSpeedChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeFloat64);
     
-    TTObjectBasePtr aTimeProcess;
-    TTObjectBasePtr aScheduler;
-    TTValue         v;
+    TTObject    aTimeProcess;
+    TTObject    aScheduler;
+    TTValue     v;
     
     // for each time process
     for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
@@ -625,11 +635,11 @@ TTErr TTTimeContainer::SchedulerSpeedChanged(const TTValue& inputValue, TTValue&
         aTimeProcess = mTimeProcessList.current()[0];
         
         // get the actual time process scheduler
-        aTimeProcess->getAttributeValue(TTSymbol("scheduler"), v);
+        aTimeProcess.get("scheduler", v);
         aScheduler = v[0];
         
         // set the time process scheduler speed value with the container scheduler speed value
-        aScheduler->setAttributeValue(kTTSym_speed, inputValue);
+        aScheduler.set(kTTSym_speed, inputValue);
     }
     
     return kTTErrNone;
@@ -642,41 +652,44 @@ TTErr TTTimeContainer::SchedulerSpeedChanged(const TTValue& inputValue, TTValue&
 
 void TTTimeContainerFindTimeProcess(const TTValue& aValue, TTPtr timeProcessPtrToMatch, TTBoolean& found)
 {
-	found = (TTObjectBasePtr)aValue[0] == (TTObjectBasePtr)timeProcessPtrToMatch;
+    TTObject anObject = aValue[0];
+	found = anObject.instance() == (TTObjectBasePtr)timeProcessPtrToMatch;
 }
 
 void TTTimeContainerFindTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found)
 {
-    found = (TTObjectBasePtr)aValue[0] == (TTObjectBasePtr)timeEventPtrToMatch;
+    TTObject anObject = aValue[0];
+	found = anObject.instance() == (TTObjectBasePtr)timeEventPtrToMatch;
 }
 
 void TTTimeContainerFindTimeEventWithName(const TTValue& aValue, TTPtr timeEventNamePtrToMatch, TTBoolean& found)
 {
-    TTValuePtr      b = TTValuePtr(timeEventNamePtrToMatch);
-    TTSymbol        nameToMatch = (*b)[0];
-    TTTimeEventPtr  timeEventToTest = TTTimeEventPtr(TTObjectBasePtr(aValue[0]));
+    TTValuePtr  b = TTValuePtr(timeEventNamePtrToMatch);
+    TTSymbol    nameToMatch = (*b)[0];
+    TTObject    timeEventToTest = aValue[0];
     
-    found = timeEventToTest->mName == nameToMatch;
+    found = TTTimeEventPtr(timeEventToTest.instance())->mName == nameToMatch;
 }
 
 void TTTimeContainerFindTimeProcessWithTimeEvent(const TTValue& aValue, TTPtr timeEventPtrToMatch, TTBoolean& found)
 {
-    TTTimeProcessPtr    aTimeProcess = TTTimeProcessPtr(TTObjectBasePtr(aValue[0]));
-    TTValue             v;
+    TTObject    aTimeProcess = aValue[0];
+    TTValue     v;
     
     // check start event
-    found = aTimeProcess->getStartEvent() == TTObjectBasePtr(timeEventPtrToMatch);
+    found = TTTimeProcessPtr(aTimeProcess.instance())->getStartEvent() == TTObjectBasePtr(timeEventPtrToMatch);
         
     if (found)
         return;
         
     // check end event
-    found = aTimeProcess->getEndEvent() == TTObjectBasePtr(timeEventPtrToMatch);
+    found = TTTimeProcessPtr(aTimeProcess.instance())->getEndEvent() == TTObjectBasePtr(timeEventPtrToMatch);
         
     return;
 }
 
 void TTTimeContainerFindTimeCondition(const TTValue& aValue, TTPtr timeConditionPtrToMatch, TTBoolean& found)
 {
-    found = (TTObjectBasePtr)aValue[0] == (TTObjectBasePtr)timeConditionPtrToMatch;
+    TTObject anObject = aValue[0];
+	found = anObject.instance() == (TTObjectBasePtr)timeConditionPtrToMatch;
 }

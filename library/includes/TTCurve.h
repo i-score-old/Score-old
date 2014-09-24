@@ -4,7 +4,7 @@
  *
  * @brief a curve samples a freehand function unit at a sample rate
  *
- * @details The Curve class allows to ... @n@n
+ * @details The TTCurve class allows to ... @n@n
  *
  * @see Automation
  *
@@ -18,23 +18,22 @@
 #ifndef __CURVE_H__
 #define __CURVE_H__
 
-#include "TimePluginLib.h"
-#include "Automation.h"
+#include "TTScoreIncludes.h"
 
-/**	The Curve class allows to ...
+/**	The TTCurve class allows to ...
  
  @see Automation
  */
-class Curve : public TTObjectBase, public TTList
+class TTCurve : public TTObjectBase, public TTList
 {
-	TTCLASS_SETUP(Curve)
+	TTCLASS_SETUP(TTCurve)
 	
 private :
     
     TTBoolean                           mActive;                        ///< is the curve ready to run ?
     TTBoolean                           mRedundancy;                    ///< is the curve allow repetitions ?
     TTUInt32                            mSampleRate;                    ///< time precision of the curve
-    TTObjectBasePtr                     mFunction;						///< a freehand function unit
+    TTObject                            mFunction;						///< a freehand function unit
     TTBoolean                           mRecorded;                      ///< is the curve based on a record or not ?
     TTBoolean                           mSampled;                       ///< is the curve already sampled ?
     TTFloat64                           mLastSample;                    ///< used internally to avoid redundancy
@@ -65,6 +64,12 @@ private :
      @return                an error code if the operation fails */
     TTErr   Sample(const TTValue& inputValue, TTValue& outputValue);
     
+    /** Get curve's value at a position
+     @param inputvalue      position
+     @param outputvalue     value of the curve at the given position
+     @return                an error code if the operation fails */
+    TTErr   ValueAt(const TTValue& inputValue, TTValue& outputValue);
+    
     /**  needed to be handled by a TTXmlHandler
      @param	inputValue      ..
      @param	outputValue     ..
@@ -79,16 +84,17 @@ private :
 	TTErr	WriteAsText(const TTValue& inputValue, TTValue& outputValue);
 	TTErr	ReadFromText(const TTValue& inputValue, TTValue& outputValue);
     
-public:
-    
-    /** Get the next sample values for a given x.
-     a call TTList::begin() method before to use this method could be needed
-     @param x               a float64 between [0. :: 1.]
-     @param y               a float64 between [min :: max]
-     @return                an error code if the operation fails */
-    TTErr   nextSampleAt(TTFloat64& x, TTFloat64& y);
+    friend TTErr TTSCORE_EXPORT TTCurveNextSampleAt(TTCurve* aCurve, TTFloat64& x, TTFloat64& y);
+
 };
 
-typedef Curve* CurvePtr;
+typedef TTCurve* TTCurvePtr;
+
+/** Get the next sample values for a given x.
+ a call TTList::begin() method before to use this method could be needed
+ @param x               a float64 between [0. :: 1.]
+ @param y               a float64 between [min :: max]
+ @return                an error code if the operation fails */
+TTErr TTSCORE_EXPORT TTCurveNextSampleAt(TTCurve* aCurve, TTFloat64& x, TTFloat64& y);
 
 #endif // __CURVE_H__

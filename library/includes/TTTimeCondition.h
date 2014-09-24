@@ -18,12 +18,12 @@
 #ifndef __TT_TIME_CONDITION_H__
 #define __TT_TIME_CONDITION_H__
 
-#include "TTScore.h"
+#include "TTScoreIncludes.h"
 #include "Expression.h"
-#include "TTTimeEvent.h"
 
 /** Define a struct containing an expression and a boolean, as the expression to trigger and the default comportment */
 struct Comportment {
+    
     Comportment() : trigger(), dflt(true) {}
 
     Expression trigger;
@@ -34,7 +34,7 @@ struct Comportment {
 #ifdef TT_PLATFORM_WIN
     #include <hash_map>
     using namespace stdext;	// Visual Studio 2008 puts the hash_map in this namespace
-    typedef hash_map<TTTimeEventPtr,Comportment>    TTCaseMap;
+    typedef hash_map<TTObjectBasePtr,Comportment>    TTCaseMap;
 #else
 //	#ifdef TT_PLATFORM_LINUX
 //  at least for GCC 4.6 on the BeagleBoard, the unordered map is standard
@@ -43,7 +43,7 @@ struct Comportment {
 //		#include "boost/unordered_map.hpp"
 //		using namespace boost;
 //	#endif
-    typedef std::unordered_map<TTTimeEventPtr,Comportment>	TTCaseMap;
+    typedef std::unordered_map<TTObjectBasePtr,Comportment>	TTCaseMap;
 #endif
 
 typedef	TTCaseMap*                  TTCaseMapPtr;
@@ -62,7 +62,7 @@ class TTSCORE_EXPORT TTTimeCondition : public TTObjectBase {
     
     friend class TTTimeEvent;
 
-    TTObjectBasePtr                 mContainer;                     ///< the container which handles the condition
+    TTObject                        mContainer;                     ///< the container which handles the condition
     
 protected :
     
@@ -187,14 +187,11 @@ private :
     /** Helper function to manage receivers : add a receiver for to the address if no receiver already exists
      @param	anAddress      an address to observe */
     void            addReceiver(TTAddress anAddress);
-    
-    /** Helper function to manage receivers : clear the receivers */
-    void            deleteReceivers();
 
     /** Helper function to apply the default comportment of each event */
     void            applyDefaults();
 
-    friend TTErr TTSCORE_EXPORT TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data);
+    friend TTErr TTSCORE_EXPORT TTTimeConditionReceiverReturnValueCallback(const TTValue& baton, const TTValue& data);
     
 };
 
@@ -204,6 +201,6 @@ typedef TTTimeCondition* TTTimeConditionPtr;
  @param	baton               a time condition instance, an address
  @param	data                a value to test
  @return					an error code */
-TTErr TTSCORE_EXPORT TTTimeConditionReceiverReturnValueCallback(TTPtr baton, TTValue& data);
+TTErr TTSCORE_EXPORT TTTimeConditionReceiverReturnValueCallback(const TTValue& baton, const TTValue& data);
 
 #endif // __TT_TIME_CONDITION_H__

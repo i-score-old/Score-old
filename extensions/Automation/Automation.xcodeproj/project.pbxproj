@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		464A8888175748160089B27A /* Curve.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Curve.h; sourceTree = "<group>"; };
-		464A88891757481E0089B27A /* Curve.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Curve.cpp; sourceTree = "<group>"; };
 		468776AD1725DB430096DA35 /* Automation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Automation.cpp; sourceTree = "<group>"; };
 		468776B11725DB4B0096DA35 /* Automation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Automation.h; sourceTree = "<group>"; };
 		468EBBFE1784BB1E008BE2AC /* TimePluginLib.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TimePluginLib.cpp; path = ../TimePluginLib.cpp; sourceTree = "<group>"; };
@@ -31,7 +29,6 @@
 			isa = PBXGroup;
 			children = (
 				468776AD1725DB430096DA35 /* Automation.cpp */,
-				464A88891757481E0089B27A /* Curve.cpp */,
 			);
 			path = source;
 			sourceTree = "<group>";
@@ -40,7 +37,6 @@
 			isa = PBXGroup;
 			children = (
 				468776B11725DB4B0096DA35 /* Automation.h */,
-				464A8888175748160089B27A /* Curve.h */,
 			);
 			path = includes;
 			sourceTree = "<group>";
@@ -77,7 +73,7 @@
 		468776A21725DAF80096DA35 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0460;
+				LastUpgradeCheck = 0500;
 				ORGANIZATIONNAME = OSSIA;
 			};
 			buildConfigurationList = 468776A51725DAF80096DA35 /* Build configuration list for PBXProject "Automation" */;
@@ -101,7 +97,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
@@ -133,7 +128,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_CONSTANT_CONVERSION = YES;

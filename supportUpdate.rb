@@ -23,11 +23,13 @@ Dir.chdir "#{glibdir}"
 `cp "#{glibdir}"/../DSP/library/build/JamomaDSP.dylib "#{glibdir}"/support/jamoma/lib`
 
 # Modular extensions, includes and lib
+`cp "#{glibdir}"/../Modular/extensions/MIDI/build/MIDI.ttdylib "#{glibdir}"/support/jamoma/extensions`
 `cp "#{glibdir}"/../Modular/extensions/Minuit/build/Minuit.ttdylib "#{glibdir}"/support/jamoma/extensions`
 `cp "#{glibdir}"/../Modular/extensions/OSC/build/OSC.ttdylib "#{glibdir}"/support/jamoma/extensions`
 `cp "#{glibdir}"/../Modular/extensions/System/build/System.ttdylib "#{glibdir}"/support/jamoma/extensions`
 
 `cp "#{glibdir}"/../Modular/library/includes/TTModular.h "#{glibdir}"/support/jamoma/includes`
+`cp "#{glibdir}"/../Modular/library/includes/TTModularIncludes.h "#{glibdir}"/support/jamoma/includes`
 `cp "#{glibdir}"/../Modular/library/PeerObject/*.h "#{glibdir}"/support/jamoma/includes`
 `cp "#{glibdir}"/../Modular/library/ProtocolLib/Protocol.h "#{glibdir}"/support/jamoma/includes`
 `cp "#{glibdir}"/../Modular/library/SchedulerLib/Scheduler.h "#{glibdir}"/support/jamoma/includes`

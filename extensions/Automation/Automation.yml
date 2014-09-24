@@ -2,9 +2,8 @@
 #  - TIME_PROCESS_DEBUG
 
 sources:
-  - ../TimePluginLib.cpp	
+  - ../TimePluginLib.cpp
   - source/Automation.cpp
-  - source/Curve.cpp
   
 includes:
   - "."
@@ -28,6 +27,3 @@ libraries:
   # to link with the xml library
   - mac /usr/lib/libxml2.dylib
   #- win 
-
-# This project is not available for most architectures (cause of the Gecode 64-bit only dependency)
-arch: "x86_64"

@@ -47,11 +47,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
 #include "CSPConstrainedVariable.hpp"
 
 ConstrainedTemporalEntity::ConstrainedTemporalEntity(CSPConstrainedVariable *beg, CSPConstrainedVariable *length)
+  : _id(-1),
+    _name(),
+    _beginVar(beg),
+    _lengthVar(length),
+    _relatedEntities(new vector<ConstrainedTemporalEntity*>)
 {
-	_beginVar = beg;
-	_lengthVar = length;
-
-	_relatedEntities = new vector<ConstrainedTemporalEntity*>;
 }
 
 ConstrainedTemporalEntity::~ConstrainedTemporalEntity()

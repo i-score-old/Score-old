@@ -55,19 +55,26 @@ knowledge of the CeCILL-C license and that you accept its terms.
 using namespace std;
 
 PetriNet::PetriNet(unsigned int nbColors):
-m_nbColors((nbColors > 0)?nbColors:1),
-m_mustCrossAllTransitionWithoutWaitingEvent(false)
+  m_parentPetriNet(NULL),
+  m_childrenPetriNet(),
+  m_activeChildPetriNet(),
+  m_currentTime(0),
+  m_isRunning(false),
+  m_nbColors((nbColors > 0)?nbColors:1),
+  m_updateFactor(1),
+  m_places(),
+  m_transitions(),
+  m_startPlace(NULL),
+  m_endPlace(NULL),
+  m_mustStop(false),
+  m_incomingEvents(),
+  m_sensitizedTransitions(),
+  m_deactivatedTransitions(),
+  m_transitionsToCrossWhenAcceleration(),
+  m_priorityTransitionsActionQueue(),
+  m_mustCrossAllTransitionWithoutWaitingEvent(false),
+  m_isEventReadyCallback(NULL)
 {
-	m_parentPetriNet = NULL;
-
-	m_updateFactor = 1;
-	m_isEventReadyCallback = NULL;
-
-	m_mustStop = false;
-    
-    m_currentTime = 0;
-    m_isRunning = false;
-
 	resetEvents();
 }
 

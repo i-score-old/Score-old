@@ -13,9 +13,13 @@
  * http://www.cecill.info
  */
 
-#include "Curve.h"
+#include "TTCurve.h"
 
-#define thisTTClass                 Curve
+#include <libxml/encoding.h>
+#include <libxml/xmlwriter.h>
+#include <libxml/xmlreader.h>
+
+#define thisTTClass                 TTCurve
 #define thisTTClassName             "Curve"
 #define thisTTClassTags             "curve"
 
@@ -23,14 +27,13 @@ TT_BASE_OBJECT_CONSTRUCTOR,
 mActive(YES),
 mRedundancy(NO),
 mSampleRate(20),
-mFunction(NULL),
 mRecorded(NO),
 mSampled(NO),
 mLastSample(0.)
 {
-	TT_ASSERT("Correct number of args to create Curve", arguments.size() == 0);
+	TT_ASSERT("Correct number of args to create TTCurve", arguments.size() == 0);
     
-    registerAttribute(TTSymbol("functionParameters"), kTypeLocalValue, NULL, (TTGetterMethod)& Curve::getFunctionParameters, (TTSetterMethod)& Curve::setFunctionParameters);
+    registerAttribute(TTSymbol("functionParameters"), kTypeLocalValue, NULL, (TTGetterMethod)& TTCurve::getFunctionParameters, (TTSetterMethod)& TTCurve::setFunctionParameters);
     
     addAttribute(Active, kTypeBoolean);
     addAttribute(Redundancy, kTypeBoolean);
@@ -39,6 +42,7 @@ mLastSample(0.)
     addAttribute(Sampled, kTypeBoolean);
     
     addMessageWithArguments(Sample);
+    addMessageWithArguments(ValueAt);
     
 	// needed to be handled by a TTXmlHandler
 	addMessageWithArguments(WriteAsXml);
@@ -52,15 +56,15 @@ mLastSample(0.)
 	addMessageWithArguments(ReadFromText);
 	addMessageProperty(ReadFromText, hidden, YES);
     
-    TTObjectBaseInstantiate(TTSymbol("freehand"), TTObjectBaseHandle(&mFunction), 1); // for 1 channel only
+    mFunction = TTObject("freehand", 1); // for 1 channel only
 }
 
-Curve::~Curve()
+TTCurve::~TTCurve()
 {
-    TTObjectBaseRelease(&mFunction);
+    ;
 }
 
-TTErr Curve::getFunctionParameters(TTValue& value)
+TTErr TTCurve::getFunctionParameters(TTValue& value)
 {
     TTValue         curveList;
     TTUInt32        i, j;
@@ -68,7 +72,7 @@ TTErr Curve::getFunctionParameters(TTValue& value)
     if (mRecorded)
         return kTTErrGeneric;
     
-    if (!mFunction->getAttributeValue(TTSymbol("curveList"), curveList)) {
+    if (!mFunction.get("curveList", curveList)) {
         
         // edit function value
         // curveList    : x1 y1 exponential base b1 x2 y2 exponential base b2 . . . . .
@@ -92,7 +96,7 @@ TTErr Curve::getFunctionParameters(TTValue& value)
     return kTTErrGeneric;
 }
 
-TTErr Curve::setFunctionParameters(const TTValue& value)
+TTErr TTCurve::setFunctionParameters(const TTValue& value)
 {
     TTValue     curveList, none;
     TTUInt32    i, j, duration;
@@ -138,7 +142,7 @@ TTErr Curve::setFunctionParameters(const TTValue& value)
         mRecorded = NO;
         
         // set function curve list
-        mFunction->setAttributeValue(TTSymbol("curveList"), curveList);
+        mFunction.set("curveList", curveList);
         
         // sample the curve
         mSampled = NO;
@@ -151,7 +155,7 @@ TTErr Curve::setFunctionParameters(const TTValue& value)
     return kTTErrGeneric;
 }
 
-TTErr Curve::setSampleRate(const TTValue& value)
+TTErr TTCurve::setSampleRate(const TTValue& value)
 {
     TTUInt32    newSampleRate, duration;
     TTValue     none;
@@ -184,7 +188,7 @@ TTErr Curve::setSampleRate(const TTValue& value)
     return kTTErrGeneric;
 }
 
-TTErr Curve::Sample(const TTValue& inputValue, TTValue& outputValue)
+TTErr TTCurve::Sample(const TTValue& inputValue, TTValue& outputValue)
 {
     if (inputValue.size() == 1) {
         
@@ -221,7 +225,7 @@ TTErr Curve::Sample(const TTValue& inputValue, TTValue& outputValue)
                 for (i = 0; i < nbPoints; i++) {
                     
                     x = TTFloat64(i) / TTFloat64(nbPoints);
-                    nextSampleAt(x, y);
+                    TTCurveNextSampleAt(this, x, y);
                     
                     newSamples.append(TTValue(x, y));
                     outputValue.append(y);
@@ -242,7 +246,7 @@ TTErr Curve::Sample(const TTValue& inputValue, TTValue& outputValue)
                 for (i = 0; i < nbPoints; i++) {
                     
                     x = TTFloat64(i) / TTFloat64(nbPoints);
-                    TTAudioObjectBasePtr(mFunction)->calculate(x, y);
+                    TTAudioObjectBasePtr(mFunction.instance())->calculate(x, y);
                     
                     append(TTValue(x, y));
                     outputValue.append(y);
@@ -258,14 +262,43 @@ TTErr Curve::Sample(const TTValue& inputValue, TTValue& outputValue)
     return kTTErrGeneric;
 }
 
-TTErr Curve::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
+TTErr TTCurve::ValueAt(const TTValue& inputValue, TTValue& outputValue)
 {
-	TTXmlHandlerPtr	aXmlHandler = NULL;
-    TTValue         v;
-    TTString        s;
-	
-	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
+    if (inputValue.size() == 1) {
+        
+        if (inputValue[0].type() == kTypeFloat64) {
+            
+            TTFloat64 x, y;
+            
+            x = inputValue[0];
+            
+            if (mRecorded) {
+                
+                begin();
+                TTCurveNextSampleAt(this, x, y);
+            }
+            else
+                TTAudioObjectBasePtr(mFunction.instance())->calculate(x, y);
+            
+            outputValue = y;
+            
+            return kTTErrNone;
+        }
+    }
     
+    return kTTErrGeneric;
+}
+
+TTErr TTCurve::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
+{
+    TTObject o = inputValue[0];
+	TTXmlHandlerPtr aXmlHandler = (TTXmlHandlerPtr)o.instance();
+    if (!aXmlHandler)
+		return kTTErrGeneric;
+    
+    TTValue     v;
+    TTString    s;
+	
     xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "curve");
 	
     // Write if it is active
@@ -314,13 +347,15 @@ TTErr Curve::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 	return kTTErrNone;
 }
 
-TTErr Curve::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
+TTErr TTCurve::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 {
-	TTXmlHandlerPtr	aXmlHandler = NULL;
-    TTValue         v;
-	
-	aXmlHandler = TTXmlHandlerPtr((TTObjectBasePtr)inputValue[0]);
+    TTObject o = inputValue[0];
+	TTXmlHandlerPtr aXmlHandler = (TTXmlHandlerPtr)o.instance();
+    if (!aXmlHandler)
+		return kTTErrGeneric;
     
+    TTValue v;
+	
     // get the active state
     if (!aXmlHandler->getXmlAttribute(kTTSym_active, v, NO)) {
         
@@ -379,44 +414,51 @@ TTErr Curve::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 	return kTTErrNone;
 }
 
-TTErr Curve::WriteAsText(const TTValue& inputValue, TTValue& outputValue)
+TTErr TTCurve::WriteAsText(const TTValue& inputValue, TTValue& outputValue)
 {
-	TTTextHandlerPtr	aTextHandler;
-	
-	aTextHandler = TTTextHandlerPtr((TTObjectBasePtr)inputValue[0]);
-	
+    TTObject o = inputValue[0];
+	TTTextHandlerPtr aTextHandler = (TTTextHandlerPtr)o.instance();
+    if (!aTextHandler)
+		return kTTErrGeneric;
+    
 	// TODO : write the curve attributes
 	
 	return kTTErrGeneric;
 }
 
-TTErr Curve::ReadFromText(const TTValue& inputValue, TTValue& outputValue)
+TTErr TTCurve::ReadFromText(const TTValue& inputValue, TTValue& outputValue)
 {
-	TTTextHandlerPtr aTextHandler;
-	TTValue	v;
-	
-	aTextHandler = TTTextHandlerPtr((TTObjectBasePtr)inputValue[0]);
-	
+    TTObject o = inputValue[0];
+	TTTextHandlerPtr aTextHandler = (TTTextHandlerPtr)o.instance();
+    if (!aTextHandler)
+		return kTTErrGeneric;
+    
     // TODO : parse the curve attributes
 	
 	return kTTErrGeneric;
 }
 
-TTErr Curve::nextSampleAt(TTFloat64& x, TTFloat64& y)
+
+#if 0
+#pragma mark -
+#pragma mark Some Functions
+#endif
+
+TTErr TTCurveNextSampleAt(TTCurve* aCurve, TTFloat64& x, TTFloat64& y)
 {
-    if (mActive) {
+    if (aCurve->mActive) {
         
         TTBoolean   found = NO;
         TTErr       err = kTTErrNone;
         
         // while the list doesn't reach the end
-        while (end()) {
+        while (aCurve->end()) {
                 
-            if (TTFloat64(current()[0]) < x)
-                next();
+            if (TTFloat64(aCurve->current()[0]) < x)
+                aCurve->next();
             
             else {
-                y = current()[1];
+                y = aCurve->current()[1];
                 found = YES;
                 break;
             }
@@ -424,10 +466,10 @@ TTErr Curve::nextSampleAt(TTFloat64& x, TTFloat64& y)
         
         if (found) {
             
-            if (!mRedundancy && y == mLastSample)
+            if (!aCurve->mRedundancy && y == aCurve->mLastSample)
                 err = kTTErrGeneric;
             
-            mLastSample = y;
+            aCurve->mLastSample = y;
             
             return err;
         }
@@ -435,8 +477,3 @@ TTErr Curve::nextSampleAt(TTFloat64& x, TTFloat64& y)
     
     return kTTErrValueNotFound;
 }
-
-#if 0
-#pragma mark -
-#pragma mark Some Methods
-#endif

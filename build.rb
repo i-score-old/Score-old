@@ -34,6 +34,11 @@ elsif mac?
     `cp -f -p ./jamoma/includes/* /usr/local/jamoma/includes`
     `cp -f -p ./jamoma/lib/* /usr/local/jamoma/lib`
     
+    # Clean .orig files
+    `rm /usr/local/jamoma/extensions/*.orig`
+    `rm /usr/local/jamoma/includes/*.orig`
+    `rm /usr/local/jamoma/lib/*.orig`
+    
     # Create alias
     `ln -s /usr/local/jamoma/lib/JamomaFoundation.dylib /usr/local/lib/JamomaFoundation.dylib`
     `ln -s /usr/local/jamoma/lib/JamomaDSP.dylib /usr/local/lib/JamomaDSP.dylib`
@@ -44,6 +49,7 @@ elsif mac?
     `ln -s /usr/local/jamoma/extensions/NetworkLib.ttdylib /usr/local/lib/NetworkLib.ttdylib`
     `ln -s /usr/local/jamoma/extensions/System.ttdylib /usr/local/lib/System.ttdylib`
     `ln -s /usr/local/jamoma/extensions/DataspaceLib.ttdylib /usr/local/lib/DataspaceLib.ttdylib`
+    `ln -s /usr/local/jamoma/extensions/MIDI.ttdylib /usr/local/lib/MIDI.ttdylib`
     `ln -s /usr/local/jamoma/extensions/Minuit.ttdylib /usr/local/lib/Minuit.ttdylib`
     `ln -s /usr/local/jamoma/extensions/OSC.ttdylib /usr/local/lib/OSC.ttdylib`
     

@@ -93,6 +93,11 @@ public :
 	// TRUE if the relation is compatible with the system
 	bool validate() const;
 
+private:
+  
+  BinaryRelation(const BinaryRelation &);
+  BinaryRelation &operator=(const BinaryRelation&);
+
 protected :
 
 	ConstrainedTemporalEntity *_entity1;

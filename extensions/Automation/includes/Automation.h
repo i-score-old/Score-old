@@ -6,7 +6,7 @@
  *
  * @details The Automation class allows to ... @n@n
  *
- * @see TimePluginLib, TTTimeProcess
+ * @see TimePluginLib, TTTimeProcess, TTCurve
  *
  * @authors Théo de la Hogue & Clément Bossut
  *
@@ -19,13 +19,13 @@
 #define __AUTOMATION_H__
 
 #include "TimePluginLib.h"
-#include "Curve.h"
+
 
 /**	The Automation class allows to ...
  
- @see TimePluginLib, TTTimeProcess
+ @see TimePluginLib, TTTimeProcess, TTCurve
  */
-class Automation : public TimeProcess
+class Automation : public TimeProcessPlugin
 {
 	TTCLASS_SETUP(Automation)
 	
@@ -133,7 +133,7 @@ private :
     void    addReceiver(TTAddress anAddress);
     void    removeReceiver(TTAddress anAddress);
     
-    friend TTErr TTSCORE_EXPORT AutomationReceiverReturnValueCallback(TTPtr baton, TTValue& data);
+    friend TTErr TTSCORE_EXPORT AutomationReceiverReturnValueCallback(const TTValue& baton, const TTValue& data);
 };
 
 typedef Automation* AutomationPtr;
@@ -142,6 +142,6 @@ typedef Automation* AutomationPtr;
  @param	baton               a automation instance, an address
  @param	data                a value to test
  @return					an error code */
-TTErr TTSCORE_EXPORT AutomationReceiverReturnValueCallback(TTPtr baton, TTValue& data);
+TTErr TTSCORE_EXPORT AutomationReceiverReturnValueCallback(const TTValue& baton, const TTValue& data);
 
 #endif // __AUTOMATION_H__
