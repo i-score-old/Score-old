@@ -3,8 +3,8 @@
 #  - NO_EXECUTION_GRAPH
 
 sources:
-  - ../TimePluginLib.cpp
-
+  - ../TimePluginLib.cpp	
+  
   - source/Gecode/customSpace.cpp
   - source/Gecode/integerVariable.cpp
   - source/Gecode/linearConstraint.cpp
@@ -24,7 +24,7 @@ sources:
   - source/PetriNet/Transition.cpp
   - source/PetriNet/TransitionAction.cpp                # is it needed ?
   - source/PetriNet/TransitionBitArray.cpp              # is it needed ?
-
+  
   - source/Scenario.cpp
   - source/ScenarioSolver.cpp
   - source/ScenarioGraph.cpp
@@ -35,21 +35,16 @@ includes:
   - "includes"
   - "../../library/includes"
   - "../../library/tests"
-
+  
   - "source/Gecode"
   - "source/PetriNet"
-
+  
   # to build without having the whole jamoma repository
-  - ../../../Foundation/library/includes
-  - ../../../DSP/library/includes
-  - ../../../Modular/library/includes
-  - ../../../Modular/library/ProtocolLib
-  - ../../../Modular/library/SchedulerLib
-  - ../../../Modular/library/PeerObject
-
+  - ../../support/jamoma/includes
+  
   # to include gecode solver library
-#  - /Library/Frameworks/gecode.framework/Headers
-
+  - /Library/Frameworks/gecode.framework/Headers
+  
   # to use xml file format
   - /usr/include/libxml2
 
@@ -57,15 +52,14 @@ libraries:
   - FOUNDATION
   - DSP
   - MODULAR
-  - mac ../../library/build/JamomaScore.dylib
-  - linux JamomaScore
-
+  - ../../library/build/JamomaScore.dylib
+  
   # to include gecode solver library
-  - mac /Library/Frameworks/gecode.framework/gecode
-
+  - /Library/Frameworks/gecode.framework/gecode
+  
   # to link with the xml library
   - mac /usr/lib/libxml2.dylib
-  #- win
+  #- win 
 
 # This project is not available for most architectures (cause of the Gecode 64-bit only dependency)
 arch: "x86_64"
