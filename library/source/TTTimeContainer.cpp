@@ -124,8 +124,16 @@ TTErr TTTimeContainer::getTimeEvents(TTValue& value)
     if (mTimeEventList.isEmpty())
         return kTTErrGeneric;
     
+    // if there is no upper container : append the start event too
+    if (!mContainer.valid())
+        value.append(mStartEvent);
+    
     for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next())
         value.append(mTimeEventList.current()[0]); // théo : here we expect the Container plugin fills the list with the object at the [0] index ...
+    
+    // if there is no upper container : append the end event too
+    if (!mContainer.valid())
+        value.append(mEndEvent);
     
     return kTTErrNone;
 }
