@@ -416,7 +416,7 @@ TTErr Automation::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         if (aXmlHandler->mXmlNodeStart) {
             
             mCurrentObjects.clear();
-            
+            return kTTErrNone;
         }
         else {
             
@@ -434,6 +434,7 @@ TTErr Automation::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
                         
                         // add a sender
                         addSender(address);
+                        return kTTErrNone;
                     }
                 }
             }
