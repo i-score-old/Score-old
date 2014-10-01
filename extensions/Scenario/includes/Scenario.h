@@ -67,6 +67,7 @@ class Scenario : public TimeContainerPlugin {
 	TTObject           	 		mCurrentScenario;               ///< an internal pointer to remember the current scenario being read
     
     TTBoolean                   mLoading;                       ///< a flag true when the scenario is loading (mainly used to mute the edition solver)
+    TTBoolean                   mAttributeLoaded;               ///< a flag true when the scenario is loading (mainly used to mute the edition solver)
     
 	
     /** Get parameters names needed by this time process

@@ -36,7 +36,8 @@ mEditionSolver(NULL),
 #ifndef NO_EXECUTION_GRAPH
 mExecutionGraph(NULL),
 #endif
-mLoading(NO)
+mLoading(NO),
+mAttributeLoaded(NO)
 {
     TIME_PLUGIN_INITIALIZE
     
@@ -511,10 +512,20 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     // When reading a sub scenario
     if (mCurrentScenario.valid()) {
         
-        // if this this the end of a scenario node : forget the sub scenario
+        // Scenario node :
         if (aXmlHandler->mXmlNodeName == TTSymbol("Scenario")) {
             
+            // if this is the end of a scenario node : forget the sub scenario
             if (!aXmlHandler->mXmlNodeStart) {
+                
+                mCurrentScenario = TTObject();
+                return kTTErrNone;
+            }
+            
+            // if this is an empty scenario node : read the node and then forget the sub scenario
+            if (aXmlHandler->mXmlNodeIsEmpty) {
+                
+                mCurrentScenario.send("ReadFromXml", inputValue, outputValue);
                 
                 mCurrentScenario = TTObject();
                 return kTTErrNone;
@@ -522,9 +533,7 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         }
         else {
             
-            // Pass the xml handler to the sub scenario to fill it
-            aXmlHandler->setAttributeValue(kTTSym_object, mCurrentScenario);
-            return aXmlHandler->sendMessage(kTTSym_Read);
+            return mCurrentScenario.send("ReadFromXml", inputValue, outputValue);
         }
     }
 	
@@ -534,6 +543,7 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     if (aXmlHandler->mXmlNodeName == kTTSym_xmlHandlerReadingStarts) {
         
         mLoading = YES;
+        mAttributeLoaded = NO;
         
         mCurrentTimeEvent = TTObject();
         mCurrentTimeProcess = TTObject();
@@ -576,8 +586,8 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         return kTTErrNone;
     }
     
-    // Scenario node
-    if (aXmlHandler->mXmlNodeName == TTSymbol("Scenario")) {
+    // Scenario node : read attribute only for upper scenario
+    if (aXmlHandler->mXmlNodeName == TTSymbol("Scenario") && !mAttributeLoaded) {
         
         // Get the scenario name
         if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES)) {
@@ -626,6 +636,9 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
                 }
             }
         }
+        
+        mAttributeLoaded = YES;
+        return kTTErrNone;
     }
     
     // Start Event node (root Scenario only)
@@ -723,11 +736,13 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     // Process node : the name of the node is the name of the process type
     if (!mCurrentTimeProcess.valid()) {
         
-        if (aXmlHandler->mXmlNodeStart)
+        if (aXmlHandler->mXmlNodeStart) {
+            
             readTimeProcessFromXml(aXmlHandler, mCurrentTimeProcess);
-        
-        if (aXmlHandler->mXmlNodeIsEmpty)
-            mCurrentTimeProcess = TTObject();
+            
+            if (aXmlHandler->mXmlNodeIsEmpty)
+                mCurrentTimeProcess = TTObject();
+        }
     }
     else if (mCurrentTimeProcess.name() == aXmlHandler->mXmlNodeName) {
         
@@ -738,17 +753,13 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     // If there is a current time process
     if (mCurrentTimeProcess.valid()) {
         
-        // if the current time process is a sub sceanrio : don't forget it
-        if (mCurrentTimeProcess.name() == TTSymbol("Scenario")) {
+        // if the current time process is a sub scenario : don't forget it
+        if (mCurrentTimeProcess.name() == TTSymbol("Scenario"))
             mCurrentScenario = mCurrentTimeProcess;
-            
-        }
-        else {
-            
-            // Pass the xml handler to the current process to fill his data structure
-            aXmlHandler->setAttributeValue(kTTSym_object, mCurrentTimeProcess);
-            return aXmlHandler->sendMessage(kTTSym_Read);
-        }
+        
+        // Pass the xml handler to the current process to fill his data structure
+        aXmlHandler->setAttributeValue(kTTSym_object, mCurrentTimeProcess);
+        return aXmlHandler->sendMessage(kTTSym_Read);
     }
     
     return kTTErrNone;
