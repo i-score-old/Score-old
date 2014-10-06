@@ -33,7 +33,8 @@ mVerticalPosition(0),
 mVerticalSize(1),
 mRunning(NO),
 mCompiled(NO),
-mExternalTick(NO)
+mExternalTick(NO)/*,
+mPushStates(NO)*/
 {
     TT_ASSERT("Correct number of args to create TTTimeProcess", arguments.size() == 1);
     
@@ -108,8 +109,8 @@ mExternalTick(NO)
     addMessageWithArguments(Move);
     addMessageWithArguments(Limit);
     
-    addMessage(Start);
-    addMessage(End);
+    addMessageWithArguments(Start);
+    addMessageWithArguments(End);
     addMessage(Play);
     addMessage(Stop);
     addMessage(Pause);
@@ -455,14 +456,44 @@ TTErr TTTimeProcess::Limit(const TTValue& inputValue, TTValue& outputValue)
     return kTTErrGeneric;
 }
 
-TTErr TTTimeProcess::Start()
+TTErr TTTimeProcess::Start(const TTValue& inputValue, TTValue& outputValue)
 {
-    return mStartEvent.send(kTTSym_Trigger);
+    TTBoolean pushState = NO;
+    
+    if (inputValue.size() == 1)
+        if (inputValue[0].type() == kTypeBoolean)
+            pushState = inputValue[0];
+    
+    // remember the push state option for End() call (see in SchedulerRunningChanged)
+   // mPushStates = pushState;
+    
+    // optionnaly push start event state
+    if (pushState)
+        mStartEvent.send("StatePush");
+    
+    // simulate start event happening to play ourself only
+    TTValue out, v(mStartEvent, kTTSym_eventHappened, kTTSym_eventWaiting);
+    return EventStatusChanged(v, out);
 }
 
-TTErr TTTimeProcess::End()
+TTErr TTTimeProcess::End(const TTValue& inputValue, TTValue& outputValue)
 {
-    return mEndEvent.send(kTTSym_Trigger);
+    TTBoolean pushState = NO;
+    
+    if (inputValue.size() == 1)
+        if (inputValue[0].type() == kTypeBoolean)
+            pushState = inputValue[0];
+    
+    // optionnaly push end event state
+    if (pushState)
+        mEndEvent.send("StatePush");
+    
+    // reset push state flag as it not the default behaviour
+    //mPushStates = NO;
+    
+    // simulate end event happening to stop ourself only
+    TTValue out, v(mEndEvent, kTTSym_eventHappened, kTTSym_eventWaiting);
+    return EventStatusChanged(v, out);
 }
 
 TTErr TTTimeProcess::Play()
@@ -563,10 +594,11 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
     
     TTObject    aTimeEvent = inputValue[0];
     TTSymbol    newStatus = inputValue[1];
-    //TTSymbol    oldStatus = inputValue[2];
+    TTSymbol    oldStatus = inputValue[2];
     TTValue     v;
     
-    TT_ASSERT("TTTimeProcess::EventStatusChanged : status effectively changed", newStatus != oldStatus);
+    TTBoolean   statusChanged = newStatus != oldStatus;
+    TT_ASSERT("TTTimeProcess::EventStatusChanged : status effectively changed", statusChanged);
     
     // event wainting case :
     if (newStatus == kTTSym_eventWaiting) {
@@ -599,6 +631,9 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
                 // play the process
                 return Play();
             }
+            
+            TTLogError("TTTimeProcess::EventStatusChanged : ProccessStart failed\n");
+            return kTTErrGeneric;
         }
         else if (aTimeEvent == mEndEvent) {
             
@@ -633,7 +668,7 @@ TTErr TTTimeProcess::SchedulerRunningChanged(const TTValue& inputValue, TTValue&
     if (running) {
         
         // the kTTSym_ProcessStarted is sent in TTTimeProcess::EventStatusChanged
-        ;
+        return kTTErrNone;
     }
     else {
         
@@ -644,8 +679,24 @@ TTErr TTTimeProcess::SchedulerRunningChanged(const TTValue& inputValue, TTValue&
 			TTObject thisObject(this);
             sendNotification(kTTSym_ProcessEnded, thisObject);
             
+            // the process can ends itself if it is inside a non running container
+            if (mContainer.valid()) {
+
+                mContainer.get("running", running);
+            
+                if (!running) {
+                    
+                    TTValue none;
+                    
+                    End(TTBoolean(YES), none);
+                    //End(mPushStates, none);
+                }
+            }
+            
             return kTTErrNone;
         }
+        
+        return kTTErrGeneric;
     }
 }
 

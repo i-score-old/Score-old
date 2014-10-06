@@ -136,6 +136,10 @@ TTErr Scenario::Compile()
     TTObject    aTimeEvent;
     TTObject    aTimeProcess;
     
+    // don't compile empty scenario
+    if (mTimeEventList.isEmpty() && mTimeProcessList.isEmpty() && mTimeConditionList.isEmpty())
+        return kTTErrGeneric;
+    
     // get scheduler time offset
     mScheduler.get(kTTSym_offset, v);
     timeOffset = TTFloat64(v[0]);
@@ -175,6 +179,10 @@ TTErr Scenario::Compile()
 TTErr Scenario::ProcessStart()
 {
 #ifndef NO_EXECUTION_GRAPH
+    
+    // the execution graph needs to be compiled before
+    if (!mCompiled)
+        return kTTErrNone;
 
     // start the execution graph
     mExecutionGraph->start();
@@ -200,6 +208,9 @@ TTErr Scenario::ProcessEnd()
         
         aTimeProcess.send(kTTSym_Stop);
     }
+    
+    // needs to be compiled again
+    mCompiled = NO;
    
     return kTTErrNone;
 }
@@ -247,9 +258,9 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
             if (mExecutionGraph->makeOneStep(date))
                 return kTTErrNone;
             
-            // For the root Scenario : make the end happen
+            // the root Scenario ends itself
             else if (mContainer == NULL)
-                return getEndEvent().send(kTTSym_Happen);
+                return TTObject(this).send("End");
 #else
             TTValue     v;
             TTUInt32    eventDate;
@@ -396,6 +407,9 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
                 
                 aTimeProcess.send(kTTSym_Goto, v, none);
             }
+            
+            // needs to be compiled again
+            mCompiled = NO;
             
             return kTTErrNone;
         }

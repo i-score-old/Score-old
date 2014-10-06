@@ -51,6 +51,8 @@ protected :
  
 private :
     
+    TTBoolean                       mPushing;                       ///< an internal flag to know if the event is pushing its state
+    
     /** Set the date of the event
      @param	value           a date
      @return                an error code if the date is wrong */
@@ -105,6 +107,11 @@ private :
      @param	outputValue     nothing
      @return                kTTErrNone */
     TTErr           StateAddressClear(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Push the state content
+     @details this method eases the call of state run method
+     @return                kTTErrNone */
+    TTErr           StatePush();
     
     friend void TTSCORE_EXPORT TTTimeContainerFindTimeEventWithName(const TTValue& aValue, TTPtr timeEventNamePtrToMatch, TTBoolean& found);
     friend TTBoolean TTSCORE_EXPORT TTTimeEventCompareDate(TTValue& v1, TTValue& v2);

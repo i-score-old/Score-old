@@ -60,6 +60,8 @@ protected :
     
 private :
     
+//    TTBoolean                       mPushStates;                    ///< a boolean flag to remember Start() push state option in order to do the same when calling End() (see in SchedulerRunningChanged)
+    
     TTObject                        mStartEvent;                    ///< the event object which handles the time process execution start
     
     TTList                          mIntermediateEvents;            ///< the list of all intermediate events
@@ -212,51 +214,56 @@ private :
     TTErr           getIntermediateEvents(TTValue& value);
     
     /** Move the time process
-     this method eases the setting of the start and end event dates
+     @details this method eases the setting of the start and end event dates
      @param	inputValue      new start date, new end date
      @param	outputValue     nothing
      @return                an error code if the movement fails */
     TTErr           Move(const TTValue& inputValue, TTValue& outputValue);
     
     /** Limit the time process duration
-        this method eases the setting of the minimal and maximal durations
+     @details this method eases the setting of the minimal and maximal durations
      @param	inputValue      duration min, duration max
      @param	outputValue     nothing
      @return                an error code if the limitation fails */
     TTErr           Limit(const TTValue& inputValue, TTValue& outputValue);
     
-    /** Start the time process
-     this method eases the access of the start event trigger message
+    /** Start the time process pushing optionnaly the start event state
+     @details this method simulates start event happening @n
+     if the start event state is pushed, the end event state will also be pushed
+     @param	inputValue      #TTBoolean to push the start event state or not (default : NO)
+     @param	outputValue     nothing
      @return                an error code if the play fails */
-    TTErr           Start();
+    TTErr           Start(const TTValue& inputValue, TTValue& outputValue);
     
-    /** End the time process
-     this method eases the access of the end event trigger message
+    /** End the time process pushing optionnaly the start event state
+     @details this method simulates end event happening
+     @param	inputValue      #TTBoolean to push the end event state or not (default : NO)
+     @param	outputValue     nothing
      @return                an error code if the stop fails */
-    TTErr           End();
+    TTErr           End(const TTValue& inputValue, TTValue& outputValue);
     
     /** Play the time process from a time offset
-        this method eases the managment of the scheduler object
+     @details this method eases the managment of the scheduler object
      @return                an error code if the play fails */
     TTErr           Play();
     
     /** Stop the time process
-     this method eases the managment of the scheduler object
+     @details this method eases the managment of the scheduler object
      @return                an error code if the stop fails */
     TTErr           Stop();
     
     /** Pause the time process
-        this method eases the managment of the scheduler object
+     @details this method eases the managment of the scheduler object
      @return                an error code if the pause fails */
     TTErr           Pause();
     
     /** Resume the time process
-        this method eases the managment of the scheduler object
+     @details this method eases the managment of the scheduler object
      @return                an error code if the resume fails */
     TTErr           Resume();
     
     /** Drive the time process progression
-     this method eases the managment of the scheduler object
+     @details this method eases the managment of the scheduler object
      @return                an error code if the tick fails */
     TTErr           Tick();
     

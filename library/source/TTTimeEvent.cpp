@@ -29,7 +29,8 @@ mName(kTTSymEmpty),
 mDate(0),
 mStatus(kTTSym_eventWaiting),
 mMute(NO),
-mState(kTTSym_Script)
+mState(kTTSym_Script),
+mPushing(NO)
 {
     TTValue none;
     
@@ -56,6 +57,7 @@ mState(kTTSym_Script)
     addMessageWithArguments(StateAddressGetValue);
     addMessageWithArguments(StateAddressSetValue);
     addMessageWithArguments(StateAddressClear);
+    addMessage(StatePush);
     
 	// needed to be handled by a TTXmlHandler
 	addMessageWithArguments(WriteAsXml);
@@ -136,9 +138,9 @@ TTErr TTTimeEvent::Trigger()
     if (mContainer.valid()) {
         
         TTValue none, v;
+        TTBoolean   running;
         
-        mContainer.get("running", v);
-        TTBoolean running = v[0];
+        mContainer.get("running", running);
         
         if (running) {
             
@@ -164,10 +166,10 @@ TTErr TTTimeEvent::Dispose()
     // an event needs to be into a running container to be disposed
     if (mContainer.valid()) {
         
-        TTValue none, v;
+        TTValue     none, v;
+        TTBoolean   running;
         
-        mContainer.get("running", v);
-        TTBoolean running = v[0];
+        mContainer.get("running", running);
         
         if (running) {
             
@@ -194,8 +196,8 @@ TTErr TTTimeEvent::Happen()
     // if the event is not muted
     if (!mMute) {
     
-        // recall the state
-        err = mState.send(kTTSym_Run);
+        // push the state
+        err = StatePush();
     }
     
     setStatus(kTTSym_eventHappened);
@@ -298,6 +300,24 @@ TTErr TTTimeEvent::StateAddressClear(const TTValue& inputValue, TTValue& outputV
     }
     
     return kTTErrGeneric;
+}
+
+TTErr TTTimeEvent::StatePush()
+{
+    /*
+    if (!mPushing) {
+        
+        mPushing = YES;
+*/
+        // recall the state
+        TTErr err = mState.send(kTTSym_Run);
+        
+//        mPushing = NO;
+        
+        return err;
+//    }
+    
+//    return kTTErrGeneric;
 }
 
 TTErr TTTimeEvent::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
