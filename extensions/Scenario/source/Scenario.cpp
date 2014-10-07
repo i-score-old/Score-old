@@ -136,6 +136,9 @@ TTErr Scenario::Compile()
     TTObject    aTimeEvent;
     TTObject    aTimeProcess;
     
+    if (mTimeEventList.isEmpty() && mTimeProcessList.isEmpty() && mTimeConditionList.isEmpty())
+        return kTTErrGeneric;
+    
     // get scheduler time offset
     mScheduler.get(kTTSym_offset, v);
     timeOffset = TTFloat64(v[0]);
@@ -175,6 +178,9 @@ TTErr Scenario::Compile()
 TTErr Scenario::ProcessStart()
 {
 #ifndef NO_EXECUTION_GRAPH
+    
+    if (!mCompiled)
+        return kTTErrNone;
 
     // start the execution graph
     mExecutionGraph->start();
@@ -200,6 +206,9 @@ TTErr Scenario::ProcessEnd()
         
         aTimeProcess.send(kTTSym_Stop);
     }
+    
+    // needs to be compiled again
+    mCompiled = NO;
    
     return kTTErrNone;
 }
@@ -396,6 +405,9 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
                 
                 aTimeProcess.send(kTTSym_Goto, v, none);
             }
+            
+            // needs to be compiled again
+            mCompiled = NO;
             
             return kTTErrNone;
         }
