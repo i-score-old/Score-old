@@ -13,6 +13,10 @@ The Score framework is based on the Jamoma Foundation framework which allows to 
 
 Installing
 
+for full OSSIA project installation : https://github.com/OSSIA/OSSIA
+
+for installing Score only :
+
 1 : First of all you need to download the Gecode framework : http://www.gecode.org/download/Gecode-3.7.3.dmg
 
 2 : create a jamoma folder inside /usr/local/ and give you a full access (read+write) on this jamoma folder.
@@ -21,10 +25,6 @@ Installing
 
 4 : in the terminal run the build script from the Score folder :     
     ./build.rb dev clean
-
-
-Documentation / API
-...
 
 
 License
@@ -39,4 +39,3 @@ More Information
 About the OSSIA project at ...
 About libIscore library at https://github.com/raphaelmarczak/libIscore
 About the Jamoma project at www.jamoma.org or on github at https://github.com/organizations/jamoma
-
