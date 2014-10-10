@@ -130,7 +130,7 @@ TTErr Scenario::setViewPosition(const TTValue& value)
 
 TTErr Scenario::Compile()
 {
-    TTValue v;
+    TTValue     v;
     TTUInt32    timeOffset;
     TTBoolean   compiled;
     TTObject    aTimeEvent;
@@ -1400,7 +1400,7 @@ TTErr Scenario::TimeProcessMove(const TTValue& inputValue, TTValue& outputValue)
                 for (it = mVariablesMap.begin() ; it != mVariablesMap.end() ; it++)
                     
                     SolverVariablePtr(it->second)->update();
-                
+
                 // needs to be compiled again
                 mCompiled = NO;
                 
