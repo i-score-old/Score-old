@@ -602,6 +602,9 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
                 // play the process
                 return Play();
             }
+            
+            TTLogError("TTTimeProcess::EventStatusChanged : process failed to start\n");
+            return kTTErrGeneric;
         }
         else if (aTimeEvent == mEndEvent) {
             
