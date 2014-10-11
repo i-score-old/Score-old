@@ -36,8 +36,7 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
 */
 
-#ifndef PETRINET_H_
-#define PETRINET_H_
+#pragma once
 
 /*!
  * \file PetriNet.hpp
@@ -45,9 +44,6 @@ knowledge of the CeCILL-C license and that you accept its terms.
  * \date 2008-2009
  */
 
-#include "Place.hpp"
-#include "Transition.hpp"
-#include "Arc.hpp"
 #include "PriorityTransitionAction.hpp"
 #include "ThreadSafeList.hpp"
 
@@ -59,8 +55,12 @@ knowledge of the CeCILL-C license and that you accept its terms.
 #include <list>
 #include <queue>
 #include <string>
-#include <pthread.h>
+//#include <pthread.h>
 
+#include "Arc.hpp"
+#include "Place.hpp"
+#include "Transition.hpp"
+class PetriNetNode;
 #define STATIC_EVENT (void*)NULL
 #define MY_MIN_STEP_TIME_IN_MS 100
 
@@ -208,7 +208,7 @@ public:
 	 * \param color : (optional) arc color.
 	 * \return the new arc created or matching arc if already exist.
 	 */
-	Arc* createArc(Place* from, Transition* to, int color = 1);
+	PetriNetArc* createArc(Place* from, Transition* to, int color = 1);
 
 	/*!
 	 * Creates an arc between from a transition to a place.
@@ -219,7 +219,7 @@ public:
 	 * \param color : (optional) arc color.
 	 * \return the new arc created or matching arc if already exist.
 	 */
-	Arc* createArc(Transition* from, Place* to, int color = 1);
+	PetriNetArc* createArc(Transition* from, Place* to, int color = 1);
 
 	/*!
 	 * Deletes all arcs between the givens nodes.
@@ -422,11 +422,10 @@ private:
 private:
 
 	// Private function only used to factorize the program.
-	Arc* newArc(PetriNetNode* from, PetriNetNode* to, int color);
+	PetriNetArc* newArc(PetriNetNode* from, PetriNetNode* to, int color);
 	void deleteItem(PetriNetNode* nodeToDelete);
 };
 
 void externLaunch(void* arg, bool option);
 void externMustStop(void* arg, bool option);
 
-#endif /*PETRINET_H_*/

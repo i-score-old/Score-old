@@ -45,7 +45,8 @@ knowledge of the CeCILL-C license and that you accept its terms.
  */
 
 #include "PetriNet.hpp"
-
+#include "Arc.hpp"
+#include "Transition.hpp"
 
 Place::Place(PetriNet* petriNet)
 : PetriNetNode(petriNet) {
@@ -107,7 +108,7 @@ void Place::produceTokens(unsigned int nbOfTokens, unsigned int colorLabel, int 
 	if ((oldNumberOfTokens < NB_OF_TOKEN_TO_ACTIVE_ARC) && (getNbOfTokens(colorLabel) >= NB_OF_TOKEN_TO_ACTIVE_ARC)) { // CB WTF : Si un token et deux arcs sortant, bug ?
 		arcList outGoingArcs = outGoingArcsOf(colorLabel);
 		for (unsigned int i = 0 ; i < outGoingArcs.size() ; ++i) {
-			Arc* arc = outGoingArcs[i];
+			PetriNetArc* arc = outGoingArcs[i];
             
 //            if (!arc->getCondition()) { // CB check if the arc can be activated
 //                continue;
@@ -146,14 +147,14 @@ void Place::merge(Place* placeToMerge) // CB copie améliorée de Transition::me
     arcList mergeOutGoingArcs = placeToMerge->outGoingArcsOf(); // CB vector
     
     for (arcList::iterator it = mergeInGoingArcs.begin() ; it != mergeInGoingArcs.end() ; it++) {
-        Arc* newArc = getPetriNet()->createArc(dynamic_cast<Transition*>((*it)->getFrom()), this); // CB uncheck cast
+        PetriNetArc* newArc = getPetriNet()->createArc(dynamic_cast<Transition*>((*it)->getFrom()), this); // CB uncheck cast
         newArc->changeAbsoluteTime((*it)->getAbsoluteMinValue(), (*it)->getAbsoluteMaxValue());
         newArc->changeRelativeTime((*it)->getRelativeMinValue(), (*it)->getRelativeMaxValue());
         getPetriNet()->deleteArc((*it)->getFrom(), placeToMerge);
     } // CB Arc::Arc adds the arc in the nodes' lists
     
     for (arcList::iterator it = mergeOutGoingArcs.begin() ; it != mergeOutGoingArcs.end() ; it++) {
-        Arc* newArc = getPetriNet()->createArc(this, dynamic_cast<Transition*>((*it)->getTo()));
+        PetriNetArc* newArc = getPetriNet()->createArc(this, dynamic_cast<Transition*>((*it)->getTo()));
         newArc->changeAbsoluteTime((*it)->getAbsoluteMinValue(), (*it)->getAbsoluteMaxValue());
         newArc->changeRelativeTime((*it)->getRelativeMinValue(), (*it)->getRelativeMaxValue());
         getPetriNet()->deleteArc(placeToMerge, (*it)->getTo());

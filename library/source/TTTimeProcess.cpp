@@ -354,8 +354,11 @@ TTErr TTTimeProcess::getDuration(TTValue& value)
     // the end must be after the start
     if (mEndDate >= mStartDate) {
             
-        value = TTValue( TTUInt32( abs(mDuration) ) );
-        
+        #ifndef TT_PLATFORM_WIN
+        value = TTValue( TTUInt32( std::abs<int32_t>(mDuration) ) );
+        #else
+        value = TTValue(mDuration);
+        #endif
         return kTTErrNone;
     }
     
@@ -599,6 +602,9 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
                 // play the process
                 return Play();
             }
+            
+            TTLogError("TTTimeProcess::EventStatusChanged : process failed to start\n");
+            return kTTErrGeneric;
         }
         else if (aTimeEvent == mEndEvent) {
             

@@ -36,8 +36,7 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
 */
 
-#ifndef PLACE_H_
-#define PLACE_H_
+#pragma once
 
 /*!
  * \file Place.hpp
@@ -49,7 +48,7 @@ knowledge of the CeCILL-C license and that you accept its terms.
 #include "PetriNetNode.hpp"
 #include "OutOfBoundException.hpp"
 #include <vector>
-
+class PetriNet;
 /*!
  * \class Place
  *
@@ -139,4 +138,3 @@ private :
 	void changeNbOfColors(int newNbColors);
 };
 
-#endif /*PLACE_H_*/

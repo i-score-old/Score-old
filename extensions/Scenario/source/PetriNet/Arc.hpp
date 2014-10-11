@@ -36,8 +36,7 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
 */
 
-#ifndef ARC_H_
-#define ARC_H_
+#pragma once
 
 /*!
  * \file Arc.hpp
@@ -76,7 +75,7 @@ class Place;
  * An arc from a transition to a place could produce a token
  * in its color.
  */
-class Arc : public PetriNetItem // CB TODO : setFrom et setTo, pour ne pas avoir à tout recopier lors des merges
+class PetriNetArc : public PetriNetItem // CB TODO : setFrom et setTo, pour ne pas avoir à tout recopier lors des merges
 {
 public:
 	friend class PetriNet;
@@ -282,7 +281,7 @@ public:
     void setCondition(bool newCondition){m_condition = newCondition;} // CB TODO : should be a function pointer
 
 	// Destructor.
-	~Arc();
+	~PetriNetArc();
 
 private:
 	// Arc color
@@ -325,14 +324,13 @@ private:
 	 * \param to : the node to.
 	 * \param color : (optionnal) arc color (1 if not provided).
 	 */
-	Arc(PetriNet* petriNet, PetriNetNode* from, PetriNetNode* to, int color = 1);
+	PetriNetArc(PetriNet* petriNet, PetriNetNode* from, PetriNetNode* to, int color = 1);
 
 	/*!
 	 * Default constructor.
 	 *
 	 * Must not be called (an Arc is a PetriNetItem, so it must belong to a Petri Network).
 	 */
-	Arc();
+	PetriNetArc();
 };
 
-#endif /*ARC_H_*/

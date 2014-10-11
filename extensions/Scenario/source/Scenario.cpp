@@ -36,7 +36,8 @@ mEditionSolver(NULL),
 #ifndef NO_EXECUTION_GRAPH
 mExecutionGraph(NULL),
 #endif
-mLoading(NO)
+mLoading(NO),
+mAttributeLoaded(NO)
 {
     TIME_PLUGIN_INITIALIZE
     
@@ -129,11 +130,14 @@ TTErr Scenario::setViewPosition(const TTValue& value)
 
 TTErr Scenario::Compile()
 {
-    TTValue v;
+    TTValue     v;
     TTUInt32    timeOffset;
     TTBoolean   compiled;
     TTObject    aTimeEvent;
     TTObject    aTimeProcess;
+    
+    if (mTimeEventList.isEmpty() && mTimeProcessList.isEmpty() && mTimeConditionList.isEmpty())
+        return kTTErrGeneric;
     
     // get scheduler time offset
     mScheduler.get(kTTSym_offset, v);
@@ -166,12 +170,17 @@ TTErr Scenario::Compile()
         aTimeProcess.set("externalTick", mExternalTick);
     }
     
+    mCompiled = YES;
+    
     return kTTErrNone;
 }
 
 TTErr Scenario::ProcessStart()
 {
 #ifndef NO_EXECUTION_GRAPH
+    
+    if (!mCompiled)
+        return kTTErrNone;
 
     // start the execution graph
     mExecutionGraph->start();
@@ -197,6 +206,9 @@ TTErr Scenario::ProcessEnd()
         
         aTimeProcess.send(kTTSym_Stop);
     }
+    
+    // needs to be compiled again
+    mCompiled = NO;
    
     return kTTErrNone;
 }
@@ -236,6 +248,10 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
             }
             
 #ifndef NO_EXECUTION_GRAPH
+            // the execution graph needs to be compiled before
+            if (!mCompiled)
+                return kTTErrGeneric;
+            
             // update the mExecutionGraph to process the scenario
             if (mExecutionGraph->makeOneStep(date))
                 return kTTErrNone;
@@ -390,6 +406,9 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
                 aTimeProcess.send(kTTSym_Goto, v, none);
             }
             
+            // needs to be compiled again
+            mCompiled = NO;
+            
             return kTTErrNone;
         }
     }
@@ -511,10 +530,20 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     // When reading a sub scenario
     if (mCurrentScenario.valid()) {
         
-        // if this this the end of a scenario node : forget the sub scenario
+        // Scenario node :
         if (aXmlHandler->mXmlNodeName == TTSymbol("Scenario")) {
             
+            // if this is the end of a scenario node : forget the sub scenario
             if (!aXmlHandler->mXmlNodeStart) {
+                
+                mCurrentScenario = TTObject();
+                return kTTErrNone;
+            }
+            
+            // if this is an empty scenario node : read the node and then forget the sub scenario
+            if (aXmlHandler->mXmlNodeIsEmpty) {
+                
+                mCurrentScenario.send("ReadFromXml", inputValue, outputValue);
                 
                 mCurrentScenario = TTObject();
                 return kTTErrNone;
@@ -522,9 +551,7 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         }
         else {
             
-            // Pass the xml handler to the sub scenario to fill it
-            aXmlHandler->setAttributeValue(kTTSym_object, mCurrentScenario);
-            return aXmlHandler->sendMessage(kTTSym_Read);
+            return mCurrentScenario.send("ReadFromXml", inputValue, outputValue);
         }
     }
 	
@@ -534,6 +561,7 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     if (aXmlHandler->mXmlNodeName == kTTSym_xmlHandlerReadingStarts) {
         
         mLoading = YES;
+        mAttributeLoaded = NO;
         
         mCurrentTimeEvent = TTObject();
         mCurrentTimeProcess = TTObject();
@@ -572,12 +600,13 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     if (aXmlHandler->mXmlNodeName == kTTSym_xmlHandlerReadingEnds) {
         
         mLoading = NO;
+        mCompiled = NO;
         
         return kTTErrNone;
     }
     
-    // Scenario node
-    if (aXmlHandler->mXmlNodeName == TTSymbol("Scenario")) {
+    // Scenario node : read attribute only for upper scenario
+    if (aXmlHandler->mXmlNodeName == TTSymbol("Scenario") && !mAttributeLoaded) {
         
         // Get the scenario name
         if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES)) {
@@ -626,6 +655,9 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
                 }
             }
         }
+        
+        mAttributeLoaded = YES;
+        return kTTErrNone;
     }
     
     // Start Event node (root Scenario only)
@@ -723,11 +755,13 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     // Process node : the name of the node is the name of the process type
     if (!mCurrentTimeProcess.valid()) {
         
-        if (aXmlHandler->mXmlNodeStart)
+        if (aXmlHandler->mXmlNodeStart) {
+            
             readTimeProcessFromXml(aXmlHandler, mCurrentTimeProcess);
-        
-        if (aXmlHandler->mXmlNodeIsEmpty)
-            mCurrentTimeProcess = TTObject();
+            
+            if (aXmlHandler->mXmlNodeIsEmpty)
+                mCurrentTimeProcess = TTObject();
+        }
     }
     else if (mCurrentTimeProcess.name() == aXmlHandler->mXmlNodeName) {
         
@@ -738,17 +772,13 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     // If there is a current time process
     if (mCurrentTimeProcess.valid()) {
         
-        // if the current time process is a sub sceanrio : don't forget it
-        if (mCurrentTimeProcess.name() == TTSymbol("Scenario")) {
+        // if the current time process is a sub scenario : don't forget it
+        if (mCurrentTimeProcess.name() == TTSymbol("Scenario"))
             mCurrentScenario = mCurrentTimeProcess;
-            
-        }
-        else {
-            
-            // Pass the xml handler to the current process to fill his data structure
-            aXmlHandler->setAttributeValue(kTTSym_object, mCurrentTimeProcess);
-            return aXmlHandler->sendMessage(kTTSym_Read);
-        }
+        
+        // Pass the xml handler to the current process to fill his data structure
+        aXmlHandler->setAttributeValue(kTTSym_object, mCurrentTimeProcess);
+        return aXmlHandler->sendMessage(kTTSym_Read);
     }
     
     return kTTErrNone;
@@ -792,6 +822,9 @@ TTErr Scenario::TimeEventCreate(const TTValue& inputValue, TTValue& outputValue)
 #endif
             // return the time event
             outputValue = aTimeEvent;
+            
+            // needs to be compiled again
+            mCompiled = NO;
             
             return kTTErrNone;
         }
@@ -864,6 +897,9 @@ TTErr Scenario::TimeEventRelease(const TTValue& inputValue, TTValue& outputValue
                         delete variable;
                     }
 #endif
+                    // needs to be compiled again
+                    mCompiled = NO;
+                    
                     return kTTErrNone;
                 }
             }
@@ -926,6 +962,9 @@ TTErr Scenario::TimeEventMove(const TTValue& inputValue, TTValue& outputValue)
                     
                     SolverVariablePtr(it->second)->update();
                 
+                // needs to be compiled again
+                mCompiled = NO;
+                
                 return kTTErrNone;
             }
 #endif
@@ -979,7 +1018,10 @@ TTErr Scenario::TimeEventCondition(const TTValue& inputValue, TTValue& outputVal
                 }
             }
             
-            // théo : maybe there will be other stuff to do considering there is a condition with several case now ? 
+            // théo : maybe there will be other stuff to do considering there is a condition with several case now ?
+            
+            // needs to be compiled again
+            mCompiled = NO;
             
             return kTTErrNone;
         }
@@ -1128,6 +1170,9 @@ TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue
             mVariablesMap.erase(aFormerTimeEvent.instance());
             mVariablesMap.emplace(aNewTimeEvent.instance(), variable);
 #endif
+            // needs to be compiled again
+            mCompiled = NO;
+            
             return kTTErrNone;
         }
     }
@@ -1214,6 +1259,9 @@ TTErr Scenario::TimeProcessCreate(const TTValue& inputValue, TTValue& outputValu
                 // return the time process
                 outputValue = aTimeProcess;
                 
+                // needs to be compiled again
+                mCompiled = NO;
+                
                 return kTTErrNone;
             }
         }
@@ -1275,6 +1323,9 @@ TTErr Scenario::TimeProcessRelease(const TTValue& inputValue, TTValue& outputVal
                 outputValue[0] = getTimeProcessStartEvent(aTimeProcess);
                 outputValue[1] = getTimeProcessEndEvent(aTimeProcess);
                 
+                // needs to be compiled again
+                mCompiled = NO;
+                
                 return kTTErrNone;
             }
         }
@@ -1325,7 +1376,7 @@ TTErr Scenario::TimeProcessMove(const TTValue& inputValue, TTValue& outputValue)
                 it = mRelationsMap.find(aTimeProcess.instance());
                 SolverRelationPtr relation = SolverRelationPtr(it->second);
                 
-                sErr = relation->move(inputValue[1], inputValue[2]);
+				sErr = relation->move(TTUInt32(inputValue[1]), TTUInt32(inputValue[2]));
                 
             } else {
                 
@@ -1336,7 +1387,7 @@ TTErr Scenario::TimeProcessMove(const TTValue& inputValue, TTValue& outputValue)
                 // extend the limit of the start variable
                 constraint->startVariable->limit(0, TTUInt32(scenarioDuration[0]));
                 
-                sErr = constraint->move(inputValue[1], inputValue[2]);
+				sErr = constraint->move(TTUInt32(inputValue[1]), TTUInt32(inputValue[2]));
                 
                 // set the start variable limit back
                 // this avoid time crushing when a time process moves while it is connected to other process
@@ -1349,6 +1400,9 @@ TTErr Scenario::TimeProcessMove(const TTValue& inputValue, TTValue& outputValue)
                 for (it = mVariablesMap.begin() ; it != mVariablesMap.end() ; it++)
                     
                     SolverVariablePtr(it->second)->update();
+
+                // needs to be compiled again
+                mCompiled = NO;
                 
                 return kTTErrNone;
             }
@@ -1385,7 +1439,7 @@ TTErr Scenario::TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue
                 it = mRelationsMap.find(aTimeProcess.instance());
                 SolverRelationPtr relation = SolverRelationPtr(it->second);
                 
-                sErr = relation->limit(inputValue[1], inputValue[2]);
+				sErr = relation->limit((TTUInt32)inputValue[1], (TTUInt32)inputValue[2]);
                 
             } else {
                 
@@ -1393,7 +1447,7 @@ TTErr Scenario::TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue
                 it = mConstraintsMap.find(aTimeProcess.instance());
                 SolverConstraintPtr constraint = SolverConstraintPtr(it->second);
                 
-                sErr = constraint->limit(inputValue[1], inputValue[2]);
+				sErr = constraint->limit((TTUInt32)inputValue[1], (TTUInt32)inputValue[2]);
             }
             
             if (!sErr && !mLoading) {
@@ -1402,6 +1456,9 @@ TTErr Scenario::TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue
                 for (it = mVariablesMap.begin() ; it != mVariablesMap.end() ; it++)
                     
                     SolverVariablePtr(it->second)->update();
+                
+                // needs to be compiled again
+                mCompiled = NO;
                 
                 return kTTErrNone;
             }
@@ -1440,6 +1497,9 @@ TTErr Scenario::TimeConditionCreate(const TTValue& inputValue, TTValue& outputVa
     // return the time condition
     outputValue = aTimeCondition;
     
+    // needs to be compiled again
+    mCompiled = NO;
+    
     return kTTErrNone;
 }
 
@@ -1468,6 +1528,9 @@ TTErr Scenario::TimeConditionRelease(const TTValue& inputValue, TTValue& outputV
                 
                 // delete all observers
                 deleteTimeConditionCacheElement(aCacheElement);
+                
+                // needs to be compiled again
+                mCompiled = NO;
                 
                 return kTTErrNone;
             }

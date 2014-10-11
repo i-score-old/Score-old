@@ -51,23 +51,23 @@ knowledge of the CeCILL-C license and that you accept its terms.
 #include <iostream>
 using namespace std;
 
-Arc::Arc() {
+PetriNetArc::PetriNetArc() {
 
 }
 
-Arc::Arc(PetriNet* petriNet, PetriNetNode* from, PetriNetNode* to, int color)
+PetriNetArc::PetriNetArc(PetriNet* petriNet, PetriNetNode* from, PetriNetNode* to, int color)
 :PetriNetItem(petriNet), m_condition(false){
 	if (!petriNet->isColorValid(color)) {
-		throw IllegalArgumentException("Arc : Invalid color");
+		throw IllegalArgumentException("PetriNetArc : Invalid color");
 	}
 
 
 	if (dynamic_cast<Place*>(from) && dynamic_cast<Place*>(to)) {
-		throw IllegalArgumentException("Arc from Place to Place");
+		throw IllegalArgumentException("PetriNetArc from Place to Place");
 	}
 
 	if (dynamic_cast<Transition*>(from) && dynamic_cast<Transition*>(to)) {
-		throw IllegalArgumentException("Arc from Transition to Transition");
+		throw IllegalArgumentException("PetriNetArc from Transition to Transition");
 	}
 
 	m_color = color;
@@ -95,58 +95,58 @@ Arc::Arc(PetriNet* petriNet, PetriNetNode* from, PetriNetNode* to, int color)
 	}
 }
 
-PetriNetNode* Arc::getFrom() {
+PetriNetNode* PetriNetArc::getFrom() {
 	return m_nodeFrom;
 }
 
-PetriNetNode* Arc::getTo() {
+PetriNetNode* PetriNetArc::getTo() {
 	return m_nodeTo;
 }
 
-void Arc::changeRelativeMinTime(ExtendedInt minTime) {
+void PetriNetArc::changeRelativeMinTime(ExtendedInt minTime) {
     if (minTime > m_relativeMaxValue) {
-		throw IllegalArgumentException("Arc : relativeMin > relativeMax");
+		throw IllegalArgumentException("PetriNetArc : relativeMin > relativeMax");
 	}
 
 	m_relativeMinValue = minTime;
 }
 
-void Arc::changeRelativeMaxTime(ExtendedInt maxTime) {
+void PetriNetArc::changeRelativeMaxTime(ExtendedInt maxTime) {
     if (maxTime < m_relativeMinValue) {
-		throw IllegalArgumentException("Arc : relativeMax < relativeMin");
+		throw IllegalArgumentException("PetriNetArc : relativeMax < relativeMin");
 	}
 
 	m_relativeMaxValue = maxTime;
 }
 
-void Arc::changeRelativeTime(ExtendedInt minTime, ExtendedInt maxTime) {
+void PetriNetArc::changeRelativeTime(ExtendedInt minTime, ExtendedInt maxTime) {
     if (maxTime < minTime) {
-		throw IllegalArgumentException("Arc : relativeMin > relativeMax (both)");
+		throw IllegalArgumentException("PetriNetArc : relativeMin > relativeMax (both)");
 	}
 
 	m_relativeMinValue = minTime;
 	m_relativeMaxValue = maxTime;
 }
 
-void Arc::changeAbsoluteMinTime(ExtendedInt minTime) {
+void PetriNetArc::changeAbsoluteMinTime(ExtendedInt minTime) {
     if (minTime > m_absoluteMaxValue) {
-		throw IllegalArgumentException("Arc : absoluteMin > absoluteMax");
+		throw IllegalArgumentException("PetriNetArc : absoluteMin > absoluteMax");
 	}
 
 	m_absoluteMinValue = minTime;
 }
 
-void Arc::changeAbsoluteMaxTime(ExtendedInt maxTime) {
+void PetriNetArc::changeAbsoluteMaxTime(ExtendedInt maxTime) {
     if (maxTime < m_absoluteMinValue) {
-		throw IllegalArgumentException("Arc : absoluteMax < absoluteMin");
+		throw IllegalArgumentException("PetriNetArc : absoluteMax < absoluteMin");
 	}
 
 	m_absoluteMaxValue = maxTime;
 }
 
-void Arc::changeAbsoluteTime(ExtendedInt minTime, ExtendedInt maxTime) {
+void PetriNetArc::changeAbsoluteTime(ExtendedInt minTime, ExtendedInt maxTime) {
     if (maxTime < minTime) {
-		throw IllegalArgumentException("Arc : absoluteMin > absoluteMax (both)");
+		throw IllegalArgumentException("PetriNetArc : absoluteMin > absoluteMax (both)");
 	}
 
 	m_absoluteMinValue = minTime;
@@ -165,7 +165,7 @@ void Arc::changeAbsoluteTime(ExtendedInt minTime, ExtendedInt maxTime) {
 //	return (m_relativeMaxValue <= m_internTimer);
 //}
 
-int Arc::nbOfArcColorLabelTokensInFrom() {
+int PetriNetArc::nbOfArcColorLabelTokensInFrom() {
 	if (!dynamic_cast<Place*>(m_nodeFrom)) {
 		throw IllegalArgumentException("Can only count Tokens from Places");
 	}
@@ -173,7 +173,7 @@ int Arc::nbOfArcColorLabelTokensInFrom() {
 	return ((Place*)m_nodeFrom)->getNbOfTokens(getColor());
 }
 
-int Arc::consumeTokenInFrom() {
+int PetriNetArc::consumeTokenInFrom() {
 	if (!dynamic_cast<Place*>(m_nodeFrom)) {
 		throw IllegalArgumentException("Can only consume Tokens from Places");
 	}
@@ -181,7 +181,7 @@ int Arc::consumeTokenInFrom() {
 	return ((Place*)m_nodeFrom)->consumeTokens(NB_OF_TOKEN_TO_CONSUME, getColor());
 }
 
-void Arc::produceTokenInTo(int tokenValue) {
+void PetriNetArc::produceTokenInTo(int tokenValue) {
 	if (!dynamic_cast<Place*>(m_nodeTo)) {
 		throw IllegalArgumentException("Can only produce Tokens into Places");
 	}
@@ -189,31 +189,31 @@ void Arc::produceTokenInTo(int tokenValue) {
 	((Place*)m_nodeTo)->produceTokens(NB_OF_TOKEN_TO_PRODUCE, getColor(), tokenValue);
 }
 
-bool Arc::isActive() {
+bool PetriNetArc::isActive() {
 	return (nbOfArcColorLabelTokensInFrom() >= NB_OF_TOKEN_TO_ACTIVE_ARC);
 }
 
-bool Arc::haveEnoughTokensInFrom() {
+bool PetriNetArc::haveEnoughTokensInFrom() {
 	return isActive();
 }
 
-int Arc::getColor() {
+int PetriNetArc::getColor() {
 	return m_color;
 }
 
-ExtendedInt Arc::getRelativeMinValue() {
+ExtendedInt PetriNetArc::getRelativeMinValue() {
 	return m_relativeMinValue;
 }
 
-ExtendedInt Arc::getRelativeMaxValue() {
+ExtendedInt PetriNetArc::getRelativeMaxValue() {
 	return m_relativeMaxValue;
 }
 
-ExtendedInt Arc::getAbsoluteMinValue() {
+ExtendedInt PetriNetArc::getAbsoluteMinValue() {
 	return m_absoluteMinValue;
 }
 
-ExtendedInt Arc::getAbsoluteMaxValue() {
+ExtendedInt PetriNetArc::getAbsoluteMaxValue() {
 	return m_absoluteMaxValue;
 }
 
@@ -221,16 +221,16 @@ ExtendedInt Arc::getAbsoluteMaxValue() {
 //	return m_internTimer;
 //}
 
-void Arc::setNumber(unsigned int arcNumber) {
+void PetriNetArc::setNumber(unsigned int arcNumber) {
 	m_number = arcNumber;
 }
 
-int Arc::getNumber() {
+int PetriNetArc::getNumber() {
 	return m_number;
 }
 
 
-Arc::~Arc() {
+PetriNetArc::~PetriNetArc() {
 	if (dynamic_cast<Transition*>(m_nodeTo)) {
 		((Transition*)m_nodeTo)->createBitArray(); // TODO : Doesn't really update the Transition bit array because the arc isn't removed from the transition's InGoingArcs
 	}

@@ -36,24 +36,23 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
 */
 
-#ifndef PETRINETNODE_H_
-#define PETRINETNODE_H_
+#pragma once
 
 /*!
  * \file PetriNetNode.hpp
  * \author Raphael Marczak (LaBRI), based on Antoine Allombert (LaBRI) LISP code
  * \date 2008-2009
  */
-
 #include "PetriNetItem.hpp"
-#include "Arc.hpp"
 #include "OutOfBoundException.hpp"
 #include "IllegalArgumentException.hpp"
 
 #include <vector>
-
-typedef std::vector<Arc*> arcList; // TODO : refactor, because later we don't know what is an arcList ! +1 CB
+class PetriNetArc;
+typedef std::vector<PetriNetArc*> arcList; // TODO : refactor, because later we don't know what is an arcList ! +1 CB
 typedef std::vector<arcList> arcListByColor;
+
+class PetriNetNode;
 typedef std::vector<PetriNetNode*> petriNetNodeList;
 
 /*!
@@ -135,7 +134,7 @@ public:
 	 * \param arcToAdd : arc to add to the in-going arcs list.
 	 * \param colorLabel : (optional) color of the arc to add (1 if not provided).
 	 */
-	void addInGoingArcs(Arc* arcToAdd, int colorLabel = 1);
+	void addInGoingArcs(PetriNetArc* arcToAdd, int colorLabel = 1);
 
 	/*!
 	 * Adds a colored arc to the out-going arcs list.
@@ -145,21 +144,21 @@ public:
 	 * \param arcToAdd : arc to add to the out-going arcs list.
 	 * \param colorLabel : (optional) color of the arc to add (1 if not provided).
 	 */
-	void addOutGoingArcs(Arc* arcToAdd, int colorLabel = 1);
+	void addOutGoingArcs(PetriNetArc* arcToAdd, int colorLabel = 1);
 
 	/*!
 	 * Removes from the in-going arcs list the given arc.
 	 *
 	 * \param arcToRemove : arc to remove from the in-going arcs list.
 	 */
-	void removeInGoingArcs(Arc* arcToRemove);
+	void removeInGoingArcs(PetriNetArc* arcToRemove);
 
 	/*!
 	 * Removes from the out-going arcs list the given arc.
 	 *
 	 * \param arcToRemove : arc to remove from the out-going arcs list.
 	 */
-	void removeOutGoingArcs(Arc* arcToRemove);
+	void removeOutGoingArcs(PetriNetArc* arcToRemove);
 
 	/*!
 	 * Removes from the in-going arcs list the given arc.
@@ -169,7 +168,7 @@ public:
 	 * \param arcToRemove : arc to remove from the in-going arcs list.
 	 * \param colorLabel : color of the arc to delete.
 	 */
-	void removeInGoingArcs(Arc* arcToRemove, int colorLabel);
+	void removeInGoingArcs(PetriNetArc* arcToRemove, int colorLabel);
 
 	/*!
 	 * Removes from the out-going arcs list the given arc.
@@ -179,7 +178,7 @@ public:
 	 * \param arcToRemove : arc to remove from the out-going arcs list.
 	 * \param colorLabel : color of the arc to delete.
 	 */
-	void removeOutGoingArcs(Arc* arcToRemove, int colorLabel);
+	void removeOutGoingArcs(PetriNetArc* arcToRemove, int colorLabel);
 
 	/*!
 	 * Tests if an arc exist between the two given nodes (all colors taken together).
@@ -188,7 +187,7 @@ public:
 	 * \param to : node to.
 	 * \return the matching arc if it exists (NULL if not).
 	 */
-	friend Arc* haveArc(PetriNetNode* from, PetriNetNode* to);
+	friend PetriNetArc* haveArc(PetriNetNode* from, PetriNetNode* to);
 
 	/*!
 	 * Tests if an arc exist between the two given nodes.
@@ -200,7 +199,7 @@ public:
 	 * \param colorLabel : arc color.
 	 * \return the matching arc if it exists (NULL if not).
 	 */
-	friend Arc* haveArc(PetriNetNode* from, PetriNetNode* to, int colorLabel);
+	friend PetriNetArc* haveArc(PetriNetNode* from, PetriNetNode* to, int colorLabel);
 
 	/*!
 	 * Tests if an arc exist between the current node, and from another given (all colors taken together).
@@ -208,7 +207,7 @@ public:
 	 * \param from : node from.
 	 * \return the matching arc if it exists (NULL if not).
 	 */
-	Arc* haveArcFrom(PetriNetNode* from);
+	PetriNetArc* haveArcFrom(PetriNetNode* from);
 
 	/*!
 	 * Tests if an arc exist between the current node, and from another given.
@@ -219,7 +218,7 @@ public:
 	 * \param colorLabel : arc color.
 	 * \return the matching arc if it exists (NULL if not).
 	 */
-	Arc* haveArcFrom(PetriNetNode* from, int colorLabel);
+	PetriNetArc* haveArcFrom(PetriNetNode* from, int colorLabel);
 
 	/*!
 	 * Tests if an arc exist between the current node, and to another given (all colors taken together).
@@ -227,7 +226,7 @@ public:
 	 * \param to : node to.
 	 * \return the matching arc if it exists (NULL if not).
 	 */
-	Arc* haveArcTo(PetriNetNode* to);
+	PetriNetArc* haveArcTo(PetriNetNode* to);
 
 	/*!
 	 * Tests if an arc exist between the current node, and to another given.
@@ -238,7 +237,7 @@ public:
 	 * \param colorLabel : arc color.
 	 * \return the matching arc if it exists (NULL if not).
 	 */
-	Arc* haveArcTo(PetriNetNode* to, int colorLabel);
+	PetriNetArc* haveArcTo(PetriNetNode* to, int colorLabel);
 
 	/*!
 	 * Gets all successors nodes (all colors taken together).
@@ -310,5 +309,3 @@ protected :
 	// TODO : m_internAction;
 	// TODO : m_externAction;
 };
-
-#endif /*PETRINETNODE_H_*/

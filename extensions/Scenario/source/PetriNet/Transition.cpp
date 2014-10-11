@@ -35,6 +35,9 @@ same conditions as regards security.
 The fact that you are presently reading this means that you have had
 knowledge of the CeCILL-C license and that you accept its terms.
 */
+#include "TTTimeEvent.h"
+#include "TTTimeCondition.h"
+#include "Arc.hpp"
 
 #include "Transition.hpp"
 
@@ -44,9 +47,11 @@ knowledge of the CeCILL-C license and that you accept its terms.
  * \date 2008-2009
  */
 
+
 #include "PetriNet.hpp"
-#include "TTTimeEvent.h"
-#include "TTTimeCondition.h"
+
+
+PetriNetArc* someptr;
 
 #include <set>
 
@@ -141,7 +146,7 @@ void Transition::merge(Transition* transitionToMerge) // CB Attention, copie de 
 	arcList mergeOutGoingArcs = transitionToMerge->outGoingArcsOf();
 
 	for (unsigned int i = 0; i < mergeInGoingArcs.size() ; ++i) {
-		Arc* currentArc = mergeInGoingArcs[i];
+		PetriNetArc* currentArc = mergeInGoingArcs[i];
 
 		ExtendedInt relativeMinValue = currentArc->getRelativeMinValue();
 		ExtendedInt relativeMaxValue = currentArc->getRelativeMaxValue();
@@ -150,7 +155,7 @@ void Transition::merge(Transition* transitionToMerge) // CB Attention, copie de 
 
 		Place* inGoingPlace = (Place*) currentArc->getFrom(); // CB TODO : check the cast
 
-		Arc* newArc = getPetriNet()->createArc(inGoingPlace, this); // CB calls Arc::Arc which add the Arc in the nodes' lists
+		PetriNetArc* newArc = getPetriNet()->createArc(inGoingPlace, this); // CB calls Arc::Arc which add the Arc in the nodes' lists
 		newArc->changeAbsoluteTime(absoluteMinValue, absoluteMaxValue);
 		newArc->changeRelativeTime(relativeMinValue, relativeMaxValue);
 
@@ -160,7 +165,7 @@ void Transition::merge(Transition* transitionToMerge) // CB Attention, copie de 
 	createBitArray();
 
 	for (unsigned int i = 0; i < mergeOutGoingArcs.size() ; ++i) { // CB TODO : Il faudrait aussi recopier les éventuelles valeurs associées à l'arc, comme ci-dessus.
-		Arc* currentArc = mergeOutGoingArcs[i];
+		PetriNetArc* currentArc = mergeOutGoingArcs[i];
 
 		Place* outGoingPlace = (Place*) currentArc->getTo(); // CB TODO : check the cast
 		getPetriNet()->createArc(this, outGoingPlace);
@@ -191,7 +196,7 @@ void Transition::setArcAsInactiveByNumber(int arcNumber)
 	m_activeArcsBitArray->setToZero(arcNumber);
 }
 
-void Transition::setArcAsActive(Arc* arc, int timeOffset, bool recalculateArcTime)
+void Transition::setArcAsActive(PetriNetArc* arc, int timeOffset, bool recalculateArcTime)
 {
 	setArcAsActiveByNumber(arc->getNumber());
 
@@ -259,7 +264,7 @@ void Transition::setArcAsActive(Arc* arc, int timeOffset, bool recalculateArcTim
 	}
 }
 
-void Transition::setArcAsInactive(Arc* arc)
+void Transition::setArcAsInactive(PetriNetArc* arc)
 {
 	if (areAllInGoingArcsActive()) {
 		m_startAction->disable();
@@ -311,7 +316,7 @@ void Transition::turnIntoOriginalStatus()
 //	return false;
 //}
 //
-//Arc* Transition::isPureAndOnMaxLimit()
+//PetriNetArc* Transition::isPureAndOnMaxLimit()
 //{
 //	for (unsigned int i = 0; i < m_activeArcs.size(); i++) {
 //		if (m_activeArcs[i]->haveReachedMaxLimit()) {
@@ -399,7 +404,7 @@ void Transition::crossTransition(bool mustChangeTokenValue, int newTokenValue)
 	}
 }
 
-Arc* Transition::hasATokenInPredecessors()
+PetriNetArc* Transition::hasATokenInPredecessors()
 {
 	arcList list = inGoingArcsOf();
 

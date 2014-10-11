@@ -32,8 +32,8 @@ mSampled(NO),
 mLastSample(0.)
 {
 	TT_ASSERT("Correct number of args to create TTCurve", arguments.size() == 0);
-    
-    registerAttribute(TTSymbol("functionParameters"), kTypeLocalValue, NULL, (TTGetterMethod)& TTCurve::getFunctionParameters, (TTSetterMethod)& TTCurve::setFunctionParameters);
+
+    registerAttribute(TTSymbol("functionParameters"), kTypeLocalValue, NULL, (TTGetterMethod) &TTCurve::getFunctionParameters, (TTSetterMethod) &TTCurve::setFunctionParameters);
     
     addAttribute(Active, kTypeBoolean);
     addAttribute(Redundancy, kTypeBoolean);
@@ -55,7 +55,7 @@ mLastSample(0.)
 	addMessageProperty(WriteAsText, hidden, YES);
 	addMessageWithArguments(ReadFromText);
 	addMessageProperty(ReadFromText, hidden, YES);
-    
+
     mFunction = TTObject("freehand", 1); // for 1 channel only
 }
 
@@ -133,10 +133,10 @@ TTErr TTCurve::setFunctionParameters(const TTValue& value)
         }
         
         // retreive the current duration
-        duration = getSize() * mSampleRate;
+        duration = mList.getSize() * mSampleRate;
         
         // clear the samples
-        clear();
+        mList.clear();
         
         // it is not based on a record anymore
         mRecorded = NO;
@@ -170,7 +170,7 @@ TTErr TTCurve::setSampleRate(const TTValue& value)
             if (newSampleRate != mSampleRate) {
                 
                 // retreive the current duration from the old sample rate
-                duration = getSize() * mSampleRate;
+                duration = mList.getSize() * mSampleRate;
                 
                 // set the new sample rate
                 mSampleRate = newSampleRate;
@@ -202,12 +202,12 @@ TTErr TTCurve::Sample(const TTValue& inputValue, TTValue& outputValue)
             nbPoints = duration / mSampleRate;
             
             // for a same number of points and already sampled curve
-            if (nbPoints == getSize() && mSampled) {
+            if (nbPoints == mList.getSize() && mSampled) {
                 
                 // return the samples
                 outputValue.clear();
-                for (begin(); end(); next())
-                    outputValue.append(current()[1]);
+                for (mList.begin(); mList.end(); mList.next())
+                    outputValue.append(mList.current()[1]);
                 
                 mSampled = YES;
                 
@@ -220,7 +220,7 @@ TTErr TTCurve::Sample(const TTValue& inputValue, TTValue& outputValue)
                 TTList newSamples;
                 
                 // get new samples from current samples
-                begin();
+                mList.begin();
                 outputValue.clear();
                 for (i = 0; i < nbPoints; i++) {
                     
@@ -232,23 +232,23 @@ TTErr TTCurve::Sample(const TTValue& inputValue, TTValue& outputValue)
                 }
                 
                 // copy the new samples
-                clear();
+                mList.clear();
                 for (newSamples.begin(); newSamples.end(); newSamples.next())
-                    append(newSamples.current());
+                    mList.append(newSamples.current());
             }
             
             // for a function based curve
             else {
                 
                 // get new samples from function
-                clear();
+                mList.clear();
                 outputValue.clear();
                 for (i = 0; i < nbPoints; i++) {
                     
                     x = TTFloat64(i) / TTFloat64(nbPoints);
                     TTAudioObjectBasePtr(mFunction.instance())->calculate(x, y);
                     
-                    append(TTValue(x, y));
+                    mList.append(TTValue(x, y));
                     outputValue.append(y);
                 }
             }
@@ -274,7 +274,7 @@ TTErr TTCurve::ValueAt(const TTValue& inputValue, TTValue& outputValue)
             
             if (mRecorded) {
                 
-                begin();
+                mList.begin();
                 TTCurveNextSampleAt(this, x, y);
             }
             else
@@ -331,10 +331,10 @@ TTErr TTCurve::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
         
         // Write the samples
         v.clear();
-        for (begin(); end(); next()) {
+        for (mList.begin(); mList.end(); mList.next()) {
             
-            v.append(current()[0]);
-            v.append(current()[1]);
+            v.append(mList.current()[0]);
+            v.append(mList.current()[1]);
         }
             
         v.toString();
@@ -403,9 +403,9 @@ TTErr TTCurve::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     // get the function samples
     else if (!aXmlHandler->getXmlAttribute(kTTSym_samples, v, NO)) {
         
-        clear();
+        mList.clear();
         for (TTUInt32 i = 0; i < v.size(); i = i+2)
-            append(TTValue(v[i], v[i+1]));
+            mList.append(TTValue(v[i], v[i+1]));
         
         mRecorded = YES;
         mSampled = YES;
@@ -452,13 +452,13 @@ TTErr TTCurveNextSampleAt(TTCurve* aCurve, TTFloat64& x, TTFloat64& y)
         TTErr       err = kTTErrNone;
         
         // while the list doesn't reach the end
-        while (aCurve->end()) {
+        while (aCurve->mList.end()) {
                 
-            if (TTFloat64(aCurve->current()[0]) < x)
-                aCurve->next();
+            if (TTFloat64(aCurve->mList.current()[0]) < x)
+                aCurve->mList.next();
             
             else {
-                y = aCurve->current()[1];
+                y = aCurve->mList.current()[1];
                 found = YES;
                 break;
             }

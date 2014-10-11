@@ -10,16 +10,16 @@ This software is a computer program whose purpose is to propose
 a library for interactive scores edition and execution.
 
 This software is governed by the CeCILL-C license under French law and
-abiding by the rules of distribution of free software.  You can  use, 
+abiding by the rules of distribution of free software.  You can  use,
 modify and/ or redistribute the software under the terms of the CeCILL-C
 license as circulated by CEA, CNRS and INRIA at the following URL
-"http://www.cecill.info". 
+"http://www.cecill.info".
 
 As a counterpart to the access to the source code and  rights to copy,
 modify and redistribute granted by the license, users are provided only
 with a limited warranty  and the software's author,  the holder of the
 economic rights,  and the successive licensors  have only  limited
-liability. 
+liability.
 
 In this respect, the user's attention is drawn to the risks associated
 with loading,  using,  modifying and/or developing or reproducing the
@@ -28,8 +28,8 @@ that may mean  that it is complicated to manipulate,  and  that  also
 therefore means  that it is reserved for developers  and  experienced
 professionals having in-depth computer knowledge. Users are therefore
 encouraged to load and test the software's suitability as regards their
-requirements in conditions enabling the security of their systems and/or 
-data to be ensured and,  more generally, to use and operate it in the 
+requirements in conditions enabling the security of their systems and/or
+data to be ensured and,  more generally, to use and operate it in the
 same conditions as regards security.
 
 The fact that you are presently reading this means that you have had
@@ -38,15 +38,21 @@ knowledge of the CeCILL-C license and that you accept its terms.
 
 #include "customSpace.hpp"
 
-CustomSpace::CustomSpace() 
+CustomSpace::CustomSpace()
 //TODO: avant ": Space(), _dat(this, 0), _objFuncInitialized(false)"
 : Space(), _dat(*this, 0), _objFuncInitialized(false)
+#if GECODE_VERSION_NUMBER > 400000
+, _home(*this)
+#endif
 {
 	_lastVal = -1;
 	_cpt = 0;
 }
 
-CustomSpace::CustomSpace(bool share, CustomSpace& s) : Space(share,s) 
+CustomSpace::CustomSpace(bool share, CustomSpace& s) : Space(share,s)
+#if GECODE_VERSION_NUMBER > 400000
+	,_home(*this)
+#endif
 {
 	//TODO: avant "_dat.update(this, share, s._dat);"
 	_dat.update(*this, share, s._dat);
@@ -56,7 +62,7 @@ CustomSpace::CustomSpace(bool share, CustomSpace& s) : Space(share,s)
 
 	if (_objFuncInitialized)
 	//TODO: avant "_objFunc.update(this,share,s._objFunc);	"
-		_objFunc.update(*this,share,s._objFunc);	
+		_objFunc.update(*this,share,s._objFunc);
 }
 
 CustomSpace::~CustomSpace()
@@ -69,7 +75,7 @@ CustomSpace::getNbVars() const
 	return _dat.size();
 }
 
-void 
+void
 CustomSpace::setObjFunc(IntVar v)
 {
 	_objFunc = v;
@@ -80,18 +86,18 @@ void
 CustomSpace::constrain(const Space& t)
 {
 //TODO: avant "rel(this, _objFunc, IRT_LE, (s)->_objFunc);"
-		
+
 	Space* s = &const_cast<Space&>(t);
-	
+
 	CustomSpace* s_copy = (CustomSpace*) s;
-	
-//	std::cout << "BRAAAAAA" << std::endl;		
-	
+
+//	std::cout << "BRAAAAAA" << std::endl;
+
 	rel(*this, _objFunc, IRT_LE, (s_copy)->_objFunc);
 }
 
-CustomSpace* 
-CustomSpace::copy(bool share) 
+CustomSpace*
+CustomSpace::copy(bool share)
 {
 	return new CustomSpace(share,*this);
 }
@@ -120,10 +126,14 @@ void
 CustomSpace::doBranching()
 {
 //TODO: avant "	branch(this, _dat, BVAR_MAX_MIN, BVAL_MIN);"
+#if GECODE_VERSION_NUMBER > 400000
+	branch(_home, _dat, INT_VAR_MAX_MIN(), INT_VAL_MIN(), NULL, NULL);
+#else
 	branch(*this, _dat, INT_VAR_MAX_MIN, INT_VAL_MIN);
+#endif
 }
 
-IntVar 
+IntVar
 CustomSpace::getIntVar(int i) const
 {
 	return _dat[i];

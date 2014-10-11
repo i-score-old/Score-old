@@ -20,7 +20,7 @@
 #ifndef __SCENARIO_SOLVER_H__
 #define __SCENARIO_SOLVER_H__
 
-#include "Solver.hpp"
+#include "solver.hpp"
 #include "TTTimeEvent.h"
 
 typedef Solver* SolverPtr;
