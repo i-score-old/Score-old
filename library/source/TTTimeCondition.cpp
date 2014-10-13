@@ -718,7 +718,7 @@ void TTTimeCondition::addReceiver(TTAddress anAddress)
         // register the receiver
         mReceivers.append(anAddress, aReceiver);
         
-        // set the address of the receiver (and this will try to get the current vaalue)
+        // set the address of the receiver (and this will try to get the current value)
         aReceiver.set(kTTSym_address, anAddress);
     }
 }
