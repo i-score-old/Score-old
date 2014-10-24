@@ -537,7 +537,8 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         aXmlHandler->mXmlNodeName != TTSymbol("event") &&
         aXmlHandler->mXmlNodeName != TTSymbol("startEvent") &&
         aXmlHandler->mXmlNodeName != TTSymbol("endEvent") &&
-        aXmlHandler->mXmlNodeName != TTSymbol("condition")) {
+        aXmlHandler->mXmlNodeName != TTSymbol("condition")&&
+        aXmlHandler->mXmlNodeName != TTSymbol("case")) {
         return kTTErrNone;
     }
     
