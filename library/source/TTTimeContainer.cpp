@@ -457,8 +457,11 @@ TTErr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHandler, TTObj
                 // Find the start event using his name inside the container
                 mTimeEventList.find(&TTTimeContainerFindTimeEventWithName, (TTPtr)&v, aCacheElement);
                 
-                if (aCacheElement.size() == 0)
+                if (aCacheElement.size() == 0) {
+                    
+                    TTLogError("TTTimeContainer::readTimeProcessFromXml : %s container can't find start event\n", this->mName.c_str());
                     return kTTErrGeneric;
+                }
                 
                 start = aCacheElement[0];
             }
@@ -475,8 +478,11 @@ TTErr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHandler, TTObj
                 // Find the end event using his name inside the container
                 mTimeEventList.find(&TTTimeContainerFindTimeEventWithName, (TTPtr)&v, aCacheElement);
                 
-                if (aCacheElement.size() == 0)
+                if (aCacheElement.size() == 0) {
+                    
+                    TTLogError("TTTimeContainer::readTimeProcessFromXml : %s container can't find end event\n", this->mName.c_str());
                     return kTTErrGeneric;
+                }
                 
                 end = aCacheElement[0];
             }
