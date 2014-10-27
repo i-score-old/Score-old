@@ -1817,8 +1817,10 @@ else
                 makefile.write("\t#{path_to_moduleroot}/../../Core/Shared/jamoma_copy.sh build/$(NAME)#{extension_suffix} #{path_to_moduleroot}/Jamoma/support\n")
               elsif project_type == "extension"
                 makefile.write("\t#{path_to_moduleroot}/support/jamoma_copy.sh build/$(NAME)#{extension_suffix} /usr/local/jamoma/extensions\n")
+                makefile.write("\t#{path_to_moduleroot}/support/jamoma_copy.sh build/$(NAME)#{extension_suffix} ../../../../Implementations/Max/Jamoma/support")
               else
                 makefile.write("\t#{path_to_moduleroot}/support/jamoma_copy.sh build/$(NAME)#{extension_suffix} /usr/local/jamoma/lib\n")
+                makefile.write("\t#{path_to_moduleroot}/support/jamoma_copy.sh build/$(NAME)#{extension_suffix} ../../../Implementations/Max/Jamoma/support")
               end
             else
               #TODO: windows support for this...  need to write a DOS script
