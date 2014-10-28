@@ -688,6 +688,11 @@ TTErr TTTimeCondition::setReady(TTBoolean newReady)
         
         // notify each observers
         sendNotification(kTTSym_ConditionReadyChanged, mReady);
+        
+        // notify ready observers
+        TTAttributePtr	readyAttribute;
+        this->findAttribute("ready", &readyAttribute);
+        readyAttribute->sendNotification(kTTSym_notify, mReady);
     }
     
     return kTTErrGeneric;

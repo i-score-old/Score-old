@@ -527,32 +527,74 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 #endif
     TTValue                 v;
     
+    // Filtering Score plugin
+    // théo : this is ugly but it is due to the bad design of XmlHandler
+    if (aXmlHandler->mXmlNodeName != TTSymbol("xmlHandlerReadingStarts") &&
+        aXmlHandler->mXmlNodeName != TTSymbol("xmlHandlerReadingEnds") &&
+        aXmlHandler->mXmlNodeName != TTSymbol("Scenario") &&
+        aXmlHandler->mXmlNodeName != TTSymbol("Automation") &&
+        aXmlHandler->mXmlNodeName != TTSymbol("Interval") &&
+        aXmlHandler->mXmlNodeName != TTSymbol("event") &&
+        aXmlHandler->mXmlNodeName != TTSymbol("startEvent") &&
+        aXmlHandler->mXmlNodeName != TTSymbol("endEvent") &&
+        aXmlHandler->mXmlNodeName != TTSymbol("condition")&&
+        aXmlHandler->mXmlNodeName != TTSymbol("case")) {
+        return kTTErrNone;
+    }
+    
+    // DEBUG
+    //TTLogMessage("%s reading %s\n", mName.c_str(), aXmlHandler->mXmlNodeName.c_str());
+    
     // When reading a sub scenario
     if (mCurrentScenario.valid()) {
         
         // Scenario node :
         if (aXmlHandler->mXmlNodeName == TTSymbol("Scenario")) {
             
-            // if this is the end of a scenario node : forget the sub scenario
-            if (!aXmlHandler->mXmlNodeStart) {
+            TTSymbol subName;
+            
+            // get sub scenario name
+            if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES)) {
                 
-                mCurrentScenario = TTObject();
-                return kTTErrNone;
+                if (v.size() == 1) {
+                    
+                    if (v[0].type() == kTypeSymbol) {
+                        
+                        subName = v[0];
+                    }
+                }
             }
             
-            // if this is an empty scenario node : read the node and then forget the sub scenario
-            if (aXmlHandler->mXmlNodeIsEmpty) {
+            if (subName == ScenarioPtr(mCurrentScenario.instance())->mName) {
                 
-                mCurrentScenario.send("ReadFromXml", inputValue, outputValue);
+                // if this is the end of a scenario node : forget the sub scenario
+                if (!aXmlHandler->mXmlNodeStart) {
+                    
+                    // DEBUG
+                    //TTLogMessage("%s forgets %s sub scenario (end node)\n", mName.c_str(), ScenarioPtr(mCurrentScenario.instance())->mName.c_str());
+                    
+                    mCurrentScenario = TTObject();
+                    mCurrentTimeProcess = TTObject();
+                    return kTTErrNone;
+                }
                 
-                mCurrentScenario = TTObject();
-                return kTTErrNone;
+                // if this is an empty scenario node : read the node and then forget the sub scenario
+                if (aXmlHandler->mXmlNodeIsEmpty) {
+                    
+                    mCurrentScenario.send("ReadFromXml", inputValue, outputValue);
+                    
+                    // DEBUG
+                    //TTLogMessage("%s forgets %s sub scenario (empty node)\n", mName.c_str(), ScenarioPtr(mCurrentScenario.instance())->mName.c_str());
+                    
+                    mCurrentScenario = TTObject();
+                    mCurrentTimeProcess = TTObject();
+                    return kTTErrNone;
+                }
             }
         }
-        else {
-            
-            return mCurrentScenario.send("ReadFromXml", inputValue, outputValue);
-        }
+
+        // any other case
+        return mCurrentScenario.send("ReadFromXml", inputValue, outputValue);
     }
 	
 	// Switch on the name of the XML node
@@ -564,6 +606,7 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         mAttributeLoaded = NO;
         
         mCurrentTimeEvent = TTObject();
+
         mCurrentTimeProcess = TTObject();
         mCurrentTimeCondition = TTObject();
         
@@ -756,7 +799,7 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     if (!mCurrentTimeProcess.valid()) {
         
         if (aXmlHandler->mXmlNodeStart) {
-            
+
             readTimeProcessFromXml(aXmlHandler, mCurrentTimeProcess);
             
             if (aXmlHandler->mXmlNodeIsEmpty)
@@ -773,14 +816,20 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     if (mCurrentTimeProcess.valid()) {
         
         // if the current time process is a sub scenario : don't forget it
-        if (mCurrentTimeProcess.name() == TTSymbol("Scenario"))
+        if (mCurrentTimeProcess.name() == TTSymbol("Scenario") &&
+            !aXmlHandler->mXmlNodeIsEmpty) {
+            
             mCurrentScenario = mCurrentTimeProcess;
+            
+            // DEBUG
+            //TTLogMessage("%s set %s as sub scenario \n", mName.c_str(), ScenarioPtr(mCurrentScenario.instance())->mName.c_str());
+        }
         
         // Pass the xml handler to the current process to fill his data structure
         aXmlHandler->setAttributeValue(kTTSym_object, mCurrentTimeProcess);
         return aXmlHandler->sendMessage(kTTSym_Read);
     }
-    
+
     return kTTErrNone;
 }
 
