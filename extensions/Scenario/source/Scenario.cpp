@@ -533,6 +533,8 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         aXmlHandler->mXmlNodeName != TTSymbol("xmlHandlerReadingEnds") &&
         aXmlHandler->mXmlNodeName != TTSymbol("Scenario") &&
         aXmlHandler->mXmlNodeName != TTSymbol("Automation") &&
+        aXmlHandler->mXmlNodeName != TTSymbol("indexedCurves") &&
+        aXmlHandler->mXmlNodeName != TTSymbol("curve") &&
         aXmlHandler->mXmlNodeName != TTSymbol("Interval") &&
         aXmlHandler->mXmlNodeName != TTSymbol("event") &&
         aXmlHandler->mXmlNodeName != TTSymbol("startEvent") &&
