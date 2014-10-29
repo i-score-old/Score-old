@@ -633,10 +633,10 @@ else
 
 
       # By default, assume all libs and extensions are in the same folder as the binary and as each other
-      distropath = "@loader_path"
+      distropath = "@loader_path/../../../../support"
 
       # Max externals are bundles, and they expect the libs to be in different location
-      distropath = "/usr/local/lib" if project_type == "library"
+      #distropath = "/usr/local/lib" if project_type == "library"
 
     end
 
