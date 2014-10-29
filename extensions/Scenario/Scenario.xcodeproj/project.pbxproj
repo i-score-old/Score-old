@@ -84,6 +84,8 @@
 		468C985E17A2B2D60032447A /* ScenarioGraph.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ScenarioGraph.cpp; sourceTree = "<group>"; };
 		468C986017A2B2D60032447A /* ScenarioSolver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ScenarioSolver.cpp; sourceTree = "<group>"; };
 		468C986217A2B2E60032447A /* Scenario.yml */ = {isa = PBXFileReference; lastKnownFileType = text; path = Scenario.yml; sourceTree = "<group>"; };
+		46A5878619FEE14D000E15F2 /* TimePluginLib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TimePluginLib.h; path = ../TimePluginLib.h; sourceTree = "<group>"; };
+		46A5878719FEE155000E15F2 /* TimePluginLib.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TimePluginLib.cpp; path = ../TimePluginLib.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -91,6 +93,8 @@
 			isa = PBXGroup;
 			children = (
 				468C986217A2B2E60032447A /* Scenario.yml */,
+				46A5878619FEE14D000E15F2 /* TimePluginLib.h */,
+				46A5878719FEE155000E15F2 /* TimePluginLib.cpp */,
 				468C97CF17A2B2CD0032447A /* includes */,
 				468C97D317A2B2D50032447A /* source */,
 			);
