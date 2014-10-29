@@ -155,7 +155,7 @@ solver(aSolver), minBoundID(0), maxBoundID(0)
     variableA->event.get(kTTSym_date, vA);
     variableB->event.get(kTTSym_date, vB);
     
-    ordered = vA < vB;
+    ordered = vA <= vB;
     
     startVariable = ordered ? variableA : variableB;
     endVariable = ordered ? variableB : variableA;

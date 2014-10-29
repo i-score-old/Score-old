@@ -688,6 +688,11 @@ TTErr TTTimeCondition::setReady(TTBoolean newReady)
         
         // notify each observers
         sendNotification(kTTSym_ConditionReadyChanged, mReady);
+        
+        // notify ready observers
+        TTAttributePtr	readyAttribute;
+        this->findAttribute("ready", &readyAttribute);
+        readyAttribute->sendNotification(kTTSym_notify, mReady);
     }
     
     return kTTErrGeneric;
@@ -718,7 +723,7 @@ void TTTimeCondition::addReceiver(TTAddress anAddress)
         // register the receiver
         mReceivers.append(anAddress, aReceiver);
         
-        // set the address of the receiver (and this will try to get the current vaalue)
+        // set the address of the receiver (and this will try to get the current value)
         aReceiver.set(kTTSym_address, anAddress);
     }
 }
