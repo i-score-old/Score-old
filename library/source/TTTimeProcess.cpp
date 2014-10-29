@@ -33,8 +33,7 @@ mVerticalPosition(0),
 mVerticalSize(1),
 mRunning(NO),
 mCompiled(NO),
-mExternalTick(NO)/*,
-mPushStates(NO)*/
+mExternalTick(NO)
 {
     TT_ASSERT("Correct number of args to create TTTimeProcess", arguments.size() == 1);
     
@@ -109,8 +108,8 @@ mPushStates(NO)*/
     addMessageWithArguments(Move);
     addMessageWithArguments(Limit);
     
-    addMessageWithArguments(Start);
-    addMessageWithArguments(End);
+    addMessage(Start);
+    addMessage(End);
     addMessage(Play);
     addMessage(Stop);
     addMessage(Pause);
@@ -456,44 +455,14 @@ TTErr TTTimeProcess::Limit(const TTValue& inputValue, TTValue& outputValue)
     return kTTErrGeneric;
 }
 
-TTErr TTTimeProcess::Start(const TTValue& inputValue, TTValue& outputValue)
+TTErr TTTimeProcess::Start()
 {
-    TTBoolean pushState = NO;
-    
-    if (inputValue.size() == 1)
-        if (inputValue[0].type() == kTypeBoolean)
-            pushState = inputValue[0];
-    
-    // remember the push state option for End() call (see in SchedulerRunningChanged)
-   // mPushStates = pushState;
-    
-    // optionnaly push start event state
-    if (pushState)
-        mStartEvent.send("StatePush");
-    
-    // simulate start event happening to play ourself only
-    TTValue out, v(mStartEvent, kTTSym_eventHappened, kTTSym_eventWaiting);
-    return EventStatusChanged(v, out);
+    return mStartEvent.send(kTTSym_Trigger);
 }
 
-TTErr TTTimeProcess::End(const TTValue& inputValue, TTValue& outputValue)
+TTErr TTTimeProcess::End()
 {
-    TTBoolean pushState = NO;
-    
-    if (inputValue.size() == 1)
-        if (inputValue[0].type() == kTypeBoolean)
-            pushState = inputValue[0];
-    
-    // optionnaly push end event state
-    if (pushState)
-        mEndEvent.send("StatePush");
-    
-    // reset push state flag as it not the default behaviour
-    //mPushStates = NO;
-    
-    // simulate end event happening to stop ourself only
-    TTValue out, v(mEndEvent, kTTSym_eventHappened, kTTSym_eventWaiting);
-    return EventStatusChanged(v, out);
+    return mEndEvent.send(kTTSym_Trigger);
 }
 
 TTErr TTTimeProcess::Play()
@@ -678,20 +647,6 @@ TTErr TTTimeProcess::SchedulerRunningChanged(const TTValue& inputValue, TTValue&
             // notify observers
 			TTObject thisObject(this);
             sendNotification(kTTSym_ProcessEnded, thisObject);
-            
-            // the process can ends itself if it is inside a non running container
-            if (mContainer.valid()) {
-
-                mContainer.get("running", running);
-            
-                if (!running) {
-                    
-                    TTValue none;
-                    
-                    End(TTBoolean(YES), none);
-                    //End(mPushStates, none);
-                }
-            }
             
             return kTTErrNone;
         }

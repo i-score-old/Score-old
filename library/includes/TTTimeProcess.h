@@ -60,8 +60,6 @@ protected :
     
 private :
     
-//    TTBoolean                       mPushStates;                    ///< a boolean flag to remember Start() push state option in order to do the same when calling End() (see in SchedulerRunningChanged)
-    
     TTObject                        mStartEvent;                    ///< the event object which handles the time process execution start
     
     TTList                          mIntermediateEvents;            ///< the list of all intermediate events
@@ -227,20 +225,15 @@ private :
      @return                an error code if the limitation fails */
     TTErr           Limit(const TTValue& inputValue, TTValue& outputValue);
     
-    /** Start the time process pushing optionnaly the start event state
-     @details this method simulates start event happening @n
-     if the start event state is pushed, the end event state will also be pushed
-     @param	inputValue      #TTBoolean to push the start event state or not (default : NO)
-     @param	outputValue     nothing
+    /** Start the time process
+     this method eases the access of the start event trigger message
      @return                an error code if the play fails */
-    TTErr           Start(const TTValue& inputValue, TTValue& outputValue);
+    TTErr           Start();
     
-    /** End the time process pushing optionnaly the start event state
-     @details this method simulates end event happening
-     @param	inputValue      #TTBoolean to push the end event state or not (default : NO)
-     @param	outputValue     nothing
+    /** End the time process
+     this method eases the access of the end event trigger message
      @return                an error code if the stop fails */
-    TTErr           End(const TTValue& inputValue, TTValue& outputValue);
+    TTErr           End();
     
     /** Play the time process from a time offset
      @details this method eases the managment of the scheduler object

@@ -260,7 +260,7 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
             
             // the root Scenario ends itself
             else if (mContainer == NULL)
-                return TTObject(this).send("End");
+                return getEndEvent().send(kTTSym_Happen);
 #else
             TTValue     v;
             TTUInt32    eventDate;
