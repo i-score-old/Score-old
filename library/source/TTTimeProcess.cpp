@@ -457,12 +457,46 @@ TTErr TTTimeProcess::Limit(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr TTTimeProcess::Start()
 {
-    return mStartEvent.send(kTTSym_Trigger);
+    // if the container is not valid : make the start event happen
+    if (!mContainer.valid())
+        return mStartEvent.send(kTTSym_Happen);
+    
+    // if the container is not running : simulate start event happening
+    TTBoolean running;
+    mContainer.get("running", running);
+    if (!running) {
+        
+        // simulate start event happening for this time process
+        // to not launch other time process relative to its start event
+        mStartEvent.send("StatePush");
+        
+        TTValue out, args(mStartEvent, kTTSym_eventHappened, kTTSym_eventWaiting);
+        return EventStatusChanged(args, out);
+    }
+    
+    return kTTErrNone;
 }
 
 TTErr TTTimeProcess::End()
 {
-    return mEndEvent.send(kTTSym_Trigger);
+    // if the container is not valid : make the end event happen
+    if (!mContainer.valid())
+        return mEndEvent.send(kTTSym_Happen);
+    
+    // if the container is not running : simulate end event happening
+    TTBoolean running;
+    mContainer.get("running", running);
+    if (!running) {
+        
+        // simulate end event happening for this time process
+        // to not launch other time process relative to its end event
+        mEndEvent.send("StatePush");
+    
+        TTValue out, args(mEndEvent, kTTSym_eventHappened, kTTSym_eventWaiting);
+        return EventStatusChanged(args, out);
+    }
+    
+    return kTTErrNone;
 }
 
 TTErr TTTimeProcess::Play()
@@ -566,8 +600,10 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
     TTSymbol    oldStatus = inputValue[2];
     TTValue     v;
     
-    TTBoolean   statusChanged = newStatus != oldStatus;
-    TT_ASSERT("TTTimeProcess::EventStatusChanged : status effectively changed", statusChanged);
+    if (newStatus == oldStatus && newStatus != kTTSym_eventWaiting) {
+        TTLogError(" TTTimeProcess::EventStatusChanged : new status equals old status (%s)\n", oldStatus.c_str());
+        return kTTErrGeneric;
+    }
     
     // event wainting case :
     if (newStatus == kTTSym_eventWaiting) {
@@ -633,7 +669,7 @@ TTErr TTTimeProcess::SchedulerRunningChanged(const TTValue& inputValue, TTValue&
     TT_ASSERT("TTTimeProcess::SchedulerRunningChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeBoolean);
     
     TTBoolean running = inputValue[0];
-    
+   
     if (running) {
         
         // the kTTSym_ProcessStarted is sent in TTTimeProcess::EventStatusChanged
@@ -648,7 +684,7 @@ TTErr TTTimeProcess::SchedulerRunningChanged(const TTValue& inputValue, TTValue&
 			TTObject thisObject(this);
             sendNotification(kTTSym_ProcessEnded, thisObject);
             
-            return kTTErrNone;
+            return End();
         }
         
         return kTTErrGeneric;
