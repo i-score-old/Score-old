@@ -33,8 +33,7 @@ mVerticalPosition(0),
 mVerticalSize(1),
 mRunning(NO),
 mCompiled(NO),
-mExternalTick(NO),
-mStatePush(YES)
+mExternalTick(NO)
 {
     TT_ASSERT("Correct number of args to create TTTimeProcess", arguments.size() == 1);
     
@@ -109,8 +108,8 @@ mStatePush(YES)
     addMessageWithArguments(Move);
     addMessageWithArguments(Limit);
     
-    addMessageWithArguments(Start);
-    addMessageWithArguments(End);
+    addMessage(Start);
+    addMessage(End);
     addMessage(Play);
     addMessage(Stop);
     addMessage(Pause);
@@ -456,51 +455,8 @@ TTErr TTTimeProcess::Limit(const TTValue& inputValue, TTValue& outputValue)
     return kTTErrGeneric;
 }
 
-TTErr TTTimeProcess::Start(const TTValue& inputValue, TTValue& outputValue)
+TTErr TTTimeProcess::Start()
 {
-    mStatePush = YES;
-    
-    if (inputValue.size()) {
-        
-        if (inputValue[0].type() == kTypeBoolean) {
-            
-            mStatePush = inputValue[0];
-        }
-    }
-    
-    // if the container is not running (or not valid)TTBoolean running;
-    TTBoolean running;
-    if (!mContainer.valid())
-        running = NO;
-    else
-        mContainer.get("running", running);
-    
-    if (!running) {
-        
-        // optionally push start event state
-        if (mStatePush)
-            mStartEvent.send("StatePush");
-        
-        // simulate start event happening to not launch other time processes relative to it
-        TTValue out, args(mStartEvent, kTTSym_eventHappened, kTTSym_eventWaiting);
-        return EventStatusChanged(args, out);
-    }
-    
-    return kTTErrNone;
-}
-
-TTErr TTTimeProcess::End(const TTValue& inputValue, TTValue& outputValue)
-{
-    mStatePush = YES;
-    
-    if (inputValue.size()) {
-        
-        if (inputValue[0].type() == kTypeBoolean) {
-            
-            mStatePush = inputValue[0];
-        }
-    }
-    
     // if the container is not running (or not valid)
     TTBoolean running;
     if (!mContainer.valid())
@@ -510,15 +466,26 @@ TTErr TTTimeProcess::End(const TTValue& inputValue, TTValue& outputValue)
     
     if (!running) {
         
-        // optionally push end event state
-        if (mStatePush)
-            mEndEvent.send("StatePush");
-    
-        // simulate end event happening to not launch other time processes relative to it
-        TTValue out, args(mEndEvent, kTTSym_eventHappened, kTTSym_eventWaiting);
-        return EventStatusChanged(args, out);
+        mStartEvent.set("status", kTTSym_eventWaiting);
+        
+        return mStartEvent.send(kTTSym_Happen);
     }
     
+    return kTTErrNone;
+}
+
+TTErr TTTimeProcess::End()
+{
+    // if the container is not running (or not valid)
+    TTBoolean running;
+    if (!mContainer.valid())
+        running = NO;
+    else
+        mContainer.get("running", running);
+    
+    if (!running)
+        return mEndEvent.send(kTTSym_Happen);
+
     return kTTErrNone;
 }
 
@@ -620,20 +587,35 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
     
     TTObject    aTimeEvent = inputValue[0];
     TTSymbol    newStatus = inputValue[1];
-    TTSymbol    oldStatus = inputValue[2];
+    //TTSymbol    oldStatus = inputValue[2];
     TTValue     v;
-    
-    if (newStatus == oldStatus && newStatus != kTTSym_eventWaiting) {
-        TTLogError(" TTTimeProcess::EventStatusChanged : new status equals old status (%s)\n", oldStatus.c_str());
-        return kTTErrGeneric;
-    }
     
     // event wainting case :
     if (newStatus == kTTSym_eventWaiting) {
+        
+        // the start event waiting status implies waiting status for the end event
+        if (aTimeEvent == mStartEvent) {
+            
+            // DEBUG
+            TTLogMessage("TTTimeProcess::EventStatusChanged : %s process propagates %s waiting status to %s\n", mName.c_str(), mStartName.c_str(), mEndName.c_str());
+            
+            mEndEvent.set("status", kTTSym_eventWaiting);
+        }
+        
         return kTTErrNone;
     }
     // event pending case :
     else if (newStatus == kTTSym_eventPending) {
+        
+        // the start event pending status implies waiting status for the end event
+        if (aTimeEvent == mStartEvent) {
+            
+            // DEBUG
+            TTLogMessage("TTTimeProcess::EventStatusChanged : %s process propagates %s pending status as waiting status to %s\n", mName.c_str(), mStartName.c_str(), mEndName.c_str());
+            
+            mEndEvent.set("status", kTTSym_eventWaiting);
+        }
+        
         return kTTErrNone;
     }
     // event happened case :
@@ -652,9 +634,12 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
             // use the specific start process method of the time process
             if (!ProcessStart()) {
 
-                // notify start message observers
+                // notify ProcessStarted observers
 				TTObject thisObject(this);
                 sendNotification(kTTSym_ProcessStarted, thisObject);
+                
+                // NOTE : end events should subscribe to ProcessStarted notification
+                // then, when all previous processes are started, the end event is pending.
                 
                 // play the process
                 return Play();
@@ -680,6 +665,17 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
     }
     // event disposed case :
     else if (newStatus == kTTSym_eventDisposed) {
+        
+        if (aTimeEvent == mStartEvent) {
+            
+            // notify ProcessDisposed observers
+            TTObject thisObject(this);
+            sendNotification(kTTSym_ProcessDisposed, thisObject);
+            
+            // NOTE : end events should subscribe to ProcessDisposed notification
+            // then, when all previous processes are disposed, the end event is disposed.
+        }
+        
         return kTTErrNone;
     }
     
@@ -703,12 +699,15 @@ TTErr TTTimeProcess::SchedulerRunningChanged(const TTValue& inputValue, TTValue&
         // use the specific process end method of the time process
         if (!ProcessEnd()) {
             
-            // notify observers
+            // notify ProcessEnded observers
 			TTObject thisObject(this);
             sendNotification(kTTSym_ProcessEnded, thisObject);
             
-            TTValue none;
-            return End(mStatePush, none);
+            // if the end event is not conditionned
+            if (!mEndCondition.valid())
+                return End();
+            else
+                return kTTErrNone;
         }
         
         return kTTErrGeneric;

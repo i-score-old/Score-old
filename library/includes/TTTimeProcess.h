@@ -228,18 +228,14 @@ private :
     TTErr           Limit(const TTValue& inputValue, TTValue& outputValue);
     
     /** Start the time process and optionnaly push its start event state
-     @details this method makes the start event happening if there is no container or simulates the start event happening if the container is not running
-     @param	inputValue      optionnal #TTboolean to enable/disable state pushing
-     @param	outputValue     nothing
+     @details this method makes the start event happening
      @return                an error code if the start fails */
-    TTErr           Start(const TTValue& inputValue, TTValue& outputValue);
+    TTErr           Start();
     
     /** End the time process and optionnaly push its end event state
-     @details this method makes the end event happening if there is no container or simulates the end event happening if the container is not running
-     @param	inputValue      optionnal #TTboolean to enable/disable state pushing
-     @param	outputValue     nothing
+     @details this method makes the end event happening
      @return                an error code if the end fails */
-    TTErr           End(const TTValue& inputValue, TTValue& outputValue);
+    TTErr           End();
     
     /** Play the time process from a time offset
      @details this method eases the managment of the scheduler object
@@ -320,9 +316,11 @@ void TTSCORE_EXPORT TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 posit
 /** Define some macros to ease the access of events attributes */
 #define mStartDate TTTimeEventPtr(mStartEvent.instance())->mDate
 #define mStartCondition TTTimeEventPtr(mStartEvent.instance())->mCondition
+#define mStartName TTTimeEventPtr(mStartEvent.instance())->mName
 
 #define mEndDate TTTimeEventPtr(mEndEvent.instance())->mDate
 #define mEndCondition TTTimeEventPtr(mEndEvent.instance())->mCondition
+#define mEndName TTTimeEventPtr(mEndEvent.instance())->mName
 
 #define mDuration mEndDate - mStartDate
 

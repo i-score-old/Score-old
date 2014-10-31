@@ -122,10 +122,23 @@ TTErr TTTimeEvent::setStatus(const TTValue& value)
     
     // set status
     mStatus = value[0];
+    
+    // filter repetitions
+    if (lastStatus == mStatus)
+    {
+        // log error only for non waiting status repetition
+        if (mStatus != kTTSym_eventWaiting)
+            TTLogError("TTTimeEvent::setStatus : %s new status equals last status (%s)\n", mName.c_str(), mStatus.c_str());
+        
+        return kTTErrGeneric;
+    }
 
     // notify each attribute observers
     v.append(mStatus);
     v.append(lastStatus);
+    
+    // DEBUG
+    TTLogMessage("TTTimeEvent::setStatus : %s event from %s to %s\n", mName.c_str(), lastStatus.c_str(), mStatus.c_str());
     
     sendNotification(kTTSym_EventStatusChanged, v);
     
@@ -134,26 +147,25 @@ TTErr TTTimeEvent::setStatus(const TTValue& value)
 
 TTErr TTTimeEvent::Trigger()
 {
-    // an event needs to be into a running container to be triggered
+    // the event have to be pending
+    if (mStatus != kTTSym_eventPending)
+        return kTTErrGeneric;
+    
+    // if the event muted : do nothing
+    if (mMute)
+        return kTTErrNone;
+    
+    // the event have to be into a valid running container
     if (mContainer.valid()) {
         
-        TTValue none, v;
-        TTBoolean   running;
-        
+        TTBoolean running;
         mContainer.get("running", running);
         
         if (running) {
             
-            // if not pending : do nothing
-            if (mStatus != kTTSym_eventPending)
-                return kTTErrGeneric;
-            
-            // if the event muted
-            if (mMute)
-                return kTTErrNone;
-            
-            v = TTObject(this);
-            return mContainer.send("TimeEventTrigger", v, none);
+            TTValue     none;
+            TTObject    thisObject(this);
+            return mContainer.send("TimeEventTrigger", thisObject, none);
         }
     }
     
@@ -163,26 +175,27 @@ TTErr TTTimeEvent::Trigger()
 
 TTErr TTTimeEvent::Dispose()
 {
-    // an event needs to be into a running container to be disposed
+    // if already happened or disposed : do nothing
+    if (mStatus == kTTSym_eventDisposed || mStatus == kTTSym_eventHappened)
+    {
+        TTLogError("TTTimeEvent::Dispose : %s is already disposed or pending (%s)\n", mName.c_str(), mStatus.c_str());
+        return kTTErrGeneric;
+    }
+    
+    // the event have to be into a valid running container
     if (mContainer.valid()) {
         
-        TTValue     none, v;
         TTBoolean   running;
-        
         mContainer.get("running", running);
         
         if (running) {
             
-            // if already happened or disposed : do nothing
-            if (mStatus == kTTSym_eventDisposed ||
-                mStatus == kTTSym_eventHappened)
-                return kTTErrGeneric;
-            
             // change the status before
             setStatus(kTTSym_eventDisposed);
             
-            v = TTObject(this);
-            return mContainer.send("TimeEventDispose", v, none);
+            TTValue     none;
+            TTObject    thisObject(this);
+            return mContainer.send("TimeEventDispose", thisObject, none);
         }
     }
     
@@ -191,7 +204,13 @@ TTErr TTTimeEvent::Dispose()
 
 TTErr TTTimeEvent::Happen()
 {
-    TTErr err = kTTErrNone;
+    TTErr err;
+    
+    if (mStatus != kTTSym_eventWaiting && mStatus != kTTSym_eventPending)
+    {
+        TTLogError("TTTimeEvent::Happen : %s is not waiting or pending (%s)\n", mName.c_str(), mStatus.c_str());
+        return kTTErrGeneric;
+    }
     
     // if the event is not muted
     if (!mMute) {
@@ -199,6 +218,8 @@ TTErr TTTimeEvent::Happen()
         // push the state
         err = StatePush();
     }
+    else
+        err = kTTErrNone;
     
     setStatus(kTTSym_eventHappened);
     return err;
