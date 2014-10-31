@@ -258,9 +258,9 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
             if (mExecutionGraph->makeOneStep(date))
                 return kTTErrNone;
             
-            // the root Scenario ends itself
-            else if (mContainer == NULL)
-                return getEndEvent().send(kTTSym_Happen);
+            // no more step : stop the scheduler
+            else
+                return mScheduler.send(kTTSym_Stop);
 #else
             TTValue     v;
             TTUInt32    eventDate;
