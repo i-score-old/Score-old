@@ -144,7 +144,7 @@ TTErr Scenario::Compile()
     mScheduler.get(kTTSym_offset, v);
     timeOffset = TTFloat64(v[0]);
     
-    // set all time events to a waiting status
+    // reset all time events to a waiting status
     for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next()) {
         
         aTimeEvent = mTimeEventList.current()[0];
@@ -201,7 +201,7 @@ TTErr Scenario::ProcessEnd()
 {
     TTObject aTimeProcess;
 
-    // When a Scenario ends : stop all the time processes
+    // stop all the time processes
     for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
         
         aTimeProcess = mTimeProcessList.current()[0];
@@ -258,8 +258,8 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
             if (mExecutionGraph->makeOneStep(date))
                 return kTTErrNone;
             
-            // no more step : stop the scheduler
-            else
+            // when a root scenario have no more step : stop the scheduler
+            else if (!mContainer.valid())
                 return mScheduler.send(kTTSym_Stop);
 #else
             TTValue     v;
@@ -1086,6 +1086,9 @@ TTErr Scenario::TimeEventCondition(const TTValue& inputValue, TTValue& outputVal
 
 TTErr Scenario::TimeEventTrigger(const TTValue& inputValue, TTValue& outputValue)
 {
+    if (!mRunning)
+        return kTTErrGeneric;
+    
     TTObject aTimeEvent;
     
     if (inputValue.size() == 1) {
@@ -1119,6 +1122,9 @@ TTErr Scenario::TimeEventTrigger(const TTValue& inputValue, TTValue& outputValue
 
 TTErr Scenario::TimeEventDispose(const TTValue &inputValue, TTValue &outputValue)
 {
+    if (!mRunning)
+        return kTTErrGeneric;
+    
     TTObject aTimeEvent;
 
     if (inputValue.size() == 1) {
