@@ -468,19 +468,20 @@ TTErr TTTimeProcess::Start(const TTValue& inputValue, TTValue& outputValue)
         }
     }
     
-    // if the container is not valid : make the start event happen
-    if (!mContainer.valid())
-        return mStartEvent.send(kTTSym_Happen);
-    
-    // if the container is not running : push start event state and simulate start event happening
+    // if the container is not running (or not valid)TTBoolean running;
     TTBoolean running;
-    mContainer.get("running", running);
+    if (!mContainer.valid())
+        running = NO;
+    else
+        mContainer.get("running", running);
+    
     if (!running) {
         
+        // optionally push start event state
         if (mStatePush)
             mStartEvent.send("StatePush");
         
-        // simulate to not launch other time process relative to its start event
+        // simulate start event happening to not launch other time processes relative to it
         TTValue out, args(mStartEvent, kTTSym_eventHappened, kTTSym_eventWaiting);
         return EventStatusChanged(args, out);
     }
@@ -500,19 +501,20 @@ TTErr TTTimeProcess::End(const TTValue& inputValue, TTValue& outputValue)
         }
     }
     
-    // if the container is not valid : make the end event happen
-    if (!mContainer.valid())
-        return mEndEvent.send(kTTSym_Happen);
-    
-    // if the container is not running : push end event state and simulate end event happening
+    // if the container is not running (or not valid)
     TTBoolean running;
-    mContainer.get("running", running);
+    if (!mContainer.valid())
+        running = NO;
+    else
+        mContainer.get("running", running);
+    
     if (!running) {
         
+        // optionally push end event state
         if (mStatePush)
-         mEndEvent.send("StatePush");
+            mEndEvent.send("StatePush");
     
-        // simulate to not launch other time process relative to its end event
+        // simulate end event happening to not launch other time processes relative to it
         TTValue out, args(mEndEvent, kTTSym_eventHappened, kTTSym_eventWaiting);
         return EventStatusChanged(args, out);
     }
