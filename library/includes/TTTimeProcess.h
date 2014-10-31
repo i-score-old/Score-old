@@ -58,6 +58,8 @@ protected :
     
     TTBoolean                       mExternalTick;                  ///< a boolean flag to ease the access to the scheduler externalTick attribute
     
+    TTBoolean                       mStatePush;                     ///< a boolean flag to remind the Start method pushState option to automatically apply the same option in End method (see in TTTimeProcess::SchedulerRunningChanged)
+    
 private :
     
     TTObject                        mStartEvent;                    ///< the event object which handles the time process execution start
@@ -225,15 +227,19 @@ private :
      @return                an error code if the limitation fails */
     TTErr           Limit(const TTValue& inputValue, TTValue& outputValue);
     
-    /** Start the time process
-     this method eases the access of the start event trigger message
-     @return                an error code if the play fails */
-    TTErr           Start();
+    /** Start the time process and optionnaly push its start event state
+     @details this method makes the start event happening if there is no container or simulates the start event happening if the container is not running
+     @param	inputValue      optionnal #TTboolean to enable/disable state pushing
+     @param	outputValue     nothing
+     @return                an error code if the start fails */
+    TTErr           Start(const TTValue& inputValue, TTValue& outputValue);
     
-    /** End the time process
-     this method eases the access of the end event trigger message
-     @return                an error code if the stop fails */
-    TTErr           End();
+    /** End the time process and optionnaly push its end event state
+     @details this method makes the end event happening if there is no container or simulates the end event happening if the container is not running
+     @param	inputValue      optionnal #TTboolean to enable/disable state pushing
+     @param	outputValue     nothing
+     @return                an error code if the end fails */
+    TTErr           End(const TTValue& inputValue, TTValue& outputValue);
     
     /** Play the time process from a time offset
      @details this method eases the managment of the scheduler object

@@ -33,7 +33,8 @@ mVerticalPosition(0),
 mVerticalSize(1),
 mRunning(NO),
 mCompiled(NO),
-mExternalTick(NO)
+mExternalTick(NO),
+mStatePush(YES)
 {
     TT_ASSERT("Correct number of args to create TTTimeProcess", arguments.size() == 1);
     
@@ -108,8 +109,8 @@ mExternalTick(NO)
     addMessageWithArguments(Move);
     addMessageWithArguments(Limit);
     
-    addMessage(Start);
-    addMessage(End);
+    addMessageWithArguments(Start);
+    addMessageWithArguments(End);
     addMessage(Play);
     addMessage(Stop);
     addMessage(Pause);
@@ -455,18 +456,29 @@ TTErr TTTimeProcess::Limit(const TTValue& inputValue, TTValue& outputValue)
     return kTTErrGeneric;
 }
 
-TTErr TTTimeProcess::Start()
+TTErr TTTimeProcess::Start(const TTValue& inputValue, TTValue& outputValue)
 {
+    mStatePush = YES;
+    
+    if (inputValue.size()) {
+        
+        if (inputValue[0].type() == kTypeBoolean) {
+            
+            mStatePush = inputValue[0];
+        }
+    }
+    
     // if the container is not valid : make the start event happen
     if (!mContainer.valid())
         return mStartEvent.send(kTTSym_Happen);
     
-    // if the container is not running : push start event state  and simulate start event happening
+    // if the container is not running : push start event state and simulate start event happening
     TTBoolean running;
     mContainer.get("running", running);
     if (!running) {
         
-        mStartEvent.send("StatePush");
+        if (mStatePush)
+            mStartEvent.send("StatePush");
         
         // simulate to not launch other time process relative to its start event
         TTValue out, args(mStartEvent, kTTSym_eventHappened, kTTSym_eventWaiting);
@@ -476,8 +488,18 @@ TTErr TTTimeProcess::Start()
     return kTTErrNone;
 }
 
-TTErr TTTimeProcess::End()
+TTErr TTTimeProcess::End(const TTValue& inputValue, TTValue& outputValue)
 {
+    mStatePush = YES;
+    
+    if (inputValue.size()) {
+        
+        if (inputValue[0].type() == kTypeBoolean) {
+            
+            mStatePush = inputValue[0];
+        }
+    }
+    
     // if the container is not valid : make the end event happen
     if (!mContainer.valid())
         return mEndEvent.send(kTTSym_Happen);
@@ -487,7 +509,8 @@ TTErr TTTimeProcess::End()
     mContainer.get("running", running);
     if (!running) {
         
-        mEndEvent.send("StatePush");
+        if (mStatePush)
+         mEndEvent.send("StatePush");
     
         // simulate to not launch other time process relative to its end event
         TTValue out, args(mEndEvent, kTTSym_eventHappened, kTTSym_eventWaiting);
@@ -682,7 +705,8 @@ TTErr TTTimeProcess::SchedulerRunningChanged(const TTValue& inputValue, TTValue&
 			TTObject thisObject(this);
             sendNotification(kTTSym_ProcessEnded, thisObject);
             
-            return End();
+            TTValue none;
+            return End(mStatePush, none);
         }
         
         return kTTErrGeneric;
