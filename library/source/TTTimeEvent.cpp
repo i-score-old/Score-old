@@ -193,9 +193,6 @@ TTErr TTTimeEvent::Happen()
 {
     TTErr err = kTTErrNone;
     
-    // DEBUG
-    TTLogMessage("TTTimeEvent::Happen : %s current status = %s\n", mName.c_str(), mStatus.c_str());
-
     // if the event is not muted
     if (!mMute) {
     
@@ -308,14 +305,14 @@ TTErr TTTimeEvent::StateAddressClear(const TTValue& inputValue, TTValue& outputV
 TTErr TTTimeEvent::StatePush()
 {
     if (!mPushing) {
-        
+
         mPushing = YES;
 
         // recall the state
         TTErr err = mState.send(kTTSym_Run);
         
         mPushing = NO;
-
+        
         return err;
     }
     

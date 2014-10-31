@@ -461,15 +461,14 @@ TTErr TTTimeProcess::Start()
     if (!mContainer.valid())
         return mStartEvent.send(kTTSym_Happen);
     
-    // if the container is not running : simulate start event happening
+    // if the container is not running : push start event state  and simulate start event happening
     TTBoolean running;
     mContainer.get("running", running);
     if (!running) {
         
-        // simulate start event happening for this time process
-        // to not launch other time process relative to its start event
         mStartEvent.send("StatePush");
         
+        // simulate to not launch other time process relative to its start event
         TTValue out, args(mStartEvent, kTTSym_eventHappened, kTTSym_eventWaiting);
         return EventStatusChanged(args, out);
     }
@@ -483,15 +482,14 @@ TTErr TTTimeProcess::End()
     if (!mContainer.valid())
         return mEndEvent.send(kTTSym_Happen);
     
-    // if the container is not running : simulate end event happening
+    // if the container is not running : push end event state and simulate end event happening
     TTBoolean running;
     mContainer.get("running", running);
     if (!running) {
         
-        // simulate end event happening for this time process
-        // to not launch other time process relative to its end event
         mEndEvent.send("StatePush");
     
+        // simulate to not launch other time process relative to its end event
         TTValue out, args(mEndEvent, kTTSym_eventHappened, kTTSym_eventWaiting);
         return EventStatusChanged(args, out);
     }
