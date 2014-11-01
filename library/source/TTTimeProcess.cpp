@@ -638,9 +638,6 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
 				TTObject thisObject(this);
                 sendNotification(kTTSym_ProcessStarted, thisObject);
                 
-                // NOTE : end events should subscribe to ProcessStarted notification
-                // then, when all previous processes are started, the end event is pending.
-                
                 // play the process
                 return Play();
             }
@@ -671,9 +668,6 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
             // notify ProcessDisposed observers
             TTObject thisObject(this);
             sendNotification(kTTSym_ProcessDisposed, thisObject);
-            
-            // NOTE : end events should subscribe to ProcessDisposed notification
-            // then, when all previous processes are disposed, the end event is disposed.
         }
         
         return kTTErrNone;
@@ -702,12 +696,6 @@ TTErr TTTimeProcess::SchedulerRunningChanged(const TTValue& inputValue, TTValue&
             // notify ProcessEnded observers
 			TTObject thisObject(this);
             sendNotification(kTTSym_ProcessEnded, thisObject);
-            
-            // if the end event is not conditionned
-            if (!mEndCondition.valid())
-                return End();
-            else
-                return kTTErrNone;
         }
         
         return kTTErrGeneric;
@@ -749,18 +737,25 @@ TTErr TTTimeProcess::setStartEvent(TTObject& aTimeEvent)
 
 TTErr TTTimeProcess::setEndEvent(TTObject&  aTimeEvent)
 {
-    TTObject thisObject(this);
+    TTObject    thisObject(this);
+    TTValue     none;
     
-    // Stop end event observation
+    // Stop end event observation and detach the process to it
     if (mEndEvent.valid())
+    {
         mEndEvent.unregisterObserverForNotifications(thisObject);
+        mEndEvent.send("ProcessDetach", thisObject, none);
+    }
     
     // Replace the end event by the new one
     mEndEvent = aTimeEvent;
     
-    // Observe end event
+    // Observe end event and attach the process to it
     if (mEndEvent.valid())
+    {
         mEndEvent.registerObserverForNotifications(thisObject);
+        mEndEvent.send("ProcessAttach", thisObject, none);
+    }
     
     return kTTErrNone;
 }

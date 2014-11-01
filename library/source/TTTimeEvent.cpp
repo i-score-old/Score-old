@@ -30,6 +30,9 @@ mDate(0),
 mStatus(kTTSym_eventWaiting),
 mMute(NO),
 mState(kTTSym_Script),
+mStartedProcessesCount(0),
+mEndedProcessesCount(0),
+mDisposedProcessesCount(0),
 mPushing(NO)
 {
     TTValue none;
@@ -51,6 +54,10 @@ mPushing(NO)
     addAttributeWithSetter(Condition, kTypeObject);
     addAttributeWithSetter(Status, kTypeSymbol);
     
+    addAttribute(AttachedProcesses, kTypeLocalValue);
+    addAttributeProperty(AttachedProcesses, readOnly, YES);
+    addAttributeProperty(AttachedProcesses, hidden, YES);
+    
     addMessage(Trigger);
     addMessage(Happen);
     addMessage(Dispose);
@@ -58,6 +65,12 @@ mPushing(NO)
     addMessageWithArguments(StateAddressSetValue);
     addMessageWithArguments(StateAddressClear);
     addMessage(StatePush);
+    
+    addMessageWithArguments(ProcessAttach);
+    addMessageWithArguments(ProcessDetach);
+    addMessageWithArguments(ProcessStarted);
+    addMessageWithArguments(ProcessEnded);
+    addMessageWithArguments(ProcessDisposed);
     
 	// needed to be handled by a TTXmlHandler
 	addMessageWithArguments(WriteAsXml);
@@ -131,6 +144,14 @@ TTErr TTTimeEvent::setStatus(const TTValue& value)
             TTLogError("TTTimeEvent::setStatus : %s new status equals last status (%s)\n", mName.c_str(), mStatus.c_str());
         
         return kTTErrGeneric;
+    }
+    
+    // reset counts
+    if (mStatus == kTTSym_eventWaiting)
+    {
+        mStartedProcessesCount = 0;
+        mEndedProcessesCount = 0;
+        mDisposedProcessesCount = 0;
     }
 
     // notify each attribute observers
@@ -338,6 +359,172 @@ TTErr TTTimeEvent::StatePush()
     }
     
     return kTTErrGeneric;
+}
+
+TTErr TTTimeEvent::ProcessAttach(const TTValue& inputValue, TTValue& outputValue)
+{
+    if (inputValue.size() == 1) {
+        
+        if (inputValue[0].type() == kTypeObject) {
+            
+            TTObject thisObject(this);
+            TTObject aTimeProcess = inputValue[0];
+            
+            if (aTimeProcess.valid())
+            {
+                // check if the time process is not already attached
+                TTValue     newAttachedProcesses;
+                TTBoolean   found = false;
+                
+                for (TTUInt32 i = 0; i < mAttachedProcesses.size(); i++)
+                {
+                    TTObject attachedProcess = mAttachedProcesses[i];
+                    if (attachedProcess == aTimeProcess)
+                        found = true;
+                    
+                    newAttachedProcesses.append(mAttachedProcesses[i]);
+                }
+                
+                if (!found) {
+                    
+                    // start process observation
+                    aTimeProcess.registerObserverForNotifications(thisObject);
+                    
+                    // update the attached processes
+                    newAttachedProcesses.append(aTimeProcess);
+                    mAttachedProcesses = newAttachedProcesses;
+                    
+                    return kTTErrNone;
+                }
+            }
+        }
+    }
+    
+    return kTTErrGeneric;
+}
+
+TTErr TTTimeEvent::ProcessDetach(const TTValue& inputValue, TTValue& outputValue)
+{
+    if (inputValue.size() == 1)
+    {
+        if (inputValue[0].type() == kTypeObject)
+        {
+            TTObject thisObject(this);
+            TTObject aTimeProcess = inputValue[0];
+            
+            if (aTimeProcess.valid())
+            {
+                // stop process observation
+                aTimeProcess.unregisterObserverForNotifications(thisObject);
+                
+                // update the attached processes
+                TTValue newAttachedProcesses;
+ 
+                for (TTUInt32 i = 0; i < mAttachedProcesses.size(); i++)
+                {
+                    TTObject attachedProcess = mAttachedProcesses[i];
+                    if (attachedProcess != aTimeProcess)
+                        newAttachedProcesses.append(mAttachedProcesses[i]);
+                }
+                
+                mAttachedProcesses = newAttachedProcesses;
+                
+                return kTTErrNone;
+            }
+        }
+    }
+    
+    return kTTErrGeneric;
+}
+
+TTErr TTTimeEvent::ProcessStarted(const TTValue& inputValue, TTValue& outputValue)
+{
+    TT_ASSERT("TTTimeProcess::ProcessStarted : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
+    
+    TTObject aTimeProcess = inputValue[0];
+    
+    // update count
+    mStartedProcessesCount++;
+    
+    // DEBUG
+    TTLogMessage("TTTimeEvent::ProcessStarted: %s (%d), started = %d, ended = %d, disposed = %d\n", mName.c_str(), mAttachedProcesses.size(), mStartedProcessesCount, mEndedProcessesCount, mDisposedProcessesCount);
+    
+    // a conditioned event becomes pending when all attached processes are started
+    if (mCondition.valid() &&
+        mStatus == kTTSym_eventWaiting &&
+        mStartedProcessesCount == mAttachedProcesses.size())
+    {
+        // DEBUG
+        TTLogMessage("TTTimeEvent::ProcessStarted: %s event becomes pending\n", mName.c_str());
+            
+        return setStatus(kTTSym_eventPending);
+    }
+    
+    return kTTErrNone;
+}
+
+TTErr TTTimeEvent::ProcessEnded(const TTValue& inputValue, TTValue& outputValue)
+{
+    TT_ASSERT("TTTimeProcess::ProcessEnded : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
+    
+    TTObject aTimeProcess = inputValue[0];
+    TTObject startEvent;
+    TTSymbol startEventStatus;
+    
+    // update count
+    mEndedProcessesCount++;
+
+    // DEBUG
+    TTLogMessage("TTTimeEvent::ProcessEnded: %s (%d), started = %d, ended = %d, disposed = %d\n", mName.c_str(), mAttachedProcesses.size(), mStartedProcessesCount, mEndedProcessesCount, mDisposedProcessesCount);
+    
+    // a non conditioned event happens when all attached processes are ended or disposed
+    if (!mCondition.valid() &&
+        mStatus == kTTSym_eventWaiting &&
+        mEndedProcessesCount + mDisposedProcessesCount == mAttachedProcesses.size())
+    {
+        // DEBUG
+        TTLogMessage("TTTimeEvent::ProcessEnded: %s event happens\n", mName.c_str());
+        
+        return Happen();
+    }
+
+    return kTTErrNone;
+}
+
+TTErr TTTimeEvent::ProcessDisposed(const TTValue& inputValue, TTValue& outputValue)
+{
+    TT_ASSERT("TTTimeProcess::ProcessDisposed : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
+    
+    TTObject aTimeProcess = inputValue[0];
+    
+    // update count
+    mDisposedProcessesCount++;
+    
+    // DEBUG
+    TTLogMessage("TTTimeEvent::ProcessDisposed: %s (%d), started = %d, ended = %d, disposed = %d\n", mName.c_str(), mAttachedProcesses.size(), mStartedProcessesCount, mEndedProcessesCount, mDisposedProcessesCount);
+    
+    // an event is disposed when all attached processes are disposed
+    if (mStatus == kTTSym_eventWaiting &&
+        mDisposedProcessesCount == mAttachedProcesses.size())
+    {
+        // DEBUG
+        TTLogMessage("TTTimeEvent::ProcessDisposed: %s event disposed\n", mName.c_str());
+        
+        return Dispose();
+    }
+    
+    // a non conditioned event happens when all attached processes are ended or disposed
+    if (!mCondition.valid() &&
+        mStatus == kTTSym_eventWaiting &&
+        mEndedProcessesCount + mDisposedProcessesCount == mAttachedProcesses.size())
+    {
+        // DEBUG
+        TTLogMessage("TTTimeEvent::ProcessDisposed: %s event happens\n", mName.c_str());
+        
+        return Happen();
+    }
+    
+    return kTTErrNone;
 }
 
 TTErr TTTimeEvent::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)

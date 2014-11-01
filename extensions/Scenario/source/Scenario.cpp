@@ -191,8 +191,6 @@ TTErr Scenario::ProcessStart()
     
     TTLogMessage("Scenario::ProcessStart : without execution graph\n");
     
-    // go to the first time event (as they are sorted by date)
-    mTimeEventList.begin();
 #endif
     return kTTErrNone;
 }
@@ -262,31 +260,70 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
             else if (!mContainer.valid())
                 return mScheduler.send(kTTSym_Stop);
 #else
-            TTValue     v;
-            TTUInt32    eventDate;
+            TTSymbol eventStatus;
+            TTUInt32 eventDate;
+            TTUInt32 eventHappenedCount = 0;
             
-            // if there is more event to process
-            if (mTimeEventList.end()) {
-                
-                // get the current time event (as they are sorted by date)
+            // look if all event happened or have been disposed
+            for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next())
+            {
                 TTObject aTimeEvent = mTimeEventList.current()[0];
-                aTimeEvent.get(kTTSym_date, v);
-                eventDate = v[0];
                 
-                // if the event date is lower than the current date
-                if (eventDate < date) {
+                aTimeEvent.get("status", eventStatus);
+                
+                // in case of event with no attached process
+                if (eventStatus == kTTSym_eventWaiting)
+                {
+                    TTValue attachedProcesses;
+                    aTimeEvent.get("attachedProcesses", attachedProcesses);
                     
-                    // make the event to happen
-                    aTimeEvent.send(kTTSym_Happen);
-                    
-                    // try to process the next event
-                    mTimeEventList.next();
-                    return Process(inputValue, outputValue);
+                    if (attachedProcesses.size() == 0)
+                    {
+                        TTObject condition;
+                        aTimeEvent.get("condition", condition);
+                        
+                        // set conditionned event as pending
+                        if (condition.valid()) {
+                            
+                            aTimeEvent.set("status", kTTSym_eventPending);
+                            
+                        }
+                        // or make none conditioned event to happen at its date
+                        else {
+                            
+                            aTimeEvent.get("date", eventDate);
+                            
+                            if (eventDate <= date)
+                            {
+                                // DEBUG
+                                TTSymbol eventName;
+                                aTimeEvent.get("name", eventName);
+                                TTLogMessage("Scenario::Process : make %s event happen at %f date\n", eventName.c_str(), date);
+                                
+                                aTimeEvent.send(kTTSym_Happen);
+                            }
+                        }
+                        
+                        // update its status
+                        aTimeEvent.get("status", eventStatus);
+                    }
                 }
+                
+                if (eventStatus == kTTSym_eventHappened ||
+                    eventStatus == kTTSym_eventDisposed)
+                    eventHappenedCount++;
             }
-            else
-                // Make the end happen
-                return getEndEvent()->send(kTTSym_Happen);
+            
+            // no more event to process
+            if (eventHappenedCount == mTimeEventList.getSize()) {
+                
+                if (mContainer.valid())
+                    ; // TODO  : what ?
+                
+                // root scenario case : stop the scheduler
+                else
+                    return mScheduler.send(kTTSym_Stop);
+            }
 #endif
             
         }
@@ -1111,7 +1148,7 @@ TTErr Scenario::TimeEventTrigger(const TTValue& inputValue, TTValue& outputValue
                 }
             }
 #else
-            return kTTErrNone;
+            return aTimeEvent.send(kTTSym_Happen);
 #endif
             
         }

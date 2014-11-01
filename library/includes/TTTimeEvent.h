@@ -48,6 +48,11 @@ protected :
     TTObject                        mState;                         ///< a state handled by the event
     
     TTObject                        mCondition;                     ///< a pointer to an optional condition object to make the event interactive
+    
+    TTValue                         mAttachedProcesses;             ///< all the processes the event observes
+    TTUInt32                        mStartedProcessesCount;         ///< how many processes are started ?
+    TTUInt32                        mEndedProcessesCount;           ///< how many processes have ended ?
+    TTUInt32                        mDisposedProcessesCount;        ///< how many processes have been disposed ?
  
 private :
     
@@ -112,6 +117,36 @@ private :
      @details this method eases the call of state run method
      @return                kTTErrNone */
     TTErr           StatePush();
+    
+    /** Attach a process to enable notification observation
+     @param inputValue      the process to observe
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr           ProcessAttach(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Detach a process to disable notification observation
+     @param inputValue      the process to observe
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr           ProcessDetach(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** To be notified when a previous started process
+     @param inputValue      the process which is started
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr           ProcessStarted(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** To be notified when a previous ended process
+     @param inputValue      the process which is ended
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr           ProcessEnded(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** To be notified when a previous disposed process
+     @param inputValue      the process which have been disposed
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr           ProcessDisposed(const TTValue& inputValue, TTValue& outputValue);
     
     friend void TTSCORE_EXPORT TTTimeContainerFindTimeEventWithName(const TTValue& aValue, TTPtr timeEventNamePtrToMatch, TTBoolean& found);
     friend TTBoolean TTSCORE_EXPORT TTTimeEventCompareDate(TTValue& v1, TTValue& v2);
