@@ -591,38 +591,32 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
     TTValue     v;
     
     // event wainting case :
-    if (newStatus == kTTSym_eventWaiting) {
-        
+    if (newStatus == kTTSym_eventWaiting)
+    {
         // the start event waiting status implies waiting status for the end event
-        if (aTimeEvent == mStartEvent) {
-            
-            // DEBUG
-            TTLogMessage("TTTimeProcess::EventStatusChanged : %s process propagates %s waiting status to %s\n", mName.c_str(), mStartName.c_str(), mEndName.c_str());
-            
+        if (aTimeEvent == mStartEvent)
+        {
             mEndEvent.set("status", kTTSym_eventWaiting);
         }
         
         return kTTErrNone;
     }
     // event pending case :
-    else if (newStatus == kTTSym_eventPending) {
-        
+    else if (newStatus == kTTSym_eventPending)
+    {
         // the start event pending status implies waiting status for the end event
-        if (aTimeEvent == mStartEvent) {
-            
-            // DEBUG
-            TTLogMessage("TTTimeProcess::EventStatusChanged : %s process propagates %s pending status as waiting status to %s\n", mName.c_str(), mStartName.c_str(), mEndName.c_str());
-            
+        if (aTimeEvent == mStartEvent)
+        {
             mEndEvent.set("status", kTTSym_eventWaiting);
         }
         
         return kTTErrNone;
     }
     // event happened case :
-    else if (newStatus == kTTSym_eventHappened) {
-        
-        if (aTimeEvent == mStartEvent) {
-            
+    else if (newStatus == kTTSym_eventHappened)
+    {
+        if (aTimeEvent == mStartEvent)
+        {
             // if the time process is muted
             if (mMute)
                 return kTTErrNone;
@@ -645,8 +639,8 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
             TTLogError("TTTimeProcess::EventStatusChanged : ProccessStart failed\n");
             return kTTErrGeneric;
         }
-        else if (aTimeEvent == mEndEvent) {
-            
+        else if (aTimeEvent == mEndEvent)
+        {
             // if the time process is muted
             if (mMute)
                 return kTTErrNone;
@@ -661,10 +655,10 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
         return kTTErrGeneric;
     }
     // event disposed case :
-    else if (newStatus == kTTSym_eventDisposed) {
-        
-        if (aTimeEvent == mStartEvent) {
-            
+    else if (newStatus == kTTSym_eventDisposed)
+    {
+        if (aTimeEvent == mStartEvent)
+        {
             // notify ProcessDisposed observers
             TTObject thisObject(this);
             sendNotification(kTTSym_ProcessDisposed, thisObject);

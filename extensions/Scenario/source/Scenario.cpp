@@ -281,27 +281,18 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
                     {
                         TTObject condition;
                         aTimeEvent.get("condition", condition);
+                        aTimeEvent.get("date", eventDate);
                         
                         // set conditionned event as pending
-                        if (condition.valid()) {
-                            
+                        if (condition.valid())
+                        {
                             aTimeEvent.set("status", kTTSym_eventPending);
                             
                         }
                         // or make none conditioned event to happen at its date
-                        else {
-                            
-                            aTimeEvent.get("date", eventDate);
-                            
-                            if (eventDate <= date)
-                            {
-                                // DEBUG
-                                TTSymbol eventName;
-                                aTimeEvent.get("name", eventName);
-                                TTLogMessage("Scenario::Process : make %s event happen at %f date\n", eventName.c_str(), date);
-                                
-                                aTimeEvent.send(kTTSym_Happen);
-                            }
+                        else if (eventDate <= date)
+                        {
+                            aTimeEvent.send(kTTSym_Happen);
                         }
                         
                         // update its status
