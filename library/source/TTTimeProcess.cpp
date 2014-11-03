@@ -519,10 +519,17 @@ TTErr TTTimeProcess::Play()
 
 TTErr TTTimeProcess::Stop()
 {
-    // set the running state of the process
-    mRunning = NO;
+    // filter repetitions
+    if (mRunning) {
+        
+        // set the running state of the process
+        mRunning = NO;
 
-    return mScheduler.send(kTTSym_Stop);
+        return mScheduler.send(kTTSym_Stop);
+    }
+    
+    TTLogError("TTTimeProcess::Stop : %s is already stopped\n", mName.c_str());
+    return kTTErrGeneric;
 }
 
 TTErr TTTimeProcess::Pause()
