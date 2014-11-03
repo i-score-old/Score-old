@@ -262,7 +262,7 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
 #else
             TTSymbol eventStatus;
             TTUInt32 eventDate;
-            TTUInt32 eventHappenedCount = 0;
+            TTUInt32 eventHappenedOrDisposedCount = 0;
             
             // look if all event happened or have been disposed
             for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next())
@@ -302,11 +302,11 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
                 
                 if (eventStatus == kTTSym_eventHappened ||
                     eventStatus == kTTSym_eventDisposed)
-                    eventHappenedCount++;
+                    eventHappenedOrDisposedCount++;
             }
             
             // no more event to process
-            if (eventHappenedCount == mTimeEventList.getSize()) {
+            if (eventHappenedOrDisposedCount == mTimeEventList.getSize()) {
                 
                 if (mContainer.valid())
                     ; // TODO  : what ?
@@ -409,6 +409,22 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
                 // run the temporary state
                 state.send(kTTSym_Run);
             }
+            
+#ifdef NO_EXECUTION_GRAPH
+            // prepare the status of each time event
+            // TODO : this should be merged with the state compilation done before
+            for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next())
+            {
+                aTimeEvent = mTimeEventList.current()[0];
+                aTimeEvent.get(kTTSym_date, v);
+                date = v[0];
+                
+                if (date < timeOffset)
+                    aTimeEvent.set("status", kTTSym_eventHappened);
+                else
+                    aTimeEvent.set("status", kTTSym_eventWaiting);
+            }
+#endif
             
             // prepare the timeOffset of each time process scheduler
             for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
