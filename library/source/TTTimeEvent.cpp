@@ -172,7 +172,7 @@ TTErr TTTimeEvent::Trigger()
     if (mStatus != kTTSym_eventPending)
         return kTTErrGeneric;
     
-    // if the event muted : do nothing
+    // if the event is muted : do nothing
     if (mMute)
         return kTTErrNone;
     
