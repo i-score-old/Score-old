@@ -239,12 +239,12 @@ private :
     
     /** Play the time process from a time offset
      @details this method eases the managment of the scheduler object
-     @return                an error code if the play fails */
+     @return                #kTTErrGeneric if the time process is already playing */
     TTErr           Play();
     
     /** Stop the time process
      @details this method eases the managment of the scheduler object
-     @return                an error code if the stop fails */
+     @return                #kTTErrGeneric if the time process is already stopped */
     TTErr           Stop();
     
     /** Pause the time process

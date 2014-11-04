@@ -532,7 +532,6 @@ TTErr TTTimeProcess::Stop()
         return mScheduler.send(kTTSym_Stop);
     }
     
-    TTLogError("TTTimeProcess::Stop : %s is already stopped\n", mName.c_str());
     return kTTErrGeneric;
 }
 
@@ -714,14 +713,16 @@ TTErr TTTimeProcess::sendStatusNotification(TTSymbol& notification)
     if (mContainer.valid())
         mContainer.get(kTTSym_running, running);
     
-    if (!running)
+    if (running)
     {
-        TTLogError("TTTimeProcess::sendStatusNotification : %s don't send %s notification because the container is not running\n", mName.c_str(), notification.c_str());
-        return kTTErrGeneric;
+        TTObject thisObject(this);
+        return sendNotification(notification, thisObject);
     }
     
-    TTObject thisObject(this);
-    return sendNotification(notification, thisObject);
+    // DEBUG
+    //TTLogMessage("TTTimeProcess::sendStatusNotification : %s don't send %s notification because the container is not running\n", mName.c_str(), notification.c_str());
+    
+    return kTTErrNone;
 }
 
 #if 0

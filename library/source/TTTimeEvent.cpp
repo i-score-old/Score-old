@@ -159,19 +159,20 @@ TTErr TTTimeEvent::setStatus(const TTValue& value)
     if (mContainer.valid())
         mContainer.get(kTTSym_running, running);
     
-    if (!running) {
-        TTLogError("TTTimeEvent::setStatus : %s don't notify %s status because the container is not running\n", mName.c_str(), mStatus.c_str());
-        return kTTErrGeneric;
+    if (running)
+    {
+        // notify each attribute observers
+        v.append(mStatus);
+        v.append(lastStatus);
+        
+        // DEBUG
+        //TTLogMessage("TTTimeEvent::setStatus : %s event from %s to %s\n", mName.c_str(), lastStatus.c_str(), mStatus.c_str());
+        
+        sendNotification(kTTSym_EventStatusChanged, v);
     }
-
-    // notify each attribute observers
-    v.append(mStatus);
-    v.append(lastStatus);
     
     // DEBUG
-    //TTLogMessage("TTTimeEvent::setStatus : %s event from %s to %s\n", mName.c_str(), lastStatus.c_str(), mStatus.c_str());
-    
-    sendNotification(kTTSym_EventStatusChanged, v);
+    //TTLogMessage("TTTimeEvent::setStatus : %s don't notify %s status because the container is not running\n", mName.c_str(), mStatus.c_str());
     
     return kTTErrNone;
 }
