@@ -713,10 +713,9 @@ TTErr TTTimeProcess::sendStatusNotification(TTSymbol& notification)
         TTObject thisObject(this);
         return sendNotification(notification, thisObject);
     }
-    
-    // DEBUG
-    //TTLogMessage("TTTimeProcess::sendStatusNotification : %s don't send %s notification because the container is not running\n", mName.c_str(), notification.c_str());
-    
+#ifdef TTSCORE_DEBUG
+    TTLogMessage("TTTimeProcess::sendStatusNotification %s : don't send %s notification because the container is not running\n", mName.c_str(), notification.c_str());
+#endif
     return kTTErrNone;
 }
 

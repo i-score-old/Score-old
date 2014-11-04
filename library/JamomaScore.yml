@@ -1,5 +1,6 @@
 defines:
   - TTSCORE_EXPORTS
+  - TTSCORE_DEBUG
   
 sources:
   - source/TTScore.cpp

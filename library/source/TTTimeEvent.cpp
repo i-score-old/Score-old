@@ -164,16 +164,14 @@ TTErr TTTimeEvent::setStatus(const TTValue& value)
         // notify each attribute observers
         v.append(mStatus);
         v.append(lastStatus);
-        
-        // DEBUG
-        //TTLogMessage("TTTimeEvent::setStatus : %s event from %s to %s\n", mName.c_str(), lastStatus.c_str(), mStatus.c_str());
-        
+#ifdef TTSCORE_DEBUG
+        TTLogMessage("TTTimeEvent::setStatus %s : %s -> %s\n", mName.c_str(), lastStatus.c_str(), mStatus.c_str());
+#endif
         sendNotification(kTTSym_EventStatusChanged, v);
     }
-    
-    // DEBUG
-    //TTLogMessage("TTTimeEvent::setStatus : %s don't notify %s status because the container is not running\n", mName.c_str(), mStatus.c_str());
-    
+#ifdef TTSCORE_DEBUG
+    TTLogMessage("TTTimeEvent::setStatus %s : don't notify %s status because the container is not running\n", mName.c_str(), mStatus.c_str());
+#endif
     return kTTErrNone;
 }
 
@@ -456,10 +454,9 @@ TTErr TTTimeEvent::ProcessStarted(const TTValue& inputValue, TTValue& outputValu
     
     // update count
     mStartedProcessesCount++;
-    
-    // DEBUG
-    //TTLogMessage("TTTimeEvent::ProcessStarted : %s (%d), started = %d, ended = %d, disposed = %d\n", mName.c_str(), mAttachedProcesses.size(), mStartedProcessesCount, mEndedProcessesCount, mDisposedProcessesCount);
-    
+#ifdef TTSCORE_DEBUG
+    TTLogMessage("TTTimeEvent::ProcessStarted %s : attached = %d, started = %d, ended = %d, disposed = %d\n", mName.c_str(), mAttachedProcesses.size(), mStartedProcessesCount, mEndedProcessesCount, mDisposedProcessesCount);
+#endif
     // a conditioned event becomes pending when all attached processes are started
     if (mCondition.valid() &&
         mStatus == kTTSym_eventWaiting &&
@@ -481,10 +478,9 @@ TTErr TTTimeEvent::ProcessEnded(const TTValue& inputValue, TTValue& outputValue)
     
     // update count
     mEndedProcessesCount++;
-
-    // DEBUG
-    //TTLogMessage("TTTimeEvent::ProcessEnded : %s (%d), started = %d, ended = %d, disposed = %d\n", mName.c_str(), mAttachedProcesses.size(), mStartedProcessesCount, mEndedProcessesCount, mDisposedProcessesCount);
-    
+#ifdef TTSCORE_DEBUG
+    TTLogMessage("TTTimeEvent::ProcessEnded %s : attached = %d, started = %d, ended = %d, disposed = %d\n", mName.c_str(), mAttachedProcesses.size(), mStartedProcessesCount, mEndedProcessesCount, mDisposedProcessesCount);
+#endif
     // a non conditioned event happens when all attached processes are ended or disposed
     if (!mCondition.valid() &&
         mStatus == kTTSym_eventWaiting &&
@@ -504,10 +500,9 @@ TTErr TTTimeEvent::ProcessDisposed(const TTValue& inputValue, TTValue& outputVal
     
     // update count
     mDisposedProcessesCount++;
-    
-    // DEBUG
-    //TTLogMessage("TTTimeEvent::ProcessDisposed : %s (%d), started = %d, ended = %d, disposed = %d\n", mName.c_str(), mAttachedProcesses.size(), mStartedProcessesCount, mEndedProcessesCount, mDisposedProcessesCount);
-    
+#ifdef TTSCORE_DEBUG
+    TTLogMessage("TTTimeEvent::ProcessDisposed %s : attached = %d, started = %d, ended = %d, disposed = %d\n", mName.c_str(), mAttachedProcesses.size(), mStartedProcessesCount, mEndedProcessesCount, mDisposedProcessesCount);
+#endif
     // an event is disposed when all attached processes are disposed
     if (mStatus == kTTSym_eventWaiting &&
         mDisposedProcessesCount == mAttachedProcesses.size())
