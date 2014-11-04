@@ -514,9 +514,6 @@ TTErr TTTimeProcess::Play()
             
             mScheduler.set("externalTick", mExternalTick);
             
-            // DEBUG
-            TTLogMessage("TTTimeProcess::Play : %s\n", mName.c_str());
-            
             return mScheduler.send(kTTSym_Go);
         }
     }

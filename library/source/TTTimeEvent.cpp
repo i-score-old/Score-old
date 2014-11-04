@@ -169,7 +169,7 @@ TTErr TTTimeEvent::setStatus(const TTValue& value)
     v.append(lastStatus);
     
     // DEBUG
-    TTLogMessage("TTTimeEvent::setStatus : %s event from %s to %s\n", mName.c_str(), lastStatus.c_str(), mStatus.c_str());
+    //TTLogMessage("TTTimeEvent::setStatus : %s event from %s to %s\n", mName.c_str(), lastStatus.c_str(), mStatus.c_str());
     
     sendNotification(kTTSym_EventStatusChanged, v);
     
@@ -457,7 +457,7 @@ TTErr TTTimeEvent::ProcessStarted(const TTValue& inputValue, TTValue& outputValu
     mStartedProcessesCount++;
     
     // DEBUG
-    TTLogMessage("TTTimeEvent::ProcessStarted : %s (%d), started = %d, ended = %d, disposed = %d\n", mName.c_str(), mAttachedProcesses.size(), mStartedProcessesCount, mEndedProcessesCount, mDisposedProcessesCount);
+    //TTLogMessage("TTTimeEvent::ProcessStarted : %s (%d), started = %d, ended = %d, disposed = %d\n", mName.c_str(), mAttachedProcesses.size(), mStartedProcessesCount, mEndedProcessesCount, mDisposedProcessesCount);
     
     // a conditioned event becomes pending when all attached processes are started
     if (mCondition.valid() &&
@@ -482,7 +482,7 @@ TTErr TTTimeEvent::ProcessEnded(const TTValue& inputValue, TTValue& outputValue)
     mEndedProcessesCount++;
 
     // DEBUG
-    TTLogMessage("TTTimeEvent::ProcessEnded : %s (%d), started = %d, ended = %d, disposed = %d\n", mName.c_str(), mAttachedProcesses.size(), mStartedProcessesCount, mEndedProcessesCount, mDisposedProcessesCount);
+    //TTLogMessage("TTTimeEvent::ProcessEnded : %s (%d), started = %d, ended = %d, disposed = %d\n", mName.c_str(), mAttachedProcesses.size(), mStartedProcessesCount, mEndedProcessesCount, mDisposedProcessesCount);
     
     // a non conditioned event happens when all attached processes are ended or disposed
     if (!mCondition.valid() &&
@@ -505,7 +505,7 @@ TTErr TTTimeEvent::ProcessDisposed(const TTValue& inputValue, TTValue& outputVal
     mDisposedProcessesCount++;
     
     // DEBUG
-    TTLogMessage("TTTimeEvent::ProcessDisposed : %s (%d), started = %d, ended = %d, disposed = %d\n", mName.c_str(), mAttachedProcesses.size(), mStartedProcessesCount, mEndedProcessesCount, mDisposedProcessesCount);
+    //TTLogMessage("TTTimeEvent::ProcessDisposed : %s (%d), started = %d, ended = %d, disposed = %d\n", mName.c_str(), mAttachedProcesses.size(), mStartedProcessesCount, mEndedProcessesCount, mDisposedProcessesCount);
     
     // an event is disposed when all attached processes are disposed
     if (mStatus == kTTSym_eventWaiting &&
