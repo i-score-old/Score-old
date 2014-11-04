@@ -457,15 +457,19 @@ TTErr TTTimeProcess::Limit(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr TTTimeProcess::Start()
 {
-    // if the container is not running (or not valid)
-    TTBoolean running = NO;
-    if (mContainer.valid())
-        mContainer.get("running", running);
-    
-    if (!running)
+    // filter repetitions
+    if (!mRunning)
     {
-        mStartEvent.set("status", kTTSym_eventWaiting);
-        return mStartEvent.send(kTTSym_Happen);
+        // if the container is not running (or not valid)
+        TTBoolean containerRunning = NO;
+        if (mContainer.valid())
+            mContainer.get("running", containerRunning);
+        
+        if (!containerRunning)
+        {
+            mStartEvent.set("status", kTTSym_eventWaiting);
+            return mStartEvent.send(kTTSym_Happen);
+        }
     }
     
     return kTTErrNone;
@@ -473,14 +477,18 @@ TTErr TTTimeProcess::Start()
 
 TTErr TTTimeProcess::End()
 {
-    // if the container is not running (or not valid)
-    TTBoolean running = NO;
-    if (mContainer.valid())
-        mContainer.get("running", running);
+    // filter repetitions
+    if (mRunning)
+    {
+        // if the container is not running (or not valid)
+        TTBoolean containerRunning = NO;
+        if (mContainer.valid())
+            mContainer.get("running", containerRunning);
+        
+        if (!containerRunning)
+            return mEndEvent.send(kTTSym_Happen);
+    }
     
-    if (!running)
-        return mEndEvent.send(kTTSym_Happen);
-
     return kTTErrNone;
 }
 
@@ -508,6 +516,10 @@ TTErr TTTimeProcess::Play()
             mScheduler.set(kTTSym_duration, v);
             
             mScheduler.set("externalTick", mExternalTick);
+            
+#ifdef TTSCORE_DEBUG
+            TTLogMessage("TTTimeProcess::Play %s\n", mName.c_str());
+#endif
             
             return mScheduler.send(kTTSym_Go);
         }
