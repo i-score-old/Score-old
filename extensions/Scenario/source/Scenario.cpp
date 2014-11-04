@@ -206,14 +206,25 @@ TTErr Scenario::ProcessStart()
 
 TTErr Scenario::ProcessEnd()
 {
-    TTObject aTimeProcess;
-
     // stop all the time processes
-    for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
-        
-        aTimeProcess = mTimeProcessList.current()[0];
-        
+    for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next())
+    {
+        TTObject aTimeProcess = mTimeProcessList.current()[0];
         aTimeProcess.send(kTTSym_Stop);
+    }
+    
+    // root scenario : reset the status of its start and end events
+    if (!mContainer.valid())
+    {
+        getStartEvent().set("status", kTTSym_eventWaiting);
+        getEndEvent().set("status", kTTSym_eventWaiting);
+    }
+    
+    // reset the status of each time event
+    for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next())
+    {
+        TTObject aTimeEvent = mTimeEventList.current()[0];
+        aTimeEvent.set("status", kTTSym_eventWaiting);
     }
     
     // needs to be compiled again
@@ -319,9 +330,12 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
                 if (mContainer.valid())
                     ; // TODO  : what ?
                 
-                // root scenario case : stop the scheduler
+                // root scenario case : stop itself
                 else
-                    return mScheduler.send(kTTSym_Stop);
+                {
+                    TTObject thisObject(this);
+                    return thisObject.send(kTTSym_Stop);
+                }
             }
 #endif
             
