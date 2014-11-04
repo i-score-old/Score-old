@@ -181,8 +181,6 @@ TTErr Scenario::ProcessStart()
 
 #else
     
-    TTLogMessage("Scenario::ProcessStart : without execution graph\n");
-    
     // play each time process with a happened start event and a waiting or pending end event
     for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
         
@@ -437,7 +435,7 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
             // root scenario : prepare the status of its start and end events
             if (!mContainer.valid())
             {
-                if (date == 0.)
+                if (timeOffset == 0)
                     getStartEvent().set("status", kTTSym_eventWaiting);
                 else
                     getStartEvent().set("status", kTTSym_eventHappened);
