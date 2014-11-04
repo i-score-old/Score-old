@@ -464,8 +464,8 @@ TTErr TTTimeProcess::Start()
     else
         mContainer.get("running", running);
     
-    if (!running) {
-        
+    if (!running)
+    {
         mStartEvent.set("status", kTTSym_eventWaiting);
         
         return mStartEvent.send(kTTSym_Happen);
@@ -491,27 +491,34 @@ TTErr TTTimeProcess::End()
 
 TTErr TTTimeProcess::Play()
 {
-    TTValue    v;
-    TTUInt32   start, end;
-    
-    // set the running state of the process
-    mRunning = YES;
-    
-    // launch the scheduler
-    mStartEvent.get(kTTSym_date, v);
-    start = v[0];
-    
-    mEndEvent.get(kTTSym_date, v);
-    end = v[0];
-    
-    if (end > start) {
+    // filter repetitions
+    if (!mRunning)
+    {
+        TTValue    v;
+        TTUInt32   start, end;
         
-        v = TTFloat64(end - start);
-        mScheduler.set(kTTSym_duration, v);
+        // set the running state of the process
+        mRunning = YES;
         
-        mScheduler.set("externalTick", mExternalTick);
+        // launch the scheduler
+        mStartEvent.get(kTTSym_date, v);
+        start = v[0];
         
-        return mScheduler.send(kTTSym_Go);
+        mEndEvent.get(kTTSym_date, v);
+        end = v[0];
+        
+        if (end > start) {
+            
+            v = TTFloat64(end - start);
+            mScheduler.set(kTTSym_duration, v);
+            
+            mScheduler.set("externalTick", mExternalTick);
+            
+            // DEBUG
+            TTLogMessage("TTTimeProcess::Play : %s\n", mName.c_str());
+            
+            return mScheduler.send(kTTSym_Go);
+        }
     }
     
     return kTTErrGeneric;
@@ -520,8 +527,8 @@ TTErr TTTimeProcess::Play()
 TTErr TTTimeProcess::Stop()
 {
     // filter repetitions
-    if (mRunning) {
-        
+    if (mRunning)
+    {
         // set the running state of the process
         mRunning = NO;
 
@@ -569,15 +576,15 @@ TTErr TTTimeProcess::EventDateChanged(const TTValue& inputValue, TTValue& output
     
     TTObject aTimeEvent = inputValue[0];
     
-    if (aTimeEvent == mStartEvent) {
-        
+    if (aTimeEvent == mStartEvent)
+    {
         // if needed, the compile method should be called again now
         mCompiled = NO;
         
         return kTTErrNone;
     }
-    else if (aTimeEvent == mEndEvent) {
-        
+    else if (aTimeEvent == mEndEvent)
+    {
         // if needed, the compile method should be called again now
         mCompiled = NO;
         
@@ -622,38 +629,25 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
     // event happened case :
     else if (newStatus == kTTSym_eventHappened)
     {
+        // if the time process is muted : do nothing
+        if (mMute)
+            return kTTErrNone;
+        
         if (aTimeEvent == mStartEvent)
         {
-            // if the time process is muted
-            if (mMute)
-                return kTTErrNone;
+            // play the time process
+            return Play();
             
-            // use the specific compiled method of the time process
-            if (!mCompiled)
-                Compile();
-            
-            // use the specific start process method of the time process
-            if (!ProcessStart()) {
-
-                // notify ProcessStarted observers
-                sendStatusNotification(kTTSym_ProcessStarted);
-                
-                // play the process
-                return Play();
-            }
-            
-            TTLogError("TTTimeProcess::EventStatusChanged : ProccessStart failed\n");
-            return kTTErrGeneric;
+            // the Compile method is called in TTTimeProcess::SchedulerRunningChanged
+            // the ProcessStart method is called in TTTimeProcess::SchedulerRunningChanged
+            // the kTTSym_ProcessStarted notification is sent in TTTimeProcess::SchedulerRunningChanged
         }
         else if (aTimeEvent == mEndEvent)
         {
-            // if the time process is muted
-            if (mMute)
-                return kTTErrNone;
-            
-            // stop the process
+            // stop the time process
             return Stop();
             
+            // the ProcessEnd method is called in TTTimeProcess::SchedulerRunningChanged
             // the kTTSym_ProcessEnded notification is sent in TTTimeProcess::SchedulerRunningChanged
         }
         
@@ -682,20 +676,36 @@ TTErr TTTimeProcess::SchedulerRunningChanged(const TTValue& inputValue, TTValue&
     
     TTBoolean running = inputValue[0];
    
-    if (running) {
+    if (running)
+    {
+        // use the specific compiled method of the time process
+        if (!mCompiled)
+            Compile();
         
-        // the kTTSym_ProcessStarted is sent in TTTimeProcess::EventStatusChanged
-        return kTTErrNone;
-    }
-    else {
+        // use the specific start process method of the time process
+        if (!ProcessStart())
+        {
+            // notify ProcessStarted observers
+            sendStatusNotification(kTTSym_ProcessStarted);
         
-        // use the specific process end method of the time process
-        if (!ProcessEnd()) {
-            
-            // notify ProcessEnded observers
-            sendStatusNotification(kTTSym_ProcessEnded);
+            return kTTErrNone;
         }
         
+        TTLogError("TTTimeProcess::SchedulerRunningChanged : ProcessStart failed\n");
+        return kTTErrGeneric;
+    }
+    else
+    {
+        // use the specific process end method of the time process
+        if (!ProcessEnd())
+        {
+            // notify ProcessEnded observers
+            sendStatusNotification(kTTSym_ProcessEnded);
+            
+            return kTTErrNone;
+        }
+        
+        TTLogError("TTTimeProcess::SchedulerRunningChanged : ProcessEnd failed\n");
         return kTTErrGeneric;
     }
 }
@@ -707,7 +717,8 @@ TTErr TTTimeProcess::sendStatusNotification(TTSymbol& notification)
     if (mContainer.valid())
         mContainer.get(kTTSym_running, running);
     
-    if (!running) {
+    if (!running)
+    {
         TTLogError("TTTimeProcess::sendStatusNotification : %s don't send %s notification because the container is not running\n", mName.c_str(), notification.c_str());
         return kTTErrGeneric;
     }
