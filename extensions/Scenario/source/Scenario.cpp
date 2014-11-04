@@ -191,6 +191,28 @@ TTErr Scenario::ProcessStart()
     
     TTLogMessage("Scenario::ProcessStart : without execution graph\n");
     
+    // play each time process with a happened start event and a waiting or pending end event
+    for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
+        
+        TTObject aTimeProcess = mTimeProcessList.current()[0];
+        
+        TTObject startEvent = getTimeProcessStartEvent(aTimeProcess);
+        TTSymbol startStatus;
+        startEvent.get("status", startStatus);
+        
+        TTObject endEvent = getTimeProcessEndEvent(aTimeProcess);
+        TTSymbol endStatus;
+        endEvent.get("status", endStatus);
+        
+        // DEBUG
+        TTSymbol name;
+        aTimeProcess.get(kTTSym_name, name);
+        TTLogMessage("Scenario::ProcessStart : %s start is %s and end is %s\n", name.c_str(), startStatus.c_str(), endStatus.c_str());
+        
+        if (startStatus == kTTSym_eventHappened && (endStatus == kTTSym_eventWaiting || endStatus == kTTSym_eventPending))
+            aTimeProcess.send("Play");
+    }
+    
 #endif
     return kTTErrNone;
 }
@@ -287,7 +309,6 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
                         if (condition.valid())
                         {
                             aTimeEvent.set("status", kTTSym_eventPending);
-                            
                         }
                         // or make none conditioned event to happen at its date
                         else if (eventDate <= date)
