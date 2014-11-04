@@ -636,8 +636,7 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
             if (!ProcessStart()) {
 
                 // notify ProcessStarted observers
-				TTObject thisObject(this);
-                sendNotification(kTTSym_ProcessStarted, thisObject);
+                sendStatusNotification(kTTSym_ProcessStarted);
                 
                 // play the process
                 return Play();
@@ -667,8 +666,7 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
         if (aTimeEvent == mStartEvent)
         {
             // notify ProcessDisposed observers
-            TTObject thisObject(this);
-            sendNotification(kTTSym_ProcessDisposed, thisObject);
+            sendStatusNotification(kTTSym_ProcessDisposed);
         }
         
         return kTTErrNone;
@@ -695,12 +693,27 @@ TTErr TTTimeProcess::SchedulerRunningChanged(const TTValue& inputValue, TTValue&
         if (!ProcessEnd()) {
             
             // notify ProcessEnded observers
-			TTObject thisObject(this);
-            sendNotification(kTTSym_ProcessEnded, thisObject);
+            sendStatusNotification(kTTSym_ProcessEnded);
         }
         
         return kTTErrGeneric;
     }
+}
+
+TTErr TTTimeProcess::sendStatusNotification(TTSymbol& notification)
+{
+    // is the container running ? (the nofication is sent if there is no valid container)
+    TTBoolean running = YES;
+    if (mContainer.valid())
+        mContainer.get(kTTSym_running, running);
+    
+    if (!running) {
+        TTLogError("TTTimeProcess::sendStatusNotification : %s don't send %s notification because the container is not running\n", mName.c_str(), notification.c_str());
+        return kTTErrGeneric;
+    }
+    
+    TTObject thisObject(this);
+    return sendNotification(notification, thisObject);
 }
 
 #if 0

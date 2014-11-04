@@ -153,6 +153,16 @@ TTErr TTTimeEvent::setStatus(const TTValue& value)
         mEndedProcessesCount = 0;
         mDisposedProcessesCount = 0;
     }
+    
+    // is the container running ? (the nofication is sent if there is no valid container)
+    TTBoolean running = YES;
+    if (mContainer.valid())
+        mContainer.get(kTTSym_running, running);
+    
+    if (!running) {
+        TTLogError("TTTimeEvent::setStatus : %s don't notify %s status because the container is not running\n", mName.c_str(), mStatus.c_str());
+        return kTTErrGeneric;
+    }
 
     // notify each attribute observers
     v.append(mStatus);

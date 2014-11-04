@@ -280,6 +280,11 @@ private :
      @return                kTTErrNone */
     TTErr           SchedulerRunningChanged(const TTValue& inputValue, TTValue& outputValue);
     
+    /** Send current status notification if the container is running
+     @param notification    #TTSymbol "ProcessStarted", "ProcessEnded" or "ProcessDisposed"
+     @return                kTTErrGeneric if the container is not running */
+    TTErr           sendStatusNotification(TTSymbol& notification);
+    
 protected :
     
     /** get the start event
