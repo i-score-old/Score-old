@@ -458,16 +458,13 @@ TTErr TTTimeProcess::Limit(const TTValue& inputValue, TTValue& outputValue)
 TTErr TTTimeProcess::Start()
 {
     // if the container is not running (or not valid)
-    TTBoolean running;
-    if (!mContainer.valid())
-        running = NO;
-    else
+    TTBoolean running = NO;
+    if (mContainer.valid())
         mContainer.get("running", running);
     
     if (!running)
     {
         mStartEvent.set("status", kTTSym_eventWaiting);
-        
         return mStartEvent.send(kTTSym_Happen);
     }
     
@@ -477,10 +474,8 @@ TTErr TTTimeProcess::Start()
 TTErr TTTimeProcess::End()
 {
     // if the container is not running (or not valid)
-    TTBoolean running;
-    if (!mContainer.valid())
-        running = NO;
-    else
+    TTBoolean running = NO;
+    if (mContainer.valid())
         mContainer.get("running", running);
     
     if (!running)
