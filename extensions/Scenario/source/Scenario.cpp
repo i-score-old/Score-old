@@ -211,13 +211,6 @@ TTErr Scenario::ProcessEnd()
         aTimeProcess.send(kTTSym_Stop);
     }
     
-    // root scenario : reset the status of its start and end events
-    if (!mContainer.valid())
-    {
-        getStartEvent().set("status", kTTSym_eventWaiting);
-        getEndEvent().set("status", kTTSym_eventWaiting);
-    }
-    
     // reset the status of each time event
     for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next())
     {
@@ -431,17 +424,6 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
             }
             
 #ifdef NO_EXECUTION_GRAPH
-            
-            // root scenario : prepare the status of its start and end events
-            if (!mContainer.valid())
-            {
-                if (timeOffset == 0)
-                    getStartEvent().set("status", kTTSym_eventWaiting);
-                else
-                    getStartEvent().set("status", kTTSym_eventHappened);
-                
-                getEndEvent().set("status", kTTSym_eventWaiting);
-            }
             
             // prepare the status of each time event
             // TODO : this should be merged with the state compilation done before
