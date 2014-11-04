@@ -144,14 +144,6 @@ TTErr Scenario::Compile()
     mScheduler.get(kTTSym_offset, v);
     timeOffset = TTFloat64(v[0]);
     
-    // reset all time events to a waiting status
-    for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next()) {
-        
-        aTimeEvent = mTimeEventList.current()[0];
-        
-        aTimeEvent.set(kTTSym_status, kTTSym_eventWaiting);
-    }
-    
 #ifndef NO_EXECUTION_GRAPH
     // compile the mExecutionGraph to prepare scenario execution from the scheduler time offset
     compileGraph(timeOffset);
@@ -203,11 +195,6 @@ TTErr Scenario::ProcessStart()
         TTObject endEvent = getTimeProcessEndEvent(aTimeProcess);
         TTSymbol endStatus;
         endEvent.get("status", endStatus);
-        
-        // DEBUG
-        TTSymbol name;
-        aTimeProcess.get(kTTSym_name, name);
-        TTLogMessage("Scenario::ProcessStart : %s start is %s and end is %s\n", name.c_str(), startStatus.c_str(), endStatus.c_str());
         
         if (startStatus == kTTSym_eventHappened && (endStatus == kTTSym_eventWaiting || endStatus == kTTSym_eventPending))
             aTimeProcess.send("Play");
@@ -432,6 +419,18 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
             }
             
 #ifdef NO_EXECUTION_GRAPH
+            
+            // root scenario : prepare the status of its start and end events
+            if (!mContainer.valid())
+            {
+                if (date == 0.)
+                    getStartEvent().set("status", kTTSym_eventWaiting);
+                else
+                    getStartEvent().set("status", kTTSym_eventHappened);
+                
+                getEndEvent().set("status", kTTSym_eventWaiting);
+            }
+            
             // prepare the status of each time event
             // TODO : this should be merged with the state compilation done before
             for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next())
