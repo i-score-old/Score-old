@@ -154,7 +154,7 @@ TTErr TTTimeEvent::setStatus(const TTValue& value)
         mDisposedProcessesCount = 0;
     }
     
-    // is the container running ? (the nofication is sent if there is no valid container)
+    // is the container running ? (the notification is sent if there is no valid container)
     TTBoolean running = YES;
     if (mContainer.valid())
         mContainer.get(kTTSym_running, running);
@@ -167,7 +167,7 @@ TTErr TTTimeEvent::setStatus(const TTValue& value)
 #ifdef TTSCORE_DEBUG
         TTLogMessage("TTTimeEvent::setStatus %s : %s -> %s\n", mName.c_str(), lastStatus.c_str(), mStatus.c_str());
 #endif
-        sendNotification(kTTSym_EventStatusChanged, v);
+        return sendNotification(kTTSym_EventStatusChanged, v);
     }
 #ifdef TTSCORE_DEBUG
     TTLogMessage("TTTimeEvent::setStatus %s : don't notify %s status because the container is not running\n", mName.c_str(), mStatus.c_str());
@@ -487,12 +487,21 @@ TTErr TTTimeEvent::ProcessEnded(const TTValue& inputValue, TTValue& outputValue)
 #ifdef TTSCORE_DEBUG
     TTLogMessage("TTTimeEvent::ProcessEnded %s : attached = %d, started = %d, ended = %d, disposed = %d\n", mName.c_str(), mAttachedProcesses.size(), mStartedProcessesCount, mEndedProcessesCount, mDisposedProcessesCount);
 #endif
-    // a non conditioned event happens when all attached processes are ended or disposed
-    if (!mCondition.valid() &&
-        mStatus == kTTSym_eventWaiting &&
-        mEndedProcessesCount + mDisposedProcessesCount == mAttachedProcesses.size())
+    // when all attached processes are ended or disposed
+    if (mEndedProcessesCount + mDisposedProcessesCount == mAttachedProcesses.size())
     {
-        return Happen();
+        // a conditioned pending event forces its condition to apply its default case
+        if (mCondition.valid() &&
+            mStatus == kTTSym_eventPending)
+        {
+            return mCondition.send(kTTSym_Trigger); // théo : the use of Trigger is temporary
+        }
+        // a non conditioned waiting event happens
+        else if (!mCondition.valid() &&
+                 mStatus == kTTSym_eventWaiting)
+        {
+            return Happen();
+        }
     }
 
     return kTTErrNone;
