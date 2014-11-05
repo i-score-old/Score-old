@@ -55,9 +55,6 @@ TTTimeProcess(arguments)
     
     addMessageWithArguments(TimeEventMove);
     addMessageProperty(TimeEventMove, hidden, YES);
-    
-    addMessageWithArguments(TimeEventDispose);
-    addMessageProperty(TimeEventDispose, hidden, YES);
 
     addMessageWithArguments(TimeEventReplace);
     addMessageProperty(TimeEventReplace, hidden, YES);

@@ -195,24 +195,7 @@ TTErr TTTimeEvent::Dispose()
         return kTTErrGeneric;
     }
     
-    // the event have to be into a valid running container
-    if (mContainer.valid())
-    {
-        TTBoolean   running;
-        mContainer.get("running", running);
-        
-        if (running)
-        {
-            // change the status before
-            setStatus(kTTSym_eventDisposed);
-            
-            TTValue     none;
-            TTObject    thisObject(this);
-            return mContainer.send("TimeEventDispose", thisObject, none);
-        }
-    }
-    
-    return kTTErrNone;
+    return setStatus(kTTSym_eventDisposed);
 }
 
 TTErr TTTimeEvent::Happen()

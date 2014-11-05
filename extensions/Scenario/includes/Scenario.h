@@ -143,12 +143,6 @@ class Scenario : public TimeContainerPlugin {
      @return                an error code if the movement fails */
     TTErr   TimeEventMove(const TTValue& inputValue, TTValue& outputValue);
     
-    /** Dispose a time event
-     @param inputValue      a time event object
-     @param outputvalue     nothing            
-     @return                an error code if the disposing fails */
-    TTErr   TimeEventDispose(const TTValue& inputValue, TTValue& outputValue);
-
     /** Replace a time event by another one (copying date and active attribute)
      @param inputvalue      a former time event object, a new time event object
      @param outputvalue     nothing            

@@ -1086,42 +1086,6 @@ TTErr Scenario::TimeEventMove(const TTValue& inputValue, TTValue& outputValue)
     return kTTErrGeneric;
 }
 
-TTErr Scenario::TimeEventDispose(const TTValue &inputValue, TTValue &outputValue)
-{
-    if (!mRunning)
-        return kTTErrGeneric;
-    
-    TTObject aTimeEvent;
-
-    if (inputValue.size() == 1) {
-
-        if (inputValue[0].type() == kTypeObject) {
-
-            aTimeEvent = inputValue[0];
-
-#ifndef NO_EXECUTION_GRAPH
-            if (mExecutionGraph) {
-
-                // if the execution graph is running
-                if (mExecutionGraph->getUpdateFactor() != 0) {
-
-                    // put the associated transition in the list of transitions to deactivate
-                    TTLogMessage("Scenario::TimeEventDispose : %p\n", TTPtr(aTimeEvent.instance()));
-                    mExecutionGraph->deactivateTransition(TransitionPtr(mTransitionsMap[aTimeEvent.instance()]));
-
-                    return kTTErrNone;
-                }
-            }
-#else
-            return kTTErrNone;
-#endif
-            
-        }
-    }
-
-    return kTTErrGeneric;
-}
-
 TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue)
 {
     TTObject    aFormerTimeEvent, aNewTimeEvent;

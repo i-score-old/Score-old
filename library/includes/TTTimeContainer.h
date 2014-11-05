@@ -77,12 +77,6 @@ private :
      @return                an error code if the movement fails */
     virtual TTErr   TimeEventMove(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
     
-    /** Dispose a time event
-     @param inputValue      a time event object
-     @param outputvalue     nothing
-     @return                an error code if the disposing fails */
-    virtual TTErr   TimeEventDispose(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
-
     /** Replace a time event by another one (copying date attribute)
      @param inputValue      a former time event object, a new time event object
      @param outputvalue     nothing
