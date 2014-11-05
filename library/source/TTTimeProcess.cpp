@@ -483,32 +483,52 @@ TTErr TTTimeProcess::Play()
     // filter repetitions
     if (!mRunning)
     {
-        TTValue    v;
-        TTUInt32   start, end;
-        
         // set the running state of the process
         mRunning = YES;
         
-        // launch the scheduler
-        mStartEvent.get(kTTSym_date, v);
-        start = v[0];
+        // prepare scheduler to go
+        mScheduler.set("externalTick", mExternalTick);
         
-        mEndEvent.get(kTTSym_date, v);
-        end = v[0];
+        // use duration bounds if exist
+        if (mDurationMin || mDurationMax)
+        {
+            if (mDurationMax == 0)
+            {
+                mScheduler.set("infinite", TTBoolean(YES));
+            }
+            else
+            {
+                mScheduler.set("infinite", TTBoolean(NO));
+                mScheduler.set(kTTSym_duration, TTFloat64(mDurationMax));
+            }
+        }
+        // or use events date
+        else
+        {
+            TTValue    v;
+            TTUInt32   start, end;
+            
+            mStartEvent.get(kTTSym_date, v);
+            start = v[0];
         
-        if (end > start) {
+            mEndEvent.get(kTTSym_date, v);
+            end = v[0];
             
-            v = TTFloat64(end - start);
-            mScheduler.set(kTTSym_duration, v);
+            if (end - start <= 0)
+            {
+                 TTLogError("TTTimeProcess::Play %s : wrong duration\n", mName.c_str());
+                return kTTErrGeneric;
+            }
             
-            mScheduler.set("externalTick", mExternalTick);
+            mScheduler.set("infinite", TTBoolean(NO));
+            mScheduler.set(kTTSym_duration, TTFloat64(end - start));
+        }
             
 #ifdef TTSCORE_DEBUG
-            TTLogMessage("TTTimeProcess::Play %s\n", mName.c_str());
+        TTLogMessage("TTTimeProcess::Play %s\n", mName.c_str());
 #endif
-            
-            return mScheduler.send(kTTSym_Go);
-        }
+        // launch the scheduler
+        return mScheduler.send(kTTSym_Go);
     }
     
     return kTTErrGeneric;
@@ -787,13 +807,31 @@ TTErr TTTimeProcess::setEndEvent(TTObject&  aTimeEvent)
 
 void TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 position, TTFloat64 date)
 {
-	TTTimeProcessPtr	aTimeProcess = (TTTimeProcessPtr)object;
-    TTValue             none;
+	TTTimeProcessPtr aTimeProcess = (TTTimeProcessPtr)object;
     
-    // use the specific process method
-    if (aTimeProcess->mRunning) {
+    if (aTimeProcess->mRunning)
+    {
+        // check if duration min is reached
+        if (aTimeProcess->mDurationMin > 0)
+        {
+            if (date >= aTimeProcess->mDurationMin)
+            {
+#ifdef TTSCORE_DEBUG
+                TTLogMessage("TTTimeProcessSchedulerCallback %s : reaches duration min (%d)\n", aTimeProcess->mName.c_str(), aTimeProcess->mDurationMin);
+#endif
+                // notify kTTSym_ProcessDurationMinReached observers
+                // TODO : sent this only one time !
+                //aTimeProcess->sendStatusNotification(kTTSym_ProcessDurationMinReached);
+            }
+        }
         
-        aTimeProcess->Process(TTValue(position, date), none);
+        if (!aTimeProcess->mMute)
+        {
+            TTValue none;
+            
+            // use the specific process method
+            aTimeProcess->Process(TTValue(position, date), none);
+        }
         
         // the notifications below are useful for network observation purpose for exemple
         // TODO : shouldn't we limit the sending of those observation to not overcrowed the network ?
