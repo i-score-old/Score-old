@@ -520,6 +520,8 @@ TTErr TTTimeProcess::Stop()
     if (mRunning)
     {
         // set the running state of the process
+        // note : this have to be done BEFORE the effective scheduler stop
+        // because, in time container case, this running state is checked in many place to propagate or not notifications
         mRunning = NO;
         
         // stop the scheduler
