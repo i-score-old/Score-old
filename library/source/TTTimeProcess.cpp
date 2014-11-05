@@ -125,6 +125,8 @@ mExternalTick(NO)
     // needed to be notified by events
     addMessageWithArguments(EventDateChanged);
     addMessageProperty(EventDateChanged, hidden, YES);
+    addMessageWithArguments(EventConditionChanged);
+    addMessageProperty(EventConditionChanged, hidden, YES);
     addMessageWithArguments(EventStatusChanged);
     addMessageProperty(EventStatusChanged, hidden, YES);
     
@@ -606,6 +608,22 @@ TTErr TTTimeProcess::EventDateChanged(const TTValue& inputValue, TTValue& output
     
     TTLogError("TTTimeProcess::EventDateChanged %s : wrong event\n", mName.c_str());
     return kTTErrGeneric;
+}
+
+TTErr TTTimeProcess::EventConditionChanged(const TTValue& inputValue, TTValue& outputValue)
+{
+    TT_ASSERT("TTTimeProcess::EventConditionChanged : inputValue is correct", inputValue.size() == 2 && inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeObject);
+    
+    TTObject    aTimeEvent = inputValue[0];
+    TTObject    aTimeCondition = inputValue[1];
+    
+    // a time process with a conditioned end event cannot be rigid
+    if (aTimeEvent == mEndEvent)
+    {
+        setRigid(TTBoolean(!aTimeCondition.valid()));
+    }
+    
+    return kTTErrNone;
 }
 
 TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outputValue)

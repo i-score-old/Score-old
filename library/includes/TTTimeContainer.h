@@ -77,12 +77,6 @@ private :
      @return                an error code if the movement fails */
     virtual TTErr   TimeEventMove(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
     
-    /** Link a time event to a condition
-     @param inputValue      a time event object, a time condition object
-     @param outputvalue     nothing
-     @return                an error code if the setting fails */
-    virtual TTErr   TimeEventCondition(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
-    
     /** Trigger a time event to make it happens
      @param inputValue      a time event object
      @param outputvalue     nothing

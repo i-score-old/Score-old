@@ -1086,62 +1086,6 @@ TTErr Scenario::TimeEventMove(const TTValue& inputValue, TTValue& outputValue)
     return kTTErrGeneric;
 }
 
-TTErr Scenario::TimeEventCondition(const TTValue& inputValue, TTValue& outputValue)
-{
-    TTObject    aTimeEvent;
-    TTObject    aTimeCondition;
-    TTObject    aTimeProcess;
-    TTValue     v, aCacheElement;
-#ifndef NO_EDITION_SOLVER
-    SolverObjectMapIterator it;
-#endif
-    if (inputValue.size() == 2) {
-        
-        if (inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeObject) {
-            
-            aTimeEvent = inputValue[0];
-            aTimeCondition = inputValue[1];
-            
-            // try to find the time event
-            mTimeEventList.find(&TTTimeContainerFindTimeEvent, (TTPtr)aTimeEvent.instance(), aCacheElement);
-            
-            // couldn't find the former time event in the scenario
-            if (aCacheElement.size() == 0)
-                return kTTErrValueNotFound;
-            
-            // try to find the time condition
-            mTimeConditionList.find(&TTTimeContainerFindTimeCondition, (TTPtr)aTimeCondition.instance(), aCacheElement);
-            
-            // couldn't find the former time condition in the scenario
-            if (aCacheElement.size() == 0)
-                return kTTErrValueNotFound;
-            
-            // for each time process
-            for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
-                
-                aTimeProcess = mTimeProcessList.current()[0];
-                
-                // if the time event is the time process end event
-                if (aTimeEvent == getTimeProcessEndEvent(aTimeProcess)) {
-                    
-                    // a time process with a conditioned end event cannot be rigid
-                    v = TTBoolean(!aTimeCondition.valid());
-                    aTimeProcess.set(kTTSym_rigid, v);
-                }
-            }
-            
-            // théo : maybe there will be other stuff to do considering there is a condition with several case now ?
-            
-            // needs to be compiled again
-            mCompiled = NO;
-            
-            return kTTErrNone;
-        }
-    }
-    
-    return kTTErrGeneric;
-}
-
 TTErr Scenario::TimeEventTrigger(const TTValue& inputValue, TTValue& outputValue)
 {
     if (!mRunning)

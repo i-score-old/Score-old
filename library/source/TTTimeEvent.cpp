@@ -89,6 +89,8 @@ TTTimeEvent::~TTTimeEvent()
 
 TTErr TTTimeEvent::setDate(const TTValue& value)
 {
+    TT_ASSERT("TTTimeEvent::setDate : inputValue is correct", inputValue.size() == 1 && (inputValue[0].type() == kTypeInt32 || inputValue[0].type() == kTypeUInt32));
+    
     TTUInt32 newDate = value[0];
     
     // filter repetitions
@@ -106,30 +108,27 @@ TTErr TTTimeEvent::setDate(const TTValue& value)
 
 TTErr TTTimeEvent::setCondition(const TTValue& value)
 {
-    if (value.size() == 1) {
+    TT_ASSERT("TTTimeEvent::setCondition : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
+    
+    TTObject newCondition = value[0];
+    
+    // filter repetitions
+    if (newCondition != mCondition)
+    {
+        mCondition = newCondition;
         
-        if (value[0].type() == kTypeObject) {
-            
-            // set the condition object
-            mCondition = value[0];
-            
-            // tell the container the event is becoming (or not) conditioned
-            if (mContainer.valid()) {
-                
-                TTValue none, v = TTObject(this);
-                v.append(mCondition);
-                return mContainer.send("TimeEventCondition", v, none);
-            }
-        }
+        // notify each condition attribute observers
+        TTValue v(TTObject(this), mCondition);
+        sendNotification("EventConditionChanged", v);
     }
-    else
-        mCondition = NULL;
     
     return kTTErrNone;
 }
 
 TTErr TTTimeEvent::setStatus(const TTValue& value)
 {
+    TT_ASSERT("TTTimeEvent::setStatus : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeSymbol);
+    
     TTSymbol    lastStatus = mStatus;
     TTValue     v = TTObject(this);
     

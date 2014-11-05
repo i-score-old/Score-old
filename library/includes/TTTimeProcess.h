@@ -268,6 +268,12 @@ private :
      @return                kTTErrNone */
     TTErr           EventDateChanged(const TTValue& inputValue, TTValue& outputValue);
     
+    /** To be notified when an event condition changed
+     @param inputValue      the event which have changed his condition, the condition
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr           EventConditionChanged(const TTValue& inputValue, TTValue& outputValue);
+    
     /** To be notified when an event status changed
      @param inputValue      the event which have changed his status
      @param outputValue     nothing
