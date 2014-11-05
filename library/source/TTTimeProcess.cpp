@@ -460,16 +460,8 @@ TTErr TTTimeProcess::Start()
     // filter repetitions
     if (!mRunning)
     {
-        // if the container is not running (or not valid)
-        TTBoolean containerRunning = NO;
-        if (mContainer.valid())
-            mContainer.get("running", containerRunning);
-        
-        if (!containerRunning)
-        {
-            mStartEvent.set("status", kTTSym_eventWaiting);
-            return mStartEvent.send(kTTSym_Happen);
-        }
+        mStartEvent.set("status", kTTSym_eventWaiting);
+        return mStartEvent.send(kTTSym_Happen);
     }
     
     return kTTErrNone;
@@ -480,13 +472,7 @@ TTErr TTTimeProcess::End()
     // filter repetitions
     if (mRunning)
     {
-        // if the container is not running (or not valid)
-        TTBoolean containerRunning = NO;
-        if (mContainer.valid())
-            mContainer.get("running", containerRunning);
-        
-        if (!containerRunning)
-            return mEndEvent.send(kTTSym_Happen);
+        return mEndEvent.send(kTTSym_Happen);
     }
     
     return kTTErrNone;
@@ -535,7 +521,8 @@ TTErr TTTimeProcess::Stop()
     {
         // set the running state of the process
         mRunning = NO;
-
+        
+        // stop the scheduler
         return mScheduler.send(kTTSym_Stop);
     }
     
