@@ -594,7 +594,7 @@ TTErr TTTimeProcess::EventDateChanged(const TTValue& inputValue, TTValue& output
         return kTTErrNone;
     }
     
-    TTLogError("TTTimeProcess::EventDateChanged : wrong event\n");
+    TTLogError("TTTimeProcess::EventDateChanged %s : wrong event\n", mName.c_str());
     return kTTErrGeneric;
 }
 
@@ -632,10 +632,6 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
     // event happened case :
     else if (newStatus == kTTSym_eventHappened)
     {
-        // if the time process is muted : do nothing
-        if (mMute)
-            return kTTErrNone;
-        
         if (aTimeEvent == mStartEvent)
         {
             // play the time process
@@ -654,7 +650,7 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
             // the kTTSym_ProcessEnded notification is sent in TTTimeProcess::SchedulerRunningChanged
         }
         
-        TTLogError("TTTimeProcess::EventStatusChanged : wrong event happened\n");
+        TTLogError("TTTimeProcess::EventStatusChanged %s : wrong event happened\n", mName.c_str());
         return kTTErrGeneric;
     }
     // event disposed case :
@@ -669,7 +665,7 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
         return kTTErrNone;
     }
     
-    TTLogError("TTTimeProcess::EventStatusChanged : wrong status\n");
+    TTLogError("TTTimeProcess::EventStatusChanged %s : wrong status\n", mName.c_str());
     return kTTErrGeneric;
 }
 
@@ -681,35 +677,41 @@ TTErr TTTimeProcess::SchedulerRunningChanged(const TTValue& inputValue, TTValue&
    
     if (running)
     {
-        // use the specific compiled method of the time process
-        if (!mCompiled)
-            Compile();
-        
-        // use the specific start process method of the time process
-        if (!ProcessStart())
+        if (!mMute)
         {
-            // notify ProcessStarted observers
-            sendStatusNotification(kTTSym_ProcessStarted);
-        
-            return kTTErrNone;
+            // use the specific compiled method of the time process
+            if (!mCompiled)
+                Compile();
+            
+            // use the specific start process method of the time process
+            if (ProcessStart())
+            {
+                TTLogError("TTTimeProcess::SchedulerRunningChanged %s : ProcessStart failed\n", mName.c_str());
+                return kTTErrGeneric;
+            }
         }
         
-        TTLogError("TTTimeProcess::SchedulerRunningChanged : ProcessStart failed\n");
-        return kTTErrGeneric;
+        // notify ProcessStarted observers
+        sendStatusNotification(kTTSym_ProcessStarted);
+        
+        return kTTErrNone;
     }
     else
     {
-        // use the specific process end method of the time process
-        if (!ProcessEnd())
+        if (!mMute)
         {
-            // notify ProcessEnded observers
-            sendStatusNotification(kTTSym_ProcessEnded);
-            
-            return kTTErrNone;
+            // use the specific process end method of the time process
+            if (ProcessEnd())
+            {
+                TTLogError("TTTimeProcess::SchedulerRunningChanged %s : ProcessEnd failed\n", mName.c_str());
+                return kTTErrGeneric;
+            }
         }
         
-        TTLogError("TTTimeProcess::SchedulerRunningChanged : ProcessEnd failed\n");
-        return kTTErrGeneric;
+        // notify ProcessEnded observers
+        sendStatusNotification(kTTSym_ProcessEnded);
+        
+        return kTTErrNone;
     }
 }
 
