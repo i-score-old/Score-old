@@ -495,6 +495,7 @@ TTErr TTTimeProcess::Play()
             if (mDurationMax == 0)
             {
                 mScheduler.set("infinite", TTBoolean(YES));
+                mScheduler.set(kTTSym_duration, TTFloat64(1)); // TODO : we shouldn't need to set the duration
             }
             else
             {
@@ -699,7 +700,7 @@ TTErr TTTimeProcess::SchedulerRunningChanged(const TTValue& inputValue, TTValue&
                 return kTTErrGeneric;
             }
         }
-        
+
         // notify ProcessStarted observers
         sendStatusNotification(kTTSym_ProcessStarted);
         
