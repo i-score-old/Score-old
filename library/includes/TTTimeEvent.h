@@ -74,6 +74,7 @@ private :
     TTErr           setStatus(const TTValue& value);
     
     /** Try to make the event happen (possibility to use the scenario to check event validity)
+     @note this method is deprecated : use Happen
      @return                an error code returned by the trigger method */
     TTErr           Trigger();
     

@@ -176,29 +176,7 @@ TTErr TTTimeEvent::setStatus(const TTValue& value)
 
 TTErr TTTimeEvent::Trigger()
 {
-    // the event have to be pending
-    if (mStatus != kTTSym_eventPending)
-        return kTTErrGeneric;
-    
-    // if the event is muted : do nothing
-    if (mMute)
-        return kTTErrNone;
-    
-    // the event have to be into a valid running container
-    if (mContainer.valid())
-    {
-        TTBoolean running;
-        mContainer.get("running", running);
-        
-        if (running) {
-            
-            TTValue     none;
-            TTObject    thisObject(this);
-            return mContainer.send("TimeEventTrigger", thisObject, none);
-        }
-    }
-    
-    // otherwise make it happens now
+    // this method is deprecated : use Happen
     return Happen();
 }
 
@@ -218,13 +196,13 @@ TTErr TTTimeEvent::Dispose()
     }
     
     // the event have to be into a valid running container
-    if (mContainer.valid()) {
-        
+    if (mContainer.valid())
+    {
         TTBoolean   running;
         mContainer.get("running", running);
         
-        if (running) {
-            
+        if (running)
+        {
             // change the status before
             setStatus(kTTSym_eventDisposed);
             
@@ -493,7 +471,9 @@ TTErr TTTimeEvent::ProcessEnded(const TTValue& inputValue, TTValue& outputValue)
         if (mCondition.valid() &&
             mStatus == kTTSym_eventPending)
         {
-            return mCondition.send(kTTSym_Trigger); // théo : the use of Trigger is temporary
+            // théo : the use of Trigger is temporary because there is no method to apply default case
+            // théo : commenting out the line below because the TimeProcess::Play method does'nt set the scheduler correctly for now
+            //return mCondition.send(kTTSym_Trigger);
         }
         // a non conditioned waiting event happens
         else if (!mCondition.valid() &&

@@ -1086,42 +1086,6 @@ TTErr Scenario::TimeEventMove(const TTValue& inputValue, TTValue& outputValue)
     return kTTErrGeneric;
 }
 
-TTErr Scenario::TimeEventTrigger(const TTValue& inputValue, TTValue& outputValue)
-{
-    if (!mRunning)
-        return kTTErrGeneric;
-    
-    TTObject aTimeEvent;
-    
-    if (inputValue.size() == 1) {
-        
-        if (inputValue[0].type() == kTypeObject) {
-            
-            aTimeEvent = inputValue[0];
-            
-#ifndef NO_EXECUTION_GRAPH
-            if (mExecutionGraph) {
-                
-                // if the excecution graph is running
-                if (mExecutionGraph->getUpdateFactor() != 0) {
-                    
-                    // append the event to the event queue to process its triggering
-                    TTLogMessage("Scenario::TimeEventTrigger : %p\n", TTPtr(aTimeEvent.instance()));
-                    mExecutionGraph->putAnEvent(TTPtr(aTimeEvent.instance()));
-                    
-                    return kTTErrNone;
-                }
-            }
-#else
-            return aTimeEvent.send(kTTSym_Happen);
-#endif
-            
-        }
-    }
-    
-    return kTTErrGeneric;
-}
-
 TTErr Scenario::TimeEventDispose(const TTValue &inputValue, TTValue &outputValue)
 {
     if (!mRunning)
