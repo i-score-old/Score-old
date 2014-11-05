@@ -639,7 +639,7 @@ TTErr TTTimeCondition::EventDateChanged(const TTValue& inputValue, TTValue& outp
         return kTTErrNone;
     }
     
-    TTLogError("TTTimeCondition::EventDateChanged : wrong event\n");
+    TTLogError("TTTimeCondition::EventDateChanged %s : wrong event\n", mName.c_str());
     return kTTErrGeneric;
 }
 
@@ -674,7 +674,7 @@ TTErr TTTimeCondition::EventStatusChanged(const TTValue& inputValue, TTValue& ou
         return kTTErrNone;
     }
     
-    TTLogError("TTTimeCondition::EventStatusChanged : wrong event\n");
+    TTLogError("TTTimeCondition::EventStatusChanged %s : wrong event\n", mName.c_str());
     return kTTErrGeneric;
 }
 

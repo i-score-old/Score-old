@@ -281,7 +281,7 @@ TTErr TTTimeContainer::readTimeEventFromXml(TTXmlHandlerPtr aXmlHandler, TTObjec
                     // an event cannot be created after the end even of its container
                     if (TTUInt32(v[0]) > TTTimeEventPtr(getEndEvent().instance())->mDate) {
                         
-                        TTLogError("TTTimeContainer::readTimeEventFromXml : event created after the end event of its container\n");
+                        TTLogError("TTTimeContainer::readTimeEventFromXml %s : event created after the end event of its container\n", mName.c_str());
                         return kTTErrGeneric;
                     }
                     
@@ -459,7 +459,7 @@ TTErr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHandler, TTObj
                 
                 if (aCacheElement.size() == 0) {
                     
-                    TTLogError("TTTimeContainer::readTimeProcessFromXml : %s container can't find start event\n", this->mName.c_str());
+                    TTLogError("TTTimeContainer::readTimeProcessFromXml %s : can't find start event\n", mName.c_str());
                     return kTTErrGeneric;
                 }
                 
@@ -480,7 +480,7 @@ TTErr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHandler, TTObj
                 
                 if (aCacheElement.size() == 0) {
                     
-                    TTLogError("TTTimeContainer::readTimeProcessFromXml : %s container can't find end event\n", this->mName.c_str());
+                    TTLogError("TTTimeContainer::readTimeProcessFromXml %s : can't find end event\n", mName.c_str());
                     return kTTErrGeneric;
                 }
                 

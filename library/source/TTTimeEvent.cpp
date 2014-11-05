@@ -141,7 +141,7 @@ TTErr TTTimeEvent::setStatus(const TTValue& value)
     {
         // log error only for non waiting status repetition
         if (mStatus != kTTSym_eventWaiting)
-            TTLogError("TTTimeEvent::setStatus : %s new status equals last status (%s)\n", mName.c_str(), mStatus.c_str());
+            TTLogError("TTTimeEvent::setStatus %s : new status equals last status (%s)\n", mName.c_str(), mStatus.c_str());
         
         return kTTErrGeneric;
     }
@@ -186,8 +186,8 @@ TTErr TTTimeEvent::Trigger()
         return kTTErrNone;
     
     // the event have to be into a valid running container
-    if (mContainer.valid()) {
-        
+    if (mContainer.valid())
+    {
         TTBoolean running;
         mContainer.get("running", running);
         
@@ -205,10 +205,16 @@ TTErr TTTimeEvent::Trigger()
 
 TTErr TTTimeEvent::Dispose()
 {
-    // if already happened or disposed : do nothing
-    if (mStatus == kTTSym_eventDisposed || mStatus == kTTSym_eventHappened)
+    // if the event is already happened or disposed : do nothing
+    if (mStatus == kTTSym_eventHappened)
     {
-        TTLogError("TTTimeEvent::Dispose : %s is already disposed or pending (%s)\n", mName.c_str(), mStatus.c_str());
+        TTLogError("TTTimeEvent::Dispose %s : is already happened\n", mName.c_str());
+        return kTTErrGeneric;
+    }
+    
+    if (mStatus == kTTSym_eventDisposed)
+    {
+        TTLogError("TTTimeEvent::Dispose %s : is already disposed\n", mName.c_str());
         return kTTErrGeneric;
     }
     
@@ -238,13 +244,13 @@ TTErr TTTimeEvent::Happen()
     
     if (mStatus != kTTSym_eventWaiting && mStatus != kTTSym_eventPending)
     {
-        TTLogError("TTTimeEvent::Happen : %s is not waiting or pending (%s)\n", mName.c_str(), mStatus.c_str());
+        TTLogError("TTTimeEvent::Happen %s : is not waiting or pending (%s)\n", mName.c_str(), mStatus.c_str());
         return kTTErrGeneric;
     }
     
     // if the event is not muted
-    if (!mMute) {
-    
+    if (!mMute)
+    {
         // push the state
         err = StatePush();
     }
