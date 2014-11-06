@@ -145,7 +145,7 @@ TTErr TTTimeContainer::getTimeConditions(TTValue& value)
 TTErr TTTimeContainer::Next(const TTValue& inputValue, TTValue& outputValue)
 {
     TTObject    aTimeEvent;
-    TTList      eventsToTrigger;
+    TTList      eventsToHappen;
     TTUInt32    found = 0;
     
     if (!mRunning)
@@ -165,7 +165,7 @@ TTErr TTTimeContainer::Next(const TTValue& inputValue, TTValue& outputValue)
             if (inputValue.size() == 0) {
                 
                 found = 1;
-                eventsToTrigger.append(aTimeEvent);
+                eventsToHappen.append(aTimeEvent);
                 break;
             }
             // else : is this event part of the events to trigger ?
@@ -179,7 +179,7 @@ TTErr TTTimeContainer::Next(const TTValue& inputValue, TTValue& outputValue)
                     
                     if (id == found) {
                         
-                        eventsToTrigger.append(aTimeEvent);
+                        eventsToHappen.append(aTimeEvent);
                         break;
                     }
                 }
@@ -187,15 +187,15 @@ TTErr TTTimeContainer::Next(const TTValue& inputValue, TTValue& outputValue)
         }
     }
     
-    if (eventsToTrigger.isEmpty())
+    if (eventsToHappen.isEmpty())
         return kTTErrGeneric;
     
-    for (eventsToTrigger.begin(); eventsToTrigger.end(); eventsToTrigger.next()) {
+    for (eventsToHappen.begin(); eventsToHappen.end(); eventsToHappen.next()) {
         
-        aTimeEvent = eventsToTrigger.current()[0];
+        aTimeEvent = eventsToHappen.current()[0];
         
         outputValue.append(aTimeEvent);
-        aTimeEvent.send("Trigger");
+        aTimeEvent.send(kTTSym_Happen);
     }
 
     return kTTErrNone;

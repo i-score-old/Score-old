@@ -73,11 +73,6 @@ private :
      @return                kTTErrNone */
     TTErr           setStatus(const TTValue& value);
     
-    /** Try to make the event happen (possibility to use the scenario to check event validity)
-     @note this method is deprecated : use Happen
-     @return                an error code returned by the trigger method */
-    TTErr           Trigger();
-    
     /** Make the event happen
      @return                an error code returned by the happen method */
     TTErr           Happen();

@@ -58,9 +58,9 @@ mPushing(NO)
     addAttributeProperty(AttachedProcesses, readOnly, YES);
     addAttributeProperty(AttachedProcesses, hidden, YES);
     
-    addMessage(Trigger);
     addMessage(Happen);
     addMessage(Dispose);
+    
     addMessageWithArguments(StateAddressGetValue);
     addMessageWithArguments(StateAddressSetValue);
     addMessageWithArguments(StateAddressClear);
@@ -172,12 +172,6 @@ TTErr TTTimeEvent::setStatus(const TTValue& value)
     TTLogMessage("TTTimeEvent::setStatus %s : don't notify %s status because the container is not running\n", mName.c_str(), mStatus.c_str());
 #endif
     return kTTErrNone;
-}
-
-TTErr TTTimeEvent::Trigger()
-{
-    // this method is deprecated : use Happen
-    return Happen();
 }
 
 TTErr TTTimeEvent::Dispose()

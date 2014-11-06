@@ -387,7 +387,7 @@ TTErr TTTimeCondition::Trigger(const TTValue& inputValue, TTValue& outputValue)
     if (!mReady)
         return kTTErrNone;
     
-    TTList  timeEventToTrigger;
+    TTList  timeEventToHappen;
     TTList  timeEventToDispose;
     
     // for each case
@@ -397,7 +397,7 @@ TTErr TTTimeCondition::Trigger(const TTValue& inputValue, TTValue& outputValue)
         
         // if no event are passed : trigger all the events
         if (inputValue.size() == 0) {
-            timeEventToTrigger.append(caseEvent);
+            timeEventToHappen.append(caseEvent);
             continue;
         }
         
@@ -411,7 +411,7 @@ TTErr TTTimeCondition::Trigger(const TTValue& inputValue, TTValue& outputValue)
                 TTObject event = inputValue[i];
                 
                 if (event == caseEvent) {
-                    timeEventToTrigger.append(caseEvent);
+                    timeEventToHappen.append(caseEvent);
                     found = YES;
                     break;
                 }
@@ -424,16 +424,16 @@ TTErr TTTimeCondition::Trigger(const TTValue& inputValue, TTValue& outputValue)
     }
     
     // if at least one event is in the trigger list
-    if (!timeEventToTrigger.isEmpty()) {
+    if (!timeEventToHappen.isEmpty()) {
         
         setReady(NO);
         
         TTObject o;
         
         // trigger all events of the trigger list
-        for (timeEventToTrigger.begin(); timeEventToTrigger.end(); timeEventToTrigger.next()) {
-            o = timeEventToTrigger.current()[0];
-            o.send(kTTSym_Trigger);
+        for (timeEventToHappen.begin(); timeEventToHappen.end(); timeEventToHappen.next()) {
+            o = timeEventToHappen.current()[0];
+            o.send(kTTSym_Happen);
         }
         
         // dispose all the other events
@@ -452,7 +452,7 @@ TTErr TTTimeCondition::Dispose(const TTValue& inputValue, TTValue& outputValue)
     if (!mReady)
         return kTTErrNone;
     
-    TTList  timeEventToTrigger;
+    TTList  timeEventToHappen;
     TTList  timeEventToDispose;
     
     // for each case
@@ -485,25 +485,25 @@ TTErr TTTimeCondition::Dispose(const TTValue& inputValue, TTValue& outputValue)
         
         // else prepare it to be triggered
         if (!found)
-            timeEventToTrigger.append(caseEvent);
+            timeEventToHappen.append(caseEvent);
     }
     
     // if at least one event is in the trigger list
-    if (!timeEventToTrigger.isEmpty()) {
+    if (!timeEventToHappen.isEmpty()) {
         
         setReady(NO);
         
         TTObject o;
         
         // trigger all events of the trigger list
-        for (timeEventToTrigger.begin(); timeEventToTrigger.end(); timeEventToTrigger.next()) {
-            o = timeEventToTrigger.current()[0];
-            o.send(kTTSym_Trigger);
+        for (timeEventToHappen.begin(); timeEventToHappen.end(); timeEventToHappen.next()) {
+            o = timeEventToHappen.current()[0];
+            o.send(kTTSym_Happen);
         }
         
         // dispose all the other events
         for (timeEventToDispose.begin(); timeEventToDispose.end(); timeEventToDispose.next()) {
-            o = timeEventToTrigger.current()[0];
+            o = timeEventToHappen.current()[0];
             o.send(kTTSym_Dispose);
         }
     }
@@ -739,7 +739,7 @@ void TTTimeCondition::applyDefaults()
         status = v[0];
         
         if (status != kTTSym_eventDisposed && status != kTTSym_eventHappened)
-            it->first->sendMessage(it->second.dflt?kTTSym_Trigger:kTTSym_Dispose);
+            it->first->sendMessage(it->second.dflt?kTTSym_Happen:kTTSym_Dispose);
     }
 }
 
@@ -754,7 +754,7 @@ TTErr TTTimeConditionReceiverReturnValueCallback(const TTValue& baton, const TTV
     TTTimeConditionPtr  aTimeCondition;
     TTAddress           anAddress;
     Expression          triggerExp;
-    TTList              timeEventToTrigger;
+    TTList              timeEventToHappen;
     TTList              timeEventToDispose;
     TTValue             v;
 	
@@ -794,7 +794,7 @@ TTErr TTTimeConditionReceiverReturnValueCallback(const TTValue& baton, const TTV
             if (anAddress == triggerExp.getAddress() && triggerExp.evaluate(data)) {
                 
                 // append the event to the trigger list
-                timeEventToTrigger.append(caseEvent);
+                timeEventToHappen.append(caseEvent);
             } else {
                 
                 // append the event to the dispose list
@@ -803,14 +803,14 @@ TTErr TTTimeConditionReceiverReturnValueCallback(const TTValue& baton, const TTV
         }
         
         // if at least one event is in the trigger list
-        if (!timeEventToTrigger.isEmpty()) {
+        if (!timeEventToHappen.isEmpty()) {
             
             aTimeCondition->setReady(NO);
             
             // trigger all events of the trigger list
-            for (timeEventToTrigger.begin(); timeEventToTrigger.end(); timeEventToTrigger.next()) {
-                o = timeEventToTrigger.current()[0];
-                o.send(kTTSym_Trigger);
+            for (timeEventToHappen.begin(); timeEventToHappen.end(); timeEventToHappen.next()) {
+                o = timeEventToHappen.current()[0];
+                o.send(kTTSym_Happen);
             }
             
             // dispose all the other events
