@@ -106,6 +106,10 @@ private :
      @return                kTTErrNone */
     TTErr           setDisposeExpression(const TTValue& value);
     
+    /**  Remove all events from the condition
+     @return                an error code if the operation fails */
+    TTErr           Clear();
+    
     /**  Add an event to the condition
      @param	inputValue      an event and optionnally the comportment associated
      @param	outputValue     nothing

@@ -190,20 +190,20 @@ TTErr Scenario::ProcessEnd()
 
 TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTFloat64       position, date;
-    TTObject		aTimeCondition, aTimeProcess;
-    TTValue         v;
+    TTFloat64   position, date;
+    TTObject	aTimeCondition, aTimeProcess;
+    TTValue     v;
     
-    if (inputValue.size() == 2) {
-        
-        if (inputValue[0].type() == kTypeFloat64 && inputValue[1].type() == kTypeFloat64) {
-            
+    if (inputValue.size() == 2)
+    {
+        if (inputValue[0].type() == kTypeFloat64 && inputValue[1].type() == kTypeFloat64)
+        {
             position = inputValue[0];
             date = inputValue[1];
             
             // enable or disable conditions
-            for (mTimeConditionList.begin(); mTimeConditionList.end(); mTimeConditionList.next()) {
-                
+            for (mTimeConditionList.begin(); mTimeConditionList.end(); mTimeConditionList.next())
+            {
                 aTimeCondition = mTimeConditionList.current()[0];
                 
                 // if a condition is ready we activate it
@@ -212,12 +212,11 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
             }
             
             // propagate the tick to all the time process
-            if (mExternalTick) {
-                
-                for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
-                
+            if (mExternalTick)
+            {
+                for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next())
+                {
                     aTimeProcess = mTimeProcessList.current()[0];
-                
                     aTimeProcess.send(kTTSym_Tick);
                 }
             }
@@ -267,8 +266,8 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
             }
             
             // no more event to process
-            if (eventHappenedOrDisposedCount == mTimeEventList.getSize()) {
-                
+            if (eventHappenedOrDisposedCount == mTimeEventList.getSize())
+            {
                 if (mContainer.valid())
                     ; // TODO  : what ?
                 
@@ -1460,6 +1459,9 @@ TTErr Scenario::TimeConditionRelease(const TTValue& inputValue, TTValue& outputV
                 
                 // delete all observers
                 deleteTimeConditionCacheElement(aCacheElement);
+                
+                // clear the condition
+                aTimeCondition.send("Clear");
                 
                 // needs to be compiled again
                 mCompiled = NO;
