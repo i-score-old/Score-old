@@ -345,13 +345,13 @@ TTErr TTTimeEvent::ProcessAttach(const TTValue& inputValue, TTValue& outputValue
                 TTValue     newAttachedProcesses;
                 TTBoolean   found = false;
                 
-                for (TTUInt32 i = 0; i < mAttachedProcesses.size(); i++)
+                for (TTElementIter it = mAttachedProcesses.begin() ; it != mAttachedProcesses.end() ; it++)
                 {
-                    TTObject attachedProcess = mAttachedProcesses[i];
+                    TTObject attachedProcess = TTElement(*it);
                     if (attachedProcess == aTimeProcess)
                         found = true;
                     
-                    newAttachedProcesses.append(mAttachedProcesses[i]);
+                    newAttachedProcesses.append(attachedProcess);
                 }
                 
                 if (!found) {
@@ -389,11 +389,11 @@ TTErr TTTimeEvent::ProcessDetach(const TTValue& inputValue, TTValue& outputValue
                 // update the attached processes
                 TTValue newAttachedProcesses;
  
-                for (TTUInt32 i = 0; i < mAttachedProcesses.size(); i++)
+                for (TTElementIter it = mAttachedProcesses.begin() ; it != mAttachedProcesses.end() ; it++)
                 {
-                    TTObject attachedProcess = mAttachedProcesses[i];
+                    TTObject attachedProcess = TTElement(*it);
                     if (attachedProcess != aTimeProcess)
-                        newAttachedProcesses.append(mAttachedProcesses[i]);
+                        newAttachedProcesses.append(attachedProcess);
                 }
                 
                 mAttachedProcesses = newAttachedProcesses;
