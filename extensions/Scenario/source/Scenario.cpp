@@ -33,9 +33,6 @@ mViewPosition(TTValue(0, 0)),
 #ifndef NO_EDITION_SOLVER
 mEditionSolver(NULL),
 #endif
-#ifndef NO_EXECUTION_GRAPH
-mExecutionGraph(NULL),
-#endif
 mLoading(NO),
 mAttributeLoaded(NO)
 {
@@ -46,20 +43,11 @@ mAttributeLoaded(NO)
     addAttributeWithSetter(ViewZoom, kTypeLocalValue);
     addAttributeWithSetter(ViewPosition, kTypeLocalValue);
     
-#ifndef NO_EXECUTION_GRAPH
     addMessage(Compile);
-#endif
 #ifndef NO_EDITION_SOLVER
     // Create the edition solver
     mEditionSolver = new Solver();
 #endif
-#ifndef NO_EXECUTION_GRAPH
-    // Create extended int
-    plusInfinity = ExtendedInt(PLUS_INFINITY, 0);
-    minusInfinity = ExtendedInt(MINUS_INFINITY, 0);
-    integer0 = ExtendedInt(INTEGER, 0);
-#endif
-    
     // it is possible to pass 2 events for the root scenario (which don't need a container by definition)
     if (arguments.size() == 2) {
         
@@ -97,13 +85,6 @@ Scenario::~Scenario()
         mEditionSolver = NULL;
     }
 #endif
-#ifndef NO_EXECUTION_GRAPH
-    if (mExecutionGraph) {
-        delete mExecutionGraph;
-        mExecutionGraph = NULL;
-    }
-#endif
-    
 }
 
 TTErr Scenario::getParameterNames(TTValue& value)
@@ -144,14 +125,9 @@ TTErr Scenario::Compile()
     mScheduler.get(kTTSym_offset, v);
     timeOffset = TTFloat64(v[0]);
     
-#ifndef NO_EXECUTION_GRAPH
-    // compile the mExecutionGraph to prepare scenario execution from the scheduler time offset
-    compileGraph(timeOffset);
-#endif
-    
     // compile all time processes if they need to be compiled and propagate the externalTick attribute
-    for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
-        
+    for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next())
+    {
         aTimeProcess = mTimeProcessList.current()[0];
         
         aTimeProcess.get(kTTSym_compiled, v);
@@ -170,20 +146,9 @@ TTErr Scenario::Compile()
 
 TTErr Scenario::ProcessStart()
 {
-#ifndef NO_EXECUTION_GRAPH
-    
-    // the execution graph needs to be compiled before
-    if (!mCompiled)
-        return kTTErrNone;
-
-    // start the execution graph
-    mExecutionGraph->start();
-
-#else
-    
     // play each time process with a happened start event and a waiting or pending end event
-    for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
-        
+    for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next())
+    {
         TTObject aTimeProcess = mTimeProcessList.current()[0];
         
         TTObject startEvent = getTimeProcessStartEvent(aTimeProcess);
@@ -198,7 +163,6 @@ TTErr Scenario::ProcessStart()
             aTimeProcess.send("Play");
     }
     
-#endif
     return kTTErrNone;
 }
 
@@ -258,24 +222,11 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
                 }
             }
             
-#ifndef NO_EXECUTION_GRAPH
-            // the execution graph needs to be compiled before
-            if (!mCompiled)
-                return kTTErrGeneric;
-            
-            // update the mExecutionGraph to process the scenario
-            if (mExecutionGraph->makeOneStep(date))
-                return kTTErrNone;
-            
-            // when a root scenario have no more step : stop the scheduler
-            else if (!mContainer.valid())
-                return mScheduler.send(kTTSym_Stop);
-#else
+            // look if all events happened or have been disposed
             TTSymbol eventStatus;
             TTUInt32 eventDate;
             TTUInt32 eventHappenedOrDisposedCount = 0;
             
-            // look if all event happened or have been disposed
             for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next())
             {
                 TTObject aTimeEvent = mTimeEventList.current()[0];
@@ -328,8 +279,6 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
                     return thisObject.send(kTTSym_Stop);
                 }
             }
-#endif
-            
         }
     }
     
@@ -423,8 +372,6 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
                 state.send(kTTSym_Run);
             }
             
-#ifdef NO_EXECUTION_GRAPH
-            
             // prepare the status of each time event
             // TODO : this should be merged with the state compilation done before
             for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next())
@@ -438,8 +385,7 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
                 else
                     aTimeEvent.set("status", kTTSym_eventWaiting);
             }
-#endif
-            
+
             // prepare the timeOffset of each time process scheduler
             for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
                 
@@ -695,10 +641,6 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         delete mEditionSolver;
         mEditionSolver = new Solver();
 #endif
-#ifndef NO_EXECUTION_GRAPH
-        clearGraph();
-#endif
-        
         return kTTErrNone;
     }
     
@@ -1572,29 +1514,4 @@ void Scenario::deleteTimeConditionCacheElement(const TTValue& oldCacheElement)
 #if 0
 #pragma mark -
 #pragma mark Some Methods
-#endif
-
-#ifndef NO_EXECUTION_GRAPH
-void ScenarioGraphTimeEventCallBack(TTPtr arg, TTBoolean active)
-{
-    // cf ECOMachine : crossAControlPointCallBack function
-    
-    TTObject aTimeEvent = (TTTimeEventPtr) arg;
-    
-    if (active)
-        aTimeEvent.send(kTTSym_Happen);
-    
-    // this propagates the disposition to the next events that are connected to a first disposed event
-    else
-        aTimeEvent.send(kTTSym_Dispose);
-}
-
-
-void ScenarioGraphIsEventReadyCallBack(TTPtr arg, TTBoolean isReady)
-{
-	TTTimeEventPtr aTimeEvent = (TTTimeEventPtr) arg;
-    
-    if (isReady)
-        aTimeEvent->setAttributeValue(kTTSym_status, kTTSym_eventPending);
-}
 #endif
