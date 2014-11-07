@@ -177,23 +177,24 @@ TTErr TTTimeProcess::setRigid(const TTValue& value)
 {
     TTValue v, none, duration;
     
-    if (value.size()) {
-        
-        if (value[0].type() == kTypeBoolean) {
-            
+    if (value.size())
+    {
+        if (value[0].type() == kTypeBoolean)
+        {
             v = TTObject(this);
             
             // rigid means Limit(duration, duration)
-            if (TTBoolean(value[0])) {
-                
-                if (!getDuration(duration)) {
-                    
+            if (TTBoolean(value[0]))
+            {
+                if (!getDuration(duration))
+                {
                     v.append(duration[0]);
                     v.append(duration[0]);
                 }
             }
             // non rigid means Limit(durationMin, durationMax)
-            else {
+            else
+            {
                 v.append(mDurationMin);
                 v.append(mDurationMax);
             }
@@ -209,16 +210,16 @@ TTErr TTTimeProcess::setRigid(const TTValue& value)
 
 TTErr TTTimeProcess::setDurationMin(const TTValue& value)
 {
-    if (value.size()) {
-        
-        if (value[0].type() == kTypeUInt32) {
-            
+    if (value.size())
+    {
+        if (value[0].type() == kTypeUInt32)
+        {
             // set minimal duration
             mDurationMin = TTUInt32(value[0]);
             
             // tell to the container the limit changes
-            if (mContainer.valid()) {
-                
+            if (mContainer.valid())
+            {
                 TTValue none, v = TTObject(this);
                 v.append(mDurationMin);
                 v.append(mDurationMax);
@@ -232,16 +233,16 @@ TTErr TTTimeProcess::setDurationMin(const TTValue& value)
 
 TTErr TTTimeProcess::setDurationMax(const TTValue& value)
 {
-    if (value.size()) {
-        
-        if (value[0].type() == kTypeUInt32) {
-            
+    if (value.size())
+    {
+        if (value[0].type() == kTypeUInt32)
+        {
             // set maximal duration
             mDurationMax = TTUInt32(value[0]);
             
             // tell to the container the limit changes
-            if (mContainer.valid()) {
-                
+            if (mContainer.valid())
+            {
                 TTValue none, v = TTObject(this);
                 v.append(mDurationMin);
                 v.append(mDurationMax);
@@ -261,13 +262,13 @@ TTErr TTTimeProcess::getStartDate(TTValue& value)
 
 TTErr TTTimeProcess::setStartDate(const TTValue& value)
 {
-    if (value.size()) {
-            
-        if (value[0].type() == kTypeUInt32) {
-                
+    if (value.size())
+    {
+        if (value[0].type() == kTypeUInt32)
+        {
             // tell to the container the process date changes
-            if (mContainer.valid()) {
-                
+            if (mContainer.valid())
+            {
                 TTValue none, v = TTObject(this);
                 v.append(TTUInt32(value[0]));
                 v.append(mStartDate);
@@ -291,10 +292,10 @@ TTErr TTTimeProcess::getStartCondition(TTValue& value)
 
 TTErr TTTimeProcess::setStartCondition(const TTValue& value)
 {
-    if (value.size() == 1) {
-        
-        if (value[0].type() == kTypeObject) {
-            
+    if (value.size() == 1)
+    {
+        if (value[0].type() == kTypeObject)
+        {
             mStartCondition = value[0];
         }
     }
@@ -310,13 +311,13 @@ TTErr TTTimeProcess::getEndDate(TTValue& value)
 
 TTErr TTTimeProcess::setEndDate(const TTValue& value)
 {
-    if (value.size()) {
-            
-        if (value[0].type() == kTypeUInt32) {
-                
+    if (value.size())
+    {
+        if (value[0].type() == kTypeUInt32)
+        {
             // tell to the container the process date changes
-            if (mContainer.valid()) {
-                
+            if (mContainer.valid())
+            {
                 TTValue none, v = TTObject(this);
                 v.append(mStartDate);
                 v.append(TTUInt32(value[0]));
@@ -340,10 +341,10 @@ TTErr TTTimeProcess::getEndCondition(TTValue& value)
 
 TTErr TTTimeProcess::setEndCondition(const TTValue& value)
 {
-    if (value.size() == 1) {
-        
-        if (value[0].type() == kTypeBoolean) {
-            
+    if (value.size() == 1)
+    {
+        if (value[0].type() == kTypeBoolean)
+        {
             mEndCondition = value[0];
         }
     }
@@ -354,10 +355,9 @@ TTErr TTTimeProcess::setEndCondition(const TTValue& value)
 TTErr TTTimeProcess::getDuration(TTValue& value)
 {
     // the end must be after the start
-    if (mEndDate >= mStartDate) {
-            
+    if (mEndDate >= mStartDate)
+    {
         value = TTValue( TTUInt32( abs(mDuration) ) );
-        
         return kTTErrNone;
     }
     
@@ -617,11 +617,7 @@ TTErr TTTimeProcess::EventConditionChanged(const TTValue& inputValue, TTValue& o
     TTObject    aTimeEvent = inputValue[0];
     TTObject    aTimeCondition = inputValue[1];
     
-    // a time process with a conditioned end event cannot be rigid
-    if (aTimeEvent == mEndEvent)
-    {
-        setRigid(TTBoolean(!aTimeCondition.valid()));
-    }
+    // no rule
     
     return kTTErrNone;
 }

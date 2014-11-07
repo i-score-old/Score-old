@@ -1254,6 +1254,11 @@ TTErr Scenario::TimeProcessRelease(const TTValue& inputValue, TTValue& outputVal
                 outputValue[0] = getTimeProcessStartEvent(aTimeProcess);
                 outputValue[1] = getTimeProcessEndEvent(aTimeProcess);
                 
+                // remove its events to be detached from them
+                TTObject empty;
+                setTimeProcessStartEvent(aTimeProcess, empty);
+                setTimeProcessEndEvent(aTimeProcess, empty);
+                
                 // needs to be compiled again
                 mCompiled = NO;
                 
@@ -1359,26 +1364,46 @@ TTErr Scenario::TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue
         
         if (inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeUInt32 && inputValue[2].type() == kTypeUInt32) {
             
-            aTimeProcess =inputValue[0];
+            aTimeProcess = inputValue[0];
 #ifndef NO_EDITION_SOLVER
             // update the Solver depending on the type of the time process
             timeProcessType = aTimeProcess.name();
             
-            if (timeProcessType == TTSymbol("Interval")) {
-                
+            if (timeProcessType == TTSymbol("Interval"))
+            {
                 // retreive solver relation relative to the time process
                 it = mRelationsMap.find(aTimeProcess.instance());
-                SolverRelationPtr relation = SolverRelationPtr(it->second);
                 
-                sErr = relation->limit(inputValue[1], inputValue[2]);
-                
-            } else {
-                
+                if (it != mRelationsMap.end())
+                {
+                    SolverRelationPtr relation = SolverRelationPtr(it->second);
+                    sErr = relation->limit(inputValue[1], inputValue[2]);
+                }
+                else
+                {
+                    TTSymbol name;
+                    aTimeProcess.get("name", name);
+                    TTLogError("Scenario::TimeProcessLimit %s : can't retreive solver relation relative to %s interval\n", mName.c_str(), name.c_str());
+                    sErr = SolverErrorGeneric;
+                }
+            }
+            else
+            {
                 // retreive solver constraint relative to the time process
                 it = mConstraintsMap.find(aTimeProcess.instance());
-                SolverConstraintPtr constraint = SolverConstraintPtr(it->second);
                 
-                sErr = constraint->limit(inputValue[1], inputValue[2]);
+                if (it != mRelationsMap.end())
+                {
+                    SolverConstraintPtr constraint = SolverConstraintPtr(it->second);
+                    sErr = constraint->limit(inputValue[1], inputValue[2]);
+                }
+                else
+                {
+                    TTSymbol name;
+                    aTimeProcess.get("name", name);
+                    TTLogError("Scenario::TimeProcessLimit %s : can't retreive solver constraint relative to %s time process\n", mName.c_str(), name.c_str());
+                    sErr = SolverErrorGeneric;
+                }
             }
             
             if (!sErr && !mLoading) {
@@ -1459,6 +1484,9 @@ TTErr Scenario::TimeConditionRelease(const TTValue& inputValue, TTValue& outputV
                 
                 // delete all observers
                 deleteTimeConditionCacheElement(aCacheElement);
+                
+                // get all events
+                aTimeCondition.get("events", outputValue);
                 
                 // clear the condition
                 aTimeCondition.send("Clear");

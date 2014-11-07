@@ -81,7 +81,8 @@ TTTimeCondition::~TTTimeCondition()
     mActive = NO;
     
     // update each event condition
-    for (TTCaseMapIterator it = mCases.begin() ; it != mCases.end() ; it++) {
+    for (TTCaseMapIterator it = mCases.begin() ; it != mCases.end() ; it++)
+    {
         if (TTObjectBasePtr(it->first)->valid)
             TTObjectBasePtr(it->first)->setAttributeValue(kTTSym_condition, empty);
     }
@@ -92,8 +93,8 @@ TTTimeCondition::~TTTimeCondition()
     TTObject    aReceiver;
     
     mReceivers.getKeys(keys);
-    for (TTUInt32 i = 0; i < keys.size(); i++) {
-        
+    for (TTUInt32 i = 0; i < keys.size(); i++)
+    {
         key = keys[i];
         mReceivers.lookup(key, v);
         aReceiver = v[0];
@@ -108,11 +109,11 @@ TTErr TTTimeCondition::setActive(const TTValue& value)
     TTBoolean newActive = value[0];
     
     // filter repetitions
-    if (newActive != mActive) {
-        
+    if (newActive != mActive)
+    {
         // if the condition is ready to be active
-        if (newActive && mReady) {
-            
+        if (newActive && mReady)
+        {
             mActive = YES;
             
             // create the receivers
@@ -128,8 +129,8 @@ TTErr TTTimeCondition::setActive(const TTValue& value)
             return kTTErrNone;
         }
         
-        if (!newActive) {
-            
+        if (!newActive)
+        {
             mActive = NO;
             
             // remove all receivers
@@ -138,8 +139,8 @@ TTErr TTTimeCondition::setActive(const TTValue& value)
             TTObject    aReceiver;
             
             mReceivers.getKeys(keys);
-            for (TTUInt32 i = 0; i < keys.size(); i++) {
-                
+            for (TTUInt32 i = 0; i < keys.size(); i++)
+            {
                 key = keys[i];
                 mReceivers.lookup(key, v);
                 aReceiver = v[0];
@@ -160,7 +161,8 @@ TTErr TTTimeCondition::getExpressions(TTValue& value)
     value.clear();
     
     // for each event, append the associated expressions to the result
-    for (TTCaseMapIterator it = mCases.begin() ; it != mCases.end() ; it++) {
+    for (TTCaseMapIterator it = mCases.begin() ; it != mCases.end() ; it++)
+    {
         value.append(it->second.trigger);
     }
     
@@ -175,8 +177,10 @@ TTErr TTTimeCondition::getEvents(TTValue& value)
     value.clear();
     
     // for each case, append the event to the result
-    for (TTCaseMapIterator it = mCases.begin() ; it != mCases.end() ; it++) {
-        value.append((TTObjectBasePtr)it->first); // cast to TTObjectBasePtr to associate the type kTypeObject and not kTypePointer
+    for (TTCaseMapIterator it = mCases.begin() ; it != mCases.end() ; it++)
+    {
+        TTObject event = (TTObjectBasePtr)it->first;
+        value.append(event);
     }
     
     return kTTErrNone;

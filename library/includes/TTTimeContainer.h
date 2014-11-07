@@ -123,7 +123,7 @@ private :
     
     /** Release a time process
      @param inputValue      a time condition object to release
-     @param outputvalue     nothing
+     @param outputvalue     all events conditionned by the released time condition
      @return                an error code if the destruction fails */
     virtual TTErr   TimeConditionRelease(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
     
