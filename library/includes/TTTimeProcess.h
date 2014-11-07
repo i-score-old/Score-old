@@ -335,6 +335,8 @@ void TTSCORE_EXPORT TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 posit
 
 #define mDuration mEndDate - mStartDate
 
+#define mRigid mDurationMin && mDurationMax && mDurationMin == mDurationMax
+
 /** Define callback function to get position back from the scheduler */
 typedef void (*TTTimeProcessPositionCallback)(TTPtr, TTFloat64, TTFloat64);
 

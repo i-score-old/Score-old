@@ -168,40 +168,44 @@ TTTimeProcess::~TTTimeProcess()
 
 TTErr TTTimeProcess::getRigid(TTValue& value)
 {
-    value = mDurationMin && mDurationMax && mDurationMin == mDurationMax;
+    value = mRigid;
     
     return kTTErrNone;
 }
 
 TTErr TTTimeProcess::setRigid(const TTValue& value)
 {
-    TTValue v, none, duration;
-    
     if (value.size())
     {
         if (value[0].type() == kTypeBoolean)
         {
-            v = TTObject(this);
+            TTBoolean rigid = value[0];
             
-            // rigid means Limit(duration, duration)
-            if (TTBoolean(value[0]))
+            // rigidity implies mDurationMin equals mDurationMax
+            if (rigid)
             {
+                TTValue duration;
+                
                 if (!getDuration(duration))
                 {
-                    v.append(duration[0]);
-                    v.append(duration[0]);
+                    mDurationMin = duration[0];
+                    mDurationMax = duration[0];
                 }
             }
-            // non rigid means Limit(durationMin, durationMax)
-            else
+            // else reset duration bounds if they are equal
+            else if (mDurationMin == mDurationMax)
             {
-                v.append(mDurationMin);
-                v.append(mDurationMax);
+                mDurationMin = 0;
+                mDurationMax = 0;
             }
             
             // if the time process is handled by a scenario
             if (mContainer.valid())
+            {
+                TTObject thisObject(this);
+                TTValue none, v(thisObject, mDurationMin, mDurationMax);
                 return mContainer.send("TimeProcessLimit", v, none);
+            }
         }
     }
     
@@ -435,17 +439,17 @@ TTErr TTTimeProcess::Move(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr TTTimeProcess::Limit(const TTValue& inputValue, TTValue& outputValue)
 {
-    if (inputValue.size() == 2) {
-        
-        if (inputValue[0].type() == kTypeUInt32 && inputValue[1].type() == kTypeUInt32) {
-            
+    if (inputValue.size() == 2)
+    {
+        if (inputValue[0].type() == kTypeUInt32 && inputValue[1].type() == kTypeUInt32)
+        {
             // set minimal and maximal duration
             mDurationMin = TTUInt32(inputValue[0]);
             mDurationMax = TTUInt32(inputValue[1]);
             
             // if the time process is handled by a scenario
-            if (mContainer.valid()) {
-                
+            if (mContainer.valid())
+            {
                 TTValue none, v = TTObject(this);
                 v.append(mDurationMin);
                 v.append(mDurationMax);
@@ -491,40 +495,38 @@ TTErr TTTimeProcess::Play()
         // prepare scheduler to go
         mScheduler.set("externalTick", mExternalTick);
         
-        // use duration bounds if exist
-        if (mDurationMin || mDurationMax)
+        // process duration
+        TTInt32 duration = mDuration;
+        
+        if (duration <= 0)
         {
+            TTLogError("TTTimeProcess::Play %s : wrong duration\n", mName.c_str());
+            return kTTErrGeneric;
+        }
+        
+        // rigid : use events date
+        if (mRigid)
+        {
+            mScheduler.set("infinite", TTBoolean(NO));
+            mScheduler.set(kTTSym_duration, TTFloat64(duration));
+        }
+        
+        // none rigid : use duration bounds
+        else
+        {
+            // no duration max : scheduler runs indefinitively
             if (mDurationMax == 0)
             {
                 mScheduler.set("infinite", TTBoolean(YES));
-                mScheduler.set(kTTSym_duration, TTFloat64(1)); // TODO : we shouldn't need to set the duration
+                
+                // set duration to get the progession back even if it will becomes greater than 1.
+                mScheduler.set(kTTSym_duration, TTFloat64(duration));
             }
             else
             {
                 mScheduler.set("infinite", TTBoolean(NO));
                 mScheduler.set(kTTSym_duration, TTFloat64(mDurationMax));
             }
-        }
-        // or use events date
-        else
-        {
-            TTValue    v;
-            TTUInt32   start, end;
-            
-            mStartEvent.get(kTTSym_date, v);
-            start = v[0];
-        
-            mEndEvent.get(kTTSym_date, v);
-            end = v[0];
-            
-            if (end - start <= 0)
-            {
-                 TTLogError("TTTimeProcess::Play %s : wrong duration\n", mName.c_str());
-                return kTTErrGeneric;
-            }
-            
-            mScheduler.set("infinite", TTBoolean(NO));
-            mScheduler.set(kTTSym_duration, TTFloat64(end - start));
         }
             
 #ifdef TTSCORE_DEBUG
@@ -832,7 +834,7 @@ void TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 position, TTFloat64 
             if (date >= aTimeProcess->mDurationMin)
             {
 #ifdef TTSCORE_DEBUG
-                TTLogMessage("TTTimeProcessSchedulerCallback %s : reaches duration min (%d)\n", aTimeProcess->mName.c_str(), aTimeProcess->mDurationMin);
+                //TTLogMessage("TTTimeProcessSchedulerCallback %s : reaches duration min (%d)\n", aTimeProcess->mName.c_str(), aTimeProcess->mDurationMin);
 #endif
                 // notify kTTSym_ProcessDurationMinReached observers
                 // TODO : sent this only one time !
