@@ -158,7 +158,9 @@ TTErr TTTimeEvent::setStatus(const TTValue& value)
     if (mContainer.valid())
         mContainer.get(kTTSym_running, running);
     
-    if (running)
+    
+    // always notify waiting status to reset observers when nothing is running
+    if (running || mStatus == kTTSym_eventWaiting)
     {
         // notify each attribute observers
         v.append(mStatus);
