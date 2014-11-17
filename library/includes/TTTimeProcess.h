@@ -58,7 +58,7 @@ protected :
     
     TTBoolean                       mExternalTick;                  ///< a boolean flag to ease the access to the scheduler externalTick attribute
     
-    TTBoolean                       mStatePush;                     ///< a boolean flag to remind the Start method pushState option to automatically apply the same option in End method (see in TTTimeProcess::SchedulerRunningChanged)
+    TTBoolean                       mDurationMinReached;            ///< a boolean flag to remind if the minimum duration have already been reached
     
 private :
     

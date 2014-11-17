@@ -50,7 +50,7 @@ protected :
     TTObject                        mCondition;                     ///< a pointer to an optional condition object to make the event interactive
     
     TTValue                         mAttachedProcesses;             ///< all the processes the event observes
-    TTUInt32                        mStartedProcessesCount;         ///< how many processes are started ?
+    TTUInt32                        mMinReachedProcessesCount;         ///< how many processes are started ?
     TTUInt32                        mEndedProcessesCount;           ///< how many processes have ended ?
     TTUInt32                        mDisposedProcessesCount;        ///< how many processes have been disposed ?
  
@@ -126,11 +126,11 @@ private :
      @return                kTTErrNone */
     TTErr           ProcessDetach(const TTValue& inputValue, TTValue& outputValue);
     
-    /** To be notified when a previous started process
+    /** To be notified when a previous process reaches its minimal duration
      @param inputValue      the process which is started
      @param outputValue     nothing
      @return                kTTErrNone */
-    TTErr           ProcessStarted(const TTValue& inputValue, TTValue& outputValue);
+    TTErr           ProcessDurationMinReached(const TTValue& inputValue, TTValue& outputValue);
     
     /** To be notified when a previous ended process
      @param inputValue      the process which is ended

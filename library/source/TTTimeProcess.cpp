@@ -492,6 +492,9 @@ TTErr TTTimeProcess::Play()
         // set the running state of the process
         mRunning = YES;
         
+        // the duration min have not been reached yet
+        mDurationMinReached = NO;
+        
         // prepare scheduler to go
         mScheduler.set("externalTick", mExternalTick);
         
@@ -828,18 +831,15 @@ void TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 position, TTFloat64 
     
     if (aTimeProcess->mRunning)
     {
-        // check if duration min is reached
-        if (aTimeProcess->mDurationMin > 0)
+        // check if duration min is reached for the first time
+        if (!aTimeProcess->mDurationMinReached && date >= aTimeProcess->mDurationMin)
         {
-            if (date >= aTimeProcess->mDurationMin)
-            {
+            aTimeProcess->mDurationMinReached = YES;
 #ifdef TTSCORE_DEBUG
-                //TTLogMessage("TTTimeProcessSchedulerCallback %s : reaches duration min (%d)\n", aTimeProcess->mName.c_str(), aTimeProcess->mDurationMin);
+            TTLogMessage("TTTimeProcessSchedulerCallback %s : reaches duration min (%d)\n", aTimeProcess->mName.c_str(), aTimeProcess->mDurationMin);
 #endif
-                // notify kTTSym_ProcessDurationMinReached observers
-                // TODO : sent this only one time !
-                //aTimeProcess->sendStatusNotification(kTTSym_ProcessDurationMinReached);
-            }
+            // notify kTTSym_ProcessDurationMinReached observers
+            aTimeProcess->sendStatusNotification(kTTSym_ProcessDurationMinReached);
         }
         
         if (!aTimeProcess->mMute)

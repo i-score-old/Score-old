@@ -30,7 +30,7 @@ mDate(0),
 mStatus(kTTSym_eventWaiting),
 mMute(NO),
 mState(kTTSym_Script),
-mStartedProcessesCount(0),
+mMinReachedProcessesCount(0),
 mEndedProcessesCount(0),
 mDisposedProcessesCount(0),
 mPushing(NO)
@@ -68,7 +68,7 @@ mPushing(NO)
     
     addMessageWithArguments(ProcessAttach);
     addMessageWithArguments(ProcessDetach);
-    addMessageWithArguments(ProcessStarted);
+    addMessageWithArguments(ProcessDurationMinReached);
     addMessageWithArguments(ProcessEnded);
     addMessageWithArguments(ProcessDisposed);
     
@@ -148,7 +148,7 @@ TTErr TTTimeEvent::setStatus(const TTValue& value)
     // reset counts if the event is not pending
     if (mStatus != kTTSym_eventPending)
     {
-        mStartedProcessesCount = 0;
+        mMinReachedProcessesCount = 0;
         mEndedProcessesCount = 0;
         mDisposedProcessesCount = 0;
     }
@@ -408,21 +408,21 @@ TTErr TTTimeEvent::ProcessDetach(const TTValue& inputValue, TTValue& outputValue
     return kTTErrGeneric;
 }
 
-TTErr TTTimeEvent::ProcessStarted(const TTValue& inputValue, TTValue& outputValue)
+TTErr TTTimeEvent::ProcessDurationMinReached(const TTValue& inputValue, TTValue& outputValue)
 {
-    TT_ASSERT("TTTimeProcess::ProcessStarted : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
+    TT_ASSERT("TTTimeEvent::ProcessDurationMinReached : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
     
     TTObject aTimeProcess = inputValue[0];
     
     // update count
-    mStartedProcessesCount++;
+    mMinReachedProcessesCount++;
 #ifdef TTSCORE_DEBUG
-    TTLogMessage("TTTimeEvent::ProcessStarted %s : attached = %d, started = %d, ended = %d, disposed = %d\n", mName.c_str(), mAttachedProcesses.size(), mStartedProcessesCount, mEndedProcessesCount, mDisposedProcessesCount);
+    TTLogMessage("TTTimeEvent::ProcessDurationMinReached %s : attached = %d, minReached = %d, ended = %d, disposed = %d\n", mName.c_str(), mAttachedProcesses.size(), mMinReachedProcessesCount, mEndedProcessesCount, mDisposedProcessesCount);
 #endif
     // a conditioned event becomes pending when all attached processes are started
     if (mCondition.valid() &&
         mStatus == kTTSym_eventWaiting &&
-        mStartedProcessesCount == mAttachedProcesses.size())
+        mMinReachedProcessesCount == mAttachedProcesses.size())
     {
         return setStatus(kTTSym_eventPending);
     }
@@ -432,7 +432,7 @@ TTErr TTTimeEvent::ProcessStarted(const TTValue& inputValue, TTValue& outputValu
 
 TTErr TTTimeEvent::ProcessEnded(const TTValue& inputValue, TTValue& outputValue)
 {
-    TT_ASSERT("TTTimeProcess::ProcessEnded : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
+    TT_ASSERT("TTTimeEvent::ProcessEnded : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
     
     TTObject aTimeProcess = inputValue[0];
     TTObject startEvent;
@@ -441,7 +441,7 @@ TTErr TTTimeEvent::ProcessEnded(const TTValue& inputValue, TTValue& outputValue)
     // update count
     mEndedProcessesCount++;
 #ifdef TTSCORE_DEBUG
-    TTLogMessage("TTTimeEvent::ProcessEnded %s : attached = %d, started = %d, ended = %d, disposed = %d\n", mName.c_str(), mAttachedProcesses.size(), mStartedProcessesCount, mEndedProcessesCount, mDisposedProcessesCount);
+    TTLogMessage("TTTimeEvent::ProcessEnded %s : attached = %d, minReached = %d, ended = %d, disposed = %d\n", mName.c_str(), mAttachedProcesses.size(), mMinReachedProcessesCount, mEndedProcessesCount, mDisposedProcessesCount);
 #endif
     // when all attached processes are ended or disposed
     if (mEndedProcessesCount + mDisposedProcessesCount == mAttachedProcesses.size())
@@ -465,14 +465,14 @@ TTErr TTTimeEvent::ProcessEnded(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr TTTimeEvent::ProcessDisposed(const TTValue& inputValue, TTValue& outputValue)
 {
-    TT_ASSERT("TTTimeProcess::ProcessDisposed : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
+    TT_ASSERT("TTTimeEvent::ProcessDisposed : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
     
     TTObject aTimeProcess = inputValue[0];
     
     // update count
     mDisposedProcessesCount++;
 #ifdef TTSCORE_DEBUG
-    TTLogMessage("TTTimeEvent::ProcessDisposed %s : attached = %d, started = %d, ended = %d, disposed = %d\n", mName.c_str(), mAttachedProcesses.size(), mStartedProcessesCount, mEndedProcessesCount, mDisposedProcessesCount);
+    TTLogMessage("TTTimeEvent::ProcessDisposed %s : attached = %d, minReached = %d, ended = %d, disposed = %d\n", mName.c_str(), mAttachedProcesses.size(), mMinReachedProcessesCount, mEndedProcessesCount, mDisposedProcessesCount);
 #endif
     // an event is disposed when all attached processes are disposed
     if (mStatus == kTTSym_eventWaiting &&
