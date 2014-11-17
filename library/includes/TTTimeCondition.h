@@ -164,6 +164,10 @@ private :
      @return                an error code if the operation fails */
     TTErr           Dispose(const TTValue& inputValue, TTValue& outputValue);
     
+    /**  Tell the condition to apply default behavior for each event
+     @return                an error code if the operation fails */
+    TTErr           Default();
+    
     /**  needed to be handled by a TTXmlHandler
      @param	inputValue      ..
      @param	outputValue     ..

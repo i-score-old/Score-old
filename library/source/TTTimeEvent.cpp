@@ -450,9 +450,7 @@ TTErr TTTimeEvent::ProcessEnded(const TTValue& inputValue, TTValue& outputValue)
         if (mCondition.valid() &&
             mStatus == kTTSym_eventPending)
         {
-            // théo : the use of Trigger is temporary because there is no method to apply default case
-            TTLogMessage("TTTimeEvent::ProcessEnded %s : TODO force default condition case\n", mName.c_str());
-            return mCondition.send(kTTSym_Trigger);
+            return mCondition.send("Default");
         }
         // a non conditioned waiting event happens
         else if (!mCondition.valid() &&

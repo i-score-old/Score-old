@@ -58,6 +58,7 @@ mPendingCounter(0)
     addMessageWithArguments(ExpressionTest);
     addMessageWithArguments(Trigger);
     addMessageWithArguments(Dispose);
+    addMessage(Default);
     
 	// needed to be handled by a TTXmlHandler
 	addMessageWithArguments(WriteAsXml);
@@ -535,6 +536,23 @@ TTErr TTTimeCondition::Dispose(const TTValue& inputValue, TTValue& outputValue)
     return kTTErrNone;
 }
 
+TTErr TTTimeCondition::Default()
+{
+    TTValue     v;
+    TTSymbol    status;
+    
+    for (TTCaseMapIterator it = mCases.begin() ; it != mCases.end() ; it++)
+    {
+        it->first->getAttributeValue(kTTSym_status, v);
+        status = v[0];
+        
+        if (status != kTTSym_eventDisposed && status != kTTSym_eventHappened)
+            it->first->sendMessage(it->second.dflt?kTTSym_Happen:kTTSym_Dispose);
+    }
+    
+    return kTTErrNone;
+}
+
 TTErr TTTimeCondition::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 {
 	TTObject o = inputValue[0];
@@ -688,11 +706,12 @@ TTErr TTTimeCondition::EventStatusChanged(const TTValue& inputValue, TTValue& ou
             
             // only apply default behavior when the container run.
             // otherwise can be called when some events were pending and then we reset them to a waiting status (like in Scenario::Compile)
-            mContainer.get("running", v);
-            TTBoolean running = v[0];
+            TTBoolean running = NO;
+            if (mContainer.valid())
+                mContainer.get(kTTSym_running, running);
             
             if (running)
-                applyDefaults();
+                Default();
         }
         
         return kTTErrNone;
@@ -749,21 +768,6 @@ void TTTimeCondition::addReceiver(TTAddress anAddress)
         
         // set the address of the receiver (and this will try to get the current value)
         aReceiver.set(kTTSym_address, anAddress);
-    }
-}
-
-void TTTimeCondition::applyDefaults()
-{
-    TTValue v;
-    TTSymbol status;
-    
-    for (TTCaseMapIterator it = mCases.begin() ; it != mCases.end() ; it++)
-    {
-        it->first->getAttributeValue(kTTSym_status, v);
-        status = v[0];
-        
-        if (status != kTTSym_eventDisposed && status != kTTSym_eventHappened)
-            it->first->sendMessage(it->second.dflt?kTTSym_Happen:kTTSym_Dispose);
     }
 }
 
