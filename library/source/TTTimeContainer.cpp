@@ -354,8 +354,8 @@ void TTTimeContainer::writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTObjec
     TTString    s;
     
     // If the process is handled by a upper scenario
-    if (aTimeProcessInstance->mContainer.valid()) {
-        
+    if (aTimeProcessInstance->mContainer.valid())
+    {
         // Start a node with the type of the process
         xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST aTimeProcessInstance->getName().c_str());
     }
@@ -364,8 +364,8 @@ void TTTimeContainer::writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTObjec
     xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST aTimeProcessInstance->mName.c_str());
     
     // If the process is handled by a upper scenario
-    if (aTimeProcessInstance->mContainer.valid()) {
-    
+    if (aTimeProcessInstance->mContainer.valid())
+    {
         // Write the start event name
         aTimeProcessInstance->getStartEvent().get("name", v);
         v.toString();
@@ -380,8 +380,8 @@ void TTTimeContainer::writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTObjec
     }
     
     
-    if (aTimeProcessInstance->mDurationMin > 0 || aTimeProcessInstance->mDurationMax > 0) {
-        
+    if (aTimeProcessInstance->mDurationMin > 0 || aTimeProcessInstance->mDurationMax > 0)
+    {
         // Write the duration min
         v = aTimeProcessInstance->mDurationMin;
         v.toString();
@@ -408,8 +408,8 @@ void TTTimeContainer::writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTObjec
     xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "color", BAD_CAST s.data());
     
     // If the process is handled by a upper scenario
-    if (aTimeProcessInstance->mContainer.valid()) {
-        
+    if (aTimeProcessInstance->mContainer.valid())
+    {
         // Write the vertical position
         v = aTimeProcessInstance->mVerticalPosition;
         v.toString();
@@ -439,17 +439,17 @@ TTErr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHandler, TTObj
     TTErr       err;
     
     // Get the name of the start event
-    if (!aXmlHandler->getXmlAttribute(kTTSym_start, v, YES)) {
-        
-        if (v.size() == 1) {
-            
-            if (v[0].type() == kTypeSymbol) {
-                
+    if (!aXmlHandler->getXmlAttribute(kTTSym_start, v, YES))
+    {
+        if (v.size() == 1)
+        {
+            if (v[0].type() == kTypeSymbol)
+            {
                 // Find the start event using his name inside the container
                 mTimeEventList.find(&TTTimeContainerFindTimeEventWithName, (TTPtr)&v, aCacheElement);
                 
-                if (aCacheElement.size() == 0) {
-                    
+                if (aCacheElement.size() == 0)
+                {
                     TTLogError("TTTimeContainer::readTimeProcessFromXml %s : can't find start event\n", mName.c_str());
                     return kTTErrGeneric;
                 }
@@ -460,17 +460,17 @@ TTErr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHandler, TTObj
     }
     
     // Get the name of the end event
-    if (!aXmlHandler->getXmlAttribute(kTTSym_end, v, YES)) {
-        
-        if (v.size() == 1) {
-            
-            if (v[0].type() == kTypeSymbol) {
-                
+    if (!aXmlHandler->getXmlAttribute(kTTSym_end, v, YES))
+    {
+        if (v.size() == 1)
+        {
+            if (v[0].type() == kTypeSymbol)
+            {
                 // Find the end event using his name inside the container
                 mTimeEventList.find(&TTTimeContainerFindTimeEventWithName, (TTPtr)&v, aCacheElement);
                 
-                if (aCacheElement.size() == 0) {
-                    
+                if (aCacheElement.size() == 0)
+                {
                     TTLogError("TTTimeContainer::readTimeProcessFromXml %s : can't find end event\n", mName.c_str());
                     return kTTErrGeneric;
                 }
@@ -498,84 +498,84 @@ TTErr TTTimeContainer::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHandler, TTObj
         // Get all generic time process atttributes
         
         // Get the time process name
-        if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES)) {
-            
-            if (v.size() == 1) {
-                
-                if (v[0].type() == kTypeSymbol) {
-                    
+        if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES))
+        {
+            if (v.size() == 1)
+            {
+                if (v[0].type() == kTypeSymbol)
+                {
                     aNewTimeProcess.set(kTTSym_name, v);
                 }
             }
         }
         
         // Get the durationMin
-        if (!aXmlHandler->getXmlAttribute(kTTSym_durationMin, v, NO)) {
-            
-            if (v.size() == 1) {
-                
-                if (v[0].type() == kTypeUInt32) {
-                    
+        if (!aXmlHandler->getXmlAttribute(kTTSym_durationMin, v, NO))
+        {
+            if (v.size() == 1)
+            {
+                if (v[0].type() == kTypeUInt32)
+                {
                     aNewTimeProcess.set(kTTSym_durationMin, v);
                 }
             }
         }
         
         // Get the durationMax
-        if (!aXmlHandler->getXmlAttribute(kTTSym_durationMax, v, NO)) {
-            
-            if (v.size() == 1) {
-                
-                if (v[0].type() == kTypeUInt32) {
-                    
+        if (!aXmlHandler->getXmlAttribute(kTTSym_durationMax, v, NO))
+        {
+            if (v.size() == 1)
+            {
+                if (v[0].type() == kTypeUInt32)
+                {
                     aNewTimeProcess.set(kTTSym_durationMax, v);
                 }
             }
         }
         
         // Get the mute
-        if (!aXmlHandler->getXmlAttribute(kTTSym_mute, v, NO)) {
-            
-            if (v.size() == 1) {
-                
-                if (v[0].type() == kTypeInt32) {
-                    
+        if (!aXmlHandler->getXmlAttribute(kTTSym_mute, v, NO))
+        {
+            if (v.size() == 1)
+            {
+                if (v[0].type() == kTypeInt32)
+                {
                     aNewTimeProcess.set(kTTSym_mute, v);
                 }
             }
         }
         
         // Get the color
-        if (!aXmlHandler->getXmlAttribute(kTTSym_color, v, NO)) {
-            
-            if (v.size() == 3) {
-                
-                if (v[0].type() == kTypeInt32 && v[1].type() == kTypeInt32 && v[2].type() == kTypeInt32) {
-                    
+        if (!aXmlHandler->getXmlAttribute(kTTSym_color, v, NO))
+        {
+            if (v.size() == 3)
+            {
+                if (v[0].type() == kTypeInt32 && v[1].type() == kTypeInt32 && v[2].type() == kTypeInt32)
+                {
                     aNewTimeProcess.set(kTTSym_color, v);
                 }
             }
         }
         
         // Get the vertical position
-        if (!aXmlHandler->getXmlAttribute(kTTSym_verticalPosition, v, NO)) {
-            
-            if (v.size() == 1) {
-                
-                if (v[0].type() == kTypeUInt32) {
-                    
+        if (!aXmlHandler->getXmlAttribute(kTTSym_verticalPosition, v, NO))
+        {
+            if (v.size() == 1)
+            {
+                if (v[0].type() == kTypeUInt32)
+                {
                     aNewTimeProcess.set(kTTSym_verticalPosition, v);
                 }
             }
         }
         
         // Get the vertical size
-        if (!aXmlHandler->getXmlAttribute(kTTSym_verticalSize, v, NO)) {
-            
-            if (v.size() == 1) {
-                
-                if (v[0].type() == kTypeUInt32) {
-                    
+        if (!aXmlHandler->getXmlAttribute(kTTSym_verticalSize, v, NO))
+        {
+            if (v.size() == 1)
+            {
+                if (v[0].type() == kTypeUInt32)
+                {
                     aNewTimeProcess.set(kTTSym_verticalSize, v);
                 }
             }
