@@ -305,7 +305,6 @@ extern TTFOUNDATION_EXPORT TTSymbol	kTTSym_ProcessStarted;
 extern TTFOUNDATION_EXPORT TTSymbol	kTTSym_ProcessEnded;
 extern TTFOUNDATION_EXPORT TTSymbol	kTTSym_ProcessDisposed;
 extern TTFOUNDATION_EXPORT TTSymbol	kTTSym_ProcessDurationMinReached;
-extern TTFOUNDATION_EXPORT TTSymbol	kTTSym_ProcessDurationMaxReached;
 
 // attribute, message or any names
 extern TTFOUNDATION_EXPORT TTSymbol	kTTSym_case;
