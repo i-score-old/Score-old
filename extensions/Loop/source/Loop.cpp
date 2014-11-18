@@ -48,7 +48,7 @@ mNamespace(NULL)
     mPatternStartEvent.set("container", thisObject);
     
     // create pattern end event
-    args = TTValue(0, thisObject);
+    args = TTValue(1000, thisObject);
     mPatternEndEvent = TTObject(kTTSym_TimeEvent, args);
     mPatternEndEvent.set("name", TTSymbol("patternEnd"));
     mPatternEndEvent.set("container", thisObject);
@@ -114,7 +114,9 @@ TTErr Loop::Compile()
 
 TTErr Loop::ProcessStart()
 {
+    // start the loop pattern
     mPatternStartEvent.send(kTTSym_Happen);
+    
     return kTTErrNone;
 }
 
@@ -123,9 +125,8 @@ TTErr Loop::ProcessEnd()
     // needs to be compiled again
     mCompiled = NO;
     
-    // restart the loop
-    mPatternStartEvent.set("status", kTTSym_eventWaiting);
-    mPatternStartEvent.send(kTTSym_Happen);
+    // stop the loop pattern
+    mPatternEndEvent.send(kTTSym_Happen);
    
     return kTTErrNone;
 }
@@ -141,6 +142,15 @@ TTErr Loop::Process(const TTValue& inputValue, TTValue& outputValue)
             position = inputValue[0];
             date = inputValue[1];
             
+            // if the end event pattern happened
+            TTSymbol status;
+            mPatternEndEvent.get("status", status);
+            if (status == kTTSym_eventHappened)
+            {
+                // restart the loop pattern
+                mPatternStartEvent.set("status", kTTSym_eventWaiting);
+                mPatternStartEvent.send(kTTSym_Happen);
+            }
         }
     }
     
@@ -229,15 +239,16 @@ TTErr Loop::PatternAttach(const TTValue& inputValue, TTValue& outputValue)
 {
     TT_ASSERT("Loop::PatternAttach : expects an object", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
     
-    TTObject process = inputValue[0];
+    TTObject aTimeProcess = inputValue[0];
     
     TTObject thisObject(this);
-    process.set("container", thisObject);
+    aTimeProcess.set("container", thisObject);
     
-    process.set("startEvent", mPatternStartEvent);
-    process.set("endEvent", mPatternEndEvent);
+    // set the start and end events
+    setTimeProcessStartEvent(aTimeProcess, mPatternStartEvent);
+    setTimeProcessEndEvent(aTimeProcess, mPatternEndEvent);
     
-    mPatternProcesses.append(process);
+    mPatternProcesses.append(aTimeProcess);
     
     return kTTErrNone;
 }
@@ -246,14 +257,15 @@ TTErr Loop::PatternDetach(const TTValue& inputValue, TTValue& outputValue)
 {
     TT_ASSERT("Loop::PatternDetach : expects an object", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
     
-    TTObject process = inputValue[0];
+    TTObject aTimeProcess = inputValue[0];
     
-    process.set("container", mContainer);
+    aTimeProcess.set("container", mContainer);
     
-    process.set("startEvent", this->getStartEvent());
-    process.set("endEvent", this->getEndEvent());
+    // set the start and end events
+    setTimeProcessStartEvent(aTimeProcess, this->getStartEvent());
+    setTimeProcessEndEvent(aTimeProcess, this->getEndEvent());
     
-    mPatternProcesses.remove(process);
+    mPatternProcesses.remove(aTimeProcess);
     
     return kTTErrNone;
 }
