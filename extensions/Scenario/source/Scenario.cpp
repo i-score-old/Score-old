@@ -43,6 +43,45 @@ mAttributeLoaded(NO)
     addAttributeWithSetter(ViewZoom, kTypeLocalValue);
     addAttributeWithSetter(ViewPosition, kTypeLocalValue);
     
+    
+    addMessageWithArguments(Next);
+    
+    
+    addMessageWithArguments(TimeEventCreate);
+    addMessageProperty(TimeEventCreate, hidden, YES);
+    
+    addMessageWithArguments(TimeEventRelease);
+    addMessageProperty(TimeEventRelease, hidden, YES);
+    
+    addMessageWithArguments(TimeEventMove);
+    addMessageProperty(TimeEventMove, hidden, YES);
+    
+    addMessageWithArguments(TimeEventReplace);
+    addMessageProperty(TimeEventReplace, hidden, YES);
+    
+    addMessageWithArguments(TimeEventFind);
+    addMessageProperty(TimeEventFind, hidden, YES);
+    
+
+    addMessageWithArguments(TimeProcessCreate);
+    addMessageProperty(TimeProcessCreate, hidden, YES);
+    
+    addMessageWithArguments(TimeProcessRelease);
+    addMessageProperty(TimeProcessRelease, hidden, YES);
+    
+    addMessageWithArguments(TimeProcessMove);
+    addMessageProperty(TimeProcessMove, hidden, YES);
+    
+    addMessageWithArguments(TimeProcessLimit);
+    addMessageProperty(TimeProcessLimit, hidden, YES);
+    
+    
+    addMessageWithArguments(TimeConditionCreate);
+    addMessageProperty(TimeConditionCreate, hidden, YES);
+    
+    addMessageWithArguments(TimeConditionRelease);
+    addMessageProperty(TimeConditionRelease, hidden, YES);
+    
     addMessage(Compile);
 #ifndef NO_EDITION_SOLVER
     // Create the edition solver
@@ -93,6 +132,53 @@ TTErr Scenario::getParameterNames(TTValue& value)
 	//value.append(TTSymbol("aParameterName"));
 	
 	return kTTErrNone;
+}
+
+TTErr Scenario::getTimeProcesses(TTValue& value)
+{
+    value.clear();
+    
+    if (mTimeProcessList.isEmpty())
+        return kTTErrGeneric;
+    
+    for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next())
+        value.append(mTimeProcessList.current()[0]);
+    
+    return kTTErrNone;
+}
+
+TTErr Scenario::getTimeEvents(TTValue& value)
+{
+    value.clear();
+    
+    if (mTimeEventList.isEmpty())
+        return kTTErrGeneric;
+    
+    // if there is no upper container : append the start event too
+    if (!mContainer.valid())
+        value.append(this->getStartEvent());
+    
+    for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next())
+        value.append(mTimeEventList.current()[0]);
+    
+    // if there is no upper container : append the end event too
+    if (!mContainer.valid())
+        value.append(this->getEndEvent());
+    
+    return kTTErrNone;
+}
+
+TTErr Scenario::getTimeConditions(TTValue& value)
+{
+    value.clear();
+    
+    if (mTimeConditionList.isEmpty())
+        return kTTErrGeneric;
+    
+    for (mTimeConditionList.begin(); mTimeConditionList.end(); mTimeConditionList.next())
+        value.append(mTimeConditionList.current()[0]);
+    
+    return kTTErrNone;
 }
 
 TTErr Scenario::setViewZoom(const TTValue& value)
@@ -837,6 +923,65 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     return kTTErrNone;
 }
 
+TTErr Scenario::Next(const TTValue& inputValue, TTValue& outputValue)
+{
+    TTObject    aTimeEvent;
+    TTList      eventsToHappen;
+    TTUInt32    found = 0;
+    
+    if (!mRunning)
+        return kTTErrGeneric;
+    
+    if (mMute)
+        return kTTErrGeneric;
+    
+    // trigger the first pending time event of the list (as there are sorted by date)
+    for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next()) {
+        
+        aTimeEvent = mTimeEventList.current()[0];
+        
+        if (getTimeEventStatus(aTimeEvent) == kTTSym_eventPending) {
+            
+            // if no argument : trigger the first pending event
+            if (inputValue.size() == 0) {
+                
+                found = 1;
+                eventsToHappen.append(aTimeEvent);
+                break;
+            }
+            // else : is this event part of the events to trigger ?
+            else {
+                
+                found++;
+                
+                for (TTUInt32 i = 0; i < inputValue.size(); i++) {
+                    
+                    TTUInt32 id = inputValue[i];
+                    
+                    if (id == found) {
+                        
+                        eventsToHappen.append(aTimeEvent);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    
+    if (eventsToHappen.isEmpty())
+        return kTTErrGeneric;
+    
+    for (eventsToHappen.begin(); eventsToHappen.end(); eventsToHappen.next()) {
+        
+        aTimeEvent = eventsToHappen.current()[0];
+        
+        outputValue.append(aTimeEvent);
+        aTimeEvent.send(kTTSym_Happen);
+    }
+    
+    return kTTErrNone;
+}
+
 TTErr Scenario::TimeEventCreate(const TTValue& inputValue, TTValue& outputValue)
 {
     TTObject    aTimeEvent, thisObject(this);
@@ -1027,6 +1172,19 @@ TTErr Scenario::TimeEventMove(const TTValue& inputValue, TTValue& outputValue)
     return kTTErrGeneric;
 }
 
+TTErr Scenario::TimeEventFind(const TTValue& inputValue, TTValue& outputValue)
+{
+    TTValue aCacheElement;
+    
+    // Find the process using his name inside the container
+    mTimeEventList.find(&TTTimeContainerFindTimeEventWithName, (TTPtr)&inputValue, outputValue);
+    
+    if (outputValue.size() == 0)
+        return kTTErrValueNotFound;
+    
+    return kTTErrNone;
+}
+
 TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue)
 {
     TTObject    aFormerTimeEvent, aNewTimeEvent;
@@ -1109,6 +1267,76 @@ TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue
     }
     
     return kTTErrGeneric;
+}
+
+void Scenario::writeTimeEventAsXml(TTXmlHandlerPtr aXmlHandler, TTObject& aTimeEvent)
+{
+    // Start an event node
+    xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "event");
+    
+    // Write the name
+    TTSymbol name;
+    aTimeEvent.get("name", name);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST name.c_str());
+    
+    // Pass the xml handler to the event to fill his attribute
+    aXmlHandler->setAttributeValue(kTTSym_object, aTimeEvent);
+    aXmlHandler->sendMessage(kTTSym_Write);
+    
+    // Close the event node
+    xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
+}
+
+TTErr Scenario::readTimeEventFromXml(TTXmlHandlerPtr aXmlHandler, TTObject& aNewTimeEvent)
+{
+    TTValue v, out;
+    TTErr   err = kTTErrGeneric;
+    
+    if (aXmlHandler->mXmlNodeStart) {
+        
+        // Get the date
+        if (!aXmlHandler->getXmlAttribute(kTTSym_date, v, NO)) {
+            
+            if (v.size() == 1) {
+                
+                if (v[0].type() == kTypeUInt32) {
+                    
+                    // an event cannot be created after the end event of its container
+                    if (TTUInt32(v[0]) > getTimeEventDate(getEndEvent())) {
+                        
+                        TTLogError("Scenario::readTimeEventFromXml %s : event created after the end event of its container\n", mName.c_str());
+                        return kTTErrGeneric;
+                    }
+                    
+                    // Create the time event
+                    err = this->TimeEventCreate(v, out);
+                    
+                    if (!err) {
+                        
+                        aNewTimeEvent = out[0];
+                        
+                        // Get the name
+                        if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES)) {
+                            
+                            if (v.size() == 1) {
+                                
+                                if (v[0].type() == kTypeSymbol) {
+                                    
+                                    aNewTimeEvent.set(kTTSym_name, v);
+                                }
+                            }
+                        }
+                        
+                        // Pass the xml handler to the new event to fill his attribute
+                        aXmlHandler->setAttributeValue(kTTSym_object, out);
+                        return aXmlHandler->sendMessage(kTTSym_Read);
+                    }
+                }
+            }
+        }
+    }
+    
+    return err;
 }
 
 TTErr Scenario::TimeProcessCreate(const TTValue& inputValue, TTValue& outputValue)
@@ -1427,6 +1655,244 @@ TTErr Scenario::TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue
     return kTTErrGeneric;
 }
 
+void Scenario::writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTObject& aTimeProcess)
+{
+    TTObject    timeProcessContainer;
+    TTValue     v;
+    TTString    s;
+    
+    aTimeProcess.get("container", timeProcessContainer);
+    
+    // If the process is handled by a upper scenario
+    if (timeProcessContainer.valid())
+    {
+        // Start a node with the type of the process
+        xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST aTimeProcess.name().c_str());
+    }
+    
+    // Write the name
+    TTSymbol name;
+    aTimeProcess.get("name", name);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST name.c_str());
+    
+    // If the process is handled by a upper scenario
+    if (timeProcessContainer.valid())
+    {
+        // Write the start event name
+        getTimeProcessStartEvent(aTimeProcess).get("name", v);
+        v.toString();
+        s = TTString(v[0]);
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "start", BAD_CAST s.data());
+        
+        // Write the end event name
+        getTimeProcessEndEvent(aTimeProcess).get("name", v);
+        v.toString();
+        s = TTString(v[0]);
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "end", BAD_CAST s.data());
+    }
+    
+    // Write the duration min
+    aTimeProcess.get("durationMin", v);
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "durationMin", BAD_CAST s.data());
+        
+    // Write the duration max
+    aTimeProcess.get("durationMax", v);
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "durationMax", BAD_CAST s.data());
+    
+    // Write the mute
+    aTimeProcess.get("mute", v);
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "mute", BAD_CAST s.data());
+    
+    // Write the color
+    aTimeProcess.get("color", v);
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "color", BAD_CAST s.data());
+    
+    // If the process is handled by a upper scenario
+    if (timeProcessContainer.valid())
+    {
+        // Write the vertical position
+         aTimeProcess.get("verticalPosition", v);
+        v.toString();
+        s = TTString(v[0]);
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "verticalPosition", BAD_CAST s.data());
+        
+        // Write the vertical size
+         aTimeProcess.get("verticalSize", v);
+        v.toString();
+        s = TTString(v[0]);
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "verticalSize", BAD_CAST s.data());
+        
+        // Pass the xml handler to the process to fill his attribute
+        aXmlHandler->setAttributeValue(kTTSym_object, aTimeProcess);
+        aXmlHandler->sendMessage(kTTSym_Write);
+        
+        // Close the process node
+        xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
+    }
+}
+
+TTErr Scenario::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHandler, TTObject& aNewTimeProcess)
+{
+    TTObject    start;
+    TTObject    end;
+    TTValue     v, out, aCacheElement;
+    TTErr       err;
+    
+    // Get the name of the start event
+    if (!aXmlHandler->getXmlAttribute(kTTSym_start, v, YES))
+    {
+        if (v.size() == 1)
+        {
+            if (v[0].type() == kTypeSymbol)
+            {
+                // Find the start event using his name inside the container
+                mTimeEventList.find(&TTTimeContainerFindTimeEventWithName, (TTPtr)&v, aCacheElement);
+                
+                if (aCacheElement.size() == 0)
+                {
+                    TTLogError("Scenario::readTimeProcessFromXml %s : can't find start event\n", mName.c_str());
+                    return kTTErrGeneric;
+                }
+                
+                start = aCacheElement[0];
+            }
+        }
+    }
+    
+    // Get the name of the end event
+    if (!aXmlHandler->getXmlAttribute(kTTSym_end, v, YES))
+    {
+        if (v.size() == 1)
+        {
+            if (v[0].type() == kTypeSymbol)
+            {
+                // Find the end event using his name inside the container
+                mTimeEventList.find(&TTTimeContainerFindTimeEventWithName, (TTPtr)&v, aCacheElement);
+                
+                if (aCacheElement.size() == 0)
+                {
+                    TTLogError("Scenario::readTimeProcessFromXml %s : can't find end event\n", mName.c_str());
+                    return kTTErrGeneric;
+                }
+                
+                end = aCacheElement[0];
+            }
+        }
+    }
+    
+    if (!start.valid() || !end.valid())
+        return kTTErrGeneric;
+    
+    // check start and end events are different
+    if (start == end)
+        return kTTErrGeneric;
+    
+    // Create the time process
+    v = TTValue(aXmlHandler->mXmlNodeName, start, end);
+    err = this->TimeProcessCreate(v, out);
+    
+    if (!err) {
+        
+        aNewTimeProcess = out[0];
+        
+        // Get all generic time process atttributes
+        
+        // Get the time process name
+        if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES))
+        {
+            if (v.size() == 1)
+            {
+                if (v[0].type() == kTypeSymbol)
+                {
+                    aNewTimeProcess.set(kTTSym_name, v);
+                }
+            }
+        }
+        
+        // Get the durationMin
+        if (!aXmlHandler->getXmlAttribute(kTTSym_durationMin, v, NO))
+        {
+            if (v.size() == 1)
+            {
+                if (v[0].type() == kTypeUInt32)
+                {
+                    aNewTimeProcess.set(kTTSym_durationMin, v);
+                }
+            }
+        }
+        
+        // Get the durationMax
+        if (!aXmlHandler->getXmlAttribute(kTTSym_durationMax, v, NO))
+        {
+            if (v.size() == 1)
+            {
+                if (v[0].type() == kTypeUInt32)
+                {
+                    aNewTimeProcess.set(kTTSym_durationMax, v);
+                }
+            }
+        }
+        
+        // Get the mute
+        if (!aXmlHandler->getXmlAttribute(kTTSym_mute, v, NO))
+        {
+            if (v.size() == 1)
+            {
+                if (v[0].type() == kTypeInt32)
+                {
+                    aNewTimeProcess.set(kTTSym_mute, v);
+                }
+            }
+        }
+        
+        // Get the color
+        if (!aXmlHandler->getXmlAttribute(kTTSym_color, v, NO))
+        {
+            if (v.size() == 3)
+            {
+                if (v[0].type() == kTypeInt32 && v[1].type() == kTypeInt32 && v[2].type() == kTypeInt32)
+                {
+                    aNewTimeProcess.set(kTTSym_color, v);
+                }
+            }
+        }
+        
+        // Get the vertical position
+        if (!aXmlHandler->getXmlAttribute(kTTSym_verticalPosition, v, NO))
+        {
+            if (v.size() == 1)
+            {
+                if (v[0].type() == kTypeUInt32)
+                {
+                    aNewTimeProcess.set(kTTSym_verticalPosition, v);
+                }
+            }
+        }
+        
+        // Get the vertical size
+        if (!aXmlHandler->getXmlAttribute(kTTSym_verticalSize, v, NO))
+        {
+            if (v.size() == 1)
+            {
+                if (v[0].type() == kTypeUInt32)
+                {
+                    aNewTimeProcess.set(kTTSym_verticalSize, v);
+                }
+            }
+        }
+    }
+    
+    return err;
+}
+
 TTErr Scenario::TimeConditionCreate(const TTValue& inputValue, TTValue& outputValue)
 {
     TTObject    aTimeCondition;
@@ -1500,6 +1966,42 @@ TTErr Scenario::TimeConditionRelease(const TTValue& inputValue, TTValue& outputV
     }
     
     return kTTErrGeneric;
+}
+
+void Scenario::writeTimeConditionAsXml(TTXmlHandlerPtr aXmlHandler, TTObject& aTimeCondition)
+{
+    // Start a condition node
+    xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "condition");
+    
+    // Pass the xml handler to the condition to fill his attribute
+    aXmlHandler->setAttributeValue(kTTSym_object, aTimeCondition);
+    aXmlHandler->sendMessage(kTTSym_Write);
+    
+    // Close the condition node
+    xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
+}
+
+TTErr Scenario::readTimeConditionFromXml(TTXmlHandlerPtr aXmlHandler, TTObject& aNewTimeCondition)
+{
+    TTValue v, out;
+    TTErr   err = kTTErrGeneric;
+    
+    if (aXmlHandler->mXmlNodeStart) {
+        
+        // Create the time condition
+        err = this->TimeConditionCreate(v, out);
+        
+        if (!err) {
+            
+            aNewTimeCondition = out[0];
+            
+            // Pass the xml handler to the new condition to fill his attribute
+            aXmlHandler->setAttributeValue(kTTSym_object, out);
+            return aXmlHandler->sendMessage(kTTSym_Read);
+        }
+    }
+    
+    return err;
 }
 
 void Scenario::makeTimeProcessCacheElement(TTObject& aTimeProcess, TTValue& newCacheElement)

@@ -38,6 +38,10 @@ class Scenario : public TimeContainerPlugin {
 	
     TTAddressItemPtr            mNamespace;                     ///< the namespace workspace of the scenario
     
+    TTList                      mTimeProcessList;               ///< all registered time processes and their observers
+    TTList                      mTimeEventList;                 ///< all registered time events and their observers
+    TTList                      mTimeConditionList;             ///< all registered time conditions and their observers
+    
     TTValue                     mViewZoom;                      ///< the zoom factor (x and y) into the scenario view (useful for gui)
     TTValue                     mViewPosition;                  ///< the position (x and y) of the scenario view (useful for gui)
 #ifndef NO_EDITION_SOLVER
@@ -59,6 +63,21 @@ class Scenario : public TimeContainerPlugin {
      @param	value           the returned parameter names
      @return                kTTErrNone */
 	TTErr   getParameterNames(TTValue& value);
+    
+    /** Get all time processes objects
+     @param value           all time processes objects
+     @return                kTTErrGeneric if no process */
+    TTErr   getTimeProcesses(TTValue& value);
+    
+    /** Get all time events objects
+     @param value           all time events objects
+     @return                kTTErrGeneric if no event */
+    TTErr   getTimeEvents(TTValue& value);
+    
+    /** Get all time conditions objects
+     @param value           all time conditions objects
+     @return                kTTErrGeneric if no condition */
+    TTErr   getTimeConditions(TTValue& value);
     
     /** Set the view zoom factor
      @param	value           zoomX and zoomY
@@ -108,7 +127,15 @@ class Scenario : public TimeContainerPlugin {
 	TTErr	WriteAsXml(const TTValue& inputValue, TTValue& outputValue);
 	TTErr	ReadFromXml(const TTValue& inputValue, TTValue& outputValue);
     
-
+    
+    
+    /** Trigger next pending time events
+     @param inputvalue      nothing or any event pending passing there position in the list of pending event (ex : 1 3 if there is 3 or more pending events and we want to trigger the first and the third events)
+     @param outputvalue     the triggered time events
+     @return                an error code if there is no next pending time event */
+    TTErr   Next(const TTValue& inputValue, TTValue& outputValue);
+    
+    
     
     /** Create a time event
      @param inputvalue      a date
@@ -133,6 +160,24 @@ class Scenario : public TimeContainerPlugin {
      @param outputvalue     nothing            
      @return                an error code if the replacement fails */
     TTErr   TimeEventReplace(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Look up the time event list to retreive a time event by name
+     @param inputValue      the name as symbol
+     @param outputValue     the returned time event object
+     @return                kTTErrValueNotFound if there is no event with this name */
+    TTErr   TimeEventFind(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Write basic informations of a time event as Xml
+     @param aXmlHandler     a xml handler
+     @param aTimeProcess    a time event object
+     @return                nothing */
+    void    writeTimeEventAsXml(TTXmlHandlerPtr aXmlHandler, TTObject& aTimeEvent);
+    
+    /** Read basic informations of a time event from Xml
+     @param aXmlHandler     a xml handler
+     @param                 a new time event
+     @return                #TTErr*/
+    TTErr   readTimeEventFromXml(TTXmlHandlerPtr aXmlHandler, TTObject& aNewTimeEvent);
     
     
     
@@ -160,6 +205,18 @@ class Scenario : public TimeContainerPlugin {
      @return                an error code if the limitation fails */
     TTErr   TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue);
     
+    /** Write basic informations of a time process as Xml
+     @param aXmlHandler     a xml handler
+     @param aTimeProcess    a time process object
+     @return                nothing */
+    void    writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTObject& aTimeProcess);
+    
+    /** Read basic informations of a time process from Xml
+     @param aXmlHandler     a xml handler
+     @param                 a new time process object
+     @return                #TTErr */
+    TTErr   readTimeProcessFromXml(TTXmlHandlerPtr aXmlHandler, TTObject& aNewTimeProcess);
+    
     
     
     /** Create a time condition
@@ -173,6 +230,19 @@ class Scenario : public TimeContainerPlugin {
      @param outputvalue     nothing            
      @return                an error code if the destruction fails */
     TTErr   TimeConditionRelease(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Write basic informations of a time condition as Xml
+     @param aXmlHandler     a xml handler
+     @param aTimeProcess    a time condition object
+     @return                nothing */
+    void    writeTimeConditionAsXml(TTXmlHandlerPtr aXmlHandler, TTObject& aTimeCondition);
+    
+    /** Read basic informations of a time condition from Xml
+     @param aXmlHandler     a xml handler
+     @param                 a new time condition
+     @return                #TTErr */
+    TTErr   readTimeConditionFromXml(TTXmlHandlerPtr aXmlHandler, TTObject& aNewTimeCondition);
+    
     
     
     /** an internal method used to create all time process attribute observers */

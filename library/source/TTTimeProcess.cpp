@@ -205,7 +205,7 @@ TTErr TTTimeProcess::setRigid(const TTValue& value)
             {
                 TTObject thisObject(this);
                 TTValue none, v(thisObject, mDurationMin, mDurationMax);
-                return mContainer.send("TimeProcessLimit", v, none);
+                return mContainer.send("TimeProcessLimit", v, none); // théo : it is bad because we suppose it is a Scenario
             }
         }
     }
@@ -228,7 +228,7 @@ TTErr TTTimeProcess::setDurationMin(const TTValue& value)
                 TTValue none, v = TTObject(this);
                 v.append(mDurationMin);
                 v.append(mDurationMax);
-                return mContainer.send("TimeProcessLimit", v, none);
+                return mContainer.send("TimeProcessLimit", v, none); // théo : it is bad because we suppose it is a Scenario
             }
         }
     }
@@ -251,7 +251,7 @@ TTErr TTTimeProcess::setDurationMax(const TTValue& value)
                 TTValue none, v = TTObject(this);
                 v.append(mDurationMin);
                 v.append(mDurationMax);
-                return mContainer.send("TimeProcessLimit", v, none);
+                return mContainer.send("TimeProcessLimit", v, none); // théo : it is bad because we suppose it is a Scenario
             }
         }
     }
@@ -277,7 +277,7 @@ TTErr TTTimeProcess::setStartDate(const TTValue& value)
                 TTValue none, v = TTObject(this);
                 v.append(TTUInt32(value[0]));
                 v.append(mStartDate);
-                return mContainer.send("TimeProcessMove", v, none);
+                return mContainer.send("TimeProcessMove", v, none); // théo : it is bad because we suppose it is a Scenario
             }
             
             // or set the start event date directly
@@ -326,7 +326,7 @@ TTErr TTTimeProcess::setEndDate(const TTValue& value)
                 TTValue none, v = TTObject(this);
                 v.append(mStartDate);
                 v.append(TTUInt32(value[0]));
-                return mContainer.send("TimeProcessMove", v, none);
+                return mContainer.send("TimeProcessMove", v, none); // théo : it is bad because we suppose it is a Scenario
             }
             
             // or set the end event date directly
@@ -429,7 +429,7 @@ TTErr TTTimeProcess::Move(const TTValue& inputValue, TTValue& outputValue)
                     TTValue none, v = TTObject(this);
                     v.append(TTUInt32(inputValue[0]));
                     v.append(TTUInt32(inputValue[1]));
-                    return mContainer.send("TimeProcessMove", v, none);
+                    return mContainer.send("TimeProcessMove", v, none); // théo : it is bad because we suppose it is a Scenario
                 }
             }
         }

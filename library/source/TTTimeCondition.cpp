@@ -641,8 +641,8 @@ TTErr TTTimeCondition::ReadFromXml(const TTValue& inputValue, TTValue& outputVal
         if (!aXmlHandler->getXmlAttribute(kTTSym_event, v, YES)) {
             
             // Find the event using his name from our container
-            if (!mContainer.send("TimeEventFind", v, out)) {
-                
+            if (!mContainer.send("TimeEventFind", v, out)) // théo : it is bad because we suppose it is a Scenario
+            {
                 EventAdd(out, v); // TODO : better using the second argument
                 
                 // get the expressions
