@@ -43,10 +43,7 @@ private :
      @return                kTTErrNone */
 	TTErr   getParameterNames(TTValue& value);
     
-    /** Get curve addresses
-     @param	value           the returned curve addresses
-     @return                kTTErrNone */
-	TTErr   getCurveAddresses(TTValue& value);
+
     
     /** Specific compilation method used to pre-processed data in order to accelarate Process method.
      the compiled attribute allows to know if the process needs to be compiled or not.
@@ -92,6 +89,27 @@ private :
      @return                .. */
 	TTErr	WriteAsText(const TTValue& inputValue, TTValue& outputValue);
 	TTErr	ReadFromText(const TTValue& inputValue, TTValue& outputValue);
+    
+    
+    
+    /** To be notified when an event date changed
+     @param inputValue      the event which have changed his date
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr   EventDateChanged(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** To be notified when an event condition changed
+     @param inputValue      the event which have changed his condition, the condition
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr   EventConditionChanged(const TTValue& inputValue, TTValue& outputValue);
+    
+    
+    
+    /** Get curve addresses
+     @param	value           the returned curve addresses
+     @return                kTTErrNone */
+	TTErr   getCurveAddresses(TTValue& value);
     
     /** Add a curve at an address
      @param inputvalue      address

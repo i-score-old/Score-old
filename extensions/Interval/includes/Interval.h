@@ -79,6 +79,18 @@ private :
      @return                .. */
 	TTErr	WriteAsText(const TTValue& inputValue, TTValue& outputValue);
 	TTErr	ReadFromText(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** To be notified when an event date changed
+     @param inputValue      the event which have changed his date
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr   EventDateChanged(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** To be notified when an event condition changed
+     @param inputValue      the event which have changed his condition, the condition
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr   EventConditionChanged(const TTValue& inputValue, TTValue& outputValue);
 };
 
 typedef Interval* IntervalPtr;

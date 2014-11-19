@@ -26,6 +26,11 @@ extern "C" TT_EXTENSION_EXPORT TTErr TTLoadJamomaExtension_Scenario(void)
 	return kTTErrNone;
 }
 
+#if 0
+#pragma mark -
+#pragma mark Constructor/Destructor
+#endif
+
 TIME_CONTAINER_PLUGIN_CONSTRUCTOR,
 mNamespace(NULL),
 mViewZoom(TTValue(1., 1.)),
@@ -63,11 +68,11 @@ mAttributeLoaded(NO)
     addMessageProperty(TimeEventFind, hidden, YES);
     
 
-    addMessageWithArguments(TimeProcessCreate);
-    addMessageProperty(TimeProcessCreate, hidden, YES);
+    addMessageWithArguments(TimeProcessAdd);
+    addMessageProperty(TimeProcessAdd, hidden, YES);
     
-    addMessageWithArguments(TimeProcessRelease);
-    addMessageProperty(TimeProcessRelease, hidden, YES);
+    addMessageWithArguments(TimeProcessRemove);
+    addMessageProperty(TimeProcessRemove, hidden, YES);
     
     addMessageWithArguments(TimeProcessMove);
     addMessageProperty(TimeProcessMove, hidden, YES);
@@ -126,6 +131,11 @@ Scenario::~Scenario()
 #endif
 }
 
+#if 0
+#pragma mark -
+#pragma mark TimeContainerPlugin Methods
+#endif
+
 TTErr Scenario::getParameterNames(TTValue& value)
 {
     value.clear();
@@ -133,6 +143,11 @@ TTErr Scenario::getParameterNames(TTValue& value)
 	
 	return kTTErrNone;
 }
+
+#if 0
+#pragma mark -
+#pragma mark TTTimeContainer Methods
+#endif
 
 TTErr Scenario::getTimeProcesses(TTValue& value)
 {
@@ -181,19 +196,10 @@ TTErr Scenario::getTimeConditions(TTValue& value)
     return kTTErrNone;
 }
 
-TTErr Scenario::setViewZoom(const TTValue& value)
-{
-    mViewZoom = value;
-    
-    return kTTErrNone;
-}
-
-TTErr Scenario::setViewPosition(const TTValue& value)
-{
-    mViewPosition = value;
-    
-    return kTTErrNone;
-}
+#if 0
+#pragma mark -
+#pragma mark TTTimeProcess Methods
+#endif
 
 TTErr Scenario::Compile()
 {
@@ -923,6 +929,67 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     return kTTErrNone;
 }
 
+#if 0
+#pragma mark -
+#pragma mark Notifications
+#endif
+
+TTErr Scenario::EventDateChanged(const TTValue& inputValue, TTValue& outputValue)
+{
+    TT_ASSERT("Scenario::EventDateChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
+    
+    TTObject aTimeEvent = inputValue[0];
+    
+    if (aTimeEvent == this->getStartEvent())
+    {
+        // if needed, the compile method should be called again now
+        mCompiled = NO;
+        
+        return kTTErrNone;
+    }
+    else if (aTimeEvent == this->getEndEvent())
+    {
+        // if needed, the compile method should be called again now
+        mCompiled = NO;
+        
+        return kTTErrNone;
+    }
+    
+    TTLogError("Scenario::EventDateChanged %s : wrong event\n", mName.c_str());
+    return kTTErrGeneric;
+}
+
+TTErr Scenario::EventConditionChanged(const TTValue& inputValue, TTValue& outputValue)
+{
+    TT_ASSERT("Scenario::EventConditionChanged : inputValue is correct", inputValue.size() == 2 && inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeObject);
+    
+    TTObject    aTimeEvent = inputValue[0];
+    TTObject    aTimeCondition = inputValue[1];
+    
+    // no rule
+    
+    return kTTErrNone;
+}
+
+#if 0
+#pragma mark -
+#pragma mark Specific Scenario Methods
+#endif
+
+TTErr Scenario::setViewZoom(const TTValue& value)
+{
+    mViewZoom = value;
+    
+    return kTTErrNone;
+}
+
+TTErr Scenario::setViewPosition(const TTValue& value)
+{
+    mViewPosition = value;
+    
+    return kTTErrNone;
+}
+
 TTErr Scenario::Next(const TTValue& inputValue, TTValue& outputValue)
 {
     TTObject    aTimeEvent;
@@ -1339,7 +1406,7 @@ TTErr Scenario::readTimeEventFromXml(TTXmlHandlerPtr aXmlHandler, TTObject& aNew
     return err;
 }
 
-TTErr Scenario::TimeProcessCreate(const TTValue& inputValue, TTValue& outputValue)
+TTErr Scenario::TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue)
 {
     TTObject    startEvent, endEvent;
     TTObject    aTimeProcess;
@@ -1351,13 +1418,23 @@ TTErr Scenario::TimeProcessCreate(const TTValue& inputValue, TTValue& outputValu
 #endif
     if (inputValue.size() == 3) {
         
-        if (inputValue[0].type() == kTypeSymbol && inputValue[1].type() == kTypeObject && inputValue[2].type() == kTypeObject) {
+        if (inputValue[1].type() == kTypeObject && inputValue[2].type() == kTypeObject) {
             
             // prepare argument (container)
             args = TTObject(this);
             
-            // create a time process of the given type
-            aTimeProcess = TTObject(inputValue[0], args);
+            // depending on the type of the first element
+            if (inputValue[0].type() == kTypeSymbol)
+            {
+                // create a time process of the given type
+                aTimeProcess = TTObject(inputValue[0], args);
+            }
+            else if (inputValue[0].type() == kTypeObject)
+            {
+                // use an existing time process
+                aTimeProcess = inputValue[0];
+            }
+            
             if (!aTimeProcess.valid())
                 return kTTErrGeneric;
             
@@ -1429,7 +1506,7 @@ TTErr Scenario::TimeProcessCreate(const TTValue& inputValue, TTValue& outputValu
     return kTTErrGeneric;
 }
 
-TTErr Scenario::TimeProcessRelease(const TTValue& inputValue, TTValue& outputValue)
+TTErr Scenario::TimeProcessRemove(const TTValue& inputValue, TTValue& outputValue)
 {
     TTObject    aTimeProcess;
     TTValue     aCacheElement;
@@ -1797,7 +1874,7 @@ TTErr Scenario::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHandler, TTObject& aN
     
     // Create the time process
     v = TTValue(aXmlHandler->mXmlNodeName, start, end);
-    err = this->TimeProcessCreate(v, out);
+    err = this->TimeProcessAdd(v, out);
     
     if (!err) {
         
@@ -2042,8 +2119,3 @@ void Scenario::deleteTimeConditionCacheElement(const TTValue& oldCacheElement)
 {
     ;
 }
-
-#if 0
-#pragma mark -
-#pragma mark Some Methods
-#endif

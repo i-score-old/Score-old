@@ -266,13 +266,13 @@ private :
      @param inputValue      the event which have changed his date
      @param outputValue     nothing
      @return                kTTErrNone */
-    TTErr           EventDateChanged(const TTValue& inputValue, TTValue& outputValue);
+    virtual TTErr   EventDateChanged(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
     
     /** To be notified when an event condition changed
      @param inputValue      the event which have changed his condition, the condition
      @param outputValue     nothing
      @return                kTTErrNone */
-    TTErr           EventConditionChanged(const TTValue& inputValue, TTValue& outputValue);
+    virtual TTErr   EventConditionChanged(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
     
     /** To be notified when an event status changed
      @param inputValue      the event which have changed his status

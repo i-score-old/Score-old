@@ -591,43 +591,6 @@ TTErr TTTimeProcess::Tick()
 #pragma mark Notifications
 #endif
 
-TTErr TTTimeProcess::EventDateChanged(const TTValue& inputValue, TTValue& outputValue)
-{
-    TT_ASSERT("TTTimeProcess::EventDateChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
-    
-    TTObject aTimeEvent = inputValue[0];
-    
-    if (aTimeEvent == mStartEvent)
-    {
-        // if needed, the compile method should be called again now
-        mCompiled = NO;
-        
-        return kTTErrNone;
-    }
-    else if (aTimeEvent == mEndEvent)
-    {
-        // if needed, the compile method should be called again now
-        mCompiled = NO;
-        
-        return kTTErrNone;
-    }
-    
-    TTLogError("TTTimeProcess::EventDateChanged %s : wrong event\n", mName.c_str());
-    return kTTErrGeneric;
-}
-
-TTErr TTTimeProcess::EventConditionChanged(const TTValue& inputValue, TTValue& outputValue)
-{
-    TT_ASSERT("TTTimeProcess::EventConditionChanged : inputValue is correct", inputValue.size() == 2 && inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeObject);
-    
-    TTObject    aTimeEvent = inputValue[0];
-    TTObject    aTimeCondition = inputValue[1];
-    
-    // no rule
-    
-    return kTTErrNone;
-}
-
 TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outputValue)
 {
     TT_ASSERT("TTTimeProcess::EventStatusChanged : inputValue is correct", inputValue.size() == 3 && inputValue[0].type() == kTypeObject);

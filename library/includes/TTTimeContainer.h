@@ -51,7 +51,7 @@ private :
      @param inputValue      the new speed value
      @param outputValue     nothing
      @return                kTTErrNone */
-    TTErr           SchedulerSpeedChanged(const TTValue& inputValue, TTValue& outputValue);
+    TTErr                   SchedulerSpeedChanged(const TTValue& inputValue, TTValue& outputValue);
     
 protected :
     
@@ -60,57 +60,57 @@ protected :
     /** Getter on date time event protected member
      @param aTimeEvent      a time event object
      @return                a date value */
-    TTUInt32        getTimeEventDate(TTObject& aTimeEvent);
+    TTUInt32                getTimeEventDate(TTObject& aTimeEvent);
     
     /** Getter on event's status protected member
      @param aTimeEvent      a time event object
      @return                a status symbol */
-    TTSymbol&       getTimeEventStatus(TTObject& aTimeEvent);
+    TTSymbol&               getTimeEventStatus(TTObject& aTimeEvent);
     
     /** Getter on state time event protected member
      @param aTimeEvent      a time event object
      @return                a state object */
-    TTObject&       getTimeEventState(TTObject& aTimeEvent);
+    TTObject&               getTimeEventState(TTObject& aTimeEvent);
     
     /** Getter on condition time event protected member
      @param aTimeEvent      a time event object
      @return                a condition object */
-    TTObject&       getTimeEventCondition(TTObject& aTimeEvent);
+    TTObject&               getTimeEventCondition(TTObject& aTimeEvent);
     
     /** Getter on start event time process protected member
      @param aTimeProcess    a time process object
      @return                a time event instance */
-    TTObject&       getTimeProcessStartEvent(TTObject& aTimeProcess);
+    TTObject&               getTimeProcessStartEvent(TTObject& aTimeProcess);
     
     /** Setter on start event time process protected member
      @param aTimeProcess    a time process object
      @param aTimeEvent      a time event object */
-    void            setTimeProcessStartEvent(TTObject& aTimeProcess, TTObject& aTimeEvent);
+    void                    setTimeProcessStartEvent(TTObject& aTimeProcess, TTObject& aTimeEvent);
     
     /** Getter on end event time process protected member
      @param aTimeProcess    a time process object
      @return                a time event object */
-    TTObject&       getTimeProcessEndEvent(TTObject& aTimeProcess);
+    TTObject&               getTimeProcessEndEvent(TTObject& aTimeProcess);
     
     /** Setter on end event time process protected member
      @param aTimeProcess    a time process object
      @param aTimeEvent      a time event object */
-    void            setTimeProcessEndEvent(TTObject& aTimeProcess, TTObject& aTimeEvent);
+    void                    setTimeProcessEndEvent(TTObject& aTimeProcess, TTObject& aTimeEvent);
     
     /** Getter on duration min time process protected member
      @param aTimeProcess    a time process object
      @return                a duration value */
-    TTUInt32        getTimeProcessDurationMin(TTObject& aTimeProcess);
+    TTUInt32                getTimeProcessDurationMin(TTObject& aTimeProcess);
     
     /** Getter on duration max time process protected member
      @param aTimeProcess    a time process object
      @return                a duration value */
-    TTUInt32        getTimeProcessDurationMax(TTObject& aTimeProcess);
+    TTUInt32                getTimeProcessDurationMax(TTObject& aTimeProcess);
     
     /** Getter on running state of time process protected member
      @param aTimeProcess    a time process object
      @return                a boolean value */
-    TTBoolean       getTimeProcessRunning(TTObject& aTimeProcess);
+    TTBoolean               getTimeProcessRunning(TTObject& aTimeProcess);
     
     friend TTErr TTSCORE_EXPORT TTTimeContainerSchedulerSpeedCallback(const TTValue& baton, const TTValue& data);
 };

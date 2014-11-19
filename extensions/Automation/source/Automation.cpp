@@ -30,6 +30,11 @@ extern "C" TT_EXTENSION_EXPORT TTErr TTLoadJamomaExtension_Automation(void)
 	return kTTErrNone;
 }
 
+#if 0
+#pragma mark -
+#pragma mark Constructor/Destructor
+#endif
+
 TIME_PROCESS_PLUGIN_CONSTRUCTOR
 {
     TIME_PLUGIN_INITIALIZE
@@ -53,6 +58,11 @@ Automation::~Automation()
     Clear();
 }
 
+#if 0
+#pragma mark -
+#pragma mark TimeProcessPlugin Methods
+#endif
+
 TTErr Automation::getParameterNames(TTValue& value)
 {
     value.clear();
@@ -61,10 +71,10 @@ TTErr Automation::getParameterNames(TTValue& value)
 	return kTTErrNone;
 }
 
-TTErr Automation::getCurveAddresses(TTValue& value)
-{
-    return mCurves.getKeys(value);
-}
+#if 0
+#pragma mark -
+#pragma mark TTTimeProcess Methods
+#endif
 
 TTErr Automation::Compile()
 {
@@ -488,6 +498,58 @@ TTErr Automation::ReadFromText(const TTValue& inputValue, TTValue& outputValue)
 	return kTTErrGeneric;
 }
 
+#if 0
+#pragma mark -
+#pragma mark Notifications
+#endif
+
+TTErr Automation::EventDateChanged(const TTValue& inputValue, TTValue& outputValue)
+{
+    TT_ASSERT("Automation::EventDateChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
+    
+    TTObject aTimeEvent = inputValue[0];
+    
+    if (aTimeEvent == this->getStartEvent())
+    {
+        // if needed, the compile method should be called again now
+        mCompiled = NO;
+        
+        return kTTErrNone;
+    }
+    else if (aTimeEvent == this->getEndEvent())
+    {
+        // if needed, the compile method should be called again now
+        mCompiled = NO;
+        
+        return kTTErrNone;
+    }
+    
+    TTLogError("Automation::EventDateChanged %s : wrong event\n", mName.c_str());
+    return kTTErrGeneric;
+}
+
+TTErr Automation::EventConditionChanged(const TTValue& inputValue, TTValue& outputValue)
+{
+    TT_ASSERT("Automation::EventConditionChanged : inputValue is correct", inputValue.size() == 2 && inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeObject);
+    
+    TTObject    aTimeEvent = inputValue[0];
+    TTObject    aTimeCondition = inputValue[1];
+    
+    // no rule
+    
+    return kTTErrNone;
+}
+
+#if 0
+#pragma mark -
+#pragma mark Specific Automation Methods
+#endif
+
+TTErr Automation::getCurveAddresses(TTValue& value)
+{
+    return mCurves.getKeys(value);
+}
+
 TTErr Automation::CurveAdd(const TTValue& inputValue, TTValue& outputValue)
 {
     TTValue     v, vStart, vEnd, parameters, objects, none;
@@ -838,7 +900,7 @@ void Automation::removeReceiver(TTAddress anAddress)
 
 #if 0
 #pragma mark -
-#pragma mark Some Methods
+#pragma mark Callback Functions
 #endif
 
 TTErr AutomationReceiverReturnValueCallback(const TTValue& baton, const TTValue& data)

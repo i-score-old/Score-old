@@ -28,6 +28,11 @@ extern "C" TT_EXTENSION_EXPORT TTErr TTLoadJamomaExtension_Loop(void)
 	return kTTErrNone;
 }
 
+#if 0
+#pragma mark -
+#pragma mark Constructor/Destructor
+#endif
+
 TIME_CONTAINER_PLUGIN_CONSTRUCTOR,
 mNamespace(NULL)
 {
@@ -37,6 +42,10 @@ mNamespace(NULL)
     
     addMessageWithArguments(PatternAttach);
     addMessageWithArguments(PatternDetach);
+    
+    // needed to be notified by events
+    addMessageWithArguments(EventDateChanged);
+    addMessageProperty(EventDateChanged, hidden, YES);
     
     TTObject    thisObject(this);
     TTValue     args;
@@ -67,6 +76,11 @@ Loop::~Loop()
     }
 }
 
+#if 0
+#pragma mark -
+#pragma mark TimeContainerPlugin Methods
+#endif
+
 TTErr Loop::getParameterNames(TTValue& value)
 {
     value.clear();
@@ -74,6 +88,11 @@ TTErr Loop::getParameterNames(TTValue& value)
 	
 	return kTTErrNone;
 }
+
+#if 0
+#pragma mark -
+#pragma mark TTTimeContainer Methods
+#endif
 
 TTErr Loop::getTimeProcesses(TTValue& value)
 {
@@ -104,6 +123,11 @@ TTErr Loop::getTimeConditions(TTValue& value)
     
     return kTTErrNone;
 }
+
+#if 0
+#pragma mark -
+#pragma mark TTTimeProcess Methods
+#endif
 
 TTErr Loop::Compile()
 {
@@ -235,20 +259,72 @@ TTErr Loop::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     return kTTErrNone;
 }
 
+#if 0
+#pragma mark -
+#pragma mark Notifications
+#endif
+
+TTErr Loop::EventDateChanged(const TTValue& inputValue, TTValue& outputValue)
+{
+    TT_ASSERT("Loop::EventDateChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
+    
+    TTObject aTimeEvent = inputValue[0];
+    
+    if (aTimeEvent != this->getStartEvent() && aTimeEvent != this->getEndEvent())
+    {
+        TTLogError("Loop::EventDateChanged %s : wrong event\n", mName.c_str());
+        return kTTErrGeneric;
+    }
+    
+    // if needed, the compile method should be called again now
+    mCompiled = NO;
+    
+    // get new duration to update the pattern end event date
+    TTValue v;
+    getAttributeValue(kTTSym_duration, v);
+    mPatternEndEvent.set("date", v);
+    
+    return kTTErrNone;
+}
+
+TTErr Loop::EventConditionChanged(const TTValue& inputValue, TTValue& outputValue)
+{
+    TT_ASSERT("Loop::EventConditionChanged : inputValue is correct", inputValue.size() == 2 && inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeObject);
+    
+    TTObject    aTimeEvent = inputValue[0];
+    TTObject    aTimeCondition = inputValue[1];
+    
+    // no rule
+    
+    return kTTErrNone;
+}
+
+#if 0
+#pragma mark -
+#pragma mark Specific Loop Methods
+#endif
+
 TTErr Loop::PatternAttach(const TTValue& inputValue, TTValue& outputValue)
 {
     TT_ASSERT("Loop::PatternAttach : expects an object", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
     
     TTObject aTimeProcess = inputValue[0];
     
+    // set loop as time process container
     TTObject thisObject(this);
     aTimeProcess.set("container", thisObject);
     
-    // set the start and end events
+    // make pattern start and end events as time process start and end events
     setTimeProcessStartEvent(aTimeProcess, mPatternStartEvent);
     setTimeProcessEndEvent(aTimeProcess, mPatternEndEvent);
     
+    // cache the time process
     mPatternProcesses.append(aTimeProcess);
+    
+    // get duration to update the pattern end event date
+    TTValue v;
+    getAttributeValue(kTTSym_duration, v);
+    mPatternEndEvent.set("date", v);
     
     return kTTErrNone;
 }
@@ -259,18 +335,15 @@ TTErr Loop::PatternDetach(const TTValue& inputValue, TTValue& outputValue)
     
     TTObject aTimeProcess = inputValue[0];
     
+    // reset loop container as time process container
     aTimeProcess.set("container", mContainer);
     
-    // set the start and end events
+    // make loop start and end events as time process start and end events
     setTimeProcessStartEvent(aTimeProcess, this->getStartEvent());
     setTimeProcessEndEvent(aTimeProcess, this->getEndEvent());
     
+    // uncache the time process
     mPatternProcesses.remove(aTimeProcess);
     
     return kTTErrNone;
 }
-
-#if 0
-#pragma mark -
-#pragma mark Some Methods
-#endif
