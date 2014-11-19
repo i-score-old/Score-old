@@ -697,21 +697,16 @@ TTErr TTTimeCondition::EventStatusChanged(const TTValue& inputValue, TTValue& ou
     TT_ASSERT("TTTimeCondition::EventStatusChanged : status effectively changed", newStatus != oldStatus);
     
     // if the event exists
-    if (it != mCases.end()) {
-        
-        if (newStatus == kTTSym_eventPending && --mPendingCounter == 0) {
+    if (it != mCases.end())
+    {
+        if (newStatus == kTTSym_eventPending && --mPendingCounter == 0)
+        {
             setReady(YES);
-        } else if (oldStatus == kTTSym_eventPending && mPendingCounter++ == 0 && mReady == YES) {
+        }
+        else if (newStatus == kTTSym_eventHappened && oldStatus == kTTSym_eventPending && mPendingCounter++ == 0 && mReady == YES)
+        {
             setReady(NO);
-            
-            // only apply default behavior when the container run.
-            // otherwise can be called when some events were pending and then we reset them to a waiting status (like in Scenario::Compile)
-            TTBoolean running = NO;
-            if (mContainer.valid())
-                mContainer.get(kTTSym_running, running);
-            
-            if (running)
-                Default();
+            Default();
         }
         
         return kTTErrNone;
@@ -724,8 +719,8 @@ TTErr TTTimeCondition::EventStatusChanged(const TTValue& inputValue, TTValue& ou
 TTErr TTTimeCondition::setReady(TTBoolean newReady)
 {
     // filter repetitions
-    if (newReady != mReady) {
-        
+    if (newReady != mReady)
+    {
         // set the ready value
         mReady = newReady;
         
@@ -747,8 +742,8 @@ void TTTimeCondition::addReceiver(TTAddress anAddress)
     TTValue     args, baton, none;
     
     // if there is no receiver for the expression address
-    if (anAddress != kTTAdrsEmpty && mReceivers.lookup(anAddress, none)) {
-        
+    if (anAddress != kTTAdrsEmpty && mReceivers.lookup(anAddress, none))
+    {
         // no callback to get the received address back
         args = TTObject();
         

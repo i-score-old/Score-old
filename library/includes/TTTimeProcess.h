@@ -288,7 +288,7 @@ private :
     
     /** Send current status notification if the container is running
      @param notification    #TTSymbol "ProcessStarted", "ProcessEnded" or "ProcessDisposed"
-     @return                kTTErrGeneric if the container is not running */
+     @return                kTTErrNone */
     TTErr           sendStatusNotification(TTSymbol& notification);
     
 protected :

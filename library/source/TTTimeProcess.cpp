@@ -467,6 +467,7 @@ TTErr TTTimeProcess::Start()
     // filter repetitions
     if (!mRunning)
     {
+        // make the start event happen to play the scheduler
         mStartEvent.set("status", kTTSym_eventWaiting);
         return mStartEvent.send(kTTSym_Happen);
     }
@@ -479,7 +480,8 @@ TTErr TTTimeProcess::End()
     // filter repetitions
     if (mRunning)
     {
-        return mEndEvent.send(kTTSym_Happen);
+        // stop the scheduler to make the end event happen
+        return Stop();
     }
     
     return kTTErrNone;
@@ -490,9 +492,6 @@ TTErr TTTimeProcess::Play()
     // filter repetitions
     if (!mRunning)
     {
-        // set the running state of the process
-        mRunning = YES;
-        
         // the duration min have not been reached yet
         mDurationMinReached = NO;
         
@@ -548,11 +547,6 @@ TTErr TTTimeProcess::Stop()
     // filter repetitions
     if (mRunning)
     {
-        // set the running state of the process
-        // note : this have to be done BEFORE the effective scheduler stop
-        // because, in time container case, this running state is checked in many place to propagate or not notifications
-        mRunning = NO;
-        
         // stop the scheduler
         return mScheduler.send(kTTSym_Stop);
     }
@@ -683,7 +677,10 @@ TTErr TTTimeProcess::SchedulerRunningChanged(const TTValue& inputValue, TTValue&
                 return kTTErrGeneric;
             }
         }
-
+        
+        // set the running state of the process
+        mRunning = YES;
+        
         // notify ProcessStarted observers
         sendStatusNotification(kTTSym_ProcessStarted);
         
@@ -691,6 +688,9 @@ TTErr TTTimeProcess::SchedulerRunningChanged(const TTValue& inputValue, TTValue&
     }
     else
     {
+        // set the running state of the process
+        mRunning = NO;
+        
         if (!mMute)
         {
             // use the specific process end method of the time process
@@ -710,20 +710,8 @@ TTErr TTTimeProcess::SchedulerRunningChanged(const TTValue& inputValue, TTValue&
 
 TTErr TTTimeProcess::sendStatusNotification(TTSymbol& notification)
 {
-    // is the container running ? (the nofication is sent if there is no valid container)
-    TTBoolean running = YES;
-    if (mContainer.valid())
-        mContainer.get(kTTSym_running, running);
-    
-    if (running)
-    {
-        TTObject thisObject(this);
-        return sendNotification(notification, thisObject);
-    }
-#ifdef TTSCORE_DEBUG
-    TTLogMessage("TTTimeProcess::sendStatusNotification %s : don't send %s notification because the container is not running\n", mName.c_str(), notification.c_str());
-#endif
-    return kTTErrNone;
+    TTObject thisObject(this);
+    return sendNotification(notification, thisObject);
 }
 
 #if 0

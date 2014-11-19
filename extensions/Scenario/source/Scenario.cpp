@@ -238,6 +238,23 @@ TTErr Scenario::Compile()
 
 TTErr Scenario::ProcessStart()
 {
+    TTValue v;
+    mScheduler.get(kTTSym_offset, v);
+    TTUInt32 timeOffset = v[0];
+    
+    // prepare the status of each time event depending on the time offset
+    for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next())
+    {
+        TTObject aTimeEvent = mTimeEventList.current()[0];
+        aTimeEvent.get(kTTSym_date, v);
+        TTUInt32 date = v[0];
+        
+        if (date < timeOffset)
+            aTimeEvent.set("status", kTTSym_eventHappened);
+        else
+            aTimeEvent.set("status", kTTSym_eventWaiting);
+    }
+    
     // play each time process with a happened start event and a waiting or pending end event
     for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next())
     {
@@ -264,14 +281,7 @@ TTErr Scenario::ProcessEnd()
     for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next())
     {
         TTObject aTimeProcess = mTimeProcessList.current()[0];
-        aTimeProcess.send(kTTSym_Stop);
-    }
-    
-    // reset the status of each time event
-    for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next())
-    {
-        TTObject aTimeEvent = mTimeEventList.current()[0];
-        aTimeEvent.set("status", kTTSym_eventWaiting);
+        aTimeProcess.send("Stop");
     }
     
     // needs to be compiled again
@@ -303,7 +313,7 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
                 aTimeCondition.set(kTTSym_active, v);
             }
             
-            // propagate the tick to all the time process
+            // propagate external tick to all time processes
             if (mExternalTick)
             {
                 for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next())
@@ -411,10 +421,10 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
     TTUInt32        duration, timeOffset, date;
     TTBoolean       muteRecall = NO;
     
-    if (inputValue.size() >= 1) {
-        
-        if (inputValue[0].type() == kTypeUInt32 || inputValue[0].type() == kTypeInt32) {
-            
+    if (inputValue.size() >= 1)
+    {
+        if (inputValue[0].type() == kTypeUInt32 || inputValue[0].type() == kTypeInt32)
+        {
             this->getAttributeValue(kTTSym_duration, v);
             
             // TODO : TTTimeProcess should extend Scheduler class ?
@@ -425,16 +435,16 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
             mScheduler.set(kTTSym_offset, TTFloat64(timeOffset));
             
             // is the recall of the state is muted ?
-            if (inputValue.size() == 2) {
-                
-                if (inputValue[1].type() == kTypeBoolean) {
-                    
+            if (inputValue.size() == 2)
+            {
+                if (inputValue[1].type() == kTypeBoolean)
+                {
                     muteRecall = inputValue[1];
                 }
             }
             
-            if (!muteRecall && !mMute) {
-                
+            if (!muteRecall && !mMute)
+            {
                 // create a temporary state to compile all the event states before the time offset
                 state = TTObject(kTTSym_Script);
                 
@@ -442,8 +452,8 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
                 TTScriptMerge(getTimeEventState(getStartEvent()), state);;
                 
                 // add the state of each event before the time offset (expect those which are muted)
-                for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next()) {
-                    
+                for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next())
+                {
                     aTimeEvent = mTimeEventList.current()[0];
                     aTimeEvent.get(kTTSym_date, v);
                     date = v[0];
@@ -462,32 +472,18 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
                 // run the temporary state
                 state.send(kTTSym_Run);
             }
-            
-            // prepare the status of each time event
-            // TODO : this should be merged with the state compilation done before
-            for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next())
-            {
-                aTimeEvent = mTimeEventList.current()[0];
-                aTimeEvent.get(kTTSym_date, v);
-                date = v[0];
-                
-                if (date < timeOffset)
-                    aTimeEvent.set("status", kTTSym_eventHappened);
-                else
-                    aTimeEvent.set("status", kTTSym_eventWaiting);
-            }
 
             // prepare the timeOffset of each time process scheduler
-            for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
-                
+            for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next())
+            {
                 aTimeProcess = mTimeProcessList.current()[0];
                 
                 TTObject  startEvent = getTimeProcessStartEvent(aTimeProcess);
                 TTObject  endEvent = getTimeProcessEndEvent(aTimeProcess);
                 
                 // if the date to start is in the middle of a time process
-                if (getTimeEventDate(startEvent) < timeOffset && getTimeEventDate(endEvent) > timeOffset) {
-                    
+                if (getTimeEventDate(startEvent) < timeOffset && getTimeEventDate(endEvent) > timeOffset)
+                {
                     // go to time offset
                     v = timeOffset - getTimeEventDate(startEvent);
                 }

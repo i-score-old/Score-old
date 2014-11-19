@@ -149,8 +149,16 @@ TTErr Loop::ProcessEnd()
     // needs to be compiled again
     mCompiled = NO;
     
-    // stop the loop pattern
-    mPatternEndEvent.send(kTTSym_Happen);
+    // stop all pattern time processes
+    for (mPatternProcesses.begin(); mPatternProcesses.end(); mPatternProcesses.next())
+    {
+        TTObject aTimeProcess = mPatternProcesses.current()[0];
+        aTimeProcess.send(kTTSym_Stop);
+    }
+    
+    // reset pattern events status
+    mPatternStartEvent.set("status", kTTSym_eventWaiting);
+    mPatternEndEvent.set("status", kTTSym_eventWaiting);
    
     return kTTErrNone;
 }
@@ -280,6 +288,7 @@ TTErr Loop::EventDateChanged(const TTValue& inputValue, TTValue& outputValue)
     mCompiled = NO;
     
     // get new duration to update the pattern end event date
+    // TODO : the pattern duration should be different than the loop duration
     TTValue v;
     getAttributeValue(kTTSym_duration, v);
     mPatternEndEvent.set("date", v);
@@ -322,6 +331,7 @@ TTErr Loop::PatternAttach(const TTValue& inputValue, TTValue& outputValue)
     mPatternProcesses.append(aTimeProcess);
     
     // get duration to update the pattern end event date
+    // TODO : the pattern duration should be different than the loop duration
     TTValue v;
     getAttributeValue(kTTSym_duration, v);
     mPatternEndEvent.set("date", v);
