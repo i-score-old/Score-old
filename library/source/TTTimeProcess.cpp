@@ -678,7 +678,8 @@ TTErr TTTimeProcess::SchedulerRunningChanged(const TTValue& inputValue, TTValue&
             }
         }
         
-        // set the running state of the process
+        // set the running state of the process AFTER ProcessStart to avoid any event status propagation
+        // because, if this is a container, events propagate their status if their container is running
         mRunning = YES;
         
         // notify ProcessStarted observers
@@ -688,7 +689,8 @@ TTErr TTTimeProcess::SchedulerRunningChanged(const TTValue& inputValue, TTValue&
     }
     else
     {
-        // set the running state of the process
+        // set the running state of the process BEFORE ProcessEnd to avoid any event status propagation
+        // because, if this is a container, events propagate their status if their container is running
         mRunning = NO;
         
         if (!mMute)

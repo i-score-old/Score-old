@@ -243,6 +243,7 @@ TTErr Scenario::ProcessStart()
     TTUInt32 timeOffset = v[0];
     
     // prepare the status of each time event depending on the time offset
+    // notice that the status will not be propagated as our running state is NO
     for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next())
     {
         TTObject aTimeEvent = mTimeEventList.current()[0];

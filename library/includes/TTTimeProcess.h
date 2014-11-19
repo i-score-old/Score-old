@@ -68,26 +68,30 @@ private :
     
     TTObject                        mEndEvent;                      ///< the event object which handles the time process execution stop
     
-    /** Specific compilation method used to pre-processed data in order to accelarate Process method.
-     @details the compiled attribute allows to know if the process needs to be compiled or not.
+    /** Specific compilation method used to pre-processed data in order to accelarate Process method
+     @details the compiled attribute allows to know if the process needs to be compiled or not
      @return                an error code returned by the compile method */
     virtual TTErr   Compile() {return kTTErrGeneric;};
     
     /** Specific process method on start
+     @details when this method is called the running state is NO which means event status propagation is disabled
      @return                an error code returned by the process start method */
     virtual TTErr   ProcessStart() {return kTTErrGeneric;};
     
     /** Specific process method on end
+     @details when this method is called the running state is NO which means event status propagation is disabled
      @return                an error code returned by the process end method */
     virtual TTErr   ProcessEnd() {return kTTErrGeneric;};
     
     /** Specific process method
+     @details when this method is called the running state is YES which means event status propagation is enabled
      @param	inputValue      position and date of the scheduler
      @param	outputValue     return an error of the processing
      @return                an error code returned by the process method */
     virtual TTErr   Process(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
     
     /** Specific process method for pause/resume
+     @details when this method is called the running state is YES which means event status propagation is enabled
      @param	inputValue      boolean paused state of the scheduler
      @param	outputValue     return an error of the processing
      @return                an error code returned by the process paused method */

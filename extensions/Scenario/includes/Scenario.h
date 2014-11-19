@@ -83,26 +83,30 @@ class Scenario : public TimeContainerPlugin {
     
     
     
-    /** Specific compilation method used to pre-processed data in order to accelarate Process method.
-     the compiled attribute allows to know if the process needs to be compiled or not.
+    /** Specific compilation method used to pre-processed data in order to accelarate Process method
+     @details the compiled attribute allows to know if the process needs to be compiled or not
      @return                an error code returned by the compile method */
     TTErr   Compile();
     
     /** Specific process method on start
+     @details when this method is called the running state is NO which means event status propagation is disabled
      @return                an error code returned by the process end method */
     TTErr   ProcessStart();
     
     /** Specific process method on end
+     @details when this method is called the running state is NO which means event status propagation is disabled
      @return                an error code returned by the process end method */
     TTErr   ProcessEnd();
     
     /** Specific process method
+     @details when this method is called the running state is YES which means event status propagation is enabled
      @param	inputValue      position of the scheduler
      @param	outputValue     return an error of the processing
      @return                an error code returned by the process method */
     TTErr   Process(const TTValue& inputValue, TTValue& outputValue);
     
     /** Specific process method for pause/resume
+     @details when this method is called the running state is YES which means event status propagation is enabled
      @param	inputValue      boolean paused state of the scheduler
      @param	outputValue     return an error of the processing
      @return                an error code returned by the process paused method */
