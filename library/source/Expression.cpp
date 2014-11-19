@@ -33,26 +33,32 @@ const TTValue& Expression::getValue() const
 
 TTBoolean Expression::evaluate(const TTValue& value)
 {
+    TTValue toCompare = value;
+    
+    // convert to TTFloat64 to have the same type than mValue (see in parse method)
+    for (TTElementIter it = toCompare.begin(); it != toCompare.end(); it++)
+        *it = TTFloat64(TTElement(*it));
+    
     if (mOperator == kTTSymEmpty)
         return YES;
     
     if (mOperator == TTSymbol("equal"))
-        return value == mValue;
+        return toCompare == mValue;
     
     if (mOperator == TTSymbol("different"))
-        return value != mValue;
+        return toCompare != mValue;
     
     if (mOperator == TTSymbol("greaterThan"))
-        return value > mValue;
+        return toCompare > mValue;
     
     if (mOperator == TTSymbol("greaterThanOrEqual"))
-        return value >= mValue;
+        return toCompare >= mValue;
     
     if (mOperator == TTSymbol("lowerThan"))
-        return value < mValue;
+        return toCompare < mValue;
     
     if (mOperator == TTSymbol("lowerThanOrEqual"))
-        return value <= mValue;
+        return toCompare <= mValue;
     
     return NO;
 }
@@ -96,6 +102,10 @@ void Expression::parse(TTValue& toParse)
                     if (toParse.size() > 2) {
                         
                         mValue.copyFrom(toParse, 2);
+                        
+                        // convert to TTFloat64 for comparison purpose (see in evaluate method)
+                        for (TTElementIter it = mValue.begin(); it != mValue.end(); it++)
+                            *it = TTFloat64(TTElement(*it));
                     }
                 }
             }

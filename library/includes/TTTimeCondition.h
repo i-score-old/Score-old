@@ -94,6 +94,10 @@ private :
      @return                kTTErrNone */
     TTErr           setDisposeExpression(const TTValue& value);
     
+    /**  Remove all events from the condition
+     @return                an error code if the operation fails */
+    TTErr           Clear();
+    
     /**  Add an event to the condition
      @param	inputValue      an event and optionnally the comportment associated
      @param	outputValue     nothing
@@ -147,6 +151,10 @@ private :
      @param	outputValue     nothing
      @return                an error code if the operation fails */
     TTErr           Dispose(const TTValue& inputValue, TTValue& outputValue);
+    
+    /**  Tell the condition to apply default behavior for each event
+     @return                an error code if the operation fails */
+    TTErr           Default();
     
     /**  needed to be handled by a TTXmlHandler
      @param	inputValue      ..

@@ -33,9 +33,6 @@ mViewPosition(TTValue(0, 0)),
 #ifndef NO_EDITION_SOLVER
 mEditionSolver(NULL),
 #endif
-#ifndef NO_EXECUTION_GRAPH
-mExecutionGraph(NULL),
-#endif
 mLoading(NO),
 mAttributeLoaded(NO)
 {
@@ -46,20 +43,11 @@ mAttributeLoaded(NO)
     addAttributeWithSetter(ViewZoom, kTypeLocalValue);
     addAttributeWithSetter(ViewPosition, kTypeLocalValue);
     
-#ifndef NO_EXECUTION_GRAPH
     addMessage(Compile);
-#endif
 #ifndef NO_EDITION_SOLVER
     // Create the edition solver
     mEditionSolver = new Solver();
 #endif
-#ifndef NO_EXECUTION_GRAPH
-    // Create extended int
-    plusInfinity = ExtendedInt(PLUS_INFINITY, 0);
-    minusInfinity = ExtendedInt(MINUS_INFINITY, 0);
-    integer0 = ExtendedInt(INTEGER, 0);
-#endif
-    
     // it is possible to pass 2 events for the root scenario (which don't need a container by definition)
     if (arguments.size() == 2) {
         
@@ -97,13 +85,6 @@ Scenario::~Scenario()
         mEditionSolver = NULL;
     }
 #endif
-#ifndef NO_EXECUTION_GRAPH
-    if (mExecutionGraph) {
-        delete mExecutionGraph;
-        mExecutionGraph = NULL;
-    }
-#endif
-    
 }
 
 TTErr Scenario::getParameterNames(TTValue& value)
@@ -136,6 +117,7 @@ TTErr Scenario::Compile()
     TTObject    aTimeEvent;
     TTObject    aTimeProcess;
     
+    // don't compile empty scenario
     if (mTimeEventList.isEmpty() && mTimeProcessList.isEmpty() && mTimeConditionList.isEmpty())
         return kTTErrGeneric;
     
@@ -143,22 +125,9 @@ TTErr Scenario::Compile()
     mScheduler.get(kTTSym_offset, v);
     timeOffset = TTFloat64(v[0]);
     
-    // set all time events to a waiting status
-    for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next()) {
-        
-        aTimeEvent = mTimeEventList.current()[0];
-        
-        aTimeEvent.set(kTTSym_status, kTTSym_eventWaiting);
-    }
-    
-#ifndef NO_EXECUTION_GRAPH
-    // compile the mExecutionGraph to prepare scenario execution from the scheduler time offset
-    compileGraph(timeOffset);
-#endif
-    
     // compile all time processes if they need to be compiled and propagate the externalTick attribute
-    for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
-        
+    for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next())
+    {
         aTimeProcess = mTimeProcessList.current()[0];
         
         aTimeProcess.get(kTTSym_compiled, v);
@@ -177,34 +146,40 @@ TTErr Scenario::Compile()
 
 TTErr Scenario::ProcessStart()
 {
-#ifndef NO_EXECUTION_GRAPH
+    // play each time process with a happened start event and a waiting or pending end event
+    for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next())
+    {
+        TTObject aTimeProcess = mTimeProcessList.current()[0];
+        
+        TTObject startEvent = getTimeProcessStartEvent(aTimeProcess);
+        TTSymbol startStatus;
+        startEvent.get("status", startStatus);
+        
+        TTObject endEvent = getTimeProcessEndEvent(aTimeProcess);
+        TTSymbol endStatus;
+        endEvent.get("status", endStatus);
+        
+        if (startStatus == kTTSym_eventHappened && (endStatus == kTTSym_eventWaiting || endStatus == kTTSym_eventPending))
+            aTimeProcess.send("Play");
+    }
     
-    if (!mCompiled)
-        return kTTErrNone;
-
-    // start the execution graph
-    mExecutionGraph->start();
-
-#else
-    
-    TTLogMessage("Scenario::ProcessStart : without execution graph\n");
-    
-    // go to the first time event (as they are sorted by date)
-    mTimeEventList.begin();
-#endif
     return kTTErrNone;
 }
 
 TTErr Scenario::ProcessEnd()
 {
-    TTObject aTimeProcess;
-
-    // When a Scenario ends : stop all the time processes
-    for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
-        
-        aTimeProcess = mTimeProcessList.current()[0];
-        
+    // stop all the time processes
+    for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next())
+    {
+        TTObject aTimeProcess = mTimeProcessList.current()[0];
         aTimeProcess.send(kTTSym_Stop);
+    }
+    
+    // reset the status of each time event
+    for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next())
+    {
+        TTObject aTimeEvent = mTimeEventList.current()[0];
+        aTimeEvent.set("status", kTTSym_eventWaiting);
     }
     
     // needs to be compiled again
@@ -215,20 +190,20 @@ TTErr Scenario::ProcessEnd()
 
 TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTFloat64       position, date;
-    TTObject		aTimeCondition, aTimeProcess;
-    TTValue         v;
+    TTFloat64   position, date;
+    TTObject	aTimeCondition, aTimeProcess;
+    TTValue     v;
     
-    if (inputValue.size() == 2) {
-        
-        if (inputValue[0].type() == kTypeFloat64 && inputValue[1].type() == kTypeFloat64) {
-            
+    if (inputValue.size() == 2)
+    {
+        if (inputValue[0].type() == kTypeFloat64 && inputValue[1].type() == kTypeFloat64)
+        {
             position = inputValue[0];
             date = inputValue[1];
             
             // enable or disable conditions
-            for (mTimeConditionList.begin(); mTimeConditionList.end(); mTimeConditionList.next()) {
-                
+            for (mTimeConditionList.begin(); mTimeConditionList.end(); mTimeConditionList.next())
+            {
                 aTimeCondition = mTimeConditionList.current()[0];
                 
                 // if a condition is ready we activate it
@@ -237,56 +212,72 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
             }
             
             // propagate the tick to all the time process
-            if (mExternalTick) {
-                
-                for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
-                
+            if (mExternalTick)
+            {
+                for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next())
+                {
                     aTimeProcess = mTimeProcessList.current()[0];
-                
                     aTimeProcess.send(kTTSym_Tick);
                 }
             }
             
-#ifndef NO_EXECUTION_GRAPH
-            // the execution graph needs to be compiled before
-            if (!mCompiled)
-                return kTTErrGeneric;
+            // look if all events happened or have been disposed
+            TTSymbol eventStatus;
+            TTUInt32 eventDate;
+            TTUInt32 eventHappenedOrDisposedCount = 0;
             
-            // update the mExecutionGraph to process the scenario
-            if (mExecutionGraph->makeOneStep(date))
-                return kTTErrNone;
-            
-            // For the root Scenario : make the end happen
-            else if (mContainer == NULL)
-                return getEndEvent().send(kTTSym_Happen);
-#else
-            TTValue     v;
-            TTUInt32    eventDate;
-            
-            // if there is more event to process
-            if (mTimeEventList.end()) {
-                
-                // get the current time event (as they are sorted by date)
+            for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next())
+            {
                 TTObject aTimeEvent = mTimeEventList.current()[0];
-                aTimeEvent.get(kTTSym_date, v);
-                eventDate = v[0];
                 
-                // if the event date is lower than the current date
-                if (eventDate < date) {
+                aTimeEvent.get("status", eventStatus);
+                
+                // in case of event with no attached process
+                if (eventStatus == kTTSym_eventWaiting)
+                {
+                    TTValue attachedProcesses;
+                    aTimeEvent.get("attachedProcesses", attachedProcesses);
                     
-                    // make the event to happen
-                    aTimeEvent.send(kTTSym_Happen);
-                    
-                    // try to process the next event
-                    mTimeEventList.next();
-                    return Process(inputValue, outputValue);
+                    if (attachedProcesses.size() == 0)
+                    {
+                        TTObject condition;
+                        aTimeEvent.get("condition", condition);
+                        aTimeEvent.get("date", eventDate);
+                        
+                        // set conditionned event as pending
+                        if (condition.valid())
+                        {
+                            aTimeEvent.set("status", kTTSym_eventPending);
+                        }
+                        // or make none conditioned event to happen at its date
+                        else if (eventDate <= date)
+                        {
+                            aTimeEvent.send(kTTSym_Happen);
+                        }
+                        
+                        // update its status
+                        aTimeEvent.get("status", eventStatus);
+                    }
+                }
+                
+                if (eventStatus == kTTSym_eventHappened ||
+                    eventStatus == kTTSym_eventDisposed)
+                    eventHappenedOrDisposedCount++;
+            }
+            
+            // no more event to process
+            if (eventHappenedOrDisposedCount == mTimeEventList.getSize())
+            {
+                if (mContainer.valid())
+                    ; // TODO  : what ?
+                
+                // root scenario case : stop itself
+                else
+                {
+                    TTObject thisObject(this);
+                    return thisObject.send(kTTSym_Stop);
                 }
             }
-            else
-                // Make the end happen
-                return getEndEvent()->send(kTTSym_Happen);
-#endif
-            
         }
     }
     
@@ -380,6 +371,20 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
                 state.send(kTTSym_Run);
             }
             
+            // prepare the status of each time event
+            // TODO : this should be merged with the state compilation done before
+            for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next())
+            {
+                aTimeEvent = mTimeEventList.current()[0];
+                aTimeEvent.get(kTTSym_date, v);
+                date = v[0];
+                
+                if (date < timeOffset)
+                    aTimeEvent.set("status", kTTSym_eventHappened);
+                else
+                    aTimeEvent.set("status", kTTSym_eventWaiting);
+            }
+
             // prepare the timeOffset of each time process scheduler
             for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
                 
@@ -635,10 +640,6 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         delete mEditionSolver;
         mEditionSolver = new Solver();
 #endif
-#ifndef NO_EXECUTION_GRAPH
-        clearGraph();
-#endif
-        
         return kTTErrNone;
     }
     
@@ -1026,128 +1027,6 @@ TTErr Scenario::TimeEventMove(const TTValue& inputValue, TTValue& outputValue)
     return kTTErrGeneric;
 }
 
-TTErr Scenario::TimeEventCondition(const TTValue& inputValue, TTValue& outputValue)
-{
-    TTObject    aTimeEvent;
-    TTObject    aTimeCondition;
-    TTObject    aTimeProcess;
-    TTValue     v, aCacheElement;
-#ifndef NO_EDITION_SOLVER
-    SolverObjectMapIterator it;
-#endif
-    if (inputValue.size() == 2) {
-        
-        if (inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeObject) {
-            
-            aTimeEvent = inputValue[0];
-            aTimeCondition = inputValue[1];
-            
-            // try to find the time event
-            mTimeEventList.find(&TTTimeContainerFindTimeEvent, (TTPtr)aTimeEvent.instance(), aCacheElement);
-            
-            // couldn't find the former time event in the scenario
-            if (aCacheElement.size() == 0)
-                return kTTErrValueNotFound;
-            
-            // try to find the time condition
-            mTimeConditionList.find(&TTTimeContainerFindTimeCondition, (TTPtr)aTimeCondition.instance(), aCacheElement);
-            
-            // couldn't find the former time condition in the scenario
-            if (aCacheElement.size() == 0)
-                return kTTErrValueNotFound;
-            
-            // for each time process
-            for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
-                
-                aTimeProcess = mTimeProcessList.current()[0];
-                
-                // if the time event is the time process end event
-                if (aTimeEvent == getTimeProcessEndEvent(aTimeProcess)) {
-                    
-                    // a time process with a conditioned end event cannot be rigid
-                    v = TTBoolean(!aTimeCondition.valid());
-                    aTimeProcess.set(kTTSym_rigid, v);
-                }
-            }
-            
-            // théo : maybe there will be other stuff to do considering there is a condition with several case now ?
-            
-            // needs to be compiled again
-            mCompiled = NO;
-            
-            return kTTErrNone;
-        }
-    }
-    
-    return kTTErrGeneric;
-}
-
-TTErr Scenario::TimeEventTrigger(const TTValue& inputValue, TTValue& outputValue)
-{
-    TTObject aTimeEvent;
-    
-    if (inputValue.size() == 1) {
-        
-        if (inputValue[0].type() == kTypeObject) {
-            
-            aTimeEvent = inputValue[0];
-            
-#ifndef NO_EXECUTION_GRAPH
-            if (mExecutionGraph) {
-                
-                // if the excecution graph is running
-                if (mExecutionGraph->getUpdateFactor() != 0) {
-                    
-                    // append the event to the event queue to process its triggering
-                    TTLogMessage("Scenario::TimeEventTrigger : %p\n", TTPtr(aTimeEvent.instance()));
-                    mExecutionGraph->putAnEvent(TTPtr(aTimeEvent.instance()));
-                    
-                    return kTTErrNone;
-                }
-            }
-#else
-            return kTTErrNone;
-#endif
-            
-        }
-    }
-    
-    return kTTErrGeneric;
-}
-
-TTErr Scenario::TimeEventDispose(const TTValue &inputValue, TTValue &outputValue)
-{
-    TTObject aTimeEvent;
-
-    if (inputValue.size() == 1) {
-
-        if (inputValue[0].type() == kTypeObject) {
-
-            aTimeEvent = inputValue[0];
-
-#ifndef NO_EXECUTION_GRAPH
-            if (mExecutionGraph) {
-
-                // if the execution graph is running
-                if (mExecutionGraph->getUpdateFactor() != 0) {
-
-                    // put the associated transition in the list of transitions to deactivate
-                    TTLogMessage("Scenario::TimeEventDispose : %p\n", TTPtr(aTimeEvent.instance()));
-                    mExecutionGraph->deactivateTransition(TransitionPtr(mTransitionsMap[aTimeEvent.instance()]));
-
-                    return kTTErrNone;
-                }
-            }
-#else
-            return kTTErrNone;
-#endif
-            
-        }
-    }
-
-    return kTTErrGeneric;
-}
-
 TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue)
 {
     TTObject    aFormerTimeEvent, aNewTimeEvent;
@@ -1375,6 +1254,11 @@ TTErr Scenario::TimeProcessRelease(const TTValue& inputValue, TTValue& outputVal
                 outputValue[0] = getTimeProcessStartEvent(aTimeProcess);
                 outputValue[1] = getTimeProcessEndEvent(aTimeProcess);
                 
+                // remove its events to be detached from them
+                TTObject empty;
+                setTimeProcessStartEvent(aTimeProcess, empty);
+                setTimeProcessEndEvent(aTimeProcess, empty);
+                
                 // needs to be compiled again
                 mCompiled = NO;
                 
@@ -1480,26 +1364,46 @@ TTErr Scenario::TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue
         
         if (inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeUInt32 && inputValue[2].type() == kTypeUInt32) {
             
-            aTimeProcess =inputValue[0];
+            aTimeProcess = inputValue[0];
 #ifndef NO_EDITION_SOLVER
             // update the Solver depending on the type of the time process
             timeProcessType = aTimeProcess.name();
             
-            if (timeProcessType == TTSymbol("Interval")) {
-                
+            if (timeProcessType == TTSymbol("Interval"))
+            {
                 // retreive solver relation relative to the time process
                 it = mRelationsMap.find(aTimeProcess.instance());
-                SolverRelationPtr relation = SolverRelationPtr(it->second);
                 
-				sErr = relation->limit((TTUInt32)inputValue[1], (TTUInt32)inputValue[2]);
-                
-            } else {
-                
+                if (it != mRelationsMap.end())
+                {
+                    SolverRelationPtr relation = SolverRelationPtr(it->second);
+                    sErr = relation->limit(inputValue[1], inputValue[2]);
+                }
+                else
+                {
+                    TTSymbol name;
+                    aTimeProcess.get("name", name);
+                    TTLogError("Scenario::TimeProcessLimit %s : can't retreive solver relation relative to %s interval\n", mName.c_str(), name.c_str());
+                    sErr = SolverErrorGeneric;
+                }
+            }
+            else
+            {
                 // retreive solver constraint relative to the time process
                 it = mConstraintsMap.find(aTimeProcess.instance());
-                SolverConstraintPtr constraint = SolverConstraintPtr(it->second);
                 
-				sErr = constraint->limit((TTUInt32)inputValue[1], (TTUInt32)inputValue[2]);
+                if (it != mRelationsMap.end())
+                {
+                    SolverConstraintPtr constraint = SolverConstraintPtr(it->second);
+                    sErr = constraint->limit(inputValue[1], inputValue[2]);
+                }
+                else
+                {
+                    TTSymbol name;
+                    aTimeProcess.get("name", name);
+                    TTLogError("Scenario::TimeProcessLimit %s : can't retreive solver constraint relative to %s time process\n", mName.c_str(), name.c_str());
+                    sErr = SolverErrorGeneric;
+                }
             }
             
             if (!sErr && !mLoading) {
@@ -1581,6 +1485,12 @@ TTErr Scenario::TimeConditionRelease(const TTValue& inputValue, TTValue& outputV
                 // delete all observers
                 deleteTimeConditionCacheElement(aCacheElement);
                 
+                // get all events
+                aTimeCondition.get("events", outputValue);
+                
+                // clear the condition
+                aTimeCondition.send("Clear");
+                
                 // needs to be compiled again
                 mCompiled = NO;
                 
@@ -1634,29 +1544,4 @@ void Scenario::deleteTimeConditionCacheElement(const TTValue& oldCacheElement)
 #if 0
 #pragma mark -
 #pragma mark Some Methods
-#endif
-
-#ifndef NO_EXECUTION_GRAPH
-void ScenarioGraphTimeEventCallBack(TTPtr arg, TTBoolean active)
-{
-    // cf ECOMachine : crossAControlPointCallBack function
-    
-    TTObject aTimeEvent = (TTTimeEventPtr) arg;
-    
-    if (active)
-        aTimeEvent.send(kTTSym_Happen);
-    
-    // this propagates the disposition to the next events that are connected to a first disposed event
-    else
-        aTimeEvent.send(kTTSym_Dispose);
-}
-
-
-void ScenarioGraphIsEventReadyCallBack(TTPtr arg, TTBoolean isReady)
-{
-	TTTimeEventPtr aTimeEvent = (TTTimeEventPtr) arg;
-    
-    if (isReady)
-        aTimeEvent->setAttributeValue(kTTSym_status, kTTSym_eventPending);
-}
 #endif

@@ -1,6 +1,5 @@
-#defines:
+defines:
 #  - TIME_PLUGIN_DEBUG
-#  - NO_EXECUTION_GRAPH
 
 sources:
   - ../TimePluginLib.cpp	
@@ -11,23 +10,9 @@ sources:
   - source/Gecode/searchEngine.cpp
   - source/Gecode/solver_wrap.cpp
   - source/Gecode/solver.cpp
-
-  - source/PetriNet/Arc.cpp
-  - source/PetriNet/ExtendedInt.cpp
-  - source/PetriNet/PetriNet.cpp
-  - source/PetriNet/PetriNetItem.cpp                    # is it needed ?
-  - source/PetriNet/PetriNetNode.cpp                    # is it needed ?
-  - source/PetriNet/Place.cpp
-  - source/PetriNet/PriorityTransitionAction.cpp        # is it needed ?
-  - source/PetriNet/ThreadSafeList.cpp                  # is it needed ?
-  - source/PetriNet/Token.cpp
-  - source/PetriNet/Transition.cpp
-  - source/PetriNet/TransitionAction.cpp                # is it needed ?
-  - source/PetriNet/TransitionBitArray.cpp              # is it needed ?
   
   - source/Scenario.cpp
   - source/ScenarioSolver.cpp
-  - source/ScenarioGraph.cpp
 
 includes:
   - "."
@@ -37,7 +22,6 @@ includes:
   - "../../library/tests"
   
   - "source/Gecode"
-  - "source/PetriNet"
   
   # to build without having the whole jamoma repository
   - ../../support/jamoma/includes

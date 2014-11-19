@@ -48,8 +48,15 @@ protected :
     TTObject                        mState;                         ///< a state handled by the event
     
     TTObject                        mCondition;                     ///< a pointer to an optional condition object to make the event interactive
+    
+    TTValue                         mAttachedProcesses;             ///< all the processes the event observes
+    TTUInt32                        mMinReachedProcessesCount;         ///< how many processes are started ?
+    TTUInt32                        mEndedProcessesCount;           ///< how many processes have ended ?
+    TTUInt32                        mDisposedProcessesCount;        ///< how many processes have been disposed ?
  
 private :
+    
+    TTBoolean                       mPushing;                       ///< an internal flag to know if the event is pushing its state
     
     /** Set the date of the event
      @param	value           a date
@@ -65,10 +72,6 @@ private :
      @param	value           a TTTimeEventStatusFlag
      @return                kTTErrNone */
     TTErr           setStatus(const TTValue& value);
-    
-    /** Try to make the event happen (possibility to use the scenario to check event validity)
-     @return                an error code returned by the trigger method */
-    TTErr           Trigger();
     
     /** Make the event happen
      @return                an error code returned by the happen method */
@@ -105,6 +108,41 @@ private :
      @param	outputValue     nothing
      @return                kTTErrNone */
     TTErr           StateAddressClear(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Push the state content
+     @details this method eases the call of state run method
+     @return                kTTErrNone */
+    TTErr           StatePush();
+    
+    /** Attach a process to enable notification observation
+     @param inputValue      the process to observe
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr           ProcessAttach(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** Detach a process to disable notification observation
+     @param inputValue      the process to observe
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr           ProcessDetach(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** To be notified when a previous process reaches its minimal duration
+     @param inputValue      the process which is started
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr           ProcessDurationMinReached(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** To be notified when a previous ended process
+     @param inputValue      the process which is ended
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr           ProcessEnded(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** To be notified when a previous disposed process
+     @param inputValue      the process which have been disposed
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr           ProcessDisposed(const TTValue& inputValue, TTValue& outputValue);
     
     friend void TTSCORE_EXPORT TTTimeContainerFindTimeEventWithName(const TTValue& aValue, TTPtr timeEventNamePtrToMatch, TTBoolean& found);
     friend TTBoolean TTSCORE_EXPORT TTTimeEventCompareDate(TTValue& v1, TTValue& v2);

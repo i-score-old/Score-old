@@ -24,10 +24,6 @@
 #include "ScenarioSolver.h"
 #endif
 
-#ifndef NO_EXECUTION_GRAPH
-#include "ScenarioGraph.h"
-#endif
-
 #include <libxml/encoding.h>
 #include <libxml/xmlwriter.h>
 #include <libxml/xmlreader.h>
@@ -50,17 +46,6 @@ class Scenario : public TimeContainerPlugin {
     SolverObjectMap             mConstraintsMap;                ///< an internal map to store and retreive SolverConstraintPtr using TTTimeProcessPtr
     SolverObjectMap             mRelationsMap;                  ///< an internal map to store and retreive SolverRelationPtr using TTTimeProcessPtr
 #endif
-#ifndef NO_EXECUTION_GRAPH
-    GraphPtr                    mExecutionGraph;                ///< an internal petri net to execute the scenario according time event relations
-
-    GraphObjectMap              mTransitionsMap;                ///< an internal map to store and retreive TransitionPtr using TTTimeEventPtr
-	GraphObjectMap              mArcsMap;                       ///< an internal map to store and retreive Arc* using TTTimeProcessPtr
-    GraphObjectMap              mMergedTransitionsMap;          ///< an internal map to store and retreive TransitionPtr using another TransitionPtr
-   
-    ExtendedInt                 plusInfinity;
-	ExtendedInt                 minusInfinity;
-	ExtendedInt                 integer0;
-#endif     
     TTObject                    mCurrentTimeEvent;              ///< an internal pointer to remember the current time event being read
     TTObject                    mCurrentTimeProcess;            ///< an internal pointer to remember the current time process being read
     TTObject                    mCurrentTimeCondition;          ///< an internal pointer to remember the current time condition being read
@@ -143,24 +128,6 @@ class Scenario : public TimeContainerPlugin {
      @return                an error code if the movement fails */
     TTErr   TimeEventMove(const TTValue& inputValue, TTValue& outputValue);
     
-    /** Link a time event to a condition
-     @param inputvalue      a time event object, a time condition object
-     @param outputvalue     nothing            
-     @return                an error code if the setting fails */
-    TTErr   TimeEventCondition(const TTValue& inputValue, TTValue& outputValue);
-    
-    /** Trigger a time event to make it happens
-     @param inputvalue      a time event object
-     @param outputvalue     nothing            
-     @return                an error code if the triggering fails */
-    TTErr   TimeEventTrigger(const TTValue& inputValue, TTValue& outputValue);
-    
-    /** Dispose a time event
-     @param inputValue      a time event object
-     @param outputvalue     nothing            
-     @return                an error code if the disposing fails */
-    TTErr   TimeEventDispose(const TTValue& inputValue, TTValue& outputValue);
-
     /** Replace a time event by another one (copying date and active attribute)
      @param inputvalue      a former time event object, a new time event object
      @param outputvalue     nothing            
@@ -225,34 +192,8 @@ class Scenario : public TimeContainerPlugin {
     
     /** an internal method used to delete all time condition attribute observers */
     void    deleteTimeConditionCacheElement(const TTValue& oldCacheElement);
-    
-    
- #ifndef NO_EXECUTION_GRAPH
-    /** internal methods used to compile the execution graph */
-    void    clearGraph();
-    void    compileGraph(TTUInt32 timeOffset);
-    void    compileTimeProcess(TTObject& aTimeProcess, TransitionPtr *previousTransition, TransitionPtr endTransition, TTUInt32 timeOffset);
-    void    compileInterval(TTObject& aTimeProcess);
-    void    compileTimeEvent(TTObject& aTimeEvent, TTUInt32 time, TransitionPtr previousTransition, TransitionPtr currentTransition, Place* currentPlace);
-    void    compileInteractiveEvent(TTObject& aTimeEvent, TTUInt32 timeOffset);
-    
-    friend void TT_EXTENSION_EXPORT ScenarioGraphTimeEventCallBack(TTPtr arg, TTBoolean active);
-    friend void TT_EXTENSION_EXPORT ScenarioGraphIsEventReadyCallBack(TTPtr arg, TTBoolean isReady);
-#endif
 };
 
 typedef Scenario* ScenarioPtr;
-
-#ifndef NO_EXECUTION_GRAPH
-/** The callback method used by the execution graph when ...
- @param	arg                         a time event instance
- @param	arg                         is time event becomes active or passive ? */
-void TT_EXTENSION_EXPORT ScenarioGraphTimeEventCallBack(TTPtr arg, TTBoolean active);
-
-/** The callback method used by the execution graph when ...
- @param	arg                         a time event instance
- @param	isReady                     is the time event ready to be triggered ? */
-void TT_EXTENSION_EXPORT ScenarioGraphIsEventReadyCallBack(TTPtr arg, TTBoolean isReady);
-#endif
 
 #endif // __SCENARIO_H__

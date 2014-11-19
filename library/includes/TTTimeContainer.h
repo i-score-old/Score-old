@@ -77,24 +77,6 @@ private :
      @return                an error code if the movement fails */
     virtual TTErr   TimeEventMove(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
     
-    /** Link a time event to a condition
-     @param inputValue      a time event object, a time condition object
-     @param outputvalue     nothing
-     @return                an error code if the setting fails */
-    virtual TTErr   TimeEventCondition(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
-    
-    /** Trigger a time event to make it happens
-     @param inputValue      a time event object
-     @param outputvalue     nothing
-     @return                an error code if the triggering fails */
-    virtual TTErr   TimeEventTrigger(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
-
-    /** Dispose a time event
-     @param inputValue      a time event object
-     @param outputvalue     nothing
-     @return                an error code if the disposing fails */
-    virtual TTErr   TimeEventDispose(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
-
     /** Replace a time event by another one (copying date attribute)
      @param inputValue      a former time event object, a new time event object
      @param outputvalue     nothing
@@ -141,7 +123,7 @@ private :
     
     /** Release a time process
      @param inputValue      a time condition object to release
-     @param outputvalue     nothing
+     @param outputvalue     all events conditionned by the released time condition
      @return                an error code if the destruction fails */
     virtual TTErr   TimeConditionRelease(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
     
