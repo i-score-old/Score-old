@@ -238,41 +238,32 @@ TTErr Scenario::Compile()
 
 TTErr Scenario::ProcessStart()
 {
-    TTValue v;
-    mScheduler.get(kTTSym_offset, v);
-    TTUInt32 timeOffset = v[0];
-    
-    // prepare the status of each time event depending on the time offset
-    // notice that the status will not be propagated as our running state is NO
+    // make all events to be waiting at least
     for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next())
     {
         TTObject aTimeEvent = mTimeEventList.current()[0];
-        aTimeEvent.get(kTTSym_date, v);
-        TTUInt32 date = v[0];
-        
-        if (date < timeOffset)
-            aTimeEvent.set("status", kTTSym_eventHappened);
-        else
-            aTimeEvent.set("status", kTTSym_eventWaiting);
+        aTimeEvent.send("Wait");
     }
     
-    // play each time process with a happened start event and a waiting or pending end event
+    TTValue v;
+    mScheduler.get(kTTSym_offset, v);
+    TTUInt32 timeOffset = v[0];
+
+    // start all processes which are in the middle of a time process
     for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next())
     {
         TTObject aTimeProcess = mTimeProcessList.current()[0];
-        
         TTObject startEvent = getTimeProcessStartEvent(aTimeProcess);
-        TTSymbol startStatus;
-        startEvent.get("status", startStatus);
-        
         TTObject endEvent = getTimeProcessEndEvent(aTimeProcess);
-        TTSymbol endStatus;
-        endEvent.get("status", endStatus);
         
-        if (startStatus == kTTSym_eventHappened && (endStatus == kTTSym_eventWaiting || endStatus == kTTSym_eventPending))
-            aTimeProcess.send("Play");
+        // if the date to start is in the middle of a time process
+        if (getTimeEventDate(startEvent) < timeOffset &&
+            getTimeEventDate(endEvent) > timeOffset)
+        {
+            aTimeProcess.send("Start");
+        }
     }
-    
+
     return kTTErrNone;
 }
 
@@ -324,47 +315,19 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
                 }
             }
             
-            // look if all events happened or have been disposed
-            TTSymbol eventStatus;
-            TTUInt32 eventDate;
+            // check each event and count how many are happened or disposed
             TTUInt32 eventHappenedOrDisposedCount = 0;
             
             for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next())
             {
                 TTObject aTimeEvent = mTimeEventList.current()[0];
+                TTSymbol status;
                 
-                aTimeEvent.get("status", eventStatus);
+                aTimeEvent.send("Check");
+                aTimeEvent.get("status", status);
                 
-                // in case of event with no attached process
-                if (eventStatus == kTTSym_eventWaiting)
-                {
-                    TTValue attachedProcesses;
-                    aTimeEvent.get("attachedProcesses", attachedProcesses);
-                    
-                    if (attachedProcesses.size() == 0)
-                    {
-                        TTObject condition;
-                        aTimeEvent.get("condition", condition);
-                        aTimeEvent.get("date", eventDate);
-                        
-                        // set conditionned event as pending
-                        if (condition.valid())
-                        {
-                            aTimeEvent.set("status", kTTSym_eventPending);
-                        }
-                        // or make none conditioned event to happen at its date
-                        else if (eventDate <= date)
-                        {
-                            aTimeEvent.send(kTTSym_Happen);
-                        }
-                        
-                        // update its status
-                        aTimeEvent.get("status", eventStatus);
-                    }
-                }
-                
-                if (eventStatus == kTTSym_eventHappened ||
-                    eventStatus == kTTSym_eventDisposed)
+                if (status == kTTSym_eventHappened ||
+                    status == kTTSym_eventDisposed)
                     eventHappenedOrDisposedCount++;
             }
             

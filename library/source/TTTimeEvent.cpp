@@ -33,6 +33,8 @@ mState(kTTSym_Script),
 mMinReachedProcessesCount(0),
 mEndedProcessesCount(0),
 mDisposedProcessesCount(0),
+mRequestHappen(NO),
+mRequestDispose(NO),
 mPushing(NO)
 {
     TTValue none;
@@ -58,8 +60,10 @@ mPushing(NO)
     addAttributeProperty(AttachedProcesses, readOnly, YES);
     addAttributeProperty(AttachedProcesses, hidden, YES);
     
+    addMessage(Wait);
     addMessage(Happen);
     addMessage(Dispose);
+    addMessage(Check);
     
     addMessageWithArguments(StateAddressGetValue);
     addMessageWithArguments(StateAddressSetValue);
@@ -135,6 +139,14 @@ TTErr TTTimeEvent::setStatus(const TTValue& value)
     // set status
     mStatus = value[0];
     
+    // reset counts if the event is not pending
+    if (mStatus != kTTSym_eventPending)
+    {
+        mMinReachedProcessesCount = 0;
+        mEndedProcessesCount = 0;
+        mDisposedProcessesCount = 0;
+    }
+    
     // filter repetitions
     if (lastStatus == mStatus)
     {
@@ -145,33 +157,35 @@ TTErr TTTimeEvent::setStatus(const TTValue& value)
         return kTTErrGeneric;
     }
     
-    // reset counts if the event is not pending
-    if (mStatus != kTTSym_eventPending)
+    // notify each attribute observers
+    v.append(mStatus);
+    v.append(lastStatus);
+#ifdef TTSCORE_DEBUG
+    TTLogMessage("TTTimeEvent::setStatus %s : %s -> %s\n", mName.c_str(), lastStatus.c_str(), mStatus.c_str());
+#endif
+    return sendNotification(kTTSym_EventStatusChanged, v);
+}
+
+TTErr TTTimeEvent::Wait()
+{
+    // accept wait request immediatly
+    return setStatus(kTTSym_eventWaiting);
+}
+
+TTErr TTTimeEvent::Happen()
+{
+    if (mStatus != kTTSym_eventWaiting && mStatus != kTTSym_eventPending)
     {
-        mMinReachedProcessesCount = 0;
-        mEndedProcessesCount = 0;
-        mDisposedProcessesCount = 0;
+        TTLogError("TTTimeEvent::Happen %s : is not waiting or pending (%s)\n", mName.c_str(), mStatus.c_str());
+        return kTTErrGeneric;
     }
     
-    // is the container running ? (the notification is sent if there is no valid container)
-    TTBoolean running = YES;
-    if (mContainer.valid())
-        mContainer.get(kTTSym_running, running);
+    mRequestHappen = YES;
     
-    // always notify waiting status to reset observers when nothing is running
-    if (running || mStatus == kTTSym_eventWaiting)
-    {
-        // notify each attribute observers
-        v.append(mStatus);
-        v.append(lastStatus);
-#ifdef TTSCORE_DEBUG
-        TTLogMessage("TTTimeEvent::setStatus %s : %s -> %s\n", mName.c_str(), lastStatus.c_str(), mStatus.c_str());
-#endif
-        return sendNotification(kTTSym_EventStatusChanged, v);
-    }
-#ifdef TTSCORE_DEBUG
-    TTLogMessage("TTTimeEvent::setStatus %s : don't notify %s status because the container is not running\n", mName.c_str(), mStatus.c_str());
-#endif
+    // if the event have no container to drive the check, check our self
+    if (!mContainer.valid())
+        Check();
+    
     return kTTErrNone;
 }
 
@@ -190,30 +204,111 @@ TTErr TTTimeEvent::Dispose()
         return kTTErrGeneric;
     }
     
-    return setStatus(kTTSym_eventDisposed);
+    mRequestDispose = YES;
+    
+    // if the event have no container to drive the check, check our self
+    if (!mContainer.valid())
+        Check();
+    
+    return kTTErrNone;
 }
 
-TTErr TTTimeEvent::Happen()
+TTErr TTTimeEvent::Check()
 {
-    TTErr err;
-    
-    if (mStatus != kTTSym_eventWaiting && mStatus != kTTSym_eventPending)
+    // if there is a request to make the event happen
+    if (mRequestHappen)
     {
-        TTLogError("TTTimeEvent::Happen %s : is not waiting or pending (%s)\n", mName.c_str(), mStatus.c_str());
-        return kTTErrGeneric;
+        mRequestHappen = NO;
+
+        if (StatePush())
+            TTLogError("TTTimeEvent::Check %s : StatePush error\n", mName.c_str());
+        
+        return setStatus(kTTSym_eventHappened);
     }
     
-    // if the event is not muted
-    if (!mMute)
+    // if there is a request to dispose the event
+    if (mRequestDispose)
     {
-        // push the state
-        err = StatePush();
+        mRequestDispose = NO;
+        return setStatus(kTTSym_eventDisposed);
     }
-    else
-        err = kTTErrNone;
     
-    setStatus(kTTSym_eventHappened);
-    return err;
+    // any event with attached processes
+    if (mAttachedProcesses.size() != 0)
+    {
+        // a conditioned event becomes pending when all attached processes are started
+        if (mCondition.valid() &&
+            mStatus == kTTSym_eventWaiting &&
+            mMinReachedProcessesCount == mAttachedProcesses.size())
+        {
+            return setStatus(kTTSym_eventPending);
+        }
+        
+        // when all attached processes are ended or disposed
+        if (mEndedProcessesCount + mDisposedProcessesCount == mAttachedProcesses.size())
+        {
+            // a conditioned pending event forces its condition to apply its default case
+            if (mCondition.valid() &&
+                mStatus == kTTSym_eventPending)
+            {
+                return mCondition.send("Default");
+            }
+            // a non conditioned waiting event happens
+            else if (!mCondition.valid() &&
+                     mStatus == kTTSym_eventWaiting)
+            {
+                if (StatePush())
+                    TTLogError("TTTimeEvent::Check %s : StatePush error\n", mName.c_str());
+                
+                return setStatus(kTTSym_eventHappened);
+            }
+        }
+        
+        // an event is disposed when all attached processes are disposed
+        if (mStatus == kTTSym_eventWaiting &&
+            mDisposedProcessesCount == mAttachedProcesses.size())
+        {
+            return setStatus(kTTSym_eventDisposed);
+        }
+        
+        // a non conditioned event happens when all attached processes are ended or disposed
+        if (!mCondition.valid() &&
+            mStatus == kTTSym_eventWaiting &&
+            mEndedProcessesCount + mDisposedProcessesCount == mAttachedProcesses.size())
+        {
+            if (StatePush())
+                TTLogError("TTTimeEvent::Check %s : StatePush error\n", mName.c_str());
+            
+            return setStatus(kTTSym_eventHappened);
+        }
+    }
+    
+    // waiting event with no attached process
+    else if (mStatus == kTTSym_eventWaiting)
+    {
+        // set conditionned event as pending
+        if (mCondition.valid())
+        {
+            return setStatus(kTTSym_eventPending);
+        }
+        // or make none conditioned event to happen at its date
+        else if (mContainer.valid())
+        {
+            TTValue v;
+            mContainer.get("date", v);
+            TTUInt32 containerDate = v[0];
+            
+            if (mDate <= containerDate)
+            {
+                if (StatePush())
+                    TTLogError("TTTimeEvent::Check %s : StatePush error\n", mName.c_str());
+                
+                return setStatus(kTTSym_eventHappened);
+            }
+        }
+    }
+    
+    return kTTErrGeneric;
 }
 
 TTErr TTTimeEvent::StateAddressGetValue(const TTValue& inputValue, TTValue& outputValue)
@@ -316,8 +411,11 @@ TTErr TTTimeEvent::StateAddressClear(const TTValue& inputValue, TTValue& outputV
 
 TTErr TTTimeEvent::StatePush()
 {
-    if (!mPushing) {
-
+    if (mMute)
+        return kTTErrNone;
+    
+    if (!mPushing)
+    {
         mPushing = YES;
 
         // recall the state
@@ -418,14 +516,6 @@ TTErr TTTimeEvent::ProcessDurationMinReached(const TTValue& inputValue, TTValue&
 #ifdef TTSCORE_DEBUG
     TTLogMessage("TTTimeEvent::ProcessDurationMinReached %s : attached = %d, minReached = %d, ended = %d, disposed = %d\n", mName.c_str(), mAttachedProcesses.size(), mMinReachedProcessesCount, mEndedProcessesCount, mDisposedProcessesCount);
 #endif
-    // a conditioned event becomes pending when all attached processes are started
-    if (mCondition.valid() &&
-        mStatus == kTTSym_eventWaiting &&
-        mMinReachedProcessesCount == mAttachedProcesses.size())
-    {
-        return setStatus(kTTSym_eventPending);
-    }
-    
     return kTTErrNone;
 }
 
@@ -442,23 +532,6 @@ TTErr TTTimeEvent::ProcessEnded(const TTValue& inputValue, TTValue& outputValue)
 #ifdef TTSCORE_DEBUG
     TTLogMessage("TTTimeEvent::ProcessEnded %s : attached = %d, minReached = %d, ended = %d, disposed = %d\n", mName.c_str(), mAttachedProcesses.size(), mMinReachedProcessesCount, mEndedProcessesCount, mDisposedProcessesCount);
 #endif
-    // when all attached processes are ended or disposed
-    if (mEndedProcessesCount + mDisposedProcessesCount == mAttachedProcesses.size())
-    {
-        // a conditioned pending event forces its condition to apply its default case
-        if (mCondition.valid() &&
-            mStatus == kTTSym_eventPending)
-        {
-            return mCondition.send("Default");
-        }
-        // a non conditioned waiting event happens
-        else if (!mCondition.valid() &&
-                 mStatus == kTTSym_eventWaiting)
-        {
-            return Happen();
-        }
-    }
-
     return kTTErrNone;
 }
 
@@ -473,21 +546,6 @@ TTErr TTTimeEvent::ProcessDisposed(const TTValue& inputValue, TTValue& outputVal
 #ifdef TTSCORE_DEBUG
     TTLogMessage("TTTimeEvent::ProcessDisposed %s : attached = %d, minReached = %d, ended = %d, disposed = %d\n", mName.c_str(), mAttachedProcesses.size(), mMinReachedProcessesCount, mEndedProcessesCount, mDisposedProcessesCount);
 #endif
-    // an event is disposed when all attached processes are disposed
-    if (mStatus == kTTSym_eventWaiting &&
-        mDisposedProcessesCount == mAttachedProcesses.size())
-    {
-        return Dispose();
-    }
-    
-    // a non conditioned event happens when all attached processes are ended or disposed
-    if (!mCondition.valid() &&
-        mStatus == kTTSym_eventWaiting &&
-        mEndedProcessesCount + mDisposedProcessesCount == mAttachedProcesses.size())
-    {
-        return Happen();
-    }
-    
     return kTTErrNone;
 }
 

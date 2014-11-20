@@ -49,12 +49,15 @@ protected :
     
     TTObject                        mCondition;                     ///< a pointer to an optional condition object to make the event interactive
     
+private :
+    
     TTValue                         mAttachedProcesses;             ///< all the processes the event observes
-    TTUInt32                        mMinReachedProcessesCount;         ///< how many processes are started ?
+    TTUInt32                        mMinReachedProcessesCount;      ///< how many processes are started ?
     TTUInt32                        mEndedProcessesCount;           ///< how many processes have ended ?
     TTUInt32                        mDisposedProcessesCount;        ///< how many processes have been disposed ?
- 
-private :
+    
+    TTBoolean                       mRequestHappen;                 ///< is a request to make the event happen have been registered ?
+    TTBoolean                       mRequestDispose;                ///< is a request to dispose the event have been registered ?
     
     TTBoolean                       mPushing;                       ///< an internal flag to know if the event is pushing its state
     
@@ -73,13 +76,22 @@ private :
      @return                kTTErrNone */
     TTErr           setStatus(const TTValue& value);
     
-    /** Make the event happen
-     @return                an error code returned by the happen method */
+    /** Request to make the event to wait
+     @return                #kTTErrGeneric if the request cannot be handled */
+    TTErr           Wait();
+    
+    /** Request to make the event happen
+     @return                #kTTErrGeneric if the request cannot be handled */
     TTErr           Happen();
     
-    /** Make the event not happen
-     @return                an error code returned by the dispose method */
+    /** Request to make the event not happen
+     @return                #kTTErrGeneric if the request cannot be handled */
     TTErr           Dispose();
+    
+    /** Check if the event have to change its status or apply request
+     @details this methods should only be called by our container or the event itself
+     @return                #kTTErrGeneric if nothing change for the event */
+    TTErr           Check();
     
     /**  needed to be handled by a TTXmlHandler
      @param	inputValue      ..
