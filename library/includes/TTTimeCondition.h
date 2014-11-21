@@ -187,7 +187,7 @@ private :
      @return                kTTErrNone */
     TTErr           EventStatusChanged(const TTValue& inputValue, TTValue& outputValue);
     
-    /** Helper function to set the ready attribute and notify
+    /** Helper function to set the ready attribute, send a notification and notify attribute observers
      @param	newReady        a boolean
      @return                kTTErrNone */
     TTErr           setReady(TTBoolean newReady);

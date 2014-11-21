@@ -72,10 +72,10 @@ private :
      @return                kTTErrNone */
     TTErr           setCondition(const TTValue& value);
     
-    /** Set status without any notification to observer
+    /** Set status directly when the container is not running
      @details this is usefull to reset event at precise status but it couldn't not be used when container is running
      @param	value           a #TTSymbol (kTTSym_eventWaiting, kTTSym_eventPending, kTTSym_eventHappened, kTTSym_eventDisposed)
-     @return                #kTTErrGeneric if container is running */
+     @return                #kTTErrGeneric if the container is running */
     TTErr           setStatus(const TTValue& value);
     
     /** Request to make the event to wait

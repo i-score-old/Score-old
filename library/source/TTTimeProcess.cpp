@@ -595,7 +595,14 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
     TTObject    aTimeEvent = inputValue[0];
     TTSymbol    newStatus = inputValue[1];
     //TTSymbol    oldStatus = inputValue[2];
-    TTValue     v;
+    
+    // inside a container ignore event notifications if the container is not running
+    TTBoolean running = YES;
+    if (mContainer.valid())
+        mContainer.get("running", running);
+    
+    if (!running)
+        return kTTErrGeneric;
     
     // event waiting case :
     if (newStatus == kTTSym_eventWaiting)
@@ -807,17 +814,18 @@ void TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 position, TTFloat64 
             aTimeProcess->Process(TTValue(position, date), none);
         }
         
-        // the notifications below are useful for network observation purpose for exemple
-        // TODO : shouldn't we limit the sending of those observation to not overcrowed the network ?
-        
         // notify position observers
+        // this is useful for network observation (see in Modular)
         TTAttributePtr	positionAttribute;
         aTimeProcess->findAttribute("position", &positionAttribute);
         positionAttribute->sendNotification(kTTSym_notify, position);
         
         // notify date observers
+        // this is useful for network observation (see in Modular)
         TTAttributePtr	dateAttribute;
         aTimeProcess->findAttribute("date", &dateAttribute);
         dateAttribute->sendNotification(kTTSym_notify, date);
+        
+        // TODO : shouldn't we limit the sending of those observation to not overcrowed the network ?
     }
 }

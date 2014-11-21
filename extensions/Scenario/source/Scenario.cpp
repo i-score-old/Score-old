@@ -296,6 +296,13 @@ TTErr Scenario::ProcessEnd()
         aTimeProcess.send("Stop");
     }
     
+    // disable conditions
+    for (mTimeConditionList.begin(); mTimeConditionList.end(); mTimeConditionList.next())
+    {
+        TTObject aTimeCondition = mTimeConditionList.current()[0];
+        aTimeCondition.set(kTTSym_active, TTBoolean(NO));
+    }
+    
     // needs to be compiled again
     mCompiled = NO;
    

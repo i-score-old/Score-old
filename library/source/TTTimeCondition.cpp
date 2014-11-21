@@ -692,9 +692,16 @@ TTErr TTTimeCondition::EventStatusChanged(const TTValue& inputValue, TTValue& ou
     TTObject                event = inputValue[0];
     TTCaseMapIterator       it = mCases.find(event.instance());
     TTSymbol                newStatus = inputValue[1], oldStatus = inputValue[2];
-    TTValue                 v;
     
     TT_ASSERT("TTTimeCondition::EventStatusChanged : status effectively changed", newStatus != oldStatus);
+    
+    // inside a container ignore event notifications if the container is not running
+    TTBoolean running = YES;
+    if (mContainer.valid())
+        mContainer.get("running", running);
+    
+    if (!running)
+        return kTTErrGeneric;
     
     // if the event exists
     if (it != mCases.end())
@@ -724,11 +731,12 @@ TTErr TTTimeCondition::setReady(TTBoolean newReady)
         // set the ready value
         mReady = newReady;
         
-        // notify observers
+        // send notification
         sendNotification(kTTSym_ConditionReadyChanged, mReady);
         
         // notify ready observers
-        TTAttributePtr	readyAttribute;
+        // this is useful for network observation (see in Modular)
+        TTAttributePtr readyAttribute;
         this->findAttribute("ready", &readyAttribute);
         readyAttribute->sendNotification(kTTSym_notify, mReady);
     }

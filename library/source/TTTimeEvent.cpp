@@ -151,19 +151,7 @@ TTErr TTTimeEvent::setStatus(const TTValue& value)
         }
     }
     
-    mStatus = value;
-    
-    // reset requests
-    mRequestWait = NO;
-    mRequestHappen = NO;
-    mRequestDispose = NO;
-    
-    // reset counts
-    mMinReachedProcessesCount = 0;
-    mEndedProcessesCount = 0;
-    mDisposedProcessesCount = 0;
-    
-    return kTTErrNone;
+    return applyStatus(value);
 }
 
 #if 0
@@ -374,15 +362,16 @@ TTErr TTTimeEvent::applyStatus(const TTValue& value)
         
         return kTTErrGeneric;
     }
-    
-    // notify observers
-    TTValue v = TTObject(this);
-    v.append(mStatus);
-    v.append(lastStatus);
 #ifdef TTSCORE_DEBUG
     TTLogMessage("TTTimeEvent::applyStatus %s : %s -> %s\n", mName.c_str(), lastStatus.c_str(), mStatus.c_str());
 #endif
-    return sendNotification(kTTSym_EventStatusChanged, v);
+    // send notification
+    TTValue v = TTObject(this);
+    v.append(mStatus);
+    v.append(lastStatus);
+    sendNotification(kTTSym_EventStatusChanged, v);
+    
+    return kTTErrNone;
 }
 
 #if 0
