@@ -165,48 +165,31 @@ TTErr Loop::ProcessEnd()
 
 TTErr Loop::Process(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTFloat64 position, date;
+    TT_ASSERT("Loop::Process : inputValue is correct", inputValue.size() == 2 && inputValue[0].type() == kTypeFloat64 && inputValue[1].type() == kTypeFloat64);
     
-    if (inputValue.size() == 2)
-    {
-        if (inputValue[0].type() == kTypeFloat64 && inputValue[1].type() == kTypeFloat64)
-        {
-            position = inputValue[0];
-            date = inputValue[1];
+    TTFloat64 position = inputValue[0];
+    TTFloat64 date = inputValue[1];
             
-            // if the end event pattern happened
-            TTSymbol status;
-            mPatternEndEvent.get("status", status);
-            if (status == kTTSym_eventHappened)
-            {
-                // restart the loop pattern
-                mPatternStartEvent.set("status", kTTSym_eventWaiting);
-                mPatternStartEvent.send(kTTSym_Happen);
-            }
-        }
+    // if the end event pattern happened
+    TTSymbol status;
+    mPatternEndEvent.get("status", status);
+    if (status == kTTSym_eventHappened)
+    {
+        // restart the loop pattern
+        mPatternStartEvent.set("status", kTTSym_eventWaiting);
+        mPatternStartEvent.send(kTTSym_Happen);
     }
     
-    return kTTErrGeneric;
+    return kTTErrNone;
 }
 
 TTErr Loop::ProcessPaused(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTObject    aTimeProcess;
-    TTBoolean   paused;
+    TT_ASSERT("Loop::ProcessPaused : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeBoolean);
     
-    if (inputValue.size() == 1) {
-        
-        if (inputValue[0].type() == kTypeBoolean) {
-            
-            paused = inputValue[0];
-            
-            
-        }
-        
-        return kTTErrNone;
-    }
+    TTBoolean paused = inputValue[0];
     
-    return kTTErrGeneric;
+    return kTTErrNone;
 }
 
 TTErr Loop::Goto(const TTValue& inputValue, TTValue& outputValue)

@@ -238,29 +238,49 @@ TTErr Scenario::Compile()
 
 TTErr Scenario::ProcessStart()
 {
-    // make all events to be waiting at least
+    // reset all events to waiting status
     for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next())
     {
         TTObject aTimeEvent = mTimeEventList.current()[0];
-        aTimeEvent.send("Wait");
+        aTimeEvent.set("status", kTTSym_eventWaiting);
     }
     
     TTValue v;
     mScheduler.get(kTTSym_offset, v);
     TTUInt32 timeOffset = v[0];
 
-    // start all processes which are in the middle of a time process
+    // setup events status and start processes depending on the time offset
     for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next())
     {
         TTObject aTimeProcess = mTimeProcessList.current()[0];
+        
         TTObject startEvent = getTimeProcessStartEvent(aTimeProcess);
         TTObject endEvent = getTimeProcessEndEvent(aTimeProcess);
         
+        TTUInt32 startEventDate;
+        TTUInt32 endEventDate;
+        
+        startEvent.get("date", startEventDate);
+        endEvent.get("date", endEventDate);
+        
+        if (startEventDate < timeOffset &&
+            endEventDate < timeOffset)
+        {
+            startEvent.set("status", kTTSym_eventHappened);
+            ;// don't setup the end event status because it could be the start event of another process
+        }
         // if the date to start is in the middle of a time process
-        if (getTimeEventDate(startEvent) < timeOffset &&
-            getTimeEventDate(endEvent) > timeOffset)
+        else if (startEventDate < timeOffset &&
+                 endEventDate > timeOffset)
         {
             aTimeProcess.send("Start");
+            ;// don't setup the end event status because it will be notified that its process starts
+        }
+        else if (startEventDate > timeOffset &&
+                 endEventDate > timeOffset)
+        {
+            ;// don't setup the start event status because it could be the end event of another process
+            ;// don't setup the end event status because it have been already reset to waiting status
         }
     }
 
@@ -284,98 +304,76 @@ TTErr Scenario::ProcessEnd()
 
 TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTFloat64   position, date;
-    TTObject	aTimeCondition, aTimeProcess;
-    TTValue     v;
+    TT_ASSERT("Scenario::Process : inputValue is correct", inputValue.size() == 2 && inputValue[0].type() == kTypeFloat64 && inputValue[1].type() == kTypeFloat64);
     
-    if (inputValue.size() == 2)
+    TTFloat64 position = inputValue[0];
+    TTFloat64 date = inputValue[1];
+    
+    // enable or disable conditions
+    for (mTimeConditionList.begin(); mTimeConditionList.end(); mTimeConditionList.next())
     {
-        if (inputValue[0].type() == kTypeFloat64 && inputValue[1].type() == kTypeFloat64)
+        TTObject aTimeCondition = mTimeConditionList.current()[0];
+        
+        // if a condition is ready we activate it
+        TTValue v;
+        aTimeCondition.get(kTTSym_ready, v);
+        aTimeCondition.set(kTTSym_active, v);
+    }
+    
+    // propagate external tick to all time processes
+    if (mExternalTick)
+    {
+        for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next())
         {
-            position = inputValue[0];
-            date = inputValue[1];
-            
-            // enable or disable conditions
-            for (mTimeConditionList.begin(); mTimeConditionList.end(); mTimeConditionList.next())
-            {
-                aTimeCondition = mTimeConditionList.current()[0];
-                
-                // if a condition is ready we activate it
-                aTimeCondition.get(kTTSym_ready, v);
-                aTimeCondition.set(kTTSym_active, v);
-            }
-            
-            // propagate external tick to all time processes
-            if (mExternalTick)
-            {
-                for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next())
-                {
-                    aTimeProcess = mTimeProcessList.current()[0];
-                    aTimeProcess.send(kTTSym_Tick);
-                }
-            }
-            
-            // check each event and count how many are happened or disposed
-            TTUInt32 eventHappenedOrDisposedCount = 0;
-            
-            for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next())
-            {
-                TTObject aTimeEvent = mTimeEventList.current()[0];
-                TTSymbol status;
-                
-                aTimeEvent.send("Check");
-                aTimeEvent.get("status", status);
-                
-                if (status == kTTSym_eventHappened ||
-                    status == kTTSym_eventDisposed)
-                    eventHappenedOrDisposedCount++;
-            }
-            
-            // no more event to process
-            if (eventHappenedOrDisposedCount == mTimeEventList.getSize())
-            {
-                if (mContainer.valid())
-                    ; // TODO  : what ?
-                
-                // root scenario case : stop itself
-                else
-                {
-                    TTObject thisObject(this);
-                    return thisObject.send(kTTSym_Stop);
-                }
-            }
+            TTObject aTimeProcess = mTimeProcessList.current()[0];
+            aTimeProcess.send(kTTSym_Tick);
         }
     }
     
-    return kTTErrGeneric;
+    // update each event status and count how many are happened or disposed
+    TTUInt32 eventHappenedOrDisposedCount = 0;
+    
+    for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next())
+    {
+        TTObject aTimeEvent = mTimeEventList.current()[0];
+        TTSymbol status;
+        
+        aTimeEvent.send("StatusUpdate");
+        aTimeEvent.get("status", status);
+        
+        if (status == kTTSym_eventHappened ||
+            status == kTTSym_eventDisposed)
+            eventHappenedOrDisposedCount++;
+    }
+    
+    // no more event to process
+    if (eventHappenedOrDisposedCount == mTimeEventList.getSize())
+    {
+        TTObject thisObject(this);
+        return thisObject.send(kTTSym_Stop);
+    }
+    
+    return kTTErrNone;
 }
 
 TTErr Scenario::ProcessPaused(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTObject    aTimeProcess;
-    TTBoolean   paused;
+    TT_ASSERT("Loop::ProcessPaused : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeBoolean);
     
-    if (inputValue.size() == 1) {
+    TTBoolean paused = inputValue[0];
+
+    for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next())
+    {
+        TTObject aTimeProcess = mTimeProcessList.current()[0];
         
-        if (inputValue[0].type() == kTypeBoolean) {
-            
-            paused = inputValue[0];
-            
-            for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
-                
-                aTimeProcess = mTimeProcessList.current()[0];
-                
-                if (paused)
-                    aTimeProcess.send(kTTSym_Pause);
-                else
-                    aTimeProcess.send(kTTSym_Resume);
-            }
-        }
-        
-        return kTTErrNone;
+        if (paused)
+            aTimeProcess.send(kTTSym_Pause);
+        else
+            aTimeProcess.send(kTTSym_Resume);
     }
     
-    return kTTErrGeneric;
+    return kTTErrNone;
+    
 }
 
 TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)

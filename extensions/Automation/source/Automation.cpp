@@ -226,7 +226,12 @@ TTErr Automation::ProcessEnd()
 
 TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTFloat64       position, date, sample;
+    TT_ASSERT("Automation::Process : inputValue is correct", inputValue.size() == 2 && inputValue[0].type() == kTypeFloat64 && inputValue[1].type() == kTypeFloat64);
+    
+    TTFloat64 position = inputValue[0];
+    TTFloat64 date = inputValue[1];
+    
+    TTFloat64       sample;
     TTValue         v, keys, objects, valueToSend, none;
     TTSymbol        key;
     TTAddress       address;
@@ -235,72 +240,63 @@ TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
     TTBoolean       redundancy;
 	TTErr			err;
     
-    if (inputValue.size() == 2) {
+    // store current position for recording
+    mCurrentPosition = position;
+    
+    // don't process for 0. or 1. to not send the same value twice
+    if (position == 0. || position == 1.)
+        return kTTErrGeneric;
+    
+    // calculate the curves
+    mCurves.getKeys(keys);
+    for (i = 0; i < keys.size(); i++) {
         
-        if (inputValue[0].type() == kTypeFloat64 && inputValue[1].type() == kTypeFloat64) {
+        key = keys[i];
+        
+        // a curve is processed only if it is not recording
+        if (!mReceivers.lookup(key, objects))
+            continue;
+        
+        mCurves.lookup(key, objects);
+        
+        // process each indexed curve to fill the value to send
+        valueToSend.clear();
+        valueToSend.resize(objects.size());
+        err = kTTErrNone;
+        redundancy = YES;
+        for (j = 0; j < objects.size(); j++) {
             
-            position = inputValue[0];
-            date = inputValue[1];
+            curve = objects[j];
             
-            // store current position for recording
-            mCurrentPosition = position;
+            err = TTCurveNextSampleAt(TTCurvePtr(curve.instance()), position, sample);
             
-            // don't process for 0. or 1. to not send the same value twice
-            if (position == 0. || position == 1.)
-                return kTTErrGeneric;
+            // if no value
+            if (err == kTTErrValueNotFound)
+                break;
             
-            // calculate the curves
-            mCurves.getKeys(keys);
-            for (i = 0; i < keys.size(); i++) {
-                
-                key = keys[i];
-                
-                // a curve is processed only if it is not recording
-                if (!mReceivers.lookup(key, objects))
-                    continue;
-                
-                mCurves.lookup(key, objects);
-                
-                // process each indexed curve to fill the value to send
-                valueToSend.clear();
-                valueToSend.resize(objects.size());
-                err = kTTErrNone;
-                redundancy = YES;
-                for (j = 0; j < objects.size(); j++) {
-                    
-                    curve = objects[j];
-                    
-                    err = TTCurveNextSampleAt(TTCurvePtr(curve.instance()), position, sample);
-                    
-                    // if no value
-                    if (err == kTTErrValueNotFound)
-                        break;
-                    
-                    redundancy &= err == kTTErrGeneric;
-                    
-                    valueToSend[j] = sample;
-                }
-                
-                // if no value
-                if (err == kTTErrValueNotFound || redundancy)
-                    continue;
-                
-                // look for the sender at the address
-                if (!mSenders.lookup(key, objects)) {
-                    
-                    sender = objects[0];
-                    sender.send(kTTSym_Send, valueToSend, none);
-                }
-            }
+            redundancy &= err == kTTErrGeneric;
+            
+            valueToSend[j] = sample;
+        }
+        
+        // if no value
+        if (err == kTTErrValueNotFound || redundancy)
+            continue;
+        
+        // look for the sender at the address
+        if (!mSenders.lookup(key, objects)) {
+            
+            sender = objects[0];
+            sender.send(kTTSym_Send, valueToSend, none);
         }
     }
     
-    return kTTErrGeneric;
+    return kTTErrNone;
 }
 
 TTErr Automation::ProcessPaused(const TTValue& inputValue, TTValue& outputValue)
 {
-    // théo : what do do on pause/resume ?
+    // théo : what to do on pause/resume ?
     return kTTErrNone;
 }
 

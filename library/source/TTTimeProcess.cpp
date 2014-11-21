@@ -467,9 +467,9 @@ TTErr TTTimeProcess::Start()
     // filter repetitions
     if (!mRunning)
     {
-        // if ther eis no contaienr to reset to a waiting status
+        // if there is no container to reset to a waiting status
         if (!mContainer.valid())
-            mStartEvent.send("Wait");
+            mStartEvent.set("status", kTTSym_eventWaiting);
         
         // make the start event happen to play the scheduler
         return mStartEvent.send(kTTSym_Happen);
@@ -597,7 +597,7 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
     //TTSymbol    oldStatus = inputValue[2];
     TTValue     v;
     
-    // event wainting case :
+    // event waiting case :
     if (newStatus == kTTSym_eventWaiting)
     {
         // the start event waiting status implies waiting status for the end event
