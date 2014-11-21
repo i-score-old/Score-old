@@ -52,9 +52,9 @@ protected :
 private :
     
     TTValue                         mAttachedProcesses;             ///< all the processes the event observes
-    TTUInt32                        mMinReachedProcessesCount;      ///< how many processes have reached their minimun duration bound ?
-    TTUInt32                        mEndedProcessesCount;           ///< how many processes have ended ?
-    TTUInt32                        mDisposedProcessesCount;        ///< how many processes have been disposed ?
+    TTUInt32                        mMinReachedProcessesCounter;    ///< how many processes have reached their minimun duration bound ?
+    TTUInt32                        mEndedProcessesCounter;         ///< how many processes have ended ?
+    TTUInt32                        mDisposedProcessesCounter;      ///< how many processes have been disposed ?
     
     TTBoolean                       mRequestWait;                   ///< an internal flag to know if there is a request to make the event to wait
     TTBoolean                       mRequestHappen;                 ///< an internal flag to know if there is a request to make the event happen

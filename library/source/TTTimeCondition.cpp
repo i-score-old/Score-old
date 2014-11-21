@@ -27,7 +27,7 @@
 TT_BASE_OBJECT_CONSTRUCTOR,
 mActive(NO),
 mReady(NO),
-mPendingCounter(0)
+mNotPendingEventCounter(0)
 {
     TT_ASSERT("Correct number of args to create TTTimeCondition", arguments.size() == 1);
     
@@ -117,6 +117,9 @@ TTErr TTTimeCondition::setActive(const TTValue& value)
         {
             mActive = YES;
             
+            // reset the "not pending event" counter
+            mNotPendingEventCounter = 0;
+            
             // create the receivers
             TTCaseMapIterator it;
             
@@ -134,6 +137,9 @@ TTErr TTTimeCondition::setActive(const TTValue& value)
         {
             mActive = NO;
             
+            // reset the "not pending event" counter
+            mNotPendingEventCounter = mCases.size();
+
             // remove all receivers
             TTValue     keys, v;
             TTSymbol    key;
@@ -212,25 +218,26 @@ TTErr TTTimeCondition::EventAdd(const TTValue& inputValue, TTValue& outputValue)
     Comportment     aComportment;
     TTValue         v;
     
-    switch (inputValue.size()) {/* TODO : don't know how to pass Comportment as TTValue
-                                 
-                                 // if we have two arguments
-                                 case 2 :
-                                 
-                                 // if the second argument isn't a symbol
-                                 if (inputValue[1].type() != kTypeSymbol)
-                                 
-                                 // return an error TODO : should warn the user
-                                 return kTTErrInvalidType;
-                                 
-                                 // if it's a symbol : convert it to an expression
-                                 ExpressionParseFromValue(inputValue[1], anExpression);
-                                 
-                                 // add receivers for the address if needed
-                                 if (anExpression.getAddress() != kTTAdrsEmpty)
-                                 addReceiver(anExpression.getAddress());
-                                 */
-            // if we have one or two arguments
+    switch (inputValue.size())
+    {
+/* TODO : don't know how to pass Comportment as TTValue
+        // if we have two arguments
+        case 2 :
+            
+            // if the second argument isn't a symbol
+            if (inputValue[1].type() != kTypeSymbol)
+                
+                // return an error TODO : should warn the user
+                return kTTErrInvalidType;
+            
+            // if it's a symbol : convert it to an expression
+            ExpressionParseFromValue(inputValue[1], anExpression);
+            
+            // add receivers for the address if needed
+            if (anExpression.getAddress() != kTTAdrsEmpty)
+                addReceiver(anExpression.getAddress());
+*/
+        // if we have one or two arguments
         case 1 :
             
             // if the first argument isn't an object
@@ -245,11 +252,8 @@ TTErr TTTimeCondition::EventAdd(const TTValue& inputValue, TTValue& outputValue)
             // insert the event with an expression
             mCases.insert({{event.instance(), aComportment}});
             
-            // increment the pending counter
-            mPendingCounter++;
-            
-            // set the event to waiting
-            event.set(kTTSym_status, kTTSym_eventWaiting); // CB TODO : Why ?
+            // increment the "not pending event" counter
+            mNotPendingEventCounter++;
             
             // tell the event it is conditioned
             event.set(kTTSym_condition, thisObject);
@@ -260,7 +264,7 @@ TTErr TTTimeCondition::EventAdd(const TTValue& inputValue, TTValue& outputValue)
             // return no error
             return kTTErrNone;
             
-            // if there is less than 1 or more than 2 arguments
+        // if there is less than 1 or more than 2 arguments
         default :
             
             // return an error TODO : should warn the user
@@ -285,8 +289,8 @@ TTErr TTTimeCondition::EventRemove(const TTValue& inputValue, TTValue& outputVal
         // remove the case
         mCases.erase(it);
         
-        // decrement the unready counter
-        mPendingCounter--;
+        // decrement the "not pending event" counter
+        mNotPendingEventCounter--;
         
         // tell the event it is not conditioned anymore
         v = TTObject();
@@ -416,12 +420,13 @@ TTErr TTTimeCondition::Trigger(const TTValue& inputValue, TTValue& outputValue)
     TTList  timeEventToDispose;
     
     // for each case
-    for (TTCaseMapIterator it = mCases.begin(); it != mCases.end(); it++) {
-        
+    for (TTCaseMapIterator it = mCases.begin(); it != mCases.end(); it++)
+    {
         TTObject caseEvent = TTObjectBasePtr(it->first);
         
         // if no event are passed : trigger all the events
-        if (inputValue.size() == 0) {
+        if (inputValue.size() == 0)
+        {
             timeEventToHappen.append(caseEvent);
             continue;
         }
@@ -429,10 +434,10 @@ TTErr TTTimeCondition::Trigger(const TTValue& inputValue, TTValue& outputValue)
         TTBoolean found = NO;
         
         // check if the event is part of the inputValue to prepare it to be triggered
-        for (TTUInt32 i = 0; i < inputValue.size(); i++) {
-            
-            if (inputValue[i].type() == kTypeObject) {
-                
+        for (TTUInt32 i = 0; i < inputValue.size(); i++)
+        {
+            if (inputValue[i].type() == kTypeObject)
+            {
                 TTObject event = inputValue[i];
                 
                 if (event == caseEvent) {
@@ -449,22 +454,22 @@ TTErr TTTimeCondition::Trigger(const TTValue& inputValue, TTValue& outputValue)
     }
     
     // if at least one event is in the trigger list
-    if (!timeEventToHappen.isEmpty()) {
-        
+    if (!timeEventToHappen.isEmpty())
+    {
         setReady(NO);
         
-        TTObject o;
-        
         // trigger all events of the trigger list
-        for (timeEventToHappen.begin(); timeEventToHappen.end(); timeEventToHappen.next()) {
-            o = timeEventToHappen.current()[0];
-            o.send(kTTSym_Happen);
+        for (timeEventToHappen.begin(); timeEventToHappen.end(); timeEventToHappen.next())
+        {
+            TTObject event = timeEventToHappen.current()[0];
+            event.send(kTTSym_Happen);
         }
         
         // dispose all the other events
-        for (timeEventToDispose.begin(); timeEventToDispose.end(); timeEventToDispose.next()) {
-            o = timeEventToDispose.current()[0];
-            o.send(kTTSym_Dispose);
+        for (timeEventToDispose.begin(); timeEventToDispose.end(); timeEventToDispose.next())
+        {
+            TTObject event = timeEventToDispose.current()[0];
+            event.send(kTTSym_Dispose);
         }
     }
     
@@ -481,12 +486,13 @@ TTErr TTTimeCondition::Dispose(const TTValue& inputValue, TTValue& outputValue)
     TTList  timeEventToDispose;
     
     // for each case
-    for (TTCaseMapIterator it = mCases.begin(); it != mCases.end(); it++) {
-        
+    for (TTCaseMapIterator it = mCases.begin(); it != mCases.end(); it++)
+    {
         TTObject caseEvent = TTObjectBasePtr(it->first);
         
         // if no event are passed : dispose all the events
-        if (inputValue.size() == 0) {
+        if (inputValue.size() == 0)
+        {
             timeEventToDispose.append(caseEvent);
             continue;
         }
@@ -494,13 +500,14 @@ TTErr TTTimeCondition::Dispose(const TTValue& inputValue, TTValue& outputValue)
         TTBoolean found = NO;
         
         // check if the event is part of the inputValue to prepare it to be disposed
-        for (TTUInt32 i = 0; i < inputValue.size(); i++) {
-            
-            if (inputValue[i].type() == kTypeObject) {
-                
+        for (TTUInt32 i = 0; i < inputValue.size(); i++)
+        {
+            if (inputValue[i].type() == kTypeObject)
+            {
                 TTObject event = inputValue[i];
                 
-                if (event == caseEvent) {
+                if (event == caseEvent)
+                {
                     timeEventToDispose.append(caseEvent);
                     found = YES;
                     break;
@@ -514,22 +521,22 @@ TTErr TTTimeCondition::Dispose(const TTValue& inputValue, TTValue& outputValue)
     }
     
     // if at least one event is in the trigger list
-    if (!timeEventToHappen.isEmpty()) {
-        
+    if (!timeEventToHappen.isEmpty())
+    {
         setReady(NO);
         
-        TTObject o;
-        
         // trigger all events of the trigger list
-        for (timeEventToHappen.begin(); timeEventToHappen.end(); timeEventToHappen.next()) {
-            o = timeEventToHappen.current()[0];
-            o.send(kTTSym_Happen);
+        for (timeEventToHappen.begin(); timeEventToHappen.end(); timeEventToHappen.next())
+        {
+            TTObject event = timeEventToHappen.current()[0];
+            event.send(kTTSym_Happen);
         }
         
         // dispose all the other events
-        for (timeEventToDispose.begin(); timeEventToDispose.end(); timeEventToDispose.next()) {
-            o = timeEventToHappen.current()[0];
-            o.send(kTTSym_Dispose);
+        for (timeEventToDispose.begin(); timeEventToDispose.end(); timeEventToDispose.next())
+        {
+            TTObject event = timeEventToHappen.current()[0];
+            event.send(kTTSym_Dispose);
         }
     }
     
@@ -689,9 +696,9 @@ TTErr TTTimeCondition::EventStatusChanged(const TTValue& inputValue, TTValue& ou
 {
     TT_ASSERT("TTTimeCondition::EventStatusChanged : inputValue is correct", inputValue.size() == 3 && inputValue[0].type() == kTypeObject);
     
-    TTObject                event = inputValue[0];
-    TTCaseMapIterator       it = mCases.find(event.instance());
-    TTSymbol                newStatus = inputValue[1], oldStatus = inputValue[2];
+    TTObject            event = inputValue[0];
+    TTCaseMapIterator   it = mCases.find(event.instance());
+    TTSymbol            newStatus = inputValue[1], oldStatus = inputValue[2];
     
     TT_ASSERT("TTTimeCondition::EventStatusChanged : status effectively changed", newStatus != oldStatus);
     
@@ -706,15 +713,49 @@ TTErr TTTimeCondition::EventStatusChanged(const TTValue& inputValue, TTValue& ou
     // if the event exists
     if (it != mCases.end())
     {
-        if (newStatus == kTTSym_eventPending && --mPendingCounter == 0)
+        switch (mNotPendingEventCounter)
         {
-            setReady(YES);
+            // all events are pending
+            case 0:
+            {
+                // if one of the pending events happens
+                if (oldStatus == kTTSym_eventPending &&
+                    newStatus == kTTSym_eventHappened)
+                {
+                    return setReady(NO);
+                }
+                
+                break;
+            }
+            
+            // there are still not pending events
+            default:
+            {
+                // a not pending event becomes pending
+                if (newStatus == kTTSym_eventPending)
+                {
+                    // decrement the "not pending event" counter
+                    if (--mNotPendingEventCounter == 0)
+                    {
+                        return setReady(YES);
+                    }
+                }
+                
+                break;
+            }
         }
-        else if (newStatus == kTTSym_eventHappened && oldStatus == kTTSym_eventPending && mPendingCounter++ == 0 && mReady == YES)
-        {
-            setReady(NO);
-            Default();
-        }
+        
+        if (mNotPendingEventCounter == 0 && !mReady)
+            TTLogError("TTTimeCondition::EventStatusChanged %s : not pending event counter is equal to 0 but is not ready\n", mName.c_str());
+        
+        if (mNotPendingEventCounter > 0 && mReady)
+            TTLogError("TTTimeCondition::EventStatusChanged %s : not pending event counter is greater than 0 but is ready\n", mName.c_str());
+        
+        if (mNotPendingEventCounter < 0)
+            TTLogError("TTTimeCondition::EventStatusChanged %s : not pending event counter is lower than 0\n", mName.c_str());
+        
+        if (mNotPendingEventCounter > mCases.size())
+            TTLogError("TTTimeCondition::EventStatusChanged %s : not pending event counter is greter than the number of cases\n", mName.c_str());
         
         return kTTErrNone;
     }

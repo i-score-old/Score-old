@@ -77,7 +77,8 @@ protected :
 
     Expression                      mDispose;                       ///< the expression to dispose the condition
 
-    TTUInt8                         mPendingCounter;                ///< counting the number of unready events
+    TTInt32                         mNotPendingEventCounter;        ///< counting the number of events which are not pending
+                                                                    ///< use signed integer to detect error if it goes below (see in EventStatusChanged)
 
 private :
     
