@@ -724,7 +724,7 @@ TTErr TTTimeCondition::setReady(TTBoolean newReady)
         // set the ready value
         mReady = newReady;
         
-        // notify each observers
+        // notify observers
         sendNotification(kTTSym_ConditionReadyChanged, mReady);
         
         // notify ready observers

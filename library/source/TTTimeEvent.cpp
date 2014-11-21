@@ -275,7 +275,7 @@ TTErr TTTimeEvent::StatusUpdate()
     // any event with attached processes
     if (mAttachedProcesses.size() != 0)
     {
-        // a conditioned event becomes pending when all attached processes are started
+        // a conditioned event becomes pending when all attached processes have reached their minimal duration bound
         if (mCondition.valid() &&
             mStatus == kTTSym_eventWaiting &&
             mMinReachedProcessesCount == mAttachedProcesses.size())
@@ -375,7 +375,7 @@ TTErr TTTimeEvent::applyStatus(const TTValue& value)
         return kTTErrGeneric;
     }
     
-    // notify each attribute observers
+    // notify observers
     TTValue v = TTObject(this);
     v.append(mStatus);
     v.append(lastStatus);
