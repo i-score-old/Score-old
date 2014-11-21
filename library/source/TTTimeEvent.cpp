@@ -357,7 +357,7 @@ TTErr TTTimeEvent::applyStatus(const TTValue& value)
     if (lastStatus == mStatus)
     {
         // log error only for non waiting status repetition
-        //if (mStatus != kTTSym_eventWaiting)
+        if (mStatus != kTTSym_eventWaiting)
             TTLogError("TTTimeEvent::applyStatus %s : new status equals last status (%s)\n", mName.c_str(), mStatus.c_str());
         
         return kTTErrGeneric;
