@@ -48,7 +48,7 @@ void TTScoreInit(const char* binaries)
         TTTimeEvent::registerClass();
         TTTimeProcess::registerClass();
         
-		//TTScoreTest::registerClass();
+		TTScoreTest::registerClass();
         
 #ifdef TT_DEBUG
 		TTLogMessage("Score -- Version %s -- Debugging Enabled\n", TTSCORE_VERSION_STRING);

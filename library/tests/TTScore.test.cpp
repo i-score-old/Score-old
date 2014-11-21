@@ -30,7 +30,6 @@ void TTScoreTestMain(int& errorCount, int& testAssertionCount)
 	TTTestLog("\n");
 	TTTestLog("Testing Score");
 	
-	    
     TTTestAssertion("TTScoreTest",
                     YES,
 					testAssertionCount,
