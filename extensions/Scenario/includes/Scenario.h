@@ -58,6 +58,7 @@ class Scenario : public TimeContainerPlugin {
     TTBoolean                   mLoading;                       ///< a flag true when the scenario is loading (mainly used to mute the edition solver)
     TTBoolean                   mAttributeLoaded;               ///< a flag true when the scenario is loading (mainly used to mute the edition solver)
     
+    TTSymbol                    mFileVersion;                   ///< a symbol used to store the score version format of the file being read
 	
     /** Get parameters names needed by this time process
      @param	value           the returned parameter names

@@ -39,7 +39,8 @@ mViewPosition(TTValue(0, 0)),
 mEditionSolver(NULL),
 #endif
 mLoading(NO),
-mAttributeLoaded(NO)
+mAttributeLoaded(NO),
+mFileVersion(kTTSymEmpty)
 {
     TIME_PLUGIN_INITIALIZE
     
@@ -508,6 +509,9 @@ TTErr Scenario::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
         
         writeTimeProcessAsXml(aXmlHandler, thisObject);
         
+        // Write Score version
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "version", BAD_CAST TTSCORE_VERSION_STRING);
+        
         // Write the view zoom
         v = mViewZoom;
         v.toString();
@@ -676,6 +680,7 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         
         mLoading = YES;
         mAttributeLoaded = NO;
+        mFileVersion = kTTSymEmpty;
         
         mCurrentTimeEvent = TTObject();
 
@@ -713,6 +718,32 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         mLoading = NO;
         mCompiled = NO;
         
+        // for backward compatibility between version 0.2 and 0.3
+        if (mFileVersion == TTSymbol("0.2") &&
+            TTSymbol(TTSCORE_VERSION_STRING) == TTSymbol("0.3"))
+        {
+            
+            for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next())
+            {
+                TTObject aTimeProcess = mTimeProcessList.current()[0];
+                TTObject endEvent = getTimeProcessEndEvent(aTimeProcess);
+                
+                TTUInt32 duration, durationMin, durationMax;
+                aTimeProcess.get("duration", duration);
+                aTimeProcess.get("durationMin", durationMin);
+                aTimeProcess.get("durationMax", durationMax);
+                
+                TTObject endCondition;
+                endEvent.get("condition", endCondition);
+                
+                if (!endCondition.valid() && durationMin == 0 && durationMax == 0)
+                {
+                    aTimeProcess.set("durationMin", duration);
+                    aTimeProcess.set("durationMax", duration);
+                }
+            }
+        }
+        
         return kTTErrNone;
     }
     
@@ -727,6 +758,18 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
                 if (v[0].type() == kTypeSymbol) {
                     
                     mName = v[0];
+                }
+            }
+        }
+        
+        // Get the score version
+        if (!aXmlHandler->getXmlAttribute("version", v, YES)) {
+            
+            if (v.size() == 1) {
+                
+                if (v[0].type() == kTypeSymbol) {
+                    
+                    mFileVersion = v[0];
                 }
             }
         }
