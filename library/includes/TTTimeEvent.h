@@ -172,6 +172,10 @@ private :
 
 typedef TTTimeEvent* TTTimeEventPtr;
 
+/** Comparison function
+ @param	v1			a first time event
+ @param	v2			a second time event
+ @return			return true if first time event is before second time event */
 TTBoolean TTSCORE_EXPORT TTTimeEventCompareDate(TTValue& v1, TTValue& v2);
 
 /** Define an unordered map to store and retreive a value relative to a TTTimeEventPtr */
