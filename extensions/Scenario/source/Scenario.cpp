@@ -245,11 +245,14 @@ TTErr Scenario::ProcessStart()
         aTimeEvent.set("status", kTTSym_eventWaiting);
     }
     
+    // sort events in 2 lists depending of their time process position relative to the time offset
     TTValue v;
     mScheduler.get(kTTSym_offset, v);
     TTUInt32 timeOffset = v[0];
-
-    // setup events status and start processes depending on the time offset
+    
+    TTList eventsToSetHappened;
+    TTList eventsToRequestHappen;
+    
     for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next())
     {
         TTObject aTimeProcess = mTimeProcessList.current()[0];
@@ -266,22 +269,26 @@ TTErr Scenario::ProcessStart()
         if (startEventDate < timeOffset &&
             endEventDate < timeOffset)
         {
-            startEvent.set("status", kTTSym_eventHappened);
-            ;// don't setup the end event status because it could be the start event of another process
+            eventsToSetHappened.appendUnique(startEvent);
         }
-        // if the date to start is in the middle of a time process
         else if (startEventDate < timeOffset &&
                  endEventDate > timeOffset)
         {
-            aTimeProcess.send("Start");
-            ;// don't setup the end event status because it will be notified that its process starts
+            eventsToRequestHappen.appendUnique(startEvent);
+            eventsToSetHappened.remove(startEvent);
         }
-        else if (startEventDate > timeOffset &&
-                 endEventDate > timeOffset)
-        {
-            ;// don't setup the start event status because it could be the end event of another process
-            ;// don't setup the end event status because it have been already reset to waiting status
-        }
+    }
+    
+    for (eventsToSetHappened.begin(); eventsToSetHappened.end(); eventsToSetHappened.next())
+    {
+        TTObject event = eventsToSetHappened.current()[0];
+        event.set("status", kTTSym_eventHappened);
+    }
+    
+    for (eventsToRequestHappen.begin(); eventsToRequestHappen.end(); eventsToRequestHappen.next())
+    {
+        TTObject event = eventsToRequestHappen.current()[0];
+        event.send(kTTSym_Happen);
     }
 
     return kTTErrNone;
