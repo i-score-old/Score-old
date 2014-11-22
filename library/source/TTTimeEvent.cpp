@@ -161,7 +161,7 @@ TTErr TTTimeEvent::setStatus(const TTValue& value)
 
 TTErr TTTimeEvent::Wait()
 {
-    // the wait request is sent so many times to reset a score that we filter repetitions here in this case
+    // filter repetitions here because the wait request is sent many times to reset a score
     if (mStatus == kTTSym_eventWaiting)
         return kTTErrNone;
     
