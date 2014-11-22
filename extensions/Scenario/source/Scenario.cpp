@@ -439,6 +439,9 @@ TTErr Scenario::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
         
         writeTimeProcessAsXml(aXmlHandler, thisObject);
         
+        // Write Score version
+        xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "version", BAD_CAST TTSCORE_VERSION_STRING);
+        
         // Write the view zoom
         v = mViewZoom;
         v.toString();
