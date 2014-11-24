@@ -630,9 +630,7 @@ TTErr TTTimeEvent::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
     TTString    s;
     
     // write the name
-    TTSymbol name;
-    mPatternStartEvent.get("name", name);
-    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST name.c_str());
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST mName.c_str());
     
     // write the date
     v = mDate;
