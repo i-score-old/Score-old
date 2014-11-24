@@ -65,6 +65,7 @@ mNamespace(NULL)
     // create pattern condition
     args = TTValue(thisObject);
     mPatternCondition = TTObject("TimeCondition", args);
+    mPatternCondition.set("name", TTSymbol("patternCondition"));
     mPatternCondition.set("container", thisObject);
 }
 
@@ -256,8 +257,104 @@ TTErr Loop::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 	TTXmlHandlerPtr aXmlHandler = (TTXmlHandlerPtr)o.instance();
     if (!aXmlHandler)
 		return kTTErrGeneric;
-	
+
+    // write the pattern start event
+    {
+        xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "event");
+        
+        // pass the xml handler to the event to fill his attribute
+        aXmlHandler->setAttributeValue(kTTSym_object, mPatternStartEvent);
+        aXmlHandler->sendMessage(kTTSym_Write);
+        
+        // close the event node
+        xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
+    }
+    
+    // write the pattern end event
+    {
+        xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "event");
+        
+        // pass the xml handler to the event to fill his attribute
+        aXmlHandler->setAttributeValue(kTTSym_object, mPatternEndEvent);
+        aXmlHandler->sendMessage(kTTSym_Write);
+        
+        // close the event node
+        xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
+    }
+    
+    // write all pattern time processes
+    for (mPatternProcesses.begin(); mPatternProcesses.end(); mPatternProcesses.next())
+    {
+        TTObject aTimeProcess = mPatternProcesses.current()[0];
+        
+        // start a node with the type of the process
+        xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST aTimeProcess.name().c_str());
+    
+        writeTimeProcessAsXml(aXmlHandler, aTimeProcess);
+        
+        // pass the xml handler to the process to fill his attribute
+        aXmlHandler->setAttributeValue(kTTSym_object, aTimeProcess);
+        aXmlHandler->sendMessage(kTTSym_Write);
+        
+        // close the process node
+        xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
+    }
+    
+    // write pattern condition
+    {
+        xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "condition");
+        
+        // pass the xml handler to the condition to fill his attribute
+        aXmlHandler->setAttributeValue(kTTSym_object, mPatternCondition);
+        aXmlHandler->sendMessage(kTTSym_Write);
+        
+        // close the condition node
+        xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
+    }
+
 	return kTTErrNone;
+}
+
+void Loop::writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTObject& aTimeProcess)
+{
+    TTValue     v;
+    TTString    s;
+    
+    // write the duration min
+    aTimeProcess.get("durationMin", v);
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "durationMin", BAD_CAST s.data());
+    
+    // write the duration max
+    aTimeProcess.get("durationMax", v);
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "durationMax", BAD_CAST s.data());
+    
+    // write the mute
+    aTimeProcess.get("mute", v);
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "mute", BAD_CAST s.data());
+    
+    // write the color
+    aTimeProcess.get("color", v);
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "color", BAD_CAST s.data());
+    
+    // write the vertical position
+    aTimeProcess.get("verticalPosition", v);
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "verticalPosition", BAD_CAST s.data());
+    
+    // write the vertical size
+    aTimeProcess.get("verticalSize", v);
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "verticalSize", BAD_CAST s.data());
 }
 
 TTErr Loop::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
@@ -266,7 +363,7 @@ TTErr Loop::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 	TTXmlHandlerPtr aXmlHandler = (TTXmlHandlerPtr)o.instance();
     if (!aXmlHandler)
 		return kTTErrGeneric;
-
+    
     return kTTErrNone;
 }
 

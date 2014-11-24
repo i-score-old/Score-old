@@ -106,6 +106,11 @@ private :
 	TTErr	WriteAsXml(const TTValue& inputValue, TTValue& outputValue);
 	TTErr	ReadFromXml(const TTValue& inputValue, TTValue& outputValue);
     
+    /** Write basic informations of a time process as Xml
+     @param aXmlHandler     a xml handler
+     @param aTimeProcess    a time process object
+     @return                nothing */
+    void    writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTObject& aTimeProcess);
     
     
     /** To be notified when an event date changed
