@@ -138,8 +138,15 @@ TTErr Loop::Compile()
 
 TTErr Loop::ProcessStart()
 {
+    // reset pattern events status
+    mPatternStartEvent.set("status", kTTSym_eventWaiting);
+    mPatternEndEvent.set("status", kTTSym_eventWaiting);
+    
     // start the loop pattern
     mPatternStartEvent.send(kTTSym_Happen);
+    
+    // enable the condition
+    mPatternCondition.set(kTTSym_active, TTBoolean(YES));
     
     return kTTErrNone;
 }
@@ -156,10 +163,9 @@ TTErr Loop::ProcessEnd()
         aTimeProcess.send(kTTSym_Stop);
     }
     
-    // reset pattern events status
-    mPatternStartEvent.set("status", kTTSym_eventWaiting);
-    mPatternEndEvent.set("status", kTTSym_eventWaiting);
-   
+    // disable the condition
+    mPatternCondition.set(kTTSym_active, TTBoolean(NO));
+    
     return kTTErrNone;
 }
 
@@ -169,14 +175,28 @@ TTErr Loop::Process(const TTValue& inputValue, TTValue& outputValue)
     
     TTFloat64 position = inputValue[0];
     TTFloat64 date = inputValue[1];
+    
+    // update pattern start event status
+    TTSymbol startStatus;
+    mPatternStartEvent.send("StatusUpdate");
+    mPatternStartEvent.get("status", startStatus);
+    
+    // update pattern end event status
+    TTSymbol endStatus;
+    mPatternEndEvent.send("StatusUpdate");
+    mPatternEndEvent.get("status", endStatus);
             
     // if the end event pattern happened
-    TTSymbol status;
-    mPatternEndEvent.get("status", status);
-    if (status == kTTSym_eventHappened)
+    if (endStatus == kTTSym_eventHappened)
     {
-        // restart the loop pattern
-        mPatternStartEvent.set("status", kTTSym_eventWaiting);
+        // reset the loop pattern
+        mPatternStartEvent.send("Wait");
+    }
+    
+    // if the start event pattern is waiting
+    if (startStatus == kTTSym_eventWaiting)
+    {
+        // start the loop pattern
         mPatternStartEvent.send(kTTSym_Happen);
     }
     
