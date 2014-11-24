@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		462B30921A1F2C1100F26504 /* test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = test.cpp; sourceTree = "<group>"; };
 		464FE81317F570C300529725 /* TTTimeCondition.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TTTimeCondition.h; path = includes/TTTimeCondition.h; sourceTree = SOURCE_ROOT; };
 		4659534217870BCC0094F82C /* TTScore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TTScore.h; path = includes/TTScore.h; sourceTree = SOURCE_ROOT; };
 		465A654217F081A200B70364 /* TTTimeCondition.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TTTimeCondition.cpp; path = source/TTTimeCondition.cpp; sourceTree = SOURCE_ROOT; };
@@ -43,6 +44,7 @@
 			children = (
 				46B5553F177B11FB00F50D89 /* JamomaScore.yml */,
 				46B9018B192331A700AC93ED /* Makefile */,
+				462B30921A1F2C1100F26504 /* test.cpp */,
 				46F5056F1666991700CFC3A2 /* includes */,
 				46F505731666991700CFC3A2 /* source */,
 				46BFD37C170DAE9900B99389 /* tests */,

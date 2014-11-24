@@ -205,7 +205,7 @@ TTErr TTTimeProcess::setRigid(const TTValue& value)
             {
                 TTObject thisObject(this);
                 TTValue none, v(thisObject, mDurationMin, mDurationMax);
-                return mContainer.send("TimeProcessLimit", v, none);
+                return mContainer.send("TimeProcessLimit", v, none); // théo : it is bad because we suppose it is a Scenario
             }
         }
     }
@@ -228,7 +228,7 @@ TTErr TTTimeProcess::setDurationMin(const TTValue& value)
                 TTValue none, v = TTObject(this);
                 v.append(mDurationMin);
                 v.append(mDurationMax);
-                return mContainer.send("TimeProcessLimit", v, none);
+                return mContainer.send("TimeProcessLimit", v, none); // théo : it is bad because we suppose it is a Scenario
             }
         }
     }
@@ -251,7 +251,7 @@ TTErr TTTimeProcess::setDurationMax(const TTValue& value)
                 TTValue none, v = TTObject(this);
                 v.append(mDurationMin);
                 v.append(mDurationMax);
-                return mContainer.send("TimeProcessLimit", v, none);
+                return mContainer.send("TimeProcessLimit", v, none); // théo : it is bad because we suppose it is a Scenario
             }
         }
     }
@@ -277,7 +277,7 @@ TTErr TTTimeProcess::setStartDate(const TTValue& value)
                 TTValue none, v = TTObject(this);
                 v.append(TTUInt32(value[0]));
                 v.append(mStartDate);
-                return mContainer.send("TimeProcessMove", v, none);
+                return mContainer.send("TimeProcessMove", v, none); // théo : it is bad because we suppose it is a Scenario
             }
             
             // or set the start event date directly
@@ -326,7 +326,7 @@ TTErr TTTimeProcess::setEndDate(const TTValue& value)
                 TTValue none, v = TTObject(this);
                 v.append(mStartDate);
                 v.append(TTUInt32(value[0]));
-                return mContainer.send("TimeProcessMove", v, none);
+                return mContainer.send("TimeProcessMove", v, none); // théo : it is bad because we suppose it is a Scenario
             }
             
             // or set the end event date directly
@@ -429,7 +429,7 @@ TTErr TTTimeProcess::Move(const TTValue& inputValue, TTValue& outputValue)
                     TTValue none, v = TTObject(this);
                     v.append(TTUInt32(inputValue[0]));
                     v.append(TTUInt32(inputValue[1]));
-                    return mContainer.send("TimeProcessMove", v, none);
+                    return mContainer.send("TimeProcessMove", v, none); // théo : it is bad because we suppose it is a Scenario
                 }
             }
         }
@@ -467,7 +467,11 @@ TTErr TTTimeProcess::Start()
     // filter repetitions
     if (!mRunning)
     {
-        mStartEvent.set("status", kTTSym_eventWaiting);
+        // if there is no container to reset to a waiting status
+        if (!mContainer.valid())
+            mStartEvent.set("status", kTTSym_eventWaiting);
+        
+        // make the start event happen to play the scheduler
         return mStartEvent.send(kTTSym_Happen);
     }
     
@@ -479,7 +483,8 @@ TTErr TTTimeProcess::End()
     // filter repetitions
     if (mRunning)
     {
-        return mEndEvent.send(kTTSym_Happen);
+        // stop the scheduler to make the end event happen
+        return Stop();
     }
     
     return kTTErrNone;
@@ -490,9 +495,6 @@ TTErr TTTimeProcess::Play()
     // filter repetitions
     if (!mRunning)
     {
-        // set the running state of the process
-        mRunning = YES;
-        
         // the duration min have not been reached yet
         mDurationMinReached = NO;
         
@@ -548,11 +550,6 @@ TTErr TTTimeProcess::Stop()
     // filter repetitions
     if (mRunning)
     {
-        // set the running state of the process
-        // note : this have to be done BEFORE the effective scheduler stop
-        // because, in time container case, this running state is checked in many place to propagate or not notifications
-        mRunning = NO;
-        
         // stop the scheduler
         return mScheduler.send(kTTSym_Stop);
     }
@@ -591,43 +588,6 @@ TTErr TTTimeProcess::Tick()
 #pragma mark Notifications
 #endif
 
-TTErr TTTimeProcess::EventDateChanged(const TTValue& inputValue, TTValue& outputValue)
-{
-    TT_ASSERT("TTTimeProcess::EventDateChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
-    
-    TTObject aTimeEvent = inputValue[0];
-    
-    if (aTimeEvent == mStartEvent)
-    {
-        // if needed, the compile method should be called again now
-        mCompiled = NO;
-        
-        return kTTErrNone;
-    }
-    else if (aTimeEvent == mEndEvent)
-    {
-        // if needed, the compile method should be called again now
-        mCompiled = NO;
-        
-        return kTTErrNone;
-    }
-    
-    TTLogError("TTTimeProcess::EventDateChanged %s : wrong event\n", mName.c_str());
-    return kTTErrGeneric;
-}
-
-TTErr TTTimeProcess::EventConditionChanged(const TTValue& inputValue, TTValue& outputValue)
-{
-    TT_ASSERT("TTTimeProcess::EventConditionChanged : inputValue is correct", inputValue.size() == 2 && inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeObject);
-    
-    TTObject    aTimeEvent = inputValue[0];
-    TTObject    aTimeCondition = inputValue[1];
-    
-    // no rule
-    
-    return kTTErrNone;
-}
-
 TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outputValue)
 {
     TT_ASSERT("TTTimeProcess::EventStatusChanged : inputValue is correct", inputValue.size() == 3 && inputValue[0].type() == kTypeObject);
@@ -635,15 +595,22 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
     TTObject    aTimeEvent = inputValue[0];
     TTSymbol    newStatus = inputValue[1];
     //TTSymbol    oldStatus = inputValue[2];
-    TTValue     v;
     
-    // event wainting case :
+    // inside a container ignore event notifications if the container is not running
+    TTBoolean running = YES;
+    if (mContainer.valid())
+        mContainer.get("running", running);
+    
+    if (!running)
+        return kTTErrGeneric;
+    
+    // event waiting case :
     if (newStatus == kTTSym_eventWaiting)
     {
         // the start event waiting status implies waiting status for the end event
         if (aTimeEvent == mStartEvent)
         {
-            mEndEvent.set("status", kTTSym_eventWaiting);
+            mEndEvent.send("Wait");
         }
         
         return kTTErrNone;
@@ -654,7 +621,7 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
         // the start event pending status implies waiting status for the end event
         if (aTimeEvent == mStartEvent)
         {
-            mEndEvent.set("status", kTTSym_eventWaiting);
+            mEndEvent.send("Wait");
         }
         
         return kTTErrNone;
@@ -720,7 +687,11 @@ TTErr TTTimeProcess::SchedulerRunningChanged(const TTValue& inputValue, TTValue&
                 return kTTErrGeneric;
             }
         }
-
+        
+        // set the running state of the process AFTER ProcessStart to avoid any event status propagation
+        // because, if this is a container, events propagate their status if their container is running
+        mRunning = YES;
+        
         // notify ProcessStarted observers
         sendStatusNotification(kTTSym_ProcessStarted);
         
@@ -728,6 +699,10 @@ TTErr TTTimeProcess::SchedulerRunningChanged(const TTValue& inputValue, TTValue&
     }
     else
     {
+        // set the running state of the process BEFORE ProcessEnd to avoid any event status propagation
+        // because, if this is a container, events propagate their status if their container is running
+        mRunning = NO;
+        
         if (!mMute)
         {
             // use the specific process end method of the time process
@@ -747,20 +722,8 @@ TTErr TTTimeProcess::SchedulerRunningChanged(const TTValue& inputValue, TTValue&
 
 TTErr TTTimeProcess::sendStatusNotification(TTSymbol& notification)
 {
-    // is the container running ? (the nofication is sent if there is no valid container)
-    TTBoolean running = YES;
-    if (mContainer.valid())
-        mContainer.get(kTTSym_running, running);
-    
-    if (running)
-    {
-        TTObject thisObject(this);
-        return sendNotification(notification, thisObject);
-    }
-#ifdef TTSCORE_DEBUG
-    TTLogMessage("TTTimeProcess::sendStatusNotification %s : don't send %s notification because the container is not running\n", mName.c_str(), notification.c_str());
-#endif
-    return kTTErrNone;
+    TTObject thisObject(this);
+    return sendNotification(notification, thisObject);
 }
 
 #if 0
@@ -851,17 +814,18 @@ void TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 position, TTFloat64 
             aTimeProcess->Process(TTValue(position, date), none);
         }
         
-        // the notifications below are useful for network observation purpose for exemple
-        // TODO : shouldn't we limit the sending of those observation to not overcrowed the network ?
-        
         // notify position observers
+        // this is useful for network observation (see in Modular)
         TTAttributePtr	positionAttribute;
         aTimeProcess->findAttribute("position", &positionAttribute);
         positionAttribute->sendNotification(kTTSym_notify, position);
         
         // notify date observers
+        // this is useful for network observation (see in Modular)
         TTAttributePtr	dateAttribute;
         aTimeProcess->findAttribute("date", &dateAttribute);
         dateAttribute->sendNotification(kTTSym_notify, date);
+        
+        // TODO : shouldn't we limit the sending of those observation to not overcrowed the network ?
     }
 }

@@ -65,7 +65,8 @@ protected :
 
     Expression                      mDispose;                       ///< the expression to dispose the condition
 
-    TTUInt8                         mPendingCounter;                ///< counting the number of unready events
+    TTInt32                         mNotPendingEventCounter;        ///< counting the number of events which are not pending
+                                                                    ///< use signed integer to detect error if it goes below (see in EventStatusChanged)
 
 private :
     
@@ -175,7 +176,7 @@ private :
      @return                kTTErrNone */
     TTErr           EventStatusChanged(const TTValue& inputValue, TTValue& outputValue);
     
-    /** Helper function to set the ready attribute and notify
+    /** Helper function to set the ready attribute, send a notification and notify attribute observers
      @param	newReady        a boolean
      @return                kTTErrNone */
     TTErr           setReady(TTBoolean newReady);
