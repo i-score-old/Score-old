@@ -35,6 +35,8 @@ class Loop : public TimeContainerPlugin
     TTAddressItemPtr            mNamespace;                     ///< the namespace workspace of the loop
     
 private :
+    
+    TTUInt32                    mIteration;                     ///< count how many iteration have been done
 
     TTList                      mPatternProcesses;              ///< all registered time processes to execute at each iteration
     

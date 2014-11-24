@@ -34,11 +34,15 @@ extern "C" TT_EXTENSION_EXPORT TTErr TTLoadJamomaExtension_Loop(void)
 #endif
 
 TIME_CONTAINER_PLUGIN_CONSTRUCTOR,
-mNamespace(NULL)
+mNamespace(NULL),
+mIteration(0)
 {
     TIME_PLUGIN_INITIALIZE
     
 	TT_ASSERT("Correct number of args to create Loop", arguments.size() == 0);
+    
+    addAttribute(Iteration, kTypeUInt32);
+    addAttributeProperty(Iteration, readOnly, YES);
     
     addMessageWithArguments(PatternAttach);
     addMessageWithArguments(PatternDetach);
@@ -139,6 +143,8 @@ TTErr Loop::Compile()
 
 TTErr Loop::ProcessStart()
 {
+    mIteration = 0;
+    
     // reset pattern events status
     mPatternStartEvent.set("status", kTTSym_eventWaiting);
     mPatternEndEvent.set("status", kTTSym_eventWaiting);
@@ -174,8 +180,8 @@ TTErr Loop::Process(const TTValue& inputValue, TTValue& outputValue)
 {
     TT_ASSERT("Loop::Process : inputValue is correct", inputValue.size() == 2 && inputValue[0].type() == kTypeFloat64 && inputValue[1].type() == kTypeFloat64);
     
-    TTFloat64 position = inputValue[0];
-    TTFloat64 date = inputValue[1];
+    //TTFloat64 position = inputValue[0];
+    //TTFloat64 date = inputValue[1];
     
     // update pattern start event status
     TTSymbol startStatus;
@@ -197,6 +203,9 @@ TTErr Loop::Process(const TTValue& inputValue, TTValue& outputValue)
     // if the start event pattern is waiting
     if (startStatus == kTTSym_eventWaiting)
     {
+        // next iteration coming
+        mIteration++;
+        
         // start the loop pattern
         mPatternStartEvent.send(kTTSym_Happen);
     }
@@ -208,7 +217,7 @@ TTErr Loop::ProcessPaused(const TTValue& inputValue, TTValue& outputValue)
 {
     TT_ASSERT("Loop::ProcessPaused : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeBoolean);
     
-    TTBoolean paused = inputValue[0];
+    //TTBoolean paused = inputValue[0];
     
     return kTTErrNone;
 }
