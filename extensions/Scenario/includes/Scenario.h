@@ -32,15 +32,15 @@
  
  @see TimePluginLib, TTTimeProcess, TTTimeContainer
  */
-class Scenario : public TimeContainerPlugin {
-    
+class Scenario : public TimeContainerPlugin
+{
 	TTCLASS_SETUP(Scenario)
 	
     TTAddressItemPtr            mNamespace;                     ///< the namespace workspace of the scenario
     
-    TTList                      mTimeProcessList;               ///< all registered time processes and their observers
-    TTList                      mTimeEventList;                 ///< all registered time events and their observers
-    TTList                      mTimeConditionList;             ///< all registered time conditions and their observers
+    TTList                      mTimeProcesses;                 ///< all registered time processes and their observers
+    TTList                      mTimeEvents;                    ///< all registered time events and their observers
+    TTList                      mTimeConditions;                ///< all registered time conditions and their observers
     
     TTValue                     mViewZoom;                      ///< the zoom factor (x and y) into the scenario view (useful for gui)
     TTValue                     mViewPosition;                  ///< the position (x and y) of the scenario view (useful for gui)
@@ -66,22 +66,11 @@ class Scenario : public TimeContainerPlugin {
 	TTErr   getParameterNames(TTValue& value);
     
     
-    
-    /** Get all time processes objects
-     @param value           all time processes objects
-     @return                kTTErrGeneric if no process */
-    TTErr   getTimeProcesses(TTValue& value);
-    
-    /** Get all time events objects
-     @param value           all time events objects
-     @return                kTTErrGeneric if no event */
-    TTErr   getTimeEvents(TTValue& value);
-    
-    /** Get all time conditions objects
-     @param value           all time conditions objects
-     @return                kTTErrGeneric if no condition */
-    TTErr   getTimeConditions(TTValue& value);
-    
+    /** To be notified when the scheduler speed changes
+     @param inputValue      the new speed value
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr   SchedulerSpeedChanged(const TTValue& inputValue, TTValue& outputValue);
     
     
     /** Specific compilation method used to pre-processed data in order to accelarate Process method
@@ -138,7 +127,20 @@ class Scenario : public TimeContainerPlugin {
      @return                kTTErrNone */
     TTErr   EventConditionChanged(const TTValue& inputValue, TTValue& outputValue);
     
+    /** Get all time processes objects
+     @param value           all time processes objects
+     @return                kTTErrGeneric if no process */
+    TTErr   getTimeProcesses(TTValue& value);
     
+    /** Get all time events objects
+     @param value           all time events objects
+     @return                kTTErrGeneric if no event */
+    TTErr   getTimeEvents(TTValue& value);
+    
+    /** Get all time conditions objects
+     @param value           all time conditions objects
+     @return                kTTErrGeneric if no condition */
+    TTErr   getTimeConditions(TTValue& value);
     
     /** Set the view zoom factor
      @param	value           zoomX and zoomY

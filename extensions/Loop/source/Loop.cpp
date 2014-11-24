@@ -44,12 +44,18 @@ mIteration(0)
     addAttribute(Iteration, kTypeUInt32);
     addAttributeProperty(Iteration, readOnly, YES);
     
+    registerAttribute(TTSymbol("patternProcesses"), kTypeLocalValue, NULL, (TTGetterMethod)& Loop::getPatternProcesses, NULL);
+    
     addMessageWithArguments(PatternAttach);
     addMessageWithArguments(PatternDetach);
     
     // needed to be notified by events
     addMessageWithArguments(EventDateChanged);
     addMessageProperty(EventDateChanged, hidden, YES);
+    
+    // needed to be notified by scheduler speed change
+    addMessageWithArguments(SchedulerSpeedChanged);
+    addMessageProperty(SchedulerSpeedChanged, hidden, YES);
     
     TTObject    thisObject(this);
     TTValue     args;
@@ -99,7 +105,7 @@ TTErr Loop::getParameterNames(TTValue& value)
 #pragma mark TTTimeContainer Methods
 #endif
 
-TTErr Loop::getTimeProcesses(TTValue& value)
+TTErr Loop::getPatternProcesses(TTValue& value)
 {
     value.clear();
     
@@ -108,23 +114,6 @@ TTErr Loop::getTimeProcesses(TTValue& value)
     
     for (mPatternProcesses.begin(); mPatternProcesses.end(); mPatternProcesses.next())
         value.append(mPatternProcesses.current()[0]);
-    
-    return kTTErrNone;
-}
-
-TTErr Loop::getTimeEvents(TTValue& value)
-{
-    value.clear();
-    value.append(mPatternStartEvent);
-    value.append(mPatternEndEvent);
-    
-    return kTTErrNone;
-}
-
-TTErr Loop::getTimeConditions(TTValue& value)
-{
-    value.clear();
-    value.append(mPatternCondition);
     
     return kTTErrNone;
 }
@@ -413,6 +402,26 @@ TTErr Loop::EventConditionChanged(const TTValue& inputValue, TTValue& outputValu
     TTObject    aTimeCondition = inputValue[1];
     
     // no rule
+    
+    return kTTErrNone;
+}
+
+TTErr Loop::SchedulerSpeedChanged(const TTValue& inputValue, TTValue& outputValue)
+{
+    TT_ASSERT("TTTimeContainer::SchedulerSpeedChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeFloat64);
+    
+    // for each time process of the scenario
+    for (mPatternProcesses.begin(); mPatternProcesses.end(); mPatternProcesses.next())
+    {
+        TTObject aTimeProcess = mPatternProcesses.current()[0];
+        
+        // get the actual time process scheduler
+        TTObject aScheduler;
+        aTimeProcess.get("scheduler", aScheduler);
+        
+        // set the time process scheduler speed value with the container scheduler speed value
+        aScheduler.set(kTTSym_speed, inputValue);
+    }
     
     return kTTErrNone;
 }

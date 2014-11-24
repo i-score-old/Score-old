@@ -27,8 +27,8 @@
  
  @see TTTimeEvent
  */
-class TTSCORE_EXPORT TTTimeProcess : public TTObjectBase {
-    
+class TTSCORE_EXPORT TTTimeProcess : public TTObjectBase
+{    
     TTCLASS_SETUP(TTTimeProcess)
     
     friend class TTTimeContainer;

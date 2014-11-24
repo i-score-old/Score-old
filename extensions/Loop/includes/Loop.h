@@ -51,20 +51,22 @@ private :
      @return                kTTErrNone */
 	TTErr   getParameterNames(TTValue& value);
     
+    
+    
+    /** To be notified when the scheduler speed changed
+     @param inputValue      the new speed value
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr   SchedulerSpeedChanged(const TTValue& inputValue, TTValue& outputValue);
+    
+    
+    
     /** Get all time processes objects
      @param value           all time processes objects
      @return                kTTErrGeneric if no process */
-    TTErr   getTimeProcesses(TTValue& value);
+    TTErr   getPatternProcesses(TTValue& value);
     
-    /** Get all time events objects
-     @param value           all time events objects
-     @return                kTTErrGeneric if no event */
-    TTErr   getTimeEvents(TTValue& value);
     
-    /** Get all time conditions objects
-     @param value           all time conditions objects
-     @return                kTTErrGeneric if no condition */
-    TTErr   getTimeConditions(TTValue& value);
 	
     /** Specific compilation method used to pre-processed data in order to accelarate Process method
      @details the compiled attribute allows to know if the process needs to be compiled or not

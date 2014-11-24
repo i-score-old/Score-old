@@ -26,32 +26,17 @@
  
  @see TTTimeProcess, TTTimeEvent
  */
-class TTSCORE_EXPORT TTTimeContainer : public TTTimeProcess {
-    
+class TTSCORE_EXPORT TTTimeContainer : public TTTimeProcess
+{    
     TTCLASS_SETUP(TTTimeContainer)
       
 private :
-    
-    /** Get all time processes objects
-     @param value           all time processes objects
-     @return                kTTErrGeneric if no process */
-    virtual TTErr           getTimeProcesses(TTValue& value) {value.clear(); return kTTErrGeneric;};
-    
-    /** Get all time events objects
-     @param value           all time events objects
-     @return                kTTErrGeneric if no event */
-    virtual TTErr           getTimeEvents(TTValue& value) {value.clear(); return kTTErrGeneric;};
-    
-    /** Get all time conditions objects
-     @param value           all time conditions objects
-     @return                kTTErrGeneric if no condition */
-    virtual TTErr           getTimeConditions(TTValue& value) {value.clear(); return kTTErrGeneric;};
     
     /** To be notified when the scheduler speed changed
      @param inputValue      the new speed value
      @param outputValue     nothing
      @return                kTTErrNone */
-    TTErr                   SchedulerSpeedChanged(const TTValue& inputValue, TTValue& outputValue);
+    TTErr                   SchedulerSpeedChanged(const TTValue& inputValue, TTValue& outputValue) {outputValue = inputValue; return kTTErrGeneric;};
     
 protected :
     

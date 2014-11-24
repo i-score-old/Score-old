@@ -41,13 +41,6 @@ TTTimeProcess(arguments)
 {
     TT_ASSERT("Correct number of args to create TTTimeContainer", arguments.size() == 0);
     
-    registerAttribute(TTSymbol("timeProcesses"), kTypeLocalValue, NULL, (TTGetterMethod)& TTTimeContainer::getTimeProcesses, NULL);
-    registerAttribute(TTSymbol("timeEvents"), kTypeLocalValue, NULL, (TTGetterMethod)& TTTimeContainer::getTimeEvents, NULL);
-    registerAttribute(TTSymbol("timeConditions"), kTypeLocalValue, NULL, (TTGetterMethod)& TTTimeContainer::getTimeConditions, NULL);
-    
-    addMessageWithArguments(SchedulerSpeedChanged);
-    addMessageProperty(SchedulerSpeedChanged, hidden, YES);
-    
     TTObject thisObject(this);
     mScheduler.registerObserverForNotifications(thisObject);
 }
@@ -118,29 +111,7 @@ TTBoolean TTTimeContainer::getTimeProcessRunning(TTObject& aTimeProcess)
 #pragma mark Notifications
 #endif
 
-TTErr TTTimeContainer::SchedulerSpeedChanged(const TTValue& inputValue, TTValue& outputValue)
-{
-    TT_ASSERT("TTTimeContainer::SchedulerSpeedChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeFloat64);
-    
-    TTValue processes;
-    
-    getTimeProcesses(processes);
-    
-    // for each time process of the container
-    for (TTElementIter it = processes.begin(); it != processes.end(); it++) {
-        
-        TTObject aTimeProcess = TTElement(*it);
-        
-        // get the actual time process scheduler
-        TTObject aScheduler;
-        aTimeProcess.get("scheduler", aScheduler);
-        
-        // set the time process scheduler speed value with the container scheduler speed value
-        aScheduler.set(kTTSym_speed, inputValue);
-    }
-    
-    return kTTErrNone;
-}
+
 
 #if 0
 #pragma mark -
