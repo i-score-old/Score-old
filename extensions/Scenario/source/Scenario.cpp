@@ -528,9 +528,9 @@ TTErr Scenario::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
         {
             xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "startEvent");
             
-            // Write the name
-            xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST kTTSym_start.c_str());
-            
+            // Force the name
+            getStartEvent().set("name", kTTSym_start);
+ 
             // Pass the xml handler to the event to fill his attribute
             aXmlHandler->setAttributeValue(kTTSym_object, getStartEvent());
             aXmlHandler->sendMessage(kTTSym_Write);
@@ -543,8 +543,8 @@ TTErr Scenario::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
         {
             xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "endEvent");
             
-            // Write the name
-            xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST kTTSym_end.c_str());
+            // Force the name
+            getEndEvent().set("name", kTTSym_end);
             
             // Pass the xml handler to the event to fill his attribute
             aXmlHandler->setAttributeValue(kTTSym_object, getEndEvent());
@@ -1355,11 +1355,6 @@ void Scenario::writeTimeEventAsXml(TTXmlHandlerPtr aXmlHandler, TTObject& aTimeE
 {
     // Start an event node
     xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "event");
-    
-    // Write the name
-    TTSymbol name;
-    aTimeEvent.get("name", name);
-    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST name.c_str());
     
     // Pass the xml handler to the event to fill his attribute
     aXmlHandler->setAttributeValue(kTTSym_object, aTimeEvent);

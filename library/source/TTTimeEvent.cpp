@@ -628,20 +628,25 @@ TTErr TTTimeEvent::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
     
     TTValue     v;
     TTString    s;
-	
-    // Write the date
+    
+    // write the name
+    TTSymbol name;
+    mPatternStartEvent.get("name", name);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST name.c_str());
+    
+    // write the date
     v = mDate;
     v.toString();
     s = TTString(v[0]);
     xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "date", BAD_CAST s.data());
     
-    // Write the mute
+    // write the mute
     v = mMute;
     v.toString();
     s = TTString(v[0]);
     xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "mute", BAD_CAST s.data());
     
-    // Write the name of the condition object
+    // write the name of the condition object
     if (mCondition.valid()) {
         
         mCondition.get(kTTSym_name, v);
@@ -650,7 +655,7 @@ TTErr TTTimeEvent::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
         xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "condition", BAD_CAST s.data());
     }
     
-    // Write the state
+    // write the state
     aXmlHandler->setAttributeValue(kTTSym_object, mState);
     aXmlHandler->sendMessage(kTTSym_Write);
     
