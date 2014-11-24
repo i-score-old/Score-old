@@ -22,22 +22,10 @@ ${CMAKE_CURRENT_SOURCE_DIR}/source/Gecode/searchEngine.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/source/Gecode/solver_wrap.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/source/Gecode/solver.cpp
 
-${CMAKE_CURRENT_SOURCE_DIR}/source/PetriNet/Arc.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/source/PetriNet/ExtendedInt.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/source/PetriNet/PetriNet.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/source/PetriNet/PetriNetItem.cpp                    # is it needed ?
-${CMAKE_CURRENT_SOURCE_DIR}/source/PetriNet/PetriNetNode.cpp                    # is it needed ?
-${CMAKE_CURRENT_SOURCE_DIR}/source/PetriNet/Place.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/source/PetriNet/PriorityTransitionAction.cpp        # is it needed ?
-${CMAKE_CURRENT_SOURCE_DIR}/source/PetriNet/ThreadSafeList.cpp                  # is it needed ?
-${CMAKE_CURRENT_SOURCE_DIR}/source/PetriNet/Token.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/source/PetriNet/Transition.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/source/PetriNet/TransitionAction.cpp                # is it needed ?
-${CMAKE_CURRENT_SOURCE_DIR}/source/PetriNet/TransitionBitArray.cpp              # is it needed ?
 
 ${CMAKE_CURRENT_SOURCE_DIR}/source/Scenario.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/source/ScenarioSolver.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/source/ScenarioGraph.cpp
+
 )
 file(GLOB_RECURSE PROJECT_HDRS
     ${CMAKE_CURRENT_SOURCE_DIR}/includes/*.h
