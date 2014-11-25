@@ -34,11 +34,17 @@ extern "C" TT_EXTENSION_EXPORT TTErr TTLoadJamomaExtension_Loop(void)
 #endif
 
 TIME_CONTAINER_PLUGIN_CONSTRUCTOR,
-mNamespace(NULL)
+mNamespace(NULL),
+mIteration(0)
 {
     TIME_PLUGIN_INITIALIZE
     
 	TT_ASSERT("Correct number of args to create Loop", arguments.size() == 0);
+    
+    addAttribute(Iteration, kTypeUInt32);
+    addAttributeProperty(Iteration, readOnly, YES);
+    
+    registerAttribute(TTSymbol("patternProcesses"), kTypeLocalValue, NULL, (TTGetterMethod)& Loop::getPatternProcesses, NULL);
     
     addMessageWithArguments(PatternAttach);
     addMessageWithArguments(PatternDetach);
@@ -46,6 +52,10 @@ mNamespace(NULL)
     // needed to be notified by events
     addMessageWithArguments(EventDateChanged);
     addMessageProperty(EventDateChanged, hidden, YES);
+    
+    // needed to be notified by scheduler speed change
+    addMessageWithArguments(SchedulerSpeedChanged);
+    addMessageProperty(SchedulerSpeedChanged, hidden, YES);
     
     TTObject    thisObject(this);
     TTValue     args;
@@ -65,6 +75,7 @@ mNamespace(NULL)
     // create pattern condition
     args = TTValue(thisObject);
     mPatternCondition = TTObject("TimeCondition", args);
+    mPatternCondition.set("name", TTSymbol("patternCondition"));
     mPatternCondition.set("container", thisObject);
 }
 
@@ -94,7 +105,7 @@ TTErr Loop::getParameterNames(TTValue& value)
 #pragma mark TTTimeContainer Methods
 #endif
 
-TTErr Loop::getTimeProcesses(TTValue& value)
+TTErr Loop::getPatternProcesses(TTValue& value)
 {
     value.clear();
     
@@ -103,23 +114,6 @@ TTErr Loop::getTimeProcesses(TTValue& value)
     
     for (mPatternProcesses.begin(); mPatternProcesses.end(); mPatternProcesses.next())
         value.append(mPatternProcesses.current()[0]);
-    
-    return kTTErrNone;
-}
-
-TTErr Loop::getTimeEvents(TTValue& value)
-{
-    value.clear();
-    value.append(mPatternStartEvent);
-    value.append(mPatternEndEvent);
-    
-    return kTTErrNone;
-}
-
-TTErr Loop::getTimeConditions(TTValue& value)
-{
-    value.clear();
-    value.append(mPatternCondition);
     
     return kTTErrNone;
 }
@@ -138,6 +132,8 @@ TTErr Loop::Compile()
 
 TTErr Loop::ProcessStart()
 {
+    mIteration = 0;
+    
     // reset pattern events status
     mPatternStartEvent.set("status", kTTSym_eventWaiting);
     mPatternEndEvent.set("status", kTTSym_eventWaiting);
@@ -173,8 +169,8 @@ TTErr Loop::Process(const TTValue& inputValue, TTValue& outputValue)
 {
     TT_ASSERT("Loop::Process : inputValue is correct", inputValue.size() == 2 && inputValue[0].type() == kTypeFloat64 && inputValue[1].type() == kTypeFloat64);
     
-    TTFloat64 position = inputValue[0];
-    TTFloat64 date = inputValue[1];
+    //TTFloat64 position = inputValue[0];
+    //TTFloat64 date = inputValue[1];
     
     // update pattern start event status
     TTSymbol startStatus;
@@ -196,6 +192,9 @@ TTErr Loop::Process(const TTValue& inputValue, TTValue& outputValue)
     // if the start event pattern is waiting
     if (startStatus == kTTSym_eventWaiting)
     {
+        // next iteration coming
+        mIteration++;
+        
         // start the loop pattern
         mPatternStartEvent.send(kTTSym_Happen);
     }
@@ -207,7 +206,7 @@ TTErr Loop::ProcessPaused(const TTValue& inputValue, TTValue& outputValue)
 {
     TT_ASSERT("Loop::ProcessPaused : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeBoolean);
     
-    TTBoolean paused = inputValue[0];
+    //TTBoolean paused = inputValue[0];
     
     return kTTErrNone;
 }
@@ -256,8 +255,104 @@ TTErr Loop::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
 	TTXmlHandlerPtr aXmlHandler = (TTXmlHandlerPtr)o.instance();
     if (!aXmlHandler)
 		return kTTErrGeneric;
-	
+
+    // write the pattern start event
+    {
+        xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "event");
+        
+        // pass the xml handler to the event to fill his attribute
+        aXmlHandler->setAttributeValue(kTTSym_object, mPatternStartEvent);
+        aXmlHandler->sendMessage(kTTSym_Write);
+        
+        // close the event node
+        xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
+    }
+    
+    // write the pattern end event
+    {
+        xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "event");
+        
+        // pass the xml handler to the event to fill his attribute
+        aXmlHandler->setAttributeValue(kTTSym_object, mPatternEndEvent);
+        aXmlHandler->sendMessage(kTTSym_Write);
+        
+        // close the event node
+        xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
+    }
+    
+    // write all pattern time processes
+    for (mPatternProcesses.begin(); mPatternProcesses.end(); mPatternProcesses.next())
+    {
+        TTObject aTimeProcess = mPatternProcesses.current()[0];
+        
+        // start a node with the type of the process
+        xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST aTimeProcess.name().c_str());
+    
+        writeTimeProcessAsXml(aXmlHandler, aTimeProcess);
+        
+        // pass the xml handler to the process to fill his attribute
+        aXmlHandler->setAttributeValue(kTTSym_object, aTimeProcess);
+        aXmlHandler->sendMessage(kTTSym_Write);
+        
+        // close the process node
+        xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
+    }
+    
+    // write pattern condition
+    {
+        xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "condition");
+        
+        // pass the xml handler to the condition to fill his attribute
+        aXmlHandler->setAttributeValue(kTTSym_object, mPatternCondition);
+        aXmlHandler->sendMessage(kTTSym_Write);
+        
+        // close the condition node
+        xmlTextWriterEndElement((xmlTextWriterPtr)aXmlHandler->mWriter);
+    }
+
 	return kTTErrNone;
+}
+
+void Loop::writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTObject& aTimeProcess)
+{
+    TTValue     v;
+    TTString    s;
+    
+    // write the duration min
+    aTimeProcess.get("durationMin", v);
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "durationMin", BAD_CAST s.data());
+    
+    // write the duration max
+    aTimeProcess.get("durationMax", v);
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "durationMax", BAD_CAST s.data());
+    
+    // write the mute
+    aTimeProcess.get("mute", v);
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "mute", BAD_CAST s.data());
+    
+    // write the color
+    aTimeProcess.get("color", v);
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "color", BAD_CAST s.data());
+    
+    // write the vertical position
+    aTimeProcess.get("verticalPosition", v);
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "verticalPosition", BAD_CAST s.data());
+    
+    // write the vertical size
+    aTimeProcess.get("verticalSize", v);
+    v.toString();
+    s = TTString(v[0]);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "verticalSize", BAD_CAST s.data());
 }
 
 TTErr Loop::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
@@ -266,7 +361,7 @@ TTErr Loop::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 	TTXmlHandlerPtr aXmlHandler = (TTXmlHandlerPtr)o.instance();
     if (!aXmlHandler)
 		return kTTErrGeneric;
-
+    
     return kTTErrNone;
 }
 
@@ -307,6 +402,26 @@ TTErr Loop::EventConditionChanged(const TTValue& inputValue, TTValue& outputValu
     TTObject    aTimeCondition = inputValue[1];
     
     // no rule
+    
+    return kTTErrNone;
+}
+
+TTErr Loop::SchedulerSpeedChanged(const TTValue& inputValue, TTValue& outputValue)
+{
+    TT_ASSERT("TTTimeContainer::SchedulerSpeedChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeFloat64);
+    
+    // for each time process of the scenario
+    for (mPatternProcesses.begin(); mPatternProcesses.end(); mPatternProcesses.next())
+    {
+        TTObject aTimeProcess = mPatternProcesses.current()[0];
+        
+        // get the actual time process scheduler
+        TTObject aScheduler;
+        aTimeProcess.get("scheduler", aScheduler);
+        
+        // set the time process scheduler speed value with the container scheduler speed value
+        aScheduler.set(kTTSym_speed, inputValue);
+    }
     
     return kTTErrNone;
 }

@@ -35,6 +35,8 @@ class Loop : public TimeContainerPlugin
     TTAddressItemPtr            mNamespace;                     ///< the namespace workspace of the loop
     
 private :
+    
+    TTUInt32                    mIteration;                     ///< count how many iteration have been done
 
     TTList                      mPatternProcesses;              ///< all registered time processes to execute at each iteration
     
@@ -49,20 +51,22 @@ private :
      @return                kTTErrNone */
 	TTErr   getParameterNames(TTValue& value);
     
+    
+    
+    /** To be notified when the scheduler speed changed
+     @param inputValue      the new speed value
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr   SchedulerSpeedChanged(const TTValue& inputValue, TTValue& outputValue);
+    
+    
+    
     /** Get all time processes objects
      @param value           all time processes objects
      @return                kTTErrGeneric if no process */
-    TTErr   getTimeProcesses(TTValue& value);
+    TTErr   getPatternProcesses(TTValue& value);
     
-    /** Get all time events objects
-     @param value           all time events objects
-     @return                kTTErrGeneric if no event */
-    TTErr   getTimeEvents(TTValue& value);
     
-    /** Get all time conditions objects
-     @param value           all time conditions objects
-     @return                kTTErrGeneric if no condition */
-    TTErr   getTimeConditions(TTValue& value);
 	
     /** Specific compilation method used to pre-processed data in order to accelarate Process method
      @details the compiled attribute allows to know if the process needs to be compiled or not
@@ -106,6 +110,11 @@ private :
 	TTErr	WriteAsXml(const TTValue& inputValue, TTValue& outputValue);
 	TTErr	ReadFromXml(const TTValue& inputValue, TTValue& outputValue);
     
+    /** Write basic informations of a time process as Xml
+     @param aXmlHandler     a xml handler
+     @param aTimeProcess    a time process object
+     @return                nothing */
+    void    writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTObject& aTimeProcess);
     
     
     /** To be notified when an event date changed

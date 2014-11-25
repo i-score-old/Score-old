@@ -44,8 +44,8 @@ typedef TTCaseMap::const_iterator   TTCaseMapIterator;
  
  @see TTTimeEvent
  */
-class TTSCORE_EXPORT TTTimeCondition : public TTObjectBase {
-    
+class TTSCORE_EXPORT TTTimeCondition : public TTObjectBase
+{
     TTCLASS_SETUP(TTTimeCondition)
     
     friend class TTTimeEvent;
@@ -189,7 +189,6 @@ private :
     void            applyDefaults();
 
     friend TTErr TTSCORE_EXPORT TTTimeConditionReceiverReturnValueCallback(const TTValue& baton, const TTValue& data);
-    
 };
 
 typedef TTTimeCondition* TTTimeConditionPtr;

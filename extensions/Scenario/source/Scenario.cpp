@@ -46,10 +46,17 @@ mFileVersion(kTTSymEmpty)
     
 	TT_ASSERT("Correct number of args to create Scenario", arguments.size() == 0 || arguments.size() == 2);
     
+    registerAttribute(TTSymbol("timeProcesses"), kTypeLocalValue, NULL, (TTGetterMethod)& Scenario::getTimeProcesses, NULL);
+    registerAttribute(TTSymbol("timeEvents"), kTypeLocalValue, NULL, (TTGetterMethod)& Scenario::getTimeEvents, NULL);
+    registerAttribute(TTSymbol("timeConditions"), kTypeLocalValue, NULL, (TTGetterMethod)& Scenario::getTimeConditions, NULL);
+    
     addAttributeWithSetter(ViewZoom, kTypeLocalValue);
     addAttributeWithSetter(ViewPosition, kTypeLocalValue);
     
-    
+    // needed to be notified by scheduler speed change
+    addMessageWithArguments(SchedulerSpeedChanged);
+    addMessageProperty(SchedulerSpeedChanged, hidden, YES);
+
     addMessageWithArguments(Next);
     
     
@@ -154,11 +161,11 @@ TTErr Scenario::getTimeProcesses(TTValue& value)
 {
     value.clear();
     
-    if (mTimeProcessList.isEmpty())
+    if (mTimeProcesses.isEmpty())
         return kTTErrGeneric;
     
-    for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next())
-        value.append(mTimeProcessList.current()[0]);
+    for (mTimeProcesses.begin(); mTimeProcesses.end(); mTimeProcesses.next())
+        value.append(mTimeProcesses.current()[0]);
     
     return kTTErrNone;
 }
@@ -167,15 +174,15 @@ TTErr Scenario::getTimeEvents(TTValue& value)
 {
     value.clear();
     
-    if (mTimeEventList.isEmpty())
+    if (mTimeEvents.isEmpty())
         return kTTErrGeneric;
     
     // if there is no upper container : append the start event too
     if (!mContainer.valid())
         value.append(this->getStartEvent());
     
-    for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next())
-        value.append(mTimeEventList.current()[0]);
+    for (mTimeEvents.begin(); mTimeEvents.end(); mTimeEvents.next())
+        value.append(mTimeEvents.current()[0]);
     
     // if there is no upper container : append the end event too
     if (!mContainer.valid())
@@ -188,11 +195,11 @@ TTErr Scenario::getTimeConditions(TTValue& value)
 {
     value.clear();
     
-    if (mTimeConditionList.isEmpty())
+    if (mTimeConditions.isEmpty())
         return kTTErrGeneric;
     
-    for (mTimeConditionList.begin(); mTimeConditionList.end(); mTimeConditionList.next())
-        value.append(mTimeConditionList.current()[0]);
+    for (mTimeConditions.begin(); mTimeConditions.end(); mTimeConditions.next())
+        value.append(mTimeConditions.current()[0]);
     
     return kTTErrNone;
 }
@@ -211,7 +218,7 @@ TTErr Scenario::Compile()
     TTObject    aTimeProcess;
     
     // don't compile empty scenario
-    if (mTimeEventList.isEmpty() && mTimeProcessList.isEmpty() && mTimeConditionList.isEmpty())
+    if (mTimeEvents.isEmpty() && mTimeProcesses.isEmpty() && mTimeConditions.isEmpty())
         return kTTErrGeneric;
     
     // get scheduler time offset
@@ -219,9 +226,9 @@ TTErr Scenario::Compile()
     timeOffset = TTFloat64(v[0]);
     
     // compile all time processes if they need to be compiled and propagate the externalTick attribute
-    for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next())
+    for (mTimeProcesses.begin(); mTimeProcesses.end(); mTimeProcesses.next())
     {
-        aTimeProcess = mTimeProcessList.current()[0];
+        aTimeProcess = mTimeProcesses.current()[0];
         
         aTimeProcess.get(kTTSym_compiled, v);
         compiled = v[0];
@@ -240,9 +247,9 @@ TTErr Scenario::Compile()
 TTErr Scenario::ProcessStart()
 {
     // reset all events to waiting status
-    for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next())
+    for (mTimeEvents.begin(); mTimeEvents.end(); mTimeEvents.next())
     {
-        TTObject aTimeEvent = mTimeEventList.current()[0];
+        TTObject aTimeEvent = mTimeEvents.current()[0];
         aTimeEvent.set("status", kTTSym_eventWaiting);
     }
     
@@ -254,9 +261,9 @@ TTErr Scenario::ProcessStart()
     TTList eventsToSetHappened;
     TTList eventsToRequestHappen;
     
-    for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next())
+    for (mTimeProcesses.begin(); mTimeProcesses.end(); mTimeProcesses.next())
     {
-        TTObject aTimeProcess = mTimeProcessList.current()[0];
+        TTObject aTimeProcess = mTimeProcesses.current()[0];
         
         TTObject startEvent = getTimeProcessStartEvent(aTimeProcess);
         TTObject endEvent = getTimeProcessEndEvent(aTimeProcess);
@@ -298,16 +305,16 @@ TTErr Scenario::ProcessStart()
 TTErr Scenario::ProcessEnd()
 {
     // stop all the time processes
-    for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next())
+    for (mTimeProcesses.begin(); mTimeProcesses.end(); mTimeProcesses.next())
     {
-        TTObject aTimeProcess = mTimeProcessList.current()[0];
+        TTObject aTimeProcess = mTimeProcesses.current()[0];
         aTimeProcess.send("Stop");
     }
     
     // disable conditions
-    for (mTimeConditionList.begin(); mTimeConditionList.end(); mTimeConditionList.next())
+    for (mTimeConditions.begin(); mTimeConditions.end(); mTimeConditions.next())
     {
-        TTObject aTimeCondition = mTimeConditionList.current()[0];
+        TTObject aTimeCondition = mTimeConditions.current()[0];
         aTimeCondition.set(kTTSym_active, TTBoolean(NO));
     }
     
@@ -325,9 +332,9 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
     TTFloat64 date = inputValue[1];
     
     // enable or disable conditions
-    for (mTimeConditionList.begin(); mTimeConditionList.end(); mTimeConditionList.next())
+    for (mTimeConditions.begin(); mTimeConditions.end(); mTimeConditions.next())
     {
-        TTObject aTimeCondition = mTimeConditionList.current()[0];
+        TTObject aTimeCondition = mTimeConditions.current()[0];
         
         // if a condition is ready we activate it
         TTValue v;
@@ -338,9 +345,9 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
     // propagate external tick to all time processes
     if (mExternalTick)
     {
-        for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next())
+        for (mTimeProcesses.begin(); mTimeProcesses.end(); mTimeProcesses.next())
         {
-            TTObject aTimeProcess = mTimeProcessList.current()[0];
+            TTObject aTimeProcess = mTimeProcesses.current()[0];
             aTimeProcess.send(kTTSym_Tick);
         }
     }
@@ -348,9 +355,9 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
     // update each event status and count how many are happened or disposed
     TTUInt32 eventHappenedOrDisposedCount = 0;
     
-    for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next())
+    for (mTimeEvents.begin(); mTimeEvents.end(); mTimeEvents.next())
     {
-        TTObject aTimeEvent = mTimeEventList.current()[0];
+        TTObject aTimeEvent = mTimeEvents.current()[0];
         TTSymbol status;
         
         aTimeEvent.send("StatusUpdate");
@@ -362,7 +369,7 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
     }
     
     // no more event to process
-    if (eventHappenedOrDisposedCount == mTimeEventList.getSize())
+    if (eventHappenedOrDisposedCount == mTimeEvents.getSize())
     {
         TTObject thisObject(this);
         return thisObject.send(kTTSym_Stop);
@@ -377,9 +384,9 @@ TTErr Scenario::ProcessPaused(const TTValue& inputValue, TTValue& outputValue)
     
     TTBoolean paused = inputValue[0];
 
-    for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next())
+    for (mTimeProcesses.begin(); mTimeProcesses.end(); mTimeProcesses.next())
     {
-        TTObject aTimeProcess = mTimeProcessList.current()[0];
+        TTObject aTimeProcess = mTimeProcesses.current()[0];
         
         if (paused)
             aTimeProcess.send(kTTSym_Pause);
@@ -429,9 +436,9 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
                 TTScriptMerge(getTimeEventState(getStartEvent()), state);;
                 
                 // add the state of each event before the time offset (expect those which are muted)
-                for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next())
+                for (mTimeEvents.begin(); mTimeEvents.end(); mTimeEvents.next())
                 {
-                    aTimeEvent = mTimeEventList.current()[0];
+                    aTimeEvent = mTimeEvents.current()[0];
                     aTimeEvent.get(kTTSym_date, v);
                     date = v[0];
                     
@@ -451,9 +458,9 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
             }
 
             // prepare the timeOffset of each time process scheduler
-            for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next())
+            for (mTimeProcesses.begin(); mTimeProcesses.end(); mTimeProcesses.next())
             {
-                aTimeProcess = mTimeProcessList.current()[0];
+                aTimeProcess = mTimeProcesses.current()[0];
                 
                 TTObject  startEvent = getTimeProcessStartEvent(aTimeProcess);
                 TTObject  endEvent = getTimeProcessEndEvent(aTimeProcess);
@@ -528,9 +535,9 @@ TTErr Scenario::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
         {
             xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "startEvent");
             
-            // Write the name
-            xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST kTTSym_start.c_str());
-            
+            // Force the name
+            getStartEvent().set("name", kTTSym_start);
+ 
             // Pass the xml handler to the event to fill his attribute
             aXmlHandler->setAttributeValue(kTTSym_object, getStartEvent());
             aXmlHandler->sendMessage(kTTSym_Write);
@@ -543,8 +550,8 @@ TTErr Scenario::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
         {
             xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "endEvent");
             
-            // Write the name
-            xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST kTTSym_end.c_str());
+            // Force the name
+            getEndEvent().set("name", kTTSym_end);
             
             // Pass the xml handler to the event to fill his attribute
             aXmlHandler->setAttributeValue(kTTSym_object, getEndEvent());
@@ -556,25 +563,25 @@ TTErr Scenario::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
     }
     
     // Write all the time events
-    for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next()) {
+    for (mTimeEvents.begin(); mTimeEvents.end(); mTimeEvents.next()) {
         
-        aTimeEvent = mTimeEventList.current()[0];
+        aTimeEvent = mTimeEvents.current()[0];
         
         writeTimeEventAsXml(aXmlHandler, aTimeEvent);
     }
     
     // Write all the time processes
-    for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
+    for (mTimeProcesses.begin(); mTimeProcesses.end(); mTimeProcesses.next()) {
         
-        aTimeProcess = mTimeProcessList.current()[0];
+        aTimeProcess = mTimeProcesses.current()[0];
         
         writeTimeProcessAsXml(aXmlHandler, aTimeProcess);
     }
     
     // Write all the time conditions
-    for (mTimeConditionList.begin(); mTimeConditionList.end(); mTimeConditionList.next()) {
+    for (mTimeConditions.begin(); mTimeConditions.end(); mTimeConditions.next()) {
         
-        aTimeCondition = mTimeConditionList.current()[0];
+        aTimeCondition = mTimeConditions.current()[0];
         
         writeTimeConditionAsXml(aXmlHandler, aTimeCondition);
     }
@@ -688,8 +695,8 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         mCurrentTimeCondition = TTObject();
         
         // clear all data structures
-        mTimeEventList.clear();
-        mTimeProcessList.clear();
+        mTimeEvents.clear();
+        mTimeProcesses.clear();
 #ifndef NO_EDITION_SOLVER
         for (itSolver = mVariablesMap.begin() ; itSolver != mVariablesMap.end() ; itSolver++)
             delete (SolverVariablePtr)itSolver->second;
@@ -723,9 +730,9 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
             TTSymbol(TTSCORE_VERSION_STRING) == TTSymbol("0.3"))
         {
             
-            for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next())
+            for (mTimeProcesses.begin(); mTimeProcesses.end(); mTimeProcesses.next())
             {
-                TTObject aTimeProcess = mTimeProcessList.current()[0];
+                TTObject aTimeProcess = mTimeProcesses.current()[0];
                 TTObject endEvent = getTimeProcessEndEvent(aTimeProcess);
                 
                 TTUInt32 duration, durationMin, durationMax;
@@ -986,6 +993,26 @@ TTErr Scenario::EventConditionChanged(const TTValue& inputValue, TTValue& output
     return kTTErrNone;
 }
 
+TTErr Scenario::SchedulerSpeedChanged(const TTValue& inputValue, TTValue& outputValue)
+{
+    TT_ASSERT("TTTimeContainer::SchedulerSpeedChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeFloat64);
+    
+    // for each time process of the scenario
+    for (mTimeProcesses.begin(); mTimeProcesses.end(); mTimeProcesses.next())
+    {
+        TTObject aTimeProcess = mTimeProcesses.current()[0];
+        
+        // get the actual time process scheduler
+        TTObject aScheduler;
+        aTimeProcess.get("scheduler", aScheduler);
+        
+        // set the time process scheduler speed value with the container scheduler speed value
+        aScheduler.set(kTTSym_speed, inputValue);
+    }
+    
+    return kTTErrNone;
+}
+
 #if 0
 #pragma mark -
 #pragma mark Specific Scenario Methods
@@ -1018,9 +1045,9 @@ TTErr Scenario::Next(const TTValue& inputValue, TTValue& outputValue)
         return kTTErrGeneric;
     
     // trigger the first pending time event of the list (as there are sorted by date)
-    for (mTimeEventList.begin(); mTimeEventList.end(); mTimeEventList.next()) {
+    for (mTimeEvents.begin(); mTimeEvents.end(); mTimeEvents.next()) {
         
-        aTimeEvent = mTimeEventList.current()[0];
+        aTimeEvent = mTimeEvents.current()[0];
         
         if (getTimeEventStatus(aTimeEvent) == kTTSym_eventPending) {
             
@@ -1091,8 +1118,8 @@ TTErr Scenario::TimeEventCreate(const TTValue& inputValue, TTValue& outputValue)
             makeTimeEventCacheElement(aTimeEvent, aCacheElement);
             
             // store time event object and observers
-            mTimeEventList.append(aCacheElement);
-            mTimeEventList.sort(&TTTimeEventCompareDate);
+            mTimeEvents.append(aCacheElement);
+            mTimeEvents.sort(&TTTimeEventCompareDate);
 #ifndef NO_EDITION_SOLVER
             // add variable to the solver
             SolverVariablePtr variable = new SolverVariable(mEditionSolver, aTimeEvent, TTUInt32(scenarioDuration[0]));
@@ -1130,7 +1157,7 @@ TTErr Scenario::TimeEventRelease(const TTValue& inputValue, TTValue& outputValue
             aTimeEvent = inputValue[0];
             
             // try to find the time event
-            mTimeEventList.find(&TTTimeContainerFindTimeEvent, (TTPtr)aTimeEvent.instance(), aCacheElement);
+            mTimeEvents.find(&TTTimeContainerFindTimeEvent, (TTPtr)aTimeEvent.instance(), aCacheElement);
             
             // couldn't find the same time event in the scenario
             if (aCacheElement.size() == 0)
@@ -1139,12 +1166,12 @@ TTErr Scenario::TimeEventRelease(const TTValue& inputValue, TTValue& outputValue
             else {
                 
                 // if the time event is used by a time process it can't be released
-                mTimeProcessList.find(&TTTimeContainerFindTimeProcessWithTimeEvent, (TTPtr)aTimeEvent.instance(), v);
+                mTimeProcesses.find(&TTTimeContainerFindTimeProcessWithTimeEvent, (TTPtr)aTimeEvent.instance(), v);
                 
                 if (v.size() == 0) {
                     
                     // remove time event object and observers
-                    mTimeEventList.remove(aCacheElement);
+                    mTimeEvents.remove(aCacheElement);
                     
                     // delete all observers
                     deleteTimeEventCacheElement(aCacheElement);
@@ -1259,7 +1286,7 @@ TTErr Scenario::TimeEventFind(const TTValue& inputValue, TTValue& outputValue)
     TTValue aCacheElement;
     
     // Find the process using his name inside the container
-    mTimeEventList.find(&TTTimeContainerFindTimeEventWithName, (TTPtr)&inputValue, outputValue);
+    mTimeEvents.find(&TTTimeContainerFindTimeEventWithName, (TTPtr)&inputValue, outputValue);
     
     if (outputValue.size() == 0)
         return kTTErrValueNotFound;
@@ -1283,7 +1310,7 @@ TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue
             aNewTimeEvent = inputValue[1];
             
             // try to find the former time event
-            mTimeEventList.find(&TTTimeContainerFindTimeEvent, (TTPtr)aFormerTimeEvent.instance(), aCacheElement);
+            mTimeEvents.find(&TTTimeContainerFindTimeEvent, (TTPtr)aFormerTimeEvent.instance(), aCacheElement);
             
             // couldn't find the former time event in the scenario
             if (aCacheElement.size() == 0)
@@ -1292,7 +1319,7 @@ TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue
             else {
                 
                 // remove the former time event object and observers
-                mTimeEventList.remove(aCacheElement);
+                mTimeEvents.remove(aCacheElement);
                 
                 // delete all observers on the former time event
                 deleteTimeEventCacheElement(aCacheElement);
@@ -1301,14 +1328,14 @@ TTErr Scenario::TimeEventReplace(const TTValue& inputValue, TTValue& outputValue
                 makeTimeEventCacheElement(aNewTimeEvent, aCacheElement);
                 
                 // store the new time event object and observers
-                mTimeEventList.append(aCacheElement);
-                mTimeEventList.sort(&TTTimeEventCompareDate);
+                mTimeEvents.append(aCacheElement);
+                mTimeEvents.sort(&TTTimeEventCompareDate);
             }
             
             // replace the former time event in all time process which binds on it
-            for (mTimeProcessList.begin(); mTimeProcessList.end(); mTimeProcessList.next()) {
+            for (mTimeProcesses.begin(); mTimeProcesses.end(); mTimeProcesses.next()) {
                 
-                aTimeProcess = mTimeProcessList.current()[0];
+                aTimeProcess = mTimeProcesses.current()[0];
                 
                 if (getTimeProcessStartEvent(aTimeProcess) == aFormerTimeEvent) {
                     
@@ -1355,11 +1382,6 @@ void Scenario::writeTimeEventAsXml(TTXmlHandlerPtr aXmlHandler, TTObject& aTimeE
 {
     // Start an event node
     xmlTextWriterStartElement((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "event");
-    
-    // Write the name
-    TTSymbol name;
-    aTimeEvent.get("name", name);
-    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST name.c_str());
     
     // Pass the xml handler to the event to fill his attribute
     aXmlHandler->setAttributeValue(kTTSym_object, aTimeEvent);
@@ -1471,7 +1493,7 @@ TTErr Scenario::TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue)
                 makeTimeProcessCacheElement(aTimeProcess, aCacheElement);
                 
                 // store time process object and observers
-                mTimeProcessList.append(aCacheElement);
+                mTimeProcesses.append(aCacheElement);
 #ifndef NO_EDITION_SOLVER
                 // get scenario duration
                 this->getAttributeValue(kTTSym_duration, scenarioDuration);
@@ -1535,7 +1557,7 @@ TTErr Scenario::TimeProcessRemove(const TTValue& inputValue, TTValue& outputValu
             aTimeProcess = inputValue[0];
             
             // try to find the time process
-            mTimeProcessList.find(&TTTimeContainerFindTimeProcess, (TTPtr)aTimeProcess.instance(), aCacheElement);
+            mTimeProcesses.find(&TTTimeContainerFindTimeProcess, (TTPtr)aTimeProcess.instance(), aCacheElement);
             
             // couldn't find the same time process in the scenario :
             if (aCacheElement.size() == 0)
@@ -1544,7 +1566,7 @@ TTErr Scenario::TimeProcessRemove(const TTValue& inputValue, TTValue& outputValu
             else {
                 
                 // remove time process object and observers
-                mTimeProcessList.remove(aCacheElement);
+                mTimeProcesses.remove(aCacheElement);
                 
                 // delete all observers
                 deleteTimeProcessCacheElement(aCacheElement);
@@ -1846,7 +1868,7 @@ TTErr Scenario::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHandler, TTObject& aN
             if (v[0].type() == kTypeSymbol)
             {
                 // Find the start event using his name inside the container
-                mTimeEventList.find(&TTTimeContainerFindTimeEventWithName, (TTPtr)&v, aCacheElement);
+                mTimeEvents.find(&TTTimeContainerFindTimeEventWithName, (TTPtr)&v, aCacheElement);
                 
                 if (aCacheElement.size() == 0)
                 {
@@ -1867,7 +1889,7 @@ TTErr Scenario::readTimeProcessFromXml(TTXmlHandlerPtr aXmlHandler, TTObject& aN
             if (v[0].type() == kTypeSymbol)
             {
                 // Find the end event using his name inside the container
-                mTimeEventList.find(&TTTimeContainerFindTimeEventWithName, (TTPtr)&v, aCacheElement);
+                mTimeEvents.find(&TTTimeContainerFindTimeEventWithName, (TTPtr)&v, aCacheElement);
                 
                 if (aCacheElement.size() == 0)
                 {
@@ -2002,7 +2024,7 @@ TTErr Scenario::TimeConditionCreate(const TTValue& inputValue, TTValue& outputVa
     makeTimeConditionCacheElement(aTimeCondition, aCacheElement);
     
     // store time condition object and observers
-    mTimeConditionList.append(aCacheElement);
+    mTimeConditions.append(aCacheElement);
     
     // add a first case if
     
@@ -2029,7 +2051,7 @@ TTErr Scenario::TimeConditionRelease(const TTValue& inputValue, TTValue& outputV
             aTimeCondition = inputValue[0];
             
             // try to find the time condition
-            mTimeConditionList.find(&TTTimeContainerFindTimeCondition, (TTPtr)aTimeCondition.instance(), aCacheElement);
+            mTimeConditions.find(&TTTimeContainerFindTimeCondition, (TTPtr)aTimeCondition.instance(), aCacheElement);
             
             // couldn't find the same time condition in the scenario
             if (aCacheElement.size() == 0)
@@ -2038,7 +2060,7 @@ TTErr Scenario::TimeConditionRelease(const TTValue& inputValue, TTValue& outputV
             else {
                 
                 // remove time condition object and observers
-                mTimeConditionList.remove(aCacheElement);
+                mTimeConditions.remove(aCacheElement);
                 
                 // delete all observers
                 deleteTimeConditionCacheElement(aCacheElement);
