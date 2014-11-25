@@ -39,12 +39,15 @@ private :
     TTUInt32                    mIteration;                     ///< count how many iteration have been done
 
     TTList                      mPatternProcesses;              ///< all registered time processes to execute at each iteration
-    
     TTObject                    mPatternStartEvent;             ///< the event object which handles the start of the pattern execution
-    
     TTObject                    mPatternEndEvent;               ///< the event object which handles the end of the pattern execution
-    
     TTObject                    mPatternCondition;              ///< the condition object which handles next pattern iteration or the end of the loop
+    
+    TTObject                    mCurrentTimeEvent;              ///< an internal pointer to remember the current time event being read
+    TTObject                    mCurrentTimeProcess;            ///< an internal pointer to remember the current time process being read
+    TTObject                    mCurrentTimeCondition;          ///< an internal pointer to remember the current time condition being read
+	TTObject           	 		mCurrentScenario;               ///< an internal pointer to remember the current scenario being read
+    TTObject           	 		mCurrentLoop;                   ///< an internal pointer to remember the current loop being read
 
     /** Get parameters names needed by this time process
      @param	value           the returned parameter names
