@@ -318,6 +318,18 @@ TTErr Scenario::ProcessEnd()
         aTimeCondition.set(kTTSym_active, TTBoolean(NO));
     }
     
+    // dispose waiting or pending events
+    for (mTimeEvents.begin(); mTimeEvents.end(); mTimeEvents.next())
+    {
+        TTObject aTimeEvent = mTimeEvents.current()[0];
+        
+        TTSymbol status;
+        aTimeEvent.get("status", status);
+        
+        if (status == kTTSym_eventWaiting || status == kTTSym_eventPending)
+            aTimeEvent.set("status", kTTSym_eventDisposed);
+    }
+    
     // needs to be compiled again
     mCompiled = NO;
    
@@ -626,10 +638,9 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     {
         return kTTErrNone;
     }
-    
-    // DEBUG
-    //TTLogMessage("%s reading %s\n", mName.c_str(), aXmlHandler->mXmlNodeName.c_str());
-    
+#ifdef TTSCORE_DEBUG
+     TTLogMessage("Scenario::ReadFromXml %s : reading %s\n", mName.c_str(), aXmlHandler->mXmlNodeName.c_str());
+#endif
     // When reading a sub scenario
     if (mCurrentScenario.valid()) {
         
@@ -653,27 +664,26 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
             TTSymbol currentSubName;
             mCurrentScenario.get("name", currentSubName);
             
-            if (subName == currentSubName) {
-                
+            if (subName == currentSubName)
+            {
                 // if this is the end of a scenario node : forget the sub scenario
-                if (!aXmlHandler->mXmlNodeStart) {
-                    
-                    // DEBUG
-                    //TTLogMessage("%s forgets %s sub scenario (end node)\n", mName.c_str(), currentSubName.c_str());
-                    
+                if (!aXmlHandler->mXmlNodeStart)
+                {
+#ifdef TTSCORE_DEBUG
+                    TTLogMessage("Scenario::ReadFromXml %s : forgets %s sub scenario (end node)\n", mName.c_str(), currentSubName.c_str());
+#endif
                     mCurrentScenario = TTObject();
                     mCurrentTimeProcess = TTObject();
                     return kTTErrNone;
                 }
                 
                 // if this is an empty scenario node : read the node and then forget the sub scenario
-                if (aXmlHandler->mXmlNodeIsEmpty) {
-                    
+                if (aXmlHandler->mXmlNodeIsEmpty)
+                {
                     mCurrentScenario.send("ReadFromXml", inputValue, outputValue);
-                    
-                    // DEBUG
-                    //TTLogMessage("%s forgets %s sub scenario (empty node)\n", mName.c_str(), currentSubName.c_str());
-                    
+#ifdef TTSCORE_DEBUG
+                    TTLogMessage("Scenario::ReadFromXml %s : forgets %s sub scenario (empty node)\n", mName.c_str(), currentSubName.c_str());
+#endif
                     mCurrentScenario = TTObject();
                     mCurrentTimeProcess = TTObject();
                     return kTTErrNone;
@@ -713,9 +723,9 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
                 // if this is the end of a scenario node : forget the sub scenario
                 if (!aXmlHandler->mXmlNodeStart)
                 {
-                    // DEBUG
-                    TTLogMessage("%s forgets %s loop (end node)\n", mName.c_str(), currentLoopName.c_str());
-                    
+#ifdef TTSCORE_DEBUG
+                    TTLogMessage("Scenario::ReadFromXml %s : forgets %s loop (end node)\n", mName.c_str(), currentLoopName.c_str());
+#endif
                     mCurrentLoop= TTObject();
                     mCurrentTimeProcess = TTObject();
                     return kTTErrNone;
@@ -726,9 +736,9 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
                 {
                     mCurrentLoop.send("ReadFromXml", inputValue, outputValue);
                     
-                    // DEBUG
-                    TTLogMessage("%s forgets %s loop (empty node)\n", mName.c_str(), currentLoopName.c_str());
-                    
+#ifdef TTSCORE_DEBUG
+                    TTLogMessage("Scenario::ReadFromXml %s : forgets %s loop (empty node)\n", mName.c_str(), currentLoopName.c_str());
+#endif
                     mCurrentLoop = TTObject();
                     mCurrentTimeProcess = TTObject();
                     return kTTErrNone;
@@ -999,19 +1009,20 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         {
             mCurrentScenario = mCurrentTimeProcess;
             
-            // DEBUG
-            //TTLogMessage("%s set %s as sub scenario \n", mName.c_str(), ScenarioPtr(mCurrentScenario.instance())->mName.c_str());
+#ifdef TTSCORE_DEBUG
+            TTLogMessage("Scenario::ReadFromXml %s : set %s as sub scenario \n", mName.c_str(), ScenarioPtr(mCurrentScenario.instance())->mName.c_str());
+#endif
         }
         // if the current time process is a loop : don't forget it
         else if (mCurrentTimeProcess.name() == TTSymbol("Loop") &&
                 !aXmlHandler->mXmlNodeIsEmpty)
         {
             mCurrentLoop = mCurrentTimeProcess;
-                
-            // DEBUG
+#ifdef TTSCORE_DEBUG
             TTSymbol loopName;
             mCurrentLoop.get("name", loopName);
-            TTLogMessage("%s set %s as loop \n", mName.c_str(), loopName.c_str());
+            TTLogMessage("Scenario::ReadFromXml %s : set %s as loop \n", mName.c_str(), loopName.c_str());
+#endif
         }
         
         // Pass the xml handler to the current process to fill his data structure
