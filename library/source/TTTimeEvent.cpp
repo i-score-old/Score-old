@@ -167,7 +167,8 @@ TTErr TTTimeEvent::Wait()
     
     if (mRequestWait)
     {
-        TTLogError("TTTimeEvent::Wait %s : this resquest is already registered\n", mName.c_str());
+        // don't loog error in this case because if many processes shared the same end event
+        // they can request end event waiting at the same time when start event waits (see in TTTimeProcess::EventStatusChanged)
         return kTTErrGeneric;
     }
     

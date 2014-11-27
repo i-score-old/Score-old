@@ -318,6 +318,11 @@ void Loop::writeTimeProcessAsXml(TTXmlHandlerPtr aXmlHandler, TTObject& aTimePro
     TTValue     v;
     TTString    s;
     
+    // write the name
+    TTSymbol name;
+    aTimeProcess.get("name", name);
+    xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "name", BAD_CAST name.c_str());
+    
     // write the duration min
     aTimeProcess.get("durationMin", v);
     v.toString();
@@ -361,6 +366,327 @@ TTErr Loop::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
 	TTXmlHandlerPtr aXmlHandler = (TTXmlHandlerPtr)o.instance();
     if (!aXmlHandler)
 		return kTTErrGeneric;
+    
+    TTValue v;
+    
+    // when reading a sub scenario
+    if (mCurrentScenario.valid())
+    {
+        // Scenario node :
+        if (aXmlHandler->mXmlNodeName == TTSymbol("Scenario"))
+        {
+            TTSymbol subName;
+            
+            // get sub scenario name
+            if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES))
+            {
+                if (v.size() == 1)
+                {
+                    if (v[0].type() == kTypeSymbol)
+                    {
+                        subName = v[0];
+                    }
+                }
+            }
+            
+            TTSymbol currentSubName;
+            mCurrentScenario.get("name", currentSubName);
+            
+            if (subName == currentSubName)
+            {
+                // if this is the end of a scenario node : forget the sub scenario
+                if (!aXmlHandler->mXmlNodeStart)
+                {
+#ifdef TTSCORE_DEBUG
+                    TTLogMessage("Loop::ReadFromXml %s : forgets %s sub scenario (end node)\n", mName.c_str(), currentSubName.c_str());
+#endif
+                    mCurrentScenario = TTObject();
+                    mCurrentTimeProcess = TTObject();
+                    return kTTErrNone;
+                }
+                
+                // if this is an empty scenario node : read the node and then forget the sub scenario
+                if (aXmlHandler->mXmlNodeIsEmpty)
+                {
+                    mCurrentScenario.send("ReadFromXml", inputValue, outputValue);
+#ifdef TTSCORE_DEBUG
+                    TTLogMessage("Loop::ReadFromXml %s : forgets %s sub scenario (empty node)\n", mName.c_str(), currentSubName.c_str());
+#endif
+                    mCurrentScenario = TTObject();
+                    mCurrentTimeProcess = TTObject();
+                    return kTTErrNone;
+                }
+            }
+        }
+        
+        // any other case
+        return mCurrentScenario.send("ReadFromXml", inputValue, outputValue);
+    }
+    
+    // Loop node : read attributes
+    if (aXmlHandler->mXmlNodeName == "Loop")
+    {
+        if (aXmlHandler->mXmlNodeStart)
+        {
+            // get the loop name
+            if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES))
+            {
+                if (v.size() == 1)
+                {
+                    if (v[0].type() == kTypeSymbol)
+                    {
+                        mName = v[0];
+                    }
+                }
+            }
+        }
+        
+        return kTTErrNone;
+    }
+    
+    // Event node
+    if (aXmlHandler->mXmlNodeName == kTTSym_event)
+    {
+        if (aXmlHandler->mXmlNodeStart)
+        {
+            // get the date
+            if (!aXmlHandler->getXmlAttribute(kTTSym_date, v, NO))
+            {
+                if (v.size() == 1)
+                {
+                    if (v[0].type() == kTypeUInt32)
+                    {
+                        TTValue     loopDuration;
+                        TTObject    thisObject(this);
+                        
+                        // an event cannot be created beyond the duration of its container
+                        thisObject.get(kTTSym_duration, loopDuration);
+                        
+                        if (TTUInt32(v[0]) > TTUInt32(loopDuration[0]))
+                        {
+                            TTLogError("Loop::ReadFromXml %s : event created beyond the duration of its container\n", mName.c_str());
+                            return kTTErrGeneric;
+                        }
+                        
+                        // prepare argument (date, container)
+                        TTValue args(inputValue[0], thisObject);
+                        
+                        mCurrentTimeEvent = TTObject(kTTSym_TimeEvent, args);
+                        
+                        // get the name
+                        if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES))
+                        {
+                            if (v.size() == 1)
+                            {
+                                if (v[0].type() == kTypeSymbol)
+                                {
+                                    TTSymbol name = v[0];
+                                    mCurrentTimeEvent.set(kTTSym_name, name);
+                                    
+                                    if (name == "patternStart")
+                                        mPatternStartEvent = mCurrentTimeEvent;
+                                    else
+                                        mPatternEndEvent = mCurrentTimeEvent;
+                                }
+                            }
+                        }
+                        
+                        // pass the xml handler to the new event to fill his attribute
+                        aXmlHandler->setAttributeValue(kTTSym_object, mCurrentTimeEvent);
+                        aXmlHandler->sendMessage(kTTSym_Read);
+                    }
+                }
+            }
+            
+            if (aXmlHandler->mXmlNodeIsEmpty)
+                mCurrentTimeEvent = TTObject();
+        }
+        else
+            
+            mCurrentTimeEvent = TTObject();
+        
+        return kTTErrNone;
+    }
+    
+    // If there is a current time event
+    if (mCurrentTimeEvent.valid())
+    {
+        // Pass the xml handler to the current condition to fill his data structure
+        aXmlHandler->setAttributeValue(kTTSym_object, mCurrentTimeEvent);
+        return aXmlHandler->sendMessage(kTTSym_Read);
+    }
+    
+    // Condition node
+    if (aXmlHandler->mXmlNodeName == kTTSym_condition)
+    {
+        if (aXmlHandler->mXmlNodeStart)
+        {
+            TTObject thisObject(this);
+            
+            // create the time condition
+            mCurrentTimeCondition = TTObject("TimeCondition", thisObject);
+            
+            // pass the xml handler to the new condition to fill his attribute
+            aXmlHandler->setAttributeValue(kTTSym_object, mCurrentTimeCondition);
+            aXmlHandler->sendMessage(kTTSym_Read);
+            
+            if (aXmlHandler->mXmlNodeIsEmpty)
+                mCurrentTimeCondition = TTObject();
+        }
+        else
+            
+            mCurrentTimeCondition = TTObject();
+        
+        return kTTErrNone;
+    }
+    
+    // if there is a current time condition
+    if (mCurrentTimeCondition.valid())
+    {
+        // pass the xml handler to the current condition to fill his data structure
+        aXmlHandler->setAttributeValue(kTTSym_object, mCurrentTimeCondition);
+        return aXmlHandler->sendMessage(kTTSym_Read);
+    }
+    
+    // Process node : the name of the node is the name of the process type
+    if (!mCurrentTimeProcess.valid())
+    {
+        if (aXmlHandler->mXmlNodeStart)
+        {
+            if (aXmlHandler->mXmlNodeIsEmpty)
+                mCurrentTimeProcess = TTObject();
+            
+            else
+            {
+                if (!mPatternStartEvent.valid() || !mPatternEndEvent.valid())
+                    return kTTErrGeneric;
+                
+                // check start and end events are different
+                if (mPatternStartEvent == mPatternEndEvent)
+                    return kTTErrGeneric;
+                
+                // create the time process
+                TTObject thisObject(this);
+                mCurrentTimeProcess = TTObject(aXmlHandler->mXmlNodeName, thisObject);
+                
+                // set the start and end events
+                setTimeProcessStartEvent(mCurrentTimeProcess, mPatternStartEvent);
+                setTimeProcessEndEvent(mCurrentTimeProcess, mPatternEndEvent);
+                
+                // append as pattern process
+                mPatternProcesses.append(mCurrentTimeProcess);
+                
+                // get the time process name
+                if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES))
+                {
+                    if (v.size() == 1)
+                    {
+                        if (v[0].type() == kTypeSymbol)
+                        {
+                            mCurrentTimeProcess.set(kTTSym_name, v);
+                        }
+                    }
+                }
+                
+                // get the durationMin
+                if (!aXmlHandler->getXmlAttribute(kTTSym_durationMin, v, NO))
+                {
+                    if (v.size() == 1)
+                    {
+                        if (v[0].type() == kTypeUInt32)
+                        {
+                            mCurrentTimeProcess.set(kTTSym_durationMin, v);
+                        }
+                    }
+                }
+                
+                // get the durationMax
+                if (!aXmlHandler->getXmlAttribute(kTTSym_durationMax, v, NO))
+                {
+                    if (v.size() == 1)
+                    {
+                        if (v[0].type() == kTypeUInt32)
+                        {
+                            mCurrentTimeProcess.set(kTTSym_durationMax, v);
+                        }
+                    }
+                }
+                
+                // get the mute
+                if (!aXmlHandler->getXmlAttribute(kTTSym_mute, v, NO))
+                {
+                    if (v.size() == 1)
+                    {
+                        if (v[0].type() == kTypeInt32)
+                        {
+                            mCurrentTimeProcess.set(kTTSym_mute, v);
+                        }
+                    }
+                }
+                
+                // get the color
+                if (!aXmlHandler->getXmlAttribute(kTTSym_color, v, NO))
+                {
+                    if (v.size() == 3)
+                    {
+                        if (v[0].type() == kTypeInt32 && v[1].type() == kTypeInt32 && v[2].type() == kTypeInt32)
+                        {
+                            mCurrentTimeProcess.set(kTTSym_color, v);
+                        }
+                    }
+                }
+                
+                // get the vertical position
+                if (!aXmlHandler->getXmlAttribute(kTTSym_verticalPosition, v, NO))
+                {
+                    if (v.size() == 1)
+                    {
+                        if (v[0].type() == kTypeUInt32)
+                        {
+                            mCurrentTimeProcess.set(kTTSym_verticalPosition, v);
+                        }
+                    }
+                }
+                
+                // get the vertical size
+                if (!aXmlHandler->getXmlAttribute(kTTSym_verticalSize, v, NO))
+                {
+                    if (v.size() == 1)
+                    {
+                        if (v[0].type() == kTypeUInt32)
+                        {
+                            mCurrentTimeProcess.set(kTTSym_verticalSize, v);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    else if (mCurrentTimeProcess.name() == aXmlHandler->mXmlNodeName)
+    {
+        if (!aXmlHandler->mXmlNodeStart)
+            mCurrentTimeProcess = TTObject();
+    }
+    
+    // if there is a current time process
+    if (mCurrentTimeProcess.valid())
+    {
+        // if the current time process is a sub scenario : don't forget it
+        if (mCurrentTimeProcess.name() == TTSymbol("Scenario") &&
+            !aXmlHandler->mXmlNodeIsEmpty)
+        {
+            mCurrentScenario = mCurrentTimeProcess;
+#ifdef TTSCORE_DEBUG
+            TTSymbol currentScenarioName;
+            mCurrentScenario.get("name", currentScenarioName);
+            TTLogMessage("Loop::ReadFromXml %s : set %s as sub scenario\n", mName.c_str(), currentScenarioName.c_str());
+#endif
+        }
+        
+        // pass the xml handler to the current process to fill his data structure
+        aXmlHandler->setAttributeValue(kTTSym_object, mCurrentTimeProcess);
+        return aXmlHandler->sendMessage(kTTSym_Read);
+    }
     
     return kTTErrNone;
 }
