@@ -22,7 +22,8 @@
 #include "TTUnitTest.h"
 
 /**	Provide unit tests for Score framework */
-class TTScoreTest : public TTObjectBase {
+class TTScoreTest : public TTDataObjectBase
+{
 	TTCLASS_SETUP(TTScoreTest)
 		
 	virtual TTErr test(TTValue& returnedTestInfo);
