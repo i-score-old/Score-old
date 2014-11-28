@@ -5,13 +5,13 @@
 //  Created by Théo de la Hogue on 21/11/14
 //
 
-#include "TTFoundationAPI.h"
+//#include "TTFoundationAPI.h"
 //#include "TTScore.h" // théo : Score is too closely linked to Modular (State management, XmlHandler) this bad but it should be improved in the futur
 
 int main(int argc, const char * argv[])
 {
-	TTFoundationInit();
-//    TTScoreInit();
+/*    TTFoundationInit();
+    TTScoreInit();
 	
 	TTValue classNames;
 	
@@ -24,7 +24,7 @@ int main(int argc, const char * argv[])
 		
 		obj.send("test");
 	}
-    
+*/
     return 0;
 }
 
