@@ -123,6 +123,17 @@ TTErr TTTimeCondition::setActive(const TTValue& value)
             // create the receivers
             TTCaseMapIterator it;
             
+            // check if thre is a true case
+            for(it = mCases.begin() ; it != mCases.end() ; it++)
+            {
+                if (it->second.trigger.getAddress() == "true")
+                {
+                    TTObject event = TTObjectBasePtr(it->first);
+                    TTValue none;
+                    return Trigger(event, none);
+                }
+            }
+            
             // for each trigger case
             for(it = mCases.begin() ; it != mCases.end() ; it++)
                 addReceiver(it->second.trigger.getAddress());
