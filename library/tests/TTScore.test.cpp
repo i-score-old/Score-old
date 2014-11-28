@@ -19,7 +19,7 @@
 #define thisTTClassName		"score.test"
 #define thisTTClassTags		"test, score"
 
-TT_BASE_OBJECT_CONSTRUCTOR
+TT_OBJECT_CONSTRUCTOR
 {;}
 
 TTScoreTest::~TTScoreTest()

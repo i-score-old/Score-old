@@ -17,7 +17,8 @@ int main(int argc, const char * argv[])
 	
 	TTObject::GetRegisteredClassNames(classNames);
 	
-	for (int i=0; i<classNames.size(); i++) {
+	for (int i=0; i<classNames.size(); i++)
+    {
 		TTSymbol name = classNames[i];
 		TTObject obj(name);
 		
