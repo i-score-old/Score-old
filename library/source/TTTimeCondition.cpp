@@ -29,8 +29,6 @@ mActive(NO),
 mReady(NO),
 mNotPendingEventCounter(0)
 {
-    TT_ASSERT("Correct number of args to create TTTimeCondition", arguments.size() == 1);
-    
     if (arguments.size() == 1)
         mContainer = arguments[0];
     

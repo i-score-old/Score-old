@@ -43,8 +43,6 @@ mPushing(NO)
 {
     TTValue none;
     
-    TT_ASSERT("Correct number of args to create TTTimeEvent", arguments.size() == 1 || arguments.size() == 2);
-    
     if (arguments.size() >= 1)
         mDate = arguments[0];
 
@@ -102,7 +100,7 @@ TTTimeEvent::~TTTimeEvent()
 
 TTErr TTTimeEvent::setDate(const TTValue& value)
 {
-    TT_ASSERT("TTTimeEvent::setDate : inputValue is correct", inputValue.size() == 1 && (inputValue[0].type() == kTypeInt32 || inputValue[0].type() == kTypeUInt32));
+    TT_ASSERT("TTTimeEvent::setDate : value is correct", value.size() == 1 && (value[0].type() == kTypeInt32 || value[0].type() == kTypeUInt32));
     
     TTUInt32 newDate = value[0];
     
@@ -121,7 +119,7 @@ TTErr TTTimeEvent::setDate(const TTValue& value)
 
 TTErr TTTimeEvent::setCondition(const TTValue& value)
 {
-    TT_ASSERT("TTTimeEvent::setCondition : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
+    TT_ASSERT("TTTimeEvent::setCondition : value is correct", value.size() == 1 && value[0].type() == kTypeObject);
     
     TTObject newCondition = value[0];
     
@@ -330,7 +328,7 @@ TTErr TTTimeEvent::StatusUpdate()
 
 TTErr TTTimeEvent::applyStatus(const TTValue& value)
 {
-    TT_ASSERT("TTTimeEvent::applyStatus : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeSymbol);
+    TT_ASSERT("TTTimeEvent::applyStatus : value is correct", value.size() == 1 && value[0].type() == kTypeSymbol);
     
     TTSymbol lastStatus = mStatus;
     

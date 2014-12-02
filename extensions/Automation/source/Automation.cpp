@@ -38,9 +38,7 @@ extern "C" TT_EXTENSION_EXPORT TTErr TTLoadJamomaExtension_Automation(void)
 TIME_PROCESS_PLUGIN_CONSTRUCTOR
 {
     TIME_PLUGIN_INITIALIZE
-    
-	TT_ASSERT("Correct number of args to create Automation", arguments.size() == 0);
-    
+
     registerAttribute(TTSymbol("curveAddresses"), kTypeLocalValue, NULL, (TTGetterMethod)& Automation::getCurveAddresses);
     
     addMessageWithArguments(CurveAdd);

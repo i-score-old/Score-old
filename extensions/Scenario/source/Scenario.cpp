@@ -43,9 +43,7 @@ mAttributeLoaded(NO),
 mFileVersion(kTTSymEmpty)
 {
     TIME_PLUGIN_INITIALIZE
-    
-	TT_ASSERT("Correct number of args to create Scenario", arguments.size() == 0 || arguments.size() == 2);
-    
+
     registerAttribute(TTSymbol("timeProcesses"), kTypeLocalValue, NULL, (TTGetterMethod)& Scenario::getTimeProcesses, NULL);
     registerAttribute(TTSymbol("timeEvents"), kTypeLocalValue, NULL, (TTGetterMethod)& Scenario::getTimeEvents, NULL);
     registerAttribute(TTSymbol("timeConditions"), kTypeLocalValue, NULL, (TTGetterMethod)& Scenario::getTimeConditions, NULL);

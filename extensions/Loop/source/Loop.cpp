@@ -39,8 +39,6 @@ mIteration(0)
 {
     TIME_PLUGIN_INITIALIZE
     
-	TT_ASSERT("Correct number of args to create Loop", arguments.size() == 0);
-    
     addAttribute(Iteration, kTypeUInt32);
     addAttributeProperty(Iteration, readOnly, YES);
     
