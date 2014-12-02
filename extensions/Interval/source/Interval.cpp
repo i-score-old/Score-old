@@ -22,6 +22,11 @@ extern "C" TT_EXTENSION_EXPORT TTErr TTLoadJamomaExtension_Interval(void)
 	return kTTErrNone;
 }
 
+#if 0
+#pragma mark -
+#pragma mark Constructor/Destructor
+#endif
+
 TIME_PROCESS_PLUGIN_CONSTRUCTOR
 {
     TIME_PLUGIN_INITIALIZE
@@ -34,6 +39,11 @@ Interval::~Interval()
     ;
 }
 
+#if 0
+#pragma mark -
+#pragma mark TimeProcessPlugin Methods
+#endif
+
 TTErr Interval::getParameterNames(TTValue& value)
 {
     value.clear();
@@ -41,6 +51,11 @@ TTErr Interval::getParameterNames(TTValue& value)
 	
 	return kTTErrNone;
 }
+
+#if 0
+#pragma mark -
+#pragma mark TTTimeProcess Methods
+#endif
 
 TTErr Interval::Compile()
 {
@@ -73,9 +88,9 @@ TTErr Interval::Goto(const TTValue& inputValue, TTValue& outputValue)
     TTValue     v;
     TTUInt32    duration, timeOffset;
     
-    if (inputValue.size() == 1) {
+    if (inputValue.size() >= 1) {
         
-        if (inputValue[0].type() == kTypeUInt32) {
+        if (inputValue[0].type() == kTypeUInt32 || inputValue[0].type() == kTypeInt32) {
             
             this->getAttributeValue(kTTSym_duration, v);
             
@@ -127,4 +142,46 @@ TTErr Interval::ReadFromText(const TTValue& inputValue, TTValue& outputValue)
     // TODO : parse the time box attributes, the cue start and end content, start and end receiver, ...
 	
 	return kTTErrGeneric;
+}
+
+#if 0
+#pragma mark -
+#pragma mark Notifications
+#endif
+
+TTErr Interval::EventDateChanged(const TTValue& inputValue, TTValue& outputValue)
+{
+    TT_ASSERT("Interval::EventDateChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
+    
+    TTObject aTimeEvent = inputValue[0];
+    
+    if (aTimeEvent == this->getStartEvent())
+    {
+        // if needed, the compile method should be called again now
+        mCompiled = NO;
+        
+        return kTTErrNone;
+    }
+    else if (aTimeEvent == this->getEndEvent())
+    {
+        // if needed, the compile method should be called again now
+        mCompiled = NO;
+        
+        return kTTErrNone;
+    }
+    
+    TTLogError("Interval::EventDateChanged %s : wrong event\n", mName.c_str());
+    return kTTErrGeneric;
+}
+
+TTErr Interval::EventConditionChanged(const TTValue& inputValue, TTValue& outputValue)
+{
+    TT_ASSERT("Interval::EventConditionChanged : inputValue is correct", inputValue.size() == 2 && inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeObject);
+    
+    TTObject    aTimeEvent = inputValue[0];
+    TTObject    aTimeCondition = inputValue[1];
+    
+    // no rule
+    
+    return kTTErrNone;
 }

@@ -33,7 +33,7 @@ private :
     
     TTHash                      mCurves;						///< a table of freehand function units stored by address
     TTHash                      mSenders;						///< a table of TTSender to send curves
-    TTHash                      mReceivers;						///< a table of TTReceiver to record curves
+    TTHash                      mRecordReceivers;               ///< a table of TTReceivers to record curves
    
     TTValue                     mCurrentObjects;                ///< useful for file parsing
     TTFloat64                   mCurrentPosition;            ///< useful for recording
@@ -43,31 +43,32 @@ private :
      @return                kTTErrNone */
 	TTErr   getParameterNames(TTValue& value);
     
-    /** Get curve addresses
-     @param	value           the returned curve addresses
-     @return                kTTErrNone */
-	TTErr   getCurveAddresses(TTValue& value);
+
     
-    /** Specific compilation method used to pre-processed data in order to accelarate Process method.
-     the compiled attribute allows to know if the process needs to be compiled or not.
+    /** Specific compilation method used to pre-processed data in order to accelarate Process method
+     @details the compiled attribute allows to know if the process needs to be compiled or not
      @return                an error code returned by the compile method */
     TTErr   Compile();
     
     /** Specific process method on start
+     @details when this method is called the running state is NO which means event status propagation is disabled
      @return                an error code returned by the process end method */
     TTErr   ProcessStart();
     
     /** Specific process method on end
+     @details when this method is called the running state is NO which means event status propagation is disabled
      @return                an error code returned by the process end method */
     TTErr   ProcessEnd();
     
     /** Specific process method
-     @param	inputValue      position and date of the scheduler
+     @details when this method is called the running state is YES which means event status propagation is enabled
+     @param	inputValue      position of the scheduler
      @param	outputValue     return an error of the processing
      @return                an error code returned by the process method */
     TTErr   Process(const TTValue& inputValue, TTValue& outputValue);
     
     /** Specific process method for pause/resume
+     @details when this method is called the running state is YES which means event status propagation is enabled
      @param	inputValue      boolean paused state of the scheduler
      @param	outputValue     return an error of the processing
      @return                an error code returned by the process paused method */
@@ -92,6 +93,27 @@ private :
      @return                .. */
 	TTErr	WriteAsText(const TTValue& inputValue, TTValue& outputValue);
 	TTErr	ReadFromText(const TTValue& inputValue, TTValue& outputValue);
+    
+    
+    
+    /** To be notified when an event date changed
+     @param inputValue      the event which have changed his date
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr   EventDateChanged(const TTValue& inputValue, TTValue& outputValue);
+    
+    /** To be notified when an event condition changed
+     @param inputValue      the event which have changed his condition, the condition
+     @param outputValue     nothing
+     @return                kTTErrNone */
+    TTErr   EventConditionChanged(const TTValue& inputValue, TTValue& outputValue);
+    
+    
+    
+    /** Get curve addresses
+     @param	value           the returned curve addresses
+     @return                kTTErrNone */
+	TTErr   getCurveAddresses(TTValue& value);
     
     /** Add a curve at an address
      @param inputvalue      address
@@ -130,8 +152,10 @@ private :
     void    addSender(TTAddress anAddress);
     void    removeSender(TTAddress anAddress);
     
-    void    addReceiver(TTAddress anAddress);
-    void    removeReceiver(TTAddress anAddress);
+    void    addRecordReceiver(TTAddress anAddress);
+    void    removeRecordReceiver(TTAddress anAddress);
+    
+    TTValue queryValue(TTAddress anAddress);
     
     friend TTErr TTSCORE_EXPORT AutomationReceiverReturnValueCallback(const TTValue& baton, const TTValue& data);
 };

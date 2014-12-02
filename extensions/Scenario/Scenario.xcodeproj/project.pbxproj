@@ -8,7 +8,6 @@
 
 /* Begin PBXFileReference section */
 		468C97D017A2B2CD0032447A /* Scenario.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Scenario.h; sourceTree = "<group>"; };
-		468C97D117A2B2CD0032447A /* ScenarioGraph.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScenarioGraph.h; sourceTree = "<group>"; };
 		468C97D217A2B2CD0032447A /* ScenarioSolver.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScenarioSolver.h; sourceTree = "<group>"; };
 		468C97D517A2B2D50032447A /* AllenRelation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AllenRelation.cpp; sourceTree = "<group>"; };
 		468C97D617A2B2D50032447A /* AllenRelation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AllenRelation.hpp; sourceTree = "<group>"; };
@@ -52,36 +51,7 @@
 		468C981F17A2B2D60032447A /* solver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = solver.hpp; sourceTree = "<group>"; };
 		468C982217A2B2D60032447A /* solver_wrap.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = solver_wrap.cpp; sourceTree = "<group>"; };
 		468C982317A2B2D60032447A /* solver_wrap.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = solver_wrap.hpp; sourceTree = "<group>"; };
-		468C982717A2B2D60032447A /* Arc.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Arc.cpp; sourceTree = "<group>"; };
-		468C982817A2B2D60032447A /* Arc.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Arc.hpp; sourceTree = "<group>"; };
-		468C982B17A2B2D60032447A /* ArithmeticException.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ArithmeticException.hpp; sourceTree = "<group>"; };
-		468C982C17A2B2D60032447A /* ExtendedInt.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ExtendedInt.cpp; sourceTree = "<group>"; };
-		468C982D17A2B2D60032447A /* ExtendedInt.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ExtendedInt.hpp; sourceTree = "<group>"; };
-		468C983017A2B2D60032447A /* IllegalArgumentException.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IllegalArgumentException.hpp; sourceTree = "<group>"; };
-		468C983117A2B2D60032447A /* IncoherentStateException.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IncoherentStateException.hpp; sourceTree = "<group>"; };
-		468C983217A2B2D60032447A /* OutOfBoundException.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = OutOfBoundException.hpp; sourceTree = "<group>"; };
-		468C983317A2B2D60032447A /* PetriNet.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PetriNet.cpp; sourceTree = "<group>"; };
-		468C983417A2B2D60032447A /* PetriNet.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PetriNet.hpp; sourceTree = "<group>"; };
-		468C983717A2B2D60032447A /* PetriNetItem.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PetriNetItem.cpp; sourceTree = "<group>"; };
-		468C983817A2B2D60032447A /* PetriNetItem.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PetriNetItem.hpp; sourceTree = "<group>"; };
-		468C983B17A2B2D60032447A /* PetriNetNode.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PetriNetNode.cpp; sourceTree = "<group>"; };
-		468C983C17A2B2D60032447A /* PetriNetNode.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PetriNetNode.hpp; sourceTree = "<group>"; };
-		468C983F17A2B2D60032447A /* Place.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Place.cpp; sourceTree = "<group>"; };
-		468C984017A2B2D60032447A /* Place.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Place.hpp; sourceTree = "<group>"; };
-		468C984317A2B2D60032447A /* PriorityTransitionAction.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PriorityTransitionAction.cpp; sourceTree = "<group>"; };
-		468C984417A2B2D60032447A /* PriorityTransitionAction.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PriorityTransitionAction.hpp; sourceTree = "<group>"; };
-		468C984717A2B2D60032447A /* ThreadSafeList.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ThreadSafeList.cpp; sourceTree = "<group>"; };
-		468C984817A2B2D60032447A /* ThreadSafeList.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ThreadSafeList.hpp; sourceTree = "<group>"; };
-		468C984B17A2B2D60032447A /* Token.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Token.cpp; sourceTree = "<group>"; };
-		468C984C17A2B2D60032447A /* Token.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Token.hpp; sourceTree = "<group>"; };
-		468C984F17A2B2D60032447A /* Transition.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Transition.cpp; sourceTree = "<group>"; };
-		468C985017A2B2D60032447A /* Transition.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Transition.hpp; sourceTree = "<group>"; };
-		468C985317A2B2D60032447A /* TransitionAction.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TransitionAction.cpp; sourceTree = "<group>"; };
-		468C985417A2B2D60032447A /* TransitionAction.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TransitionAction.hpp; sourceTree = "<group>"; };
-		468C985717A2B2D60032447A /* TransitionBitArray.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TransitionBitArray.cpp; sourceTree = "<group>"; };
-		468C985817A2B2D60032447A /* TransitionBitArray.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TransitionBitArray.hpp; sourceTree = "<group>"; };
 		468C985B17A2B2D60032447A /* Scenario.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Scenario.cpp; sourceTree = "<group>"; };
-		468C985E17A2B2D60032447A /* ScenarioGraph.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ScenarioGraph.cpp; sourceTree = "<group>"; };
 		468C986017A2B2D60032447A /* ScenarioSolver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ScenarioSolver.cpp; sourceTree = "<group>"; };
 		468C986217A2B2E60032447A /* Scenario.yml */ = {isa = PBXFileReference; lastKnownFileType = text; path = Scenario.yml; sourceTree = "<group>"; };
 		46A5878619FEE14D000E15F2 /* TimePluginLib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TimePluginLib.h; path = ../TimePluginLib.h; sourceTree = "<group>"; };
@@ -104,7 +74,6 @@
 			isa = PBXGroup;
 			children = (
 				468C97D017A2B2CD0032447A /* Scenario.h */,
-				468C97D117A2B2CD0032447A /* ScenarioGraph.h */,
 				468C97D217A2B2CD0032447A /* ScenarioSolver.h */,
 			);
 			path = includes;
@@ -114,11 +83,9 @@
 			isa = PBXGroup;
 			children = (
 				468C985B17A2B2D60032447A /* Scenario.cpp */,
-				468C985E17A2B2D60032447A /* ScenarioGraph.cpp */,
 				468C986017A2B2D60032447A /* ScenarioSolver.cpp */,
 				468C97D417A2B2D50032447A /* CSP */,
 				468C980B17A2B2D60032447A /* Gecode */,
-				468C982617A2B2D60032447A /* PetriNet */,
 			);
 			path = source;
 			sourceTree = SOURCE_ROOT;
@@ -177,41 +144,6 @@
 				468C982317A2B2D60032447A /* solver_wrap.hpp */,
 			);
 			path = Gecode;
-			sourceTree = "<group>";
-		};
-		468C982617A2B2D60032447A /* PetriNet */ = {
-			isa = PBXGroup;
-			children = (
-				468C982717A2B2D60032447A /* Arc.cpp */,
-				468C982817A2B2D60032447A /* Arc.hpp */,
-				468C982B17A2B2D60032447A /* ArithmeticException.hpp */,
-				468C982C17A2B2D60032447A /* ExtendedInt.cpp */,
-				468C982D17A2B2D60032447A /* ExtendedInt.hpp */,
-				468C983017A2B2D60032447A /* IllegalArgumentException.hpp */,
-				468C983117A2B2D60032447A /* IncoherentStateException.hpp */,
-				468C983217A2B2D60032447A /* OutOfBoundException.hpp */,
-				468C983317A2B2D60032447A /* PetriNet.cpp */,
-				468C983417A2B2D60032447A /* PetriNet.hpp */,
-				468C983717A2B2D60032447A /* PetriNetItem.cpp */,
-				468C983817A2B2D60032447A /* PetriNetItem.hpp */,
-				468C983B17A2B2D60032447A /* PetriNetNode.cpp */,
-				468C983C17A2B2D60032447A /* PetriNetNode.hpp */,
-				468C983F17A2B2D60032447A /* Place.cpp */,
-				468C984017A2B2D60032447A /* Place.hpp */,
-				468C984317A2B2D60032447A /* PriorityTransitionAction.cpp */,
-				468C984417A2B2D60032447A /* PriorityTransitionAction.hpp */,
-				468C984717A2B2D60032447A /* ThreadSafeList.cpp */,
-				468C984817A2B2D60032447A /* ThreadSafeList.hpp */,
-				468C984B17A2B2D60032447A /* Token.cpp */,
-				468C984C17A2B2D60032447A /* Token.hpp */,
-				468C984F17A2B2D60032447A /* Transition.cpp */,
-				468C985017A2B2D60032447A /* Transition.hpp */,
-				468C985317A2B2D60032447A /* TransitionAction.cpp */,
-				468C985417A2B2D60032447A /* TransitionAction.hpp */,
-				468C985717A2B2D60032447A /* TransitionBitArray.cpp */,
-				468C985817A2B2D60032447A /* TransitionBitArray.hpp */,
-			);
-			path = PetriNet;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

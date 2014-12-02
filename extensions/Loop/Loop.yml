@@ -1,0 +1,29 @@
+#defines:
+#  - TIME_PROCESS_DEBUG
+
+sources:
+  - ../TimePluginLib.cpp	
+  - source/Loop.cpp
+  
+includes:
+  - "."
+  - ".."
+  - "includes"
+  - "../../library/includes"
+  - "../../library/tests"
+  
+  # to build without having the whole jamoma repository
+  - ../../support/jamoma/includes
+  
+  # to use xml file format
+  - /usr/include/libxml2
+
+libraries:
+  - FOUNDATION
+  - DSP
+  - MODULAR
+  - ../../library/build/JamomaScore.dylib
+  
+  # to link with the xml library
+  - mac /usr/lib/libxml2.dylib
+  #- win 

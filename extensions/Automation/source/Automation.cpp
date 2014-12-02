@@ -30,6 +30,11 @@ extern "C" TT_EXTENSION_EXPORT TTErr TTLoadJamomaExtension_Automation(void)
 	return kTTErrNone;
 }
 
+#if 0
+#pragma mark -
+#pragma mark Constructor/Destructor
+#endif
+
 TIME_PROCESS_PLUGIN_CONSTRUCTOR
 {
     TIME_PLUGIN_INITIALIZE
@@ -53,6 +58,11 @@ Automation::~Automation()
     Clear();
 }
 
+#if 0
+#pragma mark -
+#pragma mark TimeProcessPlugin Methods
+#endif
+
 TTErr Automation::getParameterNames(TTValue& value)
 {
     value.clear();
@@ -61,10 +71,10 @@ TTErr Automation::getParameterNames(TTValue& value)
 	return kTTErrNone;
 }
 
-TTErr Automation::getCurveAddresses(TTValue& value)
-{
-    return mCurves.getKeys(value);
-}
+#if 0
+#pragma mark -
+#pragma mark TTTimeProcess Methods
+#endif
 
 TTErr Automation::Compile()
 {
@@ -109,29 +119,44 @@ TTErr Automation::ProcessStart()
     // set curves on the first sample and prepare new curves to record the address value
     mCurves.getKeys(keys);
     
-    for (i = 0; i < keys.size(); i++) {
-        
+    for (i = 0; i < keys.size(); i++)
+    {
         key = keys[i];
         mCurves.lookup(key, objects);
         
+        // update only for query symbol "?"
+        vStart = getStartEvent().send("StateAddressGetValue", key);
+        
+        if (vStart.size() == 1)
+        {
+            if (vStart[0].type() == kTypeSymbol)
+            {
+                TTSymbol s = vStart[0];
+                if (s == TTSymbol("?"))
+                {
+                    CurveUpdate(key, none);
+                }
+            }
+        }
+        
         // set each indexed curves on the first sample
-        for (j = 0; j < objects.size(); j++) {
-            
+        for (j = 0; j < objects.size(); j++)
+        {
             curve = objects[j];
             TTCurvePtr(curve.instance())->begin();
         }
         
         // a curve with a receiver is recording
-        if (!mReceivers.lookup(key, v)) {
-            
+        if (!mRecordReceivers.lookup(key, v))
+        {
             aReceiver = v[0];
             
             // delete all indexed curves
             mCurves.remove(key);
             
             // get the current value to update the start state
-            if (!aReceiver.send("Grab", v, vStart)) {
-                
+            if (!aReceiver.send("Grab", v, vStart))
+            {
                 // set the start event state value for this address
                 v = key;
                 v.append(TTPtr(&vStart));
@@ -140,8 +165,8 @@ TTErr Automation::ProcessStart()
                 // create as many indexed curves as the vStart size
                 objects.resize(vStart.size());
                 
-                for (j = 0; j < vStart.size(); j++) {
-                    
+                for (j = 0; j < vStart.size(); j++)
+                {
                     curve = TTObject("Curve");
                     
                     // store the first point
@@ -170,11 +195,11 @@ TTErr Automation::ProcessEnd()
     TTBoolean   change = NO;
     
     // edit last point of each recording curves
-    mReceivers.getKeys(keys);
+    mRecordReceivers.getKeys(keys);
     for (i = 0; i < keys.size(); i++) {
         
         key = keys[i];
-        mReceivers.lookup(key, v);
+        mRecordReceivers.lookup(key, v);
         aReceiver = v[0];
         
         // get the current value to update the end state
@@ -216,7 +241,12 @@ TTErr Automation::ProcessEnd()
 
 TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTFloat64       position, date, sample;
+    TT_ASSERT("Automation::Process : inputValue is correct", inputValue.size() == 2 && inputValue[0].type() == kTypeFloat64 && inputValue[1].type() == kTypeFloat64);
+    
+    TTFloat64 position = inputValue[0];
+    TTFloat64 date = inputValue[1];
+    
+    TTFloat64       sample;
     TTValue         v, keys, objects, valueToSend, none;
     TTSymbol        key;
     TTAddress       address;
@@ -225,72 +255,63 @@ TTErr Automation::Process(const TTValue& inputValue, TTValue& outputValue)
     TTBoolean       redundancy;
 	TTErr			err;
     
-    if (inputValue.size() == 2) {
+    // store current position for recording
+    mCurrentPosition = position;
+    
+    // don't process for 0. or 1. to not send the same value twice
+    if (position == 0. || position == 1.)
+        return kTTErrGeneric;
+    
+    // calculate the curves
+    mCurves.getKeys(keys);
+    for (i = 0; i < keys.size(); i++) {
         
-        if (inputValue[0].type() == kTypeFloat64 && inputValue[1].type() == kTypeFloat64) {
+        key = keys[i];
+        
+        // a curve is processed only if it is not recording
+        if (!mRecordReceivers.lookup(key, objects))
+            continue;
+        
+        mCurves.lookup(key, objects);
+        
+        // process each indexed curve to fill the value to send
+        valueToSend.clear();
+        valueToSend.resize(objects.size());
+        err = kTTErrNone;
+        redundancy = YES;
+        for (j = 0; j < objects.size(); j++) {
             
-            position = inputValue[0];
-            date = inputValue[1];
+            curve = objects[j];
             
-            // store current position for recording
-            mCurrentPosition = position;
+            err = TTCurveNextSampleAt(TTCurvePtr(curve.instance()), position, sample);
             
-            // don't process for 0. or 1. to not send the same value twice
-            if (position == 0. || position == 1.)
-                return kTTErrGeneric;
+            // if no value
+            if (err == kTTErrValueNotFound)
+                break;
             
-            // calculate the curves
-            mCurves.getKeys(keys);
-            for (i = 0; i < keys.size(); i++) {
-                
-                key = keys[i];
-                
-                // a curve is processed only if it is not recording
-                if (!mReceivers.lookup(key, objects))
-                    continue;
-                
-                mCurves.lookup(key, objects);
-                
-                // process each indexed curve to fill the value to send
-                valueToSend.clear();
-                valueToSend.resize(objects.size());
-                err = kTTErrNone;
-                redundancy = YES;
-                for (j = 0; j < objects.size(); j++) {
-                    
-                    curve = objects[j];
-                    
-                    err = TTCurveNextSampleAt(TTCurvePtr(curve.instance()), position, sample);
-                    
-                    // if no value
-                    if (err == kTTErrValueNotFound)
-                        break;
-                    
-                    redundancy &= err == kTTErrGeneric;
-                    
-                    valueToSend[j] = sample;
-                }
-                
-                // if no value
-                if (err == kTTErrValueNotFound || redundancy)
-                    continue;
-                
-                // look for the sender at the address
-                if (!mSenders.lookup(key, objects)) {
-                    
-                    sender = objects[0];
-                    sender.send(kTTSym_Send, valueToSend, none);
-                }
-            }
+            redundancy &= err == kTTErrGeneric;
+            
+            valueToSend[j] = sample;
+        }
+        
+        // if no value
+        if (err == kTTErrValueNotFound || redundancy)
+            continue;
+        
+        // look for the sender at the address
+        if (!mSenders.lookup(key, objects)) {
+            
+            sender = objects[0];
+            sender.send(kTTSym_Send, valueToSend, none);
         }
     }
     
-    return kTTErrGeneric;
+    return kTTErrNone;
 }
 
 TTErr Automation::ProcessPaused(const TTValue& inputValue, TTValue& outputValue)
 {
-    // théo : what do do on pause/resume ?
+    // théo : what to do on pause/resume ?
     return kTTErrNone;
 }
 
@@ -488,6 +509,58 @@ TTErr Automation::ReadFromText(const TTValue& inputValue, TTValue& outputValue)
 	return kTTErrGeneric;
 }
 
+#if 0
+#pragma mark -
+#pragma mark Notifications
+#endif
+
+TTErr Automation::EventDateChanged(const TTValue& inputValue, TTValue& outputValue)
+{
+    TT_ASSERT("Automation::EventDateChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
+    
+    TTObject aTimeEvent = inputValue[0];
+    
+    if (aTimeEvent == this->getStartEvent())
+    {
+        // if needed, the compile method should be called again now
+        mCompiled = NO;
+        
+        return kTTErrNone;
+    }
+    else if (aTimeEvent == this->getEndEvent())
+    {
+        // if needed, the compile method should be called again now
+        mCompiled = NO;
+        
+        return kTTErrNone;
+    }
+    
+    TTLogError("Automation::EventDateChanged %s : wrong event\n", mName.c_str());
+    return kTTErrGeneric;
+}
+
+TTErr Automation::EventConditionChanged(const TTValue& inputValue, TTValue& outputValue)
+{
+    TT_ASSERT("Automation::EventConditionChanged : inputValue is correct", inputValue.size() == 2 && inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeObject);
+    
+    TTObject    aTimeEvent = inputValue[0];
+    TTObject    aTimeCondition = inputValue[1];
+    
+    // no rule
+    
+    return kTTErrNone;
+}
+
+#if 0
+#pragma mark -
+#pragma mark Specific Automation Methods
+#endif
+
+TTErr Automation::getCurveAddresses(TTValue& value)
+{
+    return mCurves.getKeys(value);
+}
+
 TTErr Automation::CurveAdd(const TTValue& inputValue, TTValue& outputValue)
 {
     TTValue     v, vStart, vEnd, parameters, objects, none;
@@ -496,17 +569,30 @@ TTErr Automation::CurveAdd(const TTValue& inputValue, TTValue& outputValue)
     TTBoolean   valid = YES;
     TTUInt32    i;
     
-    if (inputValue.size() == 1) {
-        
-        if (inputValue[0].type() == kTypeSymbol) {
-            
+    if (inputValue.size() == 1)
+    {
+        if (inputValue[0].type() == kTypeSymbol)
+        {
             address = inputValue[0];
             
             // if there is no curve at the address
-            if (mCurves.lookup(address, v)) {
-                
+            if (mCurves.lookup(address, v))
+            {
                 // get the start event state value for this address
                 getStartEvent().send("StateAddressGetValue", address, vStart);
+                
+                // check for query symbol "?"
+                if (vStart.size() == 1)
+                {
+                    if (vStart[0].type() == kTypeSymbol)
+                    {
+                        TTSymbol s = vStart[0];
+                        if (s == TTSymbol("?"))
+                        {
+                            vStart = queryValue(address);
+                        }
+                    }
+                }
                 
                 // get the end event state value for this address
                 getEndEvent().send("StateAddressGetValue", address, vEnd);
@@ -528,8 +614,8 @@ TTErr Automation::CurveAdd(const TTValue& inputValue, TTValue& outputValue)
                 // create a curve for each index of the value
                 objects.resize(vStart.size());
                 
-                for (i = 0; i < vStart.size(); i++) {
-                    
+                for (i = 0; i < vStart.size(); i++)
+                {
                     curve = TTObject("Curve");
                     
                     // prepare curve parameters
@@ -567,10 +653,10 @@ TTErr Automation::CurveGet(const TTValue& inputValue, TTValue& outputValue)
 {
     TTAddress  address;
     
-    if (inputValue.size() == 1) {
-        
-        if (inputValue[0].type() == kTypeSymbol) {
-            
+    if (inputValue.size() == 1)
+    {
+        if (inputValue[0].type() == kTypeSymbol)
+        {
             address = inputValue[0];
             
             mCurves.lookup(address, outputValue);
@@ -592,15 +678,15 @@ TTErr Automation::CurveUpdate(const TTValue& inputValue, TTValue& outputValue)
     TTBoolean   change = NO;
     
     // update all curves
-    if (inputValue.size() == 0) {
-        
+    if (inputValue.size() == 0)
+    {
         TTValue         keys;
         TTSymbol        key;
         
         // update all curves
         mCurves.getKeys(keys);
-        for (i = 0; i < keys.size(); i++) {
-            
+        for (i = 0; i < keys.size(); i++)
+        {
             key = keys[i];
             CurveUpdate(key, none);
         }
@@ -608,17 +694,30 @@ TTErr Automation::CurveUpdate(const TTValue& inputValue, TTValue& outputValue)
         return kTTErrNone;
     }
     
-    if (inputValue.size() == 1) {
-        
-        if (inputValue[0].type() == kTypeSymbol) {
-            
+    if (inputValue.size() == 1)
+    {
+        if (inputValue[0].type() == kTypeSymbol)
+        {
             address = inputValue[0];
             
             // if there is a curve at the address
-            if (!mCurves.lookup(address, objects)) {
-                
+            if (!mCurves.lookup(address, objects))
+            {
                 // get the start event state value for this address
                 getStartEvent().send("StateAddressGetValue", address, vStart);
+                
+                // check for query symbol "?"
+                if (vStart.size() == 1)
+                {
+                    if (vStart[0].type() == kTypeSymbol)
+                    {
+                        TTSymbol s = vStart[0];
+                        if (s == TTSymbol("?"))
+                        {
+                            vStart = queryValue(address);
+                        }
+                    }
+                }
                 
                 // get the end event state value for this address
                 getEndEvent().send("StateAddressGetValue", address, vEnd);
@@ -631,13 +730,13 @@ TTErr Automation::CurveUpdate(const TTValue& inputValue, TTValue& outputValue)
                     return kTTErrGeneric;
                 
                 // update each indexed curve
-                for (i = 0; i < objects.size(); i++) {
-                    
+                for (i = 0; i < objects.size(); i++)
+                {
                     curve = objects[i];
                     
                     // get current curve parameters
-                    if (!curve.get("functionParameters", parameters)) {
-                        
+                    if (!curve.get("functionParameters", parameters))
+                    {
                         // change the first point y value : x1 y1 b1 ...
                         parameters[1] = TTFloat64(vStart[i]);
                         
@@ -671,15 +770,15 @@ TTErr Automation::CurveRemove(const TTValue& inputValue, TTValue& outputValue)
     TTAddress   address;
     TTObject    curve;
     
-    if (inputValue.size() == 1) {
-        
-        if (inputValue[0].type() == kTypeSymbol) {
-            
+    if (inputValue.size() == 1)
+    {
+        if (inputValue[0].type() == kTypeSymbol)
+        {
             address = inputValue[0];
             
             // if there is a curve at the address
-            if (!mCurves.lookup(address, objects)) {
-                
+            if (!mCurves.lookup(address, objects))
+            {
                 // unregister the curve
                 mCurves.remove(address);
                 
@@ -687,7 +786,7 @@ TTErr Automation::CurveRemove(const TTValue& inputValue, TTValue& outputValue)
                 removeSender(address);
                 
                 // remove receiver
-                removeReceiver(address);
+                removeRecordReceiver(address);
                 
                 return kTTErrNone;
             }
@@ -705,15 +804,15 @@ TTErr Automation::Clear()
     
     // delete all curves
     mCurves.getKeys(keys);
-    for (i = 0; i < keys.size(); i++) {
-        
+    for (i = 0; i < keys.size(); i++)
+    {
         key = keys[i];
 
         // remove sender
         removeSender(TTAddress(key));
         
         // remove receiver
-        removeReceiver(TTAddress(key));
+        removeRecordReceiver(TTAddress(key));
     }
     
     mCurves.clear();
@@ -727,16 +826,16 @@ TTErr Automation::CurveRecord(const TTValue& inputValue, TTValue& outputValue)
     TTAddress address;
     TTBoolean record;
     
-    if (inputValue.size() == 2) {
-        
-        if (inputValue[0].type() == kTypeSymbol && inputValue[1].type() == kTypeBoolean) {
-            
+    if (inputValue.size() == 2)
+    {
+        if (inputValue[0].type() == kTypeSymbol && inputValue[1].type() == kTypeBoolean)
+        {
             address = inputValue[0];
             record = inputValue[1];
             
             // if there is no curve at the address
-            if (mCurves.lookup(address, objects)) {
-                
+            if (mCurves.lookup(address, objects))
+            {
                 // register the address with no curves
                 mCurves.append(address, objects);
                 
@@ -745,9 +844,9 @@ TTErr Automation::CurveRecord(const TTValue& inputValue, TTValue& outputValue)
             }
             
             // add or remove receiver for the address
-            if (record) {
-                
-                addReceiver(address);
+            if (record)
+            {
+                addRecordReceiver(address);
                 
                 // we also need to clear the start and the end state for this address
                 // otherwise its value will be recalled on start or on end
@@ -755,7 +854,7 @@ TTErr Automation::CurveRecord(const TTValue& inputValue, TTValue& outputValue)
                 getEndEvent().send("StateAddressClear", address, out);
             }
             else
-                removeReceiver(address);
+                removeRecordReceiver(address);
             
             return kTTErrNone;
         }
@@ -770,8 +869,8 @@ void Automation::addSender(TTAddress anAddress)
     TTValue     v, none;
     
     // if there is no sender for the address
-    if (mSenders.lookup(anAddress, v)) {
-        
+    if (mSenders.lookup(anAddress, v))
+    {
         aSender = TTObject(kTTSym_Sender);
         
         // set the address of the sender
@@ -785,8 +884,8 @@ void Automation::removeSender(TTAddress anAddress)
 {
     TTValue v;
     
-    if (!mSenders.lookup(anAddress, v)) {
-        
+    if (!mSenders.lookup(anAddress, v))
+    {
         TTObject aSender = v[0];
         aSender.set(kTTSym_address, kTTAdrsEmpty);
         
@@ -794,14 +893,14 @@ void Automation::removeSender(TTAddress anAddress)
     }
 }
 
-void Automation::addReceiver(TTAddress anAddress)
+void Automation::addRecordReceiver(TTAddress anAddress)
 {
     TTObject    aReceiver, aReceiverCallback, empty, thisObject(this);
     TTValue     args, baton, none;
     
     // if there is no receiver for the address
-    if (mReceivers.lookup(anAddress, none)) {
-        
+    if (mRecordReceivers.lookup(anAddress, none))
+    {
         // No callback for the address
         args = empty;
         
@@ -819,26 +918,35 @@ void Automation::addReceiver(TTAddress anAddress)
         // set the address of the receiver
         aReceiver.set(kTTSym_address, anAddress);
         
-        mReceivers.append(anAddress, aReceiver);
+        mRecordReceivers.append(anAddress, aReceiver);
     }
 }
 
-void Automation::removeReceiver(TTAddress anAddress)
+void Automation::removeRecordReceiver(TTAddress anAddress)
 {
     TTValue v;
     
-    if (!mReceivers.lookup(anAddress, v)) {
-        
+    if (!mRecordReceivers.lookup(anAddress, v))
+    {
         TTObject aReceiver = v[0];
         aReceiver.set(kTTSym_address, kTTAdrsEmpty);
         
-        mReceivers.remove(anAddress);
+        mRecordReceivers.remove(anAddress);
     }
+}
+
+TTValue Automation::queryValue(TTAddress anAddress)
+{
+    TTObject aReceiver(kTTSym_Receiver);
+    aReceiver.set(kTTSym_address, anAddress);
+    TTValue value = aReceiver.send("Grab", anAddress);
+    aReceiver.set(kTTSym_address, kTTAdrsEmpty);
+    return value;
 }
 
 #if 0
 #pragma mark -
-#pragma mark Some Methods
+#pragma mark Callback Functions
 #endif
 
 TTErr AutomationReceiverReturnValueCallback(const TTValue& baton, const TTValue& data)
