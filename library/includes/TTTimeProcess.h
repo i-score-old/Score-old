@@ -54,6 +54,8 @@ protected :
                                                                     ///< it is related to the running state of the scheduler
                                                                     ///< but it also allows to avoid last scheduler tick to call the process method (it could happen one tick after the stop)
     
+    TTBoolean                       mSelfExecution;                 ///< an internal flag to know if the process is executing itself
+    
     TTBoolean                       mCompiled;                      ///< a boolean flag to know if the compile method needs to be called or not (uselly after an event date change)
     
     TTBoolean                       mExternalTick;                  ///< a boolean flag to ease the access to the scheduler externalTick attribute

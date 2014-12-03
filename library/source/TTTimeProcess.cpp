@@ -32,6 +32,7 @@ mMute(NO),
 mVerticalPosition(0),
 mVerticalSize(1),
 mRunning(NO),
+mSelfExecution(NO),
 mCompiled(NO),
 mExternalTick(NO),
 mDurationMinReached(NO)
@@ -464,6 +465,9 @@ TTErr TTTimeProcess::Start()
         // TODO : have a start state relative to this process stored inside the start event
         mStartEvent.send("StatePush");
         
+        // set execution mode
+        mSelfExecution = YES;
+        
         // run scheduler
         return Play();
     }
@@ -478,6 +482,9 @@ TTErr TTTimeProcess::End()
     {
         // stop scheduler
         TTErr err = Stop();
+        
+        // reset execution mode
+        mSelfExecution = NO;
         
         // push the end state relative to this process
         // TODO : have a end state relative to this process stored inside the end event
@@ -714,6 +721,17 @@ TTErr TTTimeProcess::SchedulerRunningChanged(const TTValue& inputValue, TTValue&
         
         // notify ProcessEnded observers
         sendStatusNotification(kTTSym_ProcessEnded);
+        
+        // in self execution mode :
+        if (mSelfExecution)
+        {
+            // push the end state relative to this process
+            // TODO : have a end state relative to this process stored inside the end event
+            mEndEvent.send("StatePush");
+            
+            // reset execution mode
+            mSelfExecution = NO;
+        }
         
         return kTTErrNone;
     }

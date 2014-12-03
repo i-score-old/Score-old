@@ -383,9 +383,12 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
     // no more event to process
     if (eventHappenedOrDisposedCount == mTimeEvents.getSize())
     {
-        // TODO : we should send a notification because
-        TTObject thisObject(this);
-        return thisObject.send(kTTSym_Stop);
+        // in self execution mode : stop our self
+        if (mSelfExecution)
+        {
+            TTObject thisObject(this);
+            return thisObject.send(kTTSym_Stop);
+        }
     }
     
     return kTTErrNone;
