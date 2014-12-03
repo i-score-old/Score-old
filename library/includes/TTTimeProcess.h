@@ -64,8 +64,6 @@ private :
     
     TTObject                        mStartEvent;                    ///< the event object which handles the time process execution start
     
-    TTList                          mIntermediateEvents;            ///< the list of all intermediate events
-    
     TTObject                        mEndEvent;                      ///< the event object which handles the time process execution stop
     
     /** Specific compilation method used to pre-processed data in order to accelarate Process method
@@ -211,11 +209,6 @@ private :
      @param	value           the date as #TTFloat64 value
      @return                an error code if the date cannot be get */
     TTErr           getDate(TTValue& value);
-    
-    /** Get intermediate events of the time process
-     @param	value           returned events
-     @return                kTTErrNone */
-    TTErr           getIntermediateEvents(TTValue& value);
     
     /** Move the time process
      @details this method eases the setting of the start and end event dates

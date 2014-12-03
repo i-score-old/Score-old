@@ -408,13 +408,6 @@ TTErr TTTimeProcess::getDate(TTValue& value)
     return kTTErrGeneric;
 }
 
-TTErr TTTimeProcess::getIntermediateEvents(TTValue& value)
-{
-    mIntermediateEvents.assignToValue(value);
-    
-    return kTTErrNone;
-}
-
 TTErr TTTimeProcess::Move(const TTValue& inputValue, TTValue& outputValue)
 {
     if (inputValue.size() == 2) {
