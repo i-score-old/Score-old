@@ -467,12 +467,12 @@ TTErr TTTimeProcess::Start()
     // filter repetitions
     if (!mRunning)
     {
-        // if there is no container to reset to a waiting status
-        if (!mContainer.valid())
-            mStartEvent.set("status", kTTSym_eventWaiting);
+        // push the start state relative to this process
+        // TODO : have a start state relative to this process stored inside the start event
+        mStartEvent.send("StatePush");
         
-        // make the start event happen to play the scheduler
-        return mStartEvent.send(kTTSym_Happen);
+        // run scheduler
+        return Play();
     }
     
     return kTTErrNone;
@@ -483,8 +483,14 @@ TTErr TTTimeProcess::End()
     // filter repetitions
     if (mRunning)
     {
-        // stop the scheduler to make the end event happen
-        return Stop();
+        // stop scheduler
+        TTErr err = Stop();
+        
+        // push the end state relative to this process
+        // TODO : have a end state relative to this process stored inside the end event
+        mEndEvent.send("StatePush");
+        
+        return err;
     }
     
     return kTTErrNone;
