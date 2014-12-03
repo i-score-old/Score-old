@@ -33,7 +33,7 @@ private :
     
     TTHash                      mCurves;						///< a table of freehand function units stored by address
     TTHash                      mSenders;						///< a table of TTSender to send curves
-    TTHash                      mReceivers;						///< a table of TTReceiver to record curves
+    TTHash                      mRecordReceivers;               ///< a table of TTReceivers to record curves
    
     TTValue                     mCurrentObjects;                ///< useful for file parsing
     TTFloat64                   mCurrentPosition;            ///< useful for recording
@@ -152,8 +152,10 @@ private :
     void    addSender(TTAddress anAddress);
     void    removeSender(TTAddress anAddress);
     
-    void    addReceiver(TTAddress anAddress);
-    void    removeReceiver(TTAddress anAddress);
+    void    addRecordReceiver(TTAddress anAddress);
+    void    removeRecordReceiver(TTAddress anAddress);
+    
+    TTValue queryValue(TTAddress anAddress);
     
     friend TTErr TTSCORE_EXPORT AutomationReceiverReturnValueCallback(const TTValue& baton, const TTValue& data);
 };
