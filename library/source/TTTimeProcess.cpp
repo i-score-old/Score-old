@@ -471,8 +471,17 @@ TTErr TTTimeProcess::Start()
         // run scheduler
         return Play();
     }
-    
-    return kTTErrNone;
+    else
+    {
+        // reset execution mode to not push end state (see in : TTTimeProcess::SchedulerRunningChanged)
+        mSelfExecution = NO;
+        
+        // stop scheduler
+        Stop();
+        
+        // restart
+        return Start();
+    }
 }
 
 TTErr TTTimeProcess::End()
