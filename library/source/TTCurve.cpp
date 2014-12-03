@@ -69,20 +69,33 @@ TTErr TTCurve::getFunctionParameters(TTValue& value)
     TTValue         curveList;
     TTUInt32        i, j;
     
-    if (mRecorded)
-        return kTTErrGeneric;
+    // edit function value
+    // curveList    : x1 y1 exponential base b1 x2 y2 exponential base b2 . . . . .
+    // value        : x1 y1 b1 x2 y2 b2 . . .
     
-    if (!mFunction.get("curveList", curveList)) {
+    if (mRecorded)
+    {
+        // return the samples
+        value.resize(getSize() * 3);
+        j = 0;
+        for (begin(); end(); next())
+        {
+            value[j] = current()[0];
+            value[j+1] = current()[1];
+            value[j+2] = TTFloat64(1.);
+            j++;
+        }
         
-        // edit function value
-        // curveList    : x1 y1 exponential base b1 x2 y2 exponential base b2 . . . . .
-        // value        : x1 y1 b1 x2 y2 b2 . . .
-        
+        return kTTErrNone;
+    }
+    
+    if (!mFunction.get("curveList", curveList))
+    {
         value.resize((curveList.size() / 5) * 3);
         
         j = 0;
-        for (i = 0; i < curveList.size(); i = i+5) {
-            
+        for (i = 0; i < curveList.size(); i = i+5)
+        {
             value[j] = curveList[i];
             value[j+1] = curveList[i+1];
             value[j+2] = curveList[i+4];
