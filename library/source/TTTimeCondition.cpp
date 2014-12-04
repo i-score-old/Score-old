@@ -709,7 +709,8 @@ TTErr TTTimeCondition::EventStatusChanged(const TTValue& inputValue, TTValue& ou
     TTCaseMapIterator   it = mCases.find(event.instance());
     TTSymbol            newStatus = inputValue[1], oldStatus = inputValue[2];
     
-    TT_ASSERT("TTTimeCondition::EventStatusChanged : status effectively changed", newStatus != oldStatus);
+    TTBoolean           different = newStatus != oldStatus; // JamomaCore #321
+    TT_ASSERT("TTTimeCondition::EventStatusChanged : status effectively changed", different);
     
     // inside a container ignore event notifications if the container is not running
     TTBoolean running = YES;
