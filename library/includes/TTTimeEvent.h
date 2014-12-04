@@ -78,6 +78,16 @@ private :
      @return                #kTTErrGeneric if the container is running */
     TTErr           setStatus(const TTValue& value);
     
+    /** Set the state relative to the event
+     @param	value           a state
+     @return                #kTTErrNone*/
+    TTErr           setState(const TTValue& value);
+    
+    /** Get the state relative to the event
+     @param	value           a state
+     @return                #kTTErrNone*/
+    TTErr           getState(TTValue& value);
+    
     /** Request to make the event to wait
      @details the request will be apply on next StatusUpdate call
      @return                #kTTErrGeneric if the request cannot be handled */

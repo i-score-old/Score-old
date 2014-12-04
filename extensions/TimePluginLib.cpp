@@ -18,7 +18,7 @@
 TimeProcessPlugin::TimeProcessPlugin(const TTValue& arguments) :
 TTTimeProcess(arguments)
 {
-    TT_ASSERT("Correct number of args to create TimeProcess", arguments.size() == 0);
+    ;
 }
 
 TimeProcessPlugin::~TimeProcessPlugin()
@@ -30,7 +30,7 @@ TimeProcessPlugin::~TimeProcessPlugin()
 TimeContainerPlugin::TimeContainerPlugin(const TTValue& arguments) :
 TTTimeContainer(arguments)
 {
-    TT_ASSERT("Correct number of args to create TimeContainer", arguments.size() == 0);
+    ;
 }
 
 TimeContainerPlugin::~TimeContainerPlugin()

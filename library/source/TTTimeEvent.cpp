@@ -54,7 +54,7 @@ mPushing(NO)
     addAttribute(Name, kTypeSymbol);
    	addAttributeWithSetter(Date, kTypeUInt32);
     addAttribute(Mute, kTypeBoolean);
-    addAttribute(State, kTypeObject);
+    addAttributeWithGetterAndSetter(State, kTypeObject);
     addAttributeWithSetter(Condition, kTypeObject);
     addAttributeWithSetter(Status, kTypeSymbol);
     
@@ -86,6 +86,9 @@ mPushing(NO)
     
     // generate a random name
     mName = mName.random();
+    
+    // set state script as flattened
+    mState.set("flattened", TTBoolean(YES));
 }
 
 TTTimeEvent::~TTTimeEvent()
@@ -150,6 +153,31 @@ TTErr TTTimeEvent::setStatus(const TTValue& value)
     }
     
     return applyStatus(value);
+}
+
+TTErr TTTimeEvent::setState(const TTValue& value)
+{
+    mState = value;
+  /*
+    // check if the state is flattened
+    TTBoolean flattened;
+    mState.get("flattened", flattened);
+    if (!flattened)
+        mState.send("Flatten");
+   */
+}
+
+TTErr TTTimeEvent::getState(TTValue& value)
+{
+    /*
+     // check if the state is flattened
+     TTBoolean flattened;
+     mState.get("flattened", flattened);
+     if (!flattened)
+     mState.send("Flatten");
+     */
+    
+    value = mState;
 }
 
 #if 0
