@@ -67,10 +67,13 @@ mPushing(NO)
     addMessage(Dispose);
     addMessage(StatusUpdate);
     
+    addMessage(StatePush);
+    addMessage(StateClear);
+    
     addMessageWithArguments(StateAddressGetValue);
     addMessageWithArguments(StateAddressSetValue);
     addMessageWithArguments(StateAddressClear);
-    addMessage(StatePush);
+    addMessageWithArguments(StateAddresses);
     
     addMessageWithArguments(ProcessAttach);
     addMessageWithArguments(ProcessDetach);
@@ -406,31 +409,59 @@ TTErr TTTimeEvent::applyStatus(const TTValue& value)
 #pragma mark State Management
 #endif
 
+TTErr TTTimeEvent::StatePush()
+{
+    if (mMute)
+        return kTTErrNone;
+    
+    if (!mPushing)
+    {
+        mPushing = YES;
+        
+        // recall the state
+        TTErr err = mState.send(kTTSym_Run);
+        
+        mPushing = NO;
+        
+        return err;
+    }
+    
+    return kTTErrGeneric;
+}
+
+TTErr TTTimeEvent::StateClear()
+{
+    TTErr err = mState.send("Clear");
+    mState.set("flattened", TTBoolean(YES));
+    return err;
+}
+
 TTErr TTTimeEvent::StateAddressGetValue(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTValue         v;
-    TTAddress       address;
-    TTListPtr       lines;
-    TTDictionaryBasePtr aLine;
-    TTErr           err;
-    
-    if (inputValue.size() == 1) {
-        
-        if (inputValue[0].type() == kTypeSymbol) {
+    if (inputValue.size() == 1)
+    {
+        if (inputValue[0].type() == kTypeSymbol)
+        {
+            TTValue     v;
+            TTAddress   address = inputValue[0];
             
-            address = inputValue[0];
+            // check if the state is flattened
+            TTBoolean flattened;
+            mState.get("flattened", flattened);
+            if (!flattened)
+                mState.send("Flatten");
             
             // get the lines of the state
-            mState.get(kTTSym_lines, v);
-            lines = TTListPtr(TTPtr(v[0]));
+            mState.get("flattenedLines", v);
+            TTListPtr flattenedLines = TTListPtr(TTPtr(v[0]));
             
             // find the line at address
-            err = lines->find(&TTScriptFindAddress, (TTPtr)&address, v);
+            TTErr err = flattenedLines->find(&TTScriptFindAddress, (TTPtr)&address, v);
             
             if (err)
                 return err;
             
-            aLine = TTDictionaryBasePtr((TTPtr)v[0]);
+            TTDictionaryBasePtr aLine = TTDictionaryBasePtr((TTPtr)v[0]);
             
             // get the value
             aLine->getValue(outputValue);
@@ -444,44 +475,43 @@ TTErr TTTimeEvent::StateAddressGetValue(const TTValue& inputValue, TTValue& outp
 
 TTErr TTTimeEvent::StateAddressSetValue(const TTValue& inputValue, TTValue& outputValue)
 {
-    TTValue         v, command;
-    TTAddress       address;
-    TTValuePtr      aValue;
-    TTListPtr       flattenedLines;
-    TTDictionaryBasePtr aLine;
-    TTErr           err;
-    
-    if (inputValue.size() == 2) {
-        
-        if (inputValue[0].type() == kTypeSymbol && inputValue[1].type() == kTypePointer) {
+    if (inputValue.size() >= 1)
+    {
+        if (inputValue[0].type() == kTypeSymbol)
+        {
+            TTValue     v;
+            TTAddress   address = inputValue[0];
             
-            address = inputValue[0];
-            aValue = TTValuePtr(TTPtr(inputValue[1]));
+            // check if the state is flattened
+            TTBoolean flattened;
+            mState.get("flattened", flattened);
+            if (!flattened)
+                mState.send("Flatten");
             
             // get the lines of the state
             mState.get("flattenedLines", v);
-            flattenedLines = TTListPtr(TTPtr(v[0]));
+            TTListPtr flattenedLines = TTListPtr(TTPtr(v[0]));
             
             // find the line at address
-            err = flattenedLines->find(&TTScriptFindAddress, (TTPtr)&address, v);
+            TTErr err = flattenedLines->find(&TTScriptFindAddress, (TTPtr)&address, v);
             
             // if the line doesn't exist : append it to the state
-            if (err) {
-                
-                command = *aValue;
-                command.prepend(address);
-                
-                mState.send("AppendCommand", command, v);
+            if (err)
+            {
+                return mState.send("AppendCommand", inputValue);
             }
-            else {
-            
-                aLine = TTDictionaryBasePtr((TTPtr)v[0]);
-            
+            else
+            {
+                TTDictionaryBasePtr aLine = TTDictionaryBasePtr((TTPtr)v[0]);
+                TTValue value;
+                
+                value.copyFrom(inputValue, 1);
+                
                 // set the value
-                aLine->setValue(*aValue);
+                aLine->setValue(value);
+                
+                return  kTTErrNone;
             }
-            
-            return  kTTErrNone;
         }
     }
     
@@ -491,34 +521,49 @@ TTErr TTTimeEvent::StateAddressSetValue(const TTValue& inputValue, TTValue& outp
 TTErr TTTimeEvent::StateAddressClear(const TTValue& inputValue, TTValue& outputValue)
 {
     TTValue none;
-
-    if (inputValue.size() == 1) {
-        
-        if (inputValue[0].type() == kTypeSymbol) {
-            
+    
+    if (inputValue.size() == 1)
+    {
+        if (inputValue[0].type() == kTypeSymbol)
+        {
             // remove the lines of the state
-            return mState.send("RemoveCommand", inputValue, none);
+            return mState.send("RemoveCommand", inputValue);
         }
     }
     
     return kTTErrGeneric;
 }
 
-TTErr TTTimeEvent::StatePush()
+TTErr TTTimeEvent::StateAddresses(const TTValue& inputValue, TTValue& outputValue)
 {
-    if (mMute)
-        return kTTErrNone;
+    // check if the state is flattened
+    TTBoolean flattened;
+    mState.get("flattened", flattened);
+    if (!flattened)
+        mState.send("Flatten");
     
-    if (!mPushing)
+    // get the state lines
+    TTValue out;
+    mState.get("flattenedLines", out);
+    TTListPtr flattenedLines = TTListPtr((TTPtr)out[0]);
+    
+    if (flattenedLines)
     {
-        mPushing = YES;
-
-        // recall the state
-        TTErr err = mState.send(kTTSym_Run);
+        outputValue.clear();
         
-        mPushing = NO;
+        // edit each line address into a "directory/address value" string
+        for (flattenedLines->begin(); flattenedLines->end(); flattenedLines->next())
+        {
+            TTDictionaryBasePtr aLine = TTDictionaryBasePtr((TTPtr)flattenedLines->current()[0]);
+            
+            // get the target address
+            TTAddress address;
+            aLine->lookup(kTTSym_target, out);
+            address = out[0];
+            outputValue.append(address);
+        }
         
-        return err;
+        return kTTErrNone;
     }
     
     return kTTErrGeneric;
@@ -531,10 +576,10 @@ TTErr TTTimeEvent::StatePush()
 
 TTErr TTTimeEvent::ProcessAttach(const TTValue& inputValue, TTValue& outputValue)
 {
-    if (inputValue.size() == 1) {
-        
-        if (inputValue[0].type() == kTypeObject) {
-            
+    if (inputValue.size() == 1)
+    {
+        if (inputValue[0].type() == kTypeObject)
+        {
             TTObject thisObject(this);
             TTObject aTimeProcess = inputValue[0];
             
@@ -553,8 +598,8 @@ TTErr TTTimeEvent::ProcessAttach(const TTValue& inputValue, TTValue& outputValue
                     newAttachedProcesses.append(attachedProcess);
                 }
                 
-                if (!found) {
-                    
+                if (!found)
+                {
                     // start process observation
                     aTimeProcess.registerObserverForNotifications(thisObject);
                     

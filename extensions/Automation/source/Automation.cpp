@@ -158,7 +158,7 @@ TTErr Automation::ProcessStart()
                 // set the start event state value for this address
                 v = key;
                 v.append(TTPtr(&vStart));
-                getStartEvent().send("StateAddressSetValue", v, none);
+                getStartEvent().send("StateAddressSetValue", v);
                 
                 // create as many indexed curves as the vStart size
                 objects.resize(vStart.size());
@@ -206,7 +206,7 @@ TTErr Automation::ProcessEnd()
             // set the end event state value for this address
             v = key;
             v.append(TTPtr(&vEnd));
-            getEndEvent().send("StateAddressSetValue", v, out);
+            getEndEvent().send("StateAddressSetValue", v);
             
             // update each indexed curves
             if (!mCurves.lookup(key, objects)) {
@@ -577,7 +577,7 @@ TTErr Automation::CurveAdd(const TTValue& inputValue, TTValue& outputValue)
             if (mCurves.lookup(address, v))
             {
                 // get the start event state value for this address
-                getStartEvent().send("StateAddressGetValue", address, vStart);
+                vStart = getStartEvent().send("StateAddressGetValue", address);
                 
                 // check for query symbol "?"
                 if (vStart.size() == 1)
@@ -593,7 +593,7 @@ TTErr Automation::CurveAdd(const TTValue& inputValue, TTValue& outputValue)
                 }
                 
                 // get the end event state value for this address
-                getEndEvent().send("StateAddressGetValue", address, vEnd);
+                vEnd = getEndEvent().send("StateAddressGetValue", address);
                 
                 // check values size : we can't make curve for none equal sized values
                 if (vStart.size() != vEnd.size())
@@ -702,7 +702,7 @@ TTErr Automation::CurveUpdate(const TTValue& inputValue, TTValue& outputValue)
             if (!mCurves.lookup(address, objects))
             {
                 // get the start event state value for this address
-                getStartEvent().send("StateAddressGetValue", address, vStart);
+                vStart = getStartEvent().send("StateAddressGetValue", address);
                 
                 // check for query symbol "?"
                 if (vStart.size() == 1)
@@ -718,7 +718,7 @@ TTErr Automation::CurveUpdate(const TTValue& inputValue, TTValue& outputValue)
                 }
                 
                 // get the end event state value for this address
-                getEndEvent().send("StateAddressGetValue", address, vEnd);
+                vEnd = getEndEvent().send("StateAddressGetValue", address);
                 
                 // check values size : can't update curves for none equal sized values
                 if (vStart.size() != vEnd.size())
@@ -848,8 +848,8 @@ TTErr Automation::CurveRecord(const TTValue& inputValue, TTValue& outputValue)
                 
                 // we also need to clear the start and the end state for this address
                 // otherwise its value will be recalled on start or on end
-                getStartEvent().send("StateAddressClear", address, out);
-                getEndEvent().send("StateAddressClear", address, out);
+                getStartEvent().send("StateAddressClear", address);
+                getEndEvent().send("StateAddressClear", address);
             }
             else
                 removeRecordReceiver(address);

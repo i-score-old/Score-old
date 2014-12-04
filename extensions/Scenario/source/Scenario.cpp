@@ -823,6 +823,15 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
             }
         }
         
+        // ask all event's state addresses to flatten it because they are managed by a TTScript class
+        // TODO : don't use TTScript anymore !
+        for (mTimeEvents.begin(); mTimeEvents.end(); mTimeEvents.next())
+        {
+            TTObject event = mTimeEvents.current()[0];
+            TTValue none;
+            event.send("StateAddresses", none);
+        }
+        
         return kTTErrNone;
     }
     

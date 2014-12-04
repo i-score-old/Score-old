@@ -119,32 +119,45 @@ private :
      @return                .. */
 	TTErr           WriteAsXml(const TTValue& inputValue, TTValue& outputValue);
 	TTErr           ReadFromXml(const TTValue& inputValue, TTValue& outputValue);
-
+    
+    
+    /** Push the state content
+     @details this method eases the call of state run method
+     @return                #kTTErrNone */
+    TTErr           StatePush();
+    
+    /** Clear the state content
+     @details this method eases the call of state clear method
+     @return                #kTTErrNone */
+    TTErr           StateClear();
+    
     /** Get a line value of the state for an address
      @details this method eases the access of one state value
-     @param	inputValue      an address
-     @param	outputValue     the value of the state for an address
+     @param	inputValue      #TTAddress
+     @param	outputValue     #TTValue of the state for an address
      @return                kTTErrNone */
     TTErr           StateAddressGetValue(const TTValue& inputValue, TTValue& outputValue);
     
     /** Set a line value of the state for an address
      @details this method eases the access of one state value
-     @param	inputValue      an address, value pointer
+     @param	inputValue      #TTAddress, #TTValuePtr
      @param	outputValue     the value of the state for an address
      @return                kTTErrNone */
     TTErr           StateAddressSetValue(const TTValue& inputValue, TTValue& outputValue);
     
     /** Remove a line to the state for an address
      @details this method eases the access of one state value
-     @param	inputValue      an address
+     @param	inputValue      #TTAddress
      @param	outputValue     nothing
      @return                #kTTErrNone */
     TTErr           StateAddressClear(const TTValue& inputValue, TTValue& outputValue);
     
-    /** Push the state content
-     @details this method eases the call of state run method
+    /** Get all addresses of the state
+     @details this method eases the access of all addresses of the state
+     @param	inputValue      nothing
+     @param	outputValue     all #TTAddress
      @return                #kTTErrNone */
-    TTErr           StatePush();
+    TTErr           StateAddresses(const TTValue& inputValue, TTValue& outputValue);
     
     /** Attach a process to enable notification observation
      @param inputValue      the process to observe
