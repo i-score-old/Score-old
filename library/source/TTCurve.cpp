@@ -69,21 +69,21 @@ TTErr TTCurve::getFunctionParameters(TTValue& value)
     TTValue         curveList;
     TTUInt32        i, j;
     
-    // edit function value
-    // curveList    : x1 y1 exponential base b1 x2 y2 exponential base b2 . . . . .
-    // value        : x1 y1 b1 x2 y2 b2 . . .
-    
     if (mRecorded)
     {
-        // return the samples
+        // return parameters from samples
+        // curveList    : x1 y1 exponential base b1 x2 y2 exponential base b2 . . . . .
+        // value        : x1 y1 b1 x2 y2 b2 . . .
+        
         value.resize(getSize() * 3);
+        
         j = 0;
         for (begin(); end(); next())
         {
             value[j] = current()[0];
             value[j+1] = current()[1];
             value[j+2] = TTFloat64(1.);
-            j++;
+            j = j+3;
         }
         
         return kTTErrNone;
@@ -91,6 +91,10 @@ TTErr TTCurve::getFunctionParameters(TTValue& value)
     
     if (!mFunction.get("curveList", curveList))
     {
+        // return parameters from function value
+        // curveList    : x1 y1 exponential base b1 x2 y2 exponential base b2 . . . . .
+        // value        : x1 y1 b1 x2 y2 b2 . . .
+        
         value.resize((curveList.size() / 5) * 3);
         
         j = 0;
@@ -114,9 +118,25 @@ TTErr TTCurve::setFunctionParameters(const TTValue& value)
     TTValue     curveList, none;
     TTUInt32    i, j, duration;
     
-    if (value.size() > 0) {
+    if (mRecorded)
+    {
+        // edit samples from parameters
+        // value        : x1 y1 b1 x2 y2 b2 . . .
+        // sample       : x1 y1 x2 y2 . .
         
-        // edit function curve list
+        clear();
+        
+        for (i = 0; i < value.size(); i = i+3)
+        {
+            append(TTValue(value[i], value[i+1]));
+        }
+        
+        return kTTErrNone;
+    }
+    
+    if (value.size() > 0)
+    {
+        // edit function curve list from parameters
         // value        : x1 y1 b1 x2 y2 b2 . . .
         // curveList    : x1 y1 exponential base b1 x2 y2 exponential base b2 . . . . .
         
@@ -127,12 +147,12 @@ TTErr TTCurve::setFunctionParameters(const TTValue& value)
             return kTTErrGeneric;
         
         j = 0;
-        for (i = 0; i < value.size(); i = i+3) {
-            
+        for (i = 0; i < value.size(); i = i+3)
+        {
             if (value[i].type() == kTypeFloat64 &&
                 value[i+1].type() == kTypeFloat64 &&
-                value[i+2].type() == kTypeFloat64) {
-                
+                value[i+2].type() == kTypeFloat64)
+            {
                 curveList[j] = value[i];
                 curveList[j+1] = value[i+1];
                 curveList[j+2] = TTSymbol("exponential");
