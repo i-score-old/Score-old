@@ -32,6 +32,7 @@ mMute(NO),
 mVerticalPosition(0),
 mVerticalSize(1),
 mRunning(NO),
+mSelfExecution(NO),
 mCompiled(NO),
 mExternalTick(NO),
 mDurationMinReached(NO)
@@ -406,13 +407,6 @@ TTErr TTTimeProcess::getDate(TTValue& value)
     return kTTErrGeneric;
 }
 
-TTErr TTTimeProcess::getIntermediateEvents(TTValue& value)
-{
-    mIntermediateEvents.assignToValue(value);
-    
-    return kTTErrNone;
-}
-
 TTErr TTTimeProcess::Move(const TTValue& inputValue, TTValue& outputValue)
 {
     if (inputValue.size() == 2) {
@@ -465,15 +459,27 @@ TTErr TTTimeProcess::Start()
     // filter repetitions
     if (!mRunning)
     {
-        // if there is no container to reset to a waiting status
-        if (!mContainer.valid())
-            mStartEvent.set("status", kTTSym_eventWaiting);
+        // push the start state relative to this process
+        // TODO : have a start state relative to this process stored inside the start event
+        mStartEvent.send("StatePush");
         
-        // make the start event happen to play the scheduler
-        return mStartEvent.send(kTTSym_Happen);
+        // set execution mode
+        mSelfExecution = YES;
+        
+        // run scheduler
+        return Play();
     }
-    
-    return kTTErrNone;
+    else
+    {
+        // reset execution mode to not push end state (see in : TTTimeProcess::SchedulerRunningChanged)
+        mSelfExecution = NO;
+        
+        // stop scheduler
+        Stop();
+        
+        // restart
+        return Start();
+    }
 }
 
 TTErr TTTimeProcess::End()
@@ -481,8 +487,17 @@ TTErr TTTimeProcess::End()
     // filter repetitions
     if (mRunning)
     {
-        // stop the scheduler to make the end event happen
-        return Stop();
+        // stop scheduler
+        TTErr err = Stop();
+        
+        // reset execution mode
+        mSelfExecution = NO;
+        
+        // push the end state relative to this process
+        // TODO : have a end state relative to this process stored inside the end event
+        mEndEvent.send("StatePush");
+        
+        return err;
     }
     
     return kTTErrNone;
@@ -713,6 +728,17 @@ TTErr TTTimeProcess::SchedulerRunningChanged(const TTValue& inputValue, TTValue&
         
         // notify ProcessEnded observers
         sendStatusNotification(kTTSym_ProcessEnded);
+        
+        // in self execution mode :
+        if (mSelfExecution)
+        {
+            // push the end state relative to this process
+            // TODO : have a end state relative to this process stored inside the end event
+            mEndEvent.send("StatePush");
+            
+            // reset execution mode
+            mSelfExecution = NO;
+        }
         
         return kTTErrNone;
     }
