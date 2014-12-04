@@ -12,6 +12,8 @@ The Score framework is based on the Jamoma Foundation which allows to setup a Pe
 
 Installing
 
+0 : Clone the Score folder into JamomaCore folder : https://github.com/jamoma/JamomaCore
+
 1 : First of all you need to download the Gecode framework : http://www.gecode.org/download/Gecode-3.7.3.dmg
 
 2 : create a jamoma folder inside /usr/local/ and give you a full access (read+write) on this jamoma folder.

@@ -19,6 +19,8 @@ elsif mac?
     `rm /usr/local/jamoma/extensions/*.*`
     `rm /usr/local/jamoma/includes/*.*`
     `rm /usr/local/jamoma/lib/*.*`
+    
+    puts "Clear usr/local/lib aliases"
     `rm /usr/local/lib/*.ttdylib`
     `rm /usr/local/lib/Jamoma*.dylib`
     
@@ -95,17 +97,9 @@ elsif mac?
     `ln -s /usr/local/jamoma/extensions/Interval.ttdylib /usr/local/lib/Interval.ttdylib`
     `ln -s /usr/local/jamoma/extensions/Loop.ttdylib /usr/local/lib/Loop.ttdylib`
     `ln -s /usr/local/jamoma/extensions/Scenario.ttdylib /usr/local/lib/Scenario.ttdylib`
-
-    `ln -s /usr/local/jamoma/lib/JamomaScore.dylib /usr/local/lib/JamomaScore.dylib`
-    `ln -s /usr/local/jamoma/extensions/Automation.ttdylib /usr/local/lib/Automation.ttdylib`
-    `ln -s /usr/local/jamoma/extensions/Interval.ttdylib /usr/local/lib/Interval.ttdylib`
-    `ln -s /usr/local/jamoma/extensions/Loop.ttdylib /usr/local/lib/Loop.ttdylib`
-    `ln -s /usr/local/jamoma/extensions/Scenario.ttdylib /usr/local/lib/Scenario.ttdylib`
     
-    # Clean .orig files
-    `rm /usr/local/jamoma/extensions/*.orig`
+    # Clean includes .orig files
     `rm /usr/local/jamoma/includes/*.orig`
-    `rm /usr/local/jamoma/lib/*.orig`
 end
 
 puts "done"
