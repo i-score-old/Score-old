@@ -5,8 +5,9 @@
 #include <string>
 
 // A class for our application
-class DemoApp {
-    
+class DemoApp
+{
+
 public:
     
     DemoApp(){};
