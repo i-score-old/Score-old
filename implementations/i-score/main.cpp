@@ -74,7 +74,7 @@ int main(int argc, const char * argv[])
             TTBoolean running;
             do
             {
-                sleep(1000);
+                sleep(1);
                 scenario.get("running", running);
             }
             while (running);
@@ -83,6 +83,6 @@ int main(int argc, const char * argv[])
         }
     }
     
-    return 0;
+    return EXIT_FAILURE;
 }
 
