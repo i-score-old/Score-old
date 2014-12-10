@@ -82,7 +82,7 @@ TTErr TTCurve::getFunctionParameters(TTValue& value)
         {
             value[j] = current()[0];
             value[j+1] = current()[1];
-            value[j+2] = TTFloat64(0.);
+            value[j+2] = TTFloat64(1.);
             j = j+3;
         }
         
