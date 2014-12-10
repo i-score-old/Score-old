@@ -275,7 +275,9 @@ TTErr Scenario::ProcessStart()
         if (startEventDate < timeOffset &&
             endEventDate < timeOffset)
         {
-            eventsToSetHappened.appendUnique(startEvent);
+            // if the start event is not already into the other list
+            if (eventsToRequestHappen.findEquals(startEvent, v))
+                eventsToSetHappened.appendUnique(startEvent);
         }
         else if (startEventDate < timeOffset &&
                  endEventDate > timeOffset)
