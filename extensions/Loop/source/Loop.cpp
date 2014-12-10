@@ -551,113 +551,111 @@ TTErr Loop::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
     {
         if (aXmlHandler->mXmlNodeStart)
         {
-            if (aXmlHandler->mXmlNodeIsEmpty)
-                mCurrentTimeProcess = TTObject();
+            if (!mPatternStartEvent.valid() || !mPatternEndEvent.valid())
+                return kTTErrGeneric;
             
-            else
+            // check start and end events are different
+            if (mPatternStartEvent == mPatternEndEvent)
+                return kTTErrGeneric;
+            
+            // create the time process
+            TTObject thisObject(this);
+            mCurrentTimeProcess = TTObject(aXmlHandler->mXmlNodeName, thisObject);
+            
+            // set the start and end events
+            setTimeProcessStartEvent(mCurrentTimeProcess, mPatternStartEvent);
+            setTimeProcessEndEvent(mCurrentTimeProcess, mPatternEndEvent);
+            
+            // append as pattern process
+            mPatternProcesses.append(mCurrentTimeProcess);
+            
+            // get the time process name
+            if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES))
             {
-                if (!mPatternStartEvent.valid() || !mPatternEndEvent.valid())
-                    return kTTErrGeneric;
-                
-                // check start and end events are different
-                if (mPatternStartEvent == mPatternEndEvent)
-                    return kTTErrGeneric;
-                
-                // create the time process
-                TTObject thisObject(this);
-                mCurrentTimeProcess = TTObject(aXmlHandler->mXmlNodeName, thisObject);
-                
-                // set the start and end events
-                setTimeProcessStartEvent(mCurrentTimeProcess, mPatternStartEvent);
-                setTimeProcessEndEvent(mCurrentTimeProcess, mPatternEndEvent);
-                
-                // append as pattern process
-                mPatternProcesses.append(mCurrentTimeProcess);
-                
-                // get the time process name
-                if (!aXmlHandler->getXmlAttribute(kTTSym_name, v, YES))
+                if (v.size() == 1)
                 {
-                    if (v.size() == 1)
+                    if (v[0].type() == kTypeSymbol)
                     {
-                        if (v[0].type() == kTypeSymbol)
-                        {
-                            mCurrentTimeProcess.set(kTTSym_name, v);
-                        }
-                    }
-                }
-                
-                // get the durationMin
-                if (!aXmlHandler->getXmlAttribute(kTTSym_durationMin, v, NO))
-                {
-                    if (v.size() == 1)
-                    {
-                        if (v[0].type() == kTypeUInt32)
-                        {
-                            mCurrentTimeProcess.set(kTTSym_durationMin, v);
-                        }
-                    }
-                }
-                
-                // get the durationMax
-                if (!aXmlHandler->getXmlAttribute(kTTSym_durationMax, v, NO))
-                {
-                    if (v.size() == 1)
-                    {
-                        if (v[0].type() == kTypeUInt32)
-                        {
-                            mCurrentTimeProcess.set(kTTSym_durationMax, v);
-                        }
-                    }
-                }
-                
-                // get the mute
-                if (!aXmlHandler->getXmlAttribute(kTTSym_mute, v, NO))
-                {
-                    if (v.size() == 1)
-                    {
-                        if (v[0].type() == kTypeInt32)
-                        {
-                            mCurrentTimeProcess.set(kTTSym_mute, v);
-                        }
-                    }
-                }
-                
-                // get the color
-                if (!aXmlHandler->getXmlAttribute(kTTSym_color, v, NO))
-                {
-                    if (v.size() == 3)
-                    {
-                        if (v[0].type() == kTypeInt32 && v[1].type() == kTypeInt32 && v[2].type() == kTypeInt32)
-                        {
-                            mCurrentTimeProcess.set(kTTSym_color, v);
-                        }
-                    }
-                }
-                
-                // get the vertical position
-                if (!aXmlHandler->getXmlAttribute(kTTSym_verticalPosition, v, NO))
-                {
-                    if (v.size() == 1)
-                    {
-                        if (v[0].type() == kTypeUInt32)
-                        {
-                            mCurrentTimeProcess.set(kTTSym_verticalPosition, v);
-                        }
-                    }
-                }
-                
-                // get the vertical size
-                if (!aXmlHandler->getXmlAttribute(kTTSym_verticalSize, v, NO))
-                {
-                    if (v.size() == 1)
-                    {
-                        if (v[0].type() == kTypeUInt32)
-                        {
-                            mCurrentTimeProcess.set(kTTSym_verticalSize, v);
-                        }
+                        mCurrentTimeProcess.set(kTTSym_name, v);
                     }
                 }
             }
+            
+            // get the durationMin
+            if (!aXmlHandler->getXmlAttribute(kTTSym_durationMin, v, NO))
+            {
+                if (v.size() == 1)
+                {
+                    if (v[0].type() == kTypeUInt32)
+                    {
+                        mCurrentTimeProcess.set(kTTSym_durationMin, v);
+                    }
+                }
+            }
+            
+            // get the durationMax
+            if (!aXmlHandler->getXmlAttribute(kTTSym_durationMax, v, NO))
+            {
+                if (v.size() == 1)
+                {
+                    if (v[0].type() == kTypeUInt32)
+                    {
+                        mCurrentTimeProcess.set(kTTSym_durationMax, v);
+                    }
+                }
+            }
+            
+            // get the mute
+            if (!aXmlHandler->getXmlAttribute(kTTSym_mute, v, NO))
+            {
+                if (v.size() == 1)
+                {
+                    if (v[0].type() == kTypeInt32)
+                    {
+                        mCurrentTimeProcess.set(kTTSym_mute, v);
+                    }
+                }
+            }
+            
+            // get the color
+            if (!aXmlHandler->getXmlAttribute(kTTSym_color, v, NO))
+            {
+                if (v.size() == 3)
+                {
+                    if (v[0].type() == kTypeInt32 && v[1].type() == kTypeInt32 && v[2].type() == kTypeInt32)
+                    {
+                        mCurrentTimeProcess.set(kTTSym_color, v);
+                    }
+                }
+            }
+            
+            // get the vertical position
+            if (!aXmlHandler->getXmlAttribute(kTTSym_verticalPosition, v, NO))
+            {
+                if (v.size() == 1)
+                {
+                    if (v[0].type() == kTypeUInt32)
+                    {
+                        mCurrentTimeProcess.set(kTTSym_verticalPosition, v);
+                    }
+                }
+            }
+            
+            // get the vertical size
+            if (!aXmlHandler->getXmlAttribute(kTTSym_verticalSize, v, NO))
+            {
+                if (v.size() == 1)
+                {
+                    if (v[0].type() == kTypeUInt32)
+                    {
+                        mCurrentTimeProcess.set(kTTSym_verticalSize, v);
+                    }
+                }
+            }
+            
+            // however if the node is empty : forget the object
+            if (aXmlHandler->mXmlNodeIsEmpty)
+                mCurrentTimeProcess = TTObject();
         }
     }
     else if (mCurrentTimeProcess.name() == aXmlHandler->mXmlNodeName)
