@@ -68,8 +68,9 @@ Dir.chdir "#{glibdir}"
 
 # Copy Score dylibs
 `cp -f -p ./library/build/JamomaScore.dylib /usr/local/jamoma/lib`
-`cp -f -p ./extensions/Interval/build/Interval.ttdylib /usr/local/jamoma/extensions`
 `cp -f -p ./extensions/Automation/build/Automation.ttdylib /usr/local/jamoma/extensions`
+`cp -f -p ./extensions/Interval/build/Interval.ttdylib /usr/local/jamoma/extensions`
+`cp -f -p ./extensions/Loop/build/Loop.ttdylib /usr/local/jamoma/extensions`
 `cp -f -p ./extensions/Scenario/build/Scenario.ttdylib /usr/local/jamoma/extensions`
 
 puts "Create alias into usr/local/lib folder"
