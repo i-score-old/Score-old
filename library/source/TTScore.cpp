@@ -16,6 +16,7 @@
  */
 
 #include "TTScore.h"
+#include "TTScore.test.h"
 
 #if 0
 #pragma mark -

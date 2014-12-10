@@ -39,8 +39,6 @@ mIteration(0)
 {
     TIME_PLUGIN_INITIALIZE
     
-	TT_ASSERT("Correct number of args to create Loop", arguments.size() == 0);
-    
     addAttribute(Iteration, kTypeUInt32);
     addAttributeProperty(Iteration, readOnly, YES);
     
@@ -555,6 +553,7 @@ TTErr Loop::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         {
             if (!mPatternStartEvent.valid() || !mPatternEndEvent.valid())
                 return kTTErrGeneric;
+<<<<<<< HEAD
             
             // check start and end events are different
             if (mPatternStartEvent == mPatternEndEvent)
@@ -564,6 +563,17 @@ TTErr Loop::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
             TTObject thisObject(this);
             mCurrentTimeProcess = TTObject(aXmlHandler->mXmlNodeName, thisObject);
             
+=======
+            
+            // check start and end events are different
+            if (mPatternStartEvent == mPatternEndEvent)
+                return kTTErrGeneric;
+            
+            // create the time process
+            TTObject thisObject(this);
+            mCurrentTimeProcess = TTObject(aXmlHandler->mXmlNodeName, thisObject);
+            
+>>>>>>> feature/ScoreForMax
             // set the start and end events
             setTimeProcessStartEvent(mCurrentTimeProcess, mPatternStartEvent);
             setTimeProcessEndEvent(mCurrentTimeProcess, mPatternEndEvent);

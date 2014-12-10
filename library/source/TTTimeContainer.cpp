@@ -39,8 +39,6 @@ extern "C" void TTTimeContainer::registerClass()
 TTTimeContainer :: TTTimeContainer (const TTValue& arguments) :
 TTTimeProcess(arguments)
 {
-    TT_ASSERT("Correct number of args to create TTTimeContainer", arguments.size() == 0);
-    
     TTObject thisObject(this);
     mScheduler.registerObserverForNotifications(thisObject);
 }
