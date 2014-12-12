@@ -5,7 +5,8 @@ build
 html
 Debug
 Release
-Makefile
+extensions/*/Makefile
+library/Makefile
 
 # Ignore emacs backup files
 *~
