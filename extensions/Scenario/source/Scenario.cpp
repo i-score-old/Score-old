@@ -43,9 +43,7 @@ mAttributeLoaded(NO),
 mFileVersion(kTTSymEmpty)
 {
     TIME_PLUGIN_INITIALIZE
-    
-	TT_ASSERT("Correct number of args to create Scenario", arguments.size() == 0 || arguments.size() == 2);
-    
+
     registerAttribute(TTSymbol("timeProcesses"), kTypeLocalValue, NULL, (TTGetterMethod)& Scenario::getTimeProcesses, NULL);
     registerAttribute(TTSymbol("timeEvents"), kTypeLocalValue, NULL, (TTGetterMethod)& Scenario::getTimeEvents, NULL);
     registerAttribute(TTSymbol("timeConditions"), kTypeLocalValue, NULL, (TTGetterMethod)& Scenario::getTimeConditions, NULL);
@@ -277,7 +275,9 @@ TTErr Scenario::ProcessStart()
         if (startEventDate < timeOffset &&
             endEventDate < timeOffset)
         {
-            eventsToSetHappened.appendUnique(startEvent);
+            // if the start event is not already into the other list
+            if (eventsToRequestHappen.findEquals(startEvent, v))
+                eventsToSetHappened.appendUnique(startEvent);
         }
         else if (startEventDate < timeOffset &&
                  endEventDate > timeOffset)
@@ -338,10 +338,11 @@ TTErr Scenario::ProcessEnd()
 
 TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
 {
-    TT_ASSERT("Scenario::Process : inputValue is correct", inputValue.size() == 2 && inputValue[0].type() == kTypeFloat64 && inputValue[1].type() == kTypeFloat64);
+    TTBoolean assertion = inputValue.size() == 2 && inputValue[0].type() == kTypeFloat64 && inputValue[1].type() == kTypeFloat64;
+    TT_ASSERT("Scenario::Process : inputValue is correct", assertion);
     
-    TTFloat64 position = inputValue[0];
-    TTFloat64 date = inputValue[1];
+    //TTFloat64 position = inputValue[0];
+    //TTFloat64 date = inputValue[1];
     
     // enable or disable conditions
     for (mTimeConditions.begin(); mTimeConditions.end(); mTimeConditions.next())
@@ -496,7 +497,7 @@ TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
                 
                 v.append(muteRecall);
                 
-                aTimeProcess.send(kTTSym_Goto, v, none);
+                aTimeProcess.send(kTTSym_Goto, v);
             }
             
             // needs to be compiled again
@@ -684,7 +685,7 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
                 // if this is an empty scenario node : read the node and then forget the sub scenario
                 if (aXmlHandler->mXmlNodeIsEmpty)
                 {
-                    mCurrentScenario.send("ReadFromXml", inputValue, outputValue);
+                    mCurrentScenario.send("ReadFromXml", inputValue);
 #ifdef TTSCORE_DEBUG
                     TTLogMessage("Scenario::ReadFromXml %s : forgets %s sub scenario (empty node)\n", mName.c_str(), currentSubName.c_str());
 #endif
@@ -696,7 +697,7 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         }
 
         // any other case
-        return mCurrentScenario.send("ReadFromXml", inputValue, outputValue);
+        return mCurrentScenario.send("ReadFromXml", inputValue);
     }
     
     // When reading a loop
@@ -738,7 +739,7 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
                 // if this is an empty loop node : read the node and then forget the loop
                 if (aXmlHandler->mXmlNodeIsEmpty)
                 {
-                    mCurrentLoop.send("ReadFromXml", inputValue, outputValue);
+                    mCurrentLoop.send("ReadFromXml", inputValue);
                     
 #ifdef TTSCORE_DEBUG
                     TTLogMessage("Scenario::ReadFromXml %s : forgets %s loop (empty node)\n", mName.c_str(), currentLoopName.c_str());
@@ -751,7 +752,7 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
         }
         
         // any other case
-        return mCurrentLoop.send("ReadFromXml", inputValue, outputValue);
+        return mCurrentLoop.send("ReadFromXml", inputValue);
     }
 	
 	// Switch on the name of the XML node
@@ -823,6 +824,15 @@ TTErr Scenario::ReadFromXml(const TTValue& inputValue, TTValue& outputValue)
                     aTimeProcess.set("durationMax", duration);
                 }
             }
+        }
+        
+        // ask all event's state addresses to flatten it because they are managed by a TTScript class
+        // TODO : don't use TTScript anymore !
+        for (mTimeEvents.begin(); mTimeEvents.end(); mTimeEvents.next())
+        {
+            TTObject event = mTimeEvents.current()[0];
+            TTValue none;
+            event.send("StateAddresses", none);
         }
         
         return kTTErrNone;
@@ -1069,7 +1079,8 @@ TTErr Scenario::EventDateChanged(const TTValue& inputValue, TTValue& outputValue
 
 TTErr Scenario::EventConditionChanged(const TTValue& inputValue, TTValue& outputValue)
 {
-    TT_ASSERT("Scenario::EventConditionChanged : inputValue is correct", inputValue.size() == 2 && inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeObject);
+    TTBoolean assertion = inputValue.size() == 2 && inputValue[0].type() == kTypeObject && inputValue[1].type() == kTypeObject;
+    TT_ASSERT("Scenario::EventConditionChanged : inputValue is correct", assertion);
     
     TTObject    aTimeEvent = inputValue[0];
     TTObject    aTimeCondition = inputValue[1];
@@ -1339,10 +1350,10 @@ TTErr Scenario::TimeEventMove(const TTValue& inputValue, TTValue& outputValue)
             for (it = mConstraintsMap.begin() ; it != mConstraintsMap.end() ; it++) {
                 
                 if (SolverConstraintPtr(it->second)->startVariable == variable)
-                    sErr = SolverConstraintPtr(it->second)->move(inputValue[1], SolverConstraintPtr(it->second)->endVariable->get());
+                    sErr = SolverConstraintPtr(it->second)->move(TTUInt32(inputValue[1]), SolverConstraintPtr(it->second)->endVariable->get());
                 
                 if (SolverConstraintPtr(it->second)->endVariable == variable)
-                    sErr = SolverConstraintPtr(it->second)->move(SolverConstraintPtr(it->second)->startVariable->get(), inputValue[1]);
+                    sErr = SolverConstraintPtr(it->second)->move(SolverConstraintPtr(it->second)->startVariable->get(), TTUInt32(inputValue[1]));
                 
                 if (sErr)
                     break;
@@ -1605,7 +1616,7 @@ TTErr Scenario::TimeProcessAdd(const TTValue& inputValue, TTValue& outputValue)
                     
                     // limit the start variable to the process duration
                     // this avoid time crushing when a time process moves while it is connected to other process
-                    startVariable->limit(duration, duration);
+                    startVariable->limit(TTUInt32(duration[0]), TTUInt32(duration[0]));
                     
                     // add a constraint between the 2 variables to the solver
                     SolverConstraintPtr constraint = new SolverConstraint(mEditionSolver, startVariable, endVariable, getTimeProcessDurationMin(aTimeProcess), getTimeProcessDurationMax(aTimeProcess), TTUInt32(scenarioDuration[0]));
@@ -1740,7 +1751,7 @@ TTErr Scenario::TimeProcessMove(const TTValue& inputValue, TTValue& outputValue)
                 it = mRelationsMap.find(aTimeProcess.instance());
                 SolverRelationPtr relation = SolverRelationPtr(it->second);
                 
-				sErr = relation->move(TTUInt32(inputValue[1]), TTUInt32(inputValue[2]));
+                sErr = relation->move(TTUInt32(inputValue[1]), TTUInt32(inputValue[2]));
                 
             } else {
                 
@@ -1751,7 +1762,7 @@ TTErr Scenario::TimeProcessMove(const TTValue& inputValue, TTValue& outputValue)
                 // extend the limit of the start variable
                 constraint->startVariable->limit(0, TTUInt32(scenarioDuration[0]));
                 
-				sErr = constraint->move(TTUInt32(inputValue[1]), TTUInt32(inputValue[2]));
+                sErr = constraint->move(TTUInt32(inputValue[1]), TTUInt32(inputValue[2]));
                 
                 // set the start variable limit back
                 // this avoid time crushing when a time process moves while it is connected to other process
@@ -1805,7 +1816,7 @@ TTErr Scenario::TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue
                 if (it != mRelationsMap.end())
                 {
                     SolverRelationPtr relation = SolverRelationPtr(it->second);
-                    sErr = relation->limit(inputValue[1], inputValue[2]);
+                    sErr = relation->limit(TTUInt32(inputValue[1]), TTUInt32(inputValue[2]));
                 }
                 else
                 {
@@ -1823,7 +1834,7 @@ TTErr Scenario::TimeProcessLimit(const TTValue& inputValue, TTValue& outputValue
                 if (it != mRelationsMap.end())
                 {
                     SolverConstraintPtr constraint = SolverConstraintPtr(it->second);
-                    sErr = constraint->limit(inputValue[1], inputValue[2]);
+                    sErr = constraint->limit(TTUInt32(inputValue[1]), TTUInt32(inputValue[2]));
                 }
                 else
                 {

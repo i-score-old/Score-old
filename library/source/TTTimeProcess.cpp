@@ -37,8 +37,6 @@ mCompiled(NO),
 mExternalTick(NO),
 mDurationMinReached(NO)
 {
-    TT_ASSERT("Correct number of args to create TTTimeProcess", arguments.size() == 1);
-    
     if (arguments.size() == 1)
         mContainer = arguments[0];
     

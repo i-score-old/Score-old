@@ -13,9 +13,13 @@ The Score framework is based on the Jamoma Foundation framework which allows to 
 
 Installing
 
+<<<<<<< HEAD
 for full OSSIA project installation : https://github.com/OSSIA/OSSIA
 
 for installing Score only :
+=======
+0 : Clone the Score folder into JamomaCore folder : https://github.com/jamoma/JamomaCore
+>>>>>>> 7039d8aad0f62d12a9eb46aee553064e18f0140d
 
 1 : First of all you need to download the Gecode framework : http://www.gecode.org/download/Gecode-3.7.3.dmg
 

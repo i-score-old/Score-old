@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		461B799A1A2E33EB0091FD86 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		468C97D017A2B2CD0032447A /* Scenario.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Scenario.h; sourceTree = "<group>"; };
 		468C97D217A2B2CD0032447A /* ScenarioSolver.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScenarioSolver.h; sourceTree = "<group>"; };
 		468C97D517A2B2D50032447A /* AllenRelation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AllenRelation.cpp; sourceTree = "<group>"; };
@@ -63,6 +64,7 @@
 			isa = PBXGroup;
 			children = (
 				468C986217A2B2E60032447A /* Scenario.yml */,
+				461B799A1A2E33EB0091FD86 /* Makefile */,
 				46A5878619FEE14D000E15F2 /* TimePluginLib.h */,
 				46A5878719FEE155000E15F2 /* TimePluginLib.cpp */,
 				468C97CF17A2B2CD0032447A /* includes */,
