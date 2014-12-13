@@ -79,9 +79,9 @@ target_link_libraries(${PROJECT_NAME} gecodesearch gecodedriver gecodeminimodel 
 else()
 target_link_libraries(${PROJECT_NAME} ${GECODE_LIBRARIES}) # not that gecodefloat is missing in GECODE_LIBRARIES but not required to compile
 endif()
-target_link_libraries(${PROJECT_NAME} ${JAMOMA_FOUNDATION_LIBRARY})
-target_link_libraries(${PROJECT_NAME} ${JAMOMA_DSP_LIBRARY})
-target_link_libraries(${PROJECT_NAME} ${JAMOMA_MODULAR_LIBRARY})
+target_link_libraries(${PROJECT_NAME} JamomaFoundation)
+target_link_libraries(${PROJECT_NAME} JamomaDSP)
+target_link_libraries(${PROJECT_NAME} JamomaModular)
 target_link_libraries(${PROJECT_NAME} JamomaScore)
 target_link_libraries(${PROJECT_NAME} ${LIBXML2_LIBRARIES})
 

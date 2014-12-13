@@ -33,9 +33,9 @@ endif()
 
 add_library(${PROJECT_NAME} SHARED ${PROJECT_SRCS} ${PROJECT_HDRS})
 
-target_link_libraries(${PROJECT_NAME} ${JAMOMA_FOUNDATION_LIBRARY})
-target_link_libraries(${PROJECT_NAME} ${JAMOMA_DSP_LIBRARY})
-target_link_libraries(${PROJECT_NAME} ${JAMOMA_MODULAR_LIBRARY})
+target_link_libraries(${PROJECT_NAME} JamomaFoundation)
+target_link_libraries(${PROJECT_NAME} JamomaDSP)
+target_link_libraries(${PROJECT_NAME} JamomaModular)
 target_link_libraries(${PROJECT_NAME} JamomaScore)
 target_link_libraries(${PROJECT_NAME} ${LIBXML2_LIBRARIES})
 
