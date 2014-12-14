@@ -45,15 +45,14 @@ include_directories("${PROJECT_SOURCE_DIR}/includes")
 include_directories("${GECODE_INCLUDE_DIR}")
 include_directories("${PROJECT_SOURCE_DIR}/source/Gecode")
 include_directories("${PROJECT_SOURCE_DIR}/source/PetriNet")
-include_directories("${PROJECT_SOURCE_DIR}/../../library/includes")
 include_directories("${PROJECT_SOURCE_DIR}/../../library/tests")
-include_directories("${JAMOMA_MODULAR_INCLUDE_DIR}")
+
 include_directories("${JAMOMA_MODULAR_PROTOCOLLIB_INCLUDE_DIR}")
 include_directories("${JAMOMA_MODULAR_SCHEDULERLIB_INCLUDE_DIR}")
 include_directories("${JAMOMA_MODULAR_PEEROBJECT_INCLUDE_DIR}")
-include_directories("${JAMOMA_FOUNDATION_INCLUDE_DIR}")
+
 include_directories("${JAMOMA_FOUNDATION_INCLUDE_DIR}/../libiconv/include")
-include_directories("${JAMOMA_DSP_INCLUDE_DIR}")
+
 
 
 # TODO make FindPthreadWin32.cmake
@@ -79,10 +78,10 @@ target_link_libraries(${PROJECT_NAME} gecodesearch gecodedriver gecodeminimodel 
 else()
 target_link_libraries(${PROJECT_NAME} ${GECODE_LIBRARIES}) # not that gecodefloat is missing in GECODE_LIBRARIES but not required to compile
 endif()
-target_link_libraries(${PROJECT_NAME} JamomaFoundation)
-target_link_libraries(${PROJECT_NAME} JamomaDSP)
-target_link_libraries(${PROJECT_NAME} JamomaModular)
-target_link_libraries(${PROJECT_NAME} JamomaScore)
+target_link_libraries(${PROJECT_NAME} Foundation)
+target_link_libraries(${PROJECT_NAME} DSP)
+target_link_libraries(${PROJECT_NAME} Modular)
+target_link_libraries(${PROJECT_NAME} Score)
 target_link_libraries(${PROJECT_NAME} ${LIBXML2_LIBRARIES})
 
 # TODO make FindPthreadWin32.cmake
