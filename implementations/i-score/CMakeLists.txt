@@ -1,15 +1,15 @@
 cmake_minimum_required(VERSION 2.6)
 
 set(CMAKE_INSTALL_PREFIX /usr/local) # won't work on windows
+set(CMAKE_PREFIX_PATH /usr/share/cmake/Jamoma;/usr/local/share/cmake/Jamoma)
 project (iscoreCommandLine)
 
-include_directories("/usr/include/jamoma")
+find_package(Jamoma 0.6 REQUIRED)
 
 set(CMAKE_CXX_FLAGS "-std=c++11")
 
-
 add_executable(i-score-nogui "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp")
-target_link_libraries(i-score-nogui JamomaFoundation JamomaModular JamomaScore pthread)
+target_link_libraries(i-score-nogui Jamoma::Foundation Jamoma::Modular Jamoma::Score pthread)
 
 INSTALL(TARGETS i-score-nogui
-	RUNTIME DESTINATION bin)
+		RUNTIME DESTINATION bin)
