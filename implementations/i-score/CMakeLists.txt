@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 
 set(CMAKE_INSTALL_PREFIX /usr/local) # won't work on windows
-set(CMAKE_PREFIX_PATH /usr/share/cmake/Jamoma;/usr/local/share/cmake/Jamoma)
+set(CMAKE_PREFIX_PATH /usr/share/cmake/Jamoma;/usr/local/jamoma/share/cmake/Jamoma;)
 project (iscoreCommandLine)
 
 find_package(Jamoma 0.6 REQUIRED)
