@@ -7,9 +7,10 @@ project (iscoreCommandLine)
 find_package(Jamoma 0.6 REQUIRED)
 
 set(CMAKE_CXX_FLAGS "-std=c++11")
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH True)
 
 add_executable(i-score-nogui "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp")
 target_link_libraries(i-score-nogui Jamoma::Foundation Jamoma::Modular Jamoma::Score pthread)
 
-INSTALL(TARGETS i-score-nogui
+install(TARGETS i-score-nogui
 		RUNTIME DESTINATION bin)
