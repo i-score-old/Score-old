@@ -301,6 +301,13 @@ TTErr TTTimeEvent::StatusUpdate()
             return applyStatus(kTTSym_eventPending);
         }
         
+        // an event is disposed when all attached processes are disposed
+        if (mStatus == kTTSym_eventWaiting &&
+            mDisposedProcessesCounter == mAttachedProcesses.size())
+        {
+            return applyStatus(kTTSym_eventDisposed);
+        }
+        
         // when all attached processes are ended or disposed
         if (mEndedProcessesCounter + mDisposedProcessesCounter == mAttachedProcesses.size())
         {
@@ -319,13 +326,6 @@ TTErr TTTimeEvent::StatusUpdate()
                 
                 return applyStatus(kTTSym_eventHappened);
             }
-        }
-        
-        // an event is disposed when all attached processes are disposed
-        if (mStatus == kTTSym_eventWaiting &&
-            mDisposedProcessesCounter == mAttachedProcesses.size())
-        {
-            return applyStatus(kTTSym_eventDisposed);
         }
     }
     
