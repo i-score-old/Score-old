@@ -1272,6 +1272,15 @@ TTErr Scenario::TimeEventRelease(const TTValue& inputValue, TTValue& outputValue
                     
                     // delete all observers
                     deleteTimeEventCacheElement(aCacheElement);
+                    
+                    // remove the time event from its time condition
+                    TTObject aTimeCondition;
+                    aTimeEvent.get("condition", aTimeCondition);
+                    if (aTimeCondition.valid())
+                    {
+                        aTimeCondition.send("EventRemove", aTimeEvent);
+                    }
+                    
 #ifndef NO_EDITION_SOLVER
                     // retreive solver variable relative to each event
                     it = mVariablesMap.find(aTimeEvent.instance());
