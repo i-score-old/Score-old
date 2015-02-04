@@ -381,15 +381,11 @@ TTErr Scenario::Process(const TTValue& inputValue, TTValue& outputValue)
             eventHappenedOrDisposedCount++;
     }
     
-    // no more event to process
+    // if no more event to process : stop our self
     if (eventHappenedOrDisposedCount == mTimeEvents.getSize())
     {
-        // in self execution mode : stop our self
-        if (mSelfExecution)
-        {
-            TTObject thisObject(this);
-            return thisObject.send(kTTSym_Stop);
-        }
+        TTObject thisObject(this);
+        return thisObject.send(kTTSym_Stop);
     }
     
     return kTTErrNone;
@@ -412,7 +408,6 @@ TTErr Scenario::ProcessPaused(const TTValue& inputValue, TTValue& outputValue)
     }
     
     return kTTErrNone;
-    
 }
 
 TTErr Scenario::Goto(const TTValue& inputValue, TTValue& outputValue)
