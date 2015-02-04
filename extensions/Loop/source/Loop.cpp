@@ -42,6 +42,9 @@ mIteration(0)
     addAttribute(Iteration, kTypeUInt32);
     addAttributeProperty(Iteration, readOnly, YES);
     
+    addAttributeWithSetter(PatternStartEvent, kTypeObject);
+    addAttributeWithSetter(PatternEndEvent, kTypeObject);
+    
     registerAttribute(TTSymbol("patternProcesses"), kTypeLocalValue, NULL, (TTGetterMethod)& Loop::getPatternProcesses, NULL);
     
     addMessageWithArguments(PatternAttach);
@@ -75,6 +78,19 @@ mIteration(0)
     mPatternCondition = TTObject("TimeCondition", args);
     mPatternCondition.set("name", TTSymbol("patternCondition"));
     mPatternCondition.set("container", thisObject);
+    
+    // it is possible to pass 2 events for the root loop (which don't need a container by definition)
+    if (arguments.size() == 2)
+    {
+        if (arguments[0].type() == kTypeObject && arguments[1].type() == kTypeObject)
+        {
+            TTObject start = arguments[0];
+            TTObject end = arguments[1];
+            
+            this->setStartEvent(start);
+            this->setEndEvent(end);
+        }
+    }
 }
 
 Loop::~Loop()
@@ -179,7 +195,7 @@ TTErr Loop::Process(const TTValue& inputValue, TTValue& outputValue)
     TTSymbol endStatus;
     mPatternEndEvent.send("StatusUpdate");
     mPatternEndEvent.get("status", endStatus);
-            
+   
     // if the end event pattern happened
     if (endStatus == kTTSym_eventHappened)
     {
@@ -204,7 +220,17 @@ TTErr Loop::ProcessPaused(const TTValue& inputValue, TTValue& outputValue)
 {
     TT_ASSERT("Loop::ProcessPaused : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeBoolean);
     
-    //TTBoolean paused = inputValue[0];
+    TTBoolean paused = inputValue[0];
+    
+    // apply to all pattern time processes
+    for (mPatternProcesses.begin(); mPatternProcesses.end(); mPatternProcesses.next())
+    {
+        TTObject aTimeProcess = mPatternProcesses.current()[0];
+        if (paused)
+            aTimeProcess.send(kTTSym_Pause);
+        else
+            aTimeProcess.send(kTTSym_Resume);
+    }
     
     return kTTErrNone;
 }
@@ -732,7 +758,7 @@ TTErr Loop::SchedulerSpeedChanged(const TTValue& inputValue, TTValue& outputValu
 {
     TT_ASSERT("TTTimeContainer::SchedulerSpeedChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeFloat64);
     
-    // for each time process of the scenario
+    // for each time process of the pattern
     for (mPatternProcesses.begin(); mPatternProcesses.end(); mPatternProcesses.next())
     {
         TTObject aTimeProcess = mPatternProcesses.current()[0];
@@ -744,6 +770,76 @@ TTErr Loop::SchedulerSpeedChanged(const TTValue& inputValue, TTValue& outputValu
         // set the time process scheduler speed value with the container scheduler speed value
         aScheduler.set(kTTSym_speed, inputValue);
     }
+    
+    return kTTErrNone;
+}
+
+
+#if 0
+#pragma mark -
+#pragma mark Specific Loop Accessors
+#endif
+
+TTErr Loop::setPatternStartEvent(const TTValue& value)
+{
+    // make the former start pattern event to forget ourself
+    if (mPatternStartEvent.valid())
+    {
+        TTObject empty;
+        mPatternStartEvent.set("container", empty);
+    }
+    
+    mPatternStartEvent = value;
+    
+    // tell the new start pattern event we are his container
+    if (mPatternStartEvent.valid())
+    {
+        TTObject thisObject(this);
+        mPatternStartEvent.set("container", thisObject);
+    }
+    
+    // for each time process of the pattern
+    for (mPatternProcesses.begin(); mPatternProcesses.end(); mPatternProcesses.next())
+    {
+        TTObject aTimeProcess = mPatternProcesses.current()[0];
+        
+        setTimeProcessStartEvent(aTimeProcess, mPatternStartEvent);
+    }
+    
+    return kTTErrNone;
+}
+
+TTErr Loop::setPatternEndEvent(const TTValue& value)
+{
+    // make the former end pattern event to forget ourself
+    if (mPatternEndEvent.valid())
+    {
+        TTObject empty;
+        mPatternEndEvent.set("container", empty);
+    }
+    
+    mPatternEndEvent = value;
+    
+    // tell the new end pattern event we are his container
+    if (mPatternEndEvent.valid())
+    {
+        TTObject thisObject(this);
+        mPatternEndEvent.set("container", thisObject);
+    }
+    
+    // for each time process of the pattern
+    for (mPatternProcesses.begin(); mPatternProcesses.end(); mPatternProcesses.next())
+    {
+        TTObject aTimeProcess = mPatternProcesses.current()[0];
+        
+        setTimeProcessStartEvent(aTimeProcess, mPatternEndEvent);
+    }
+    
+    // get duration to update the pattern end event date
+    // TODO : the pattern duration should be different than the loop duration
+    TTValue v;
+    getAttributeValue(kTTSym_duration, v);
+    mPatternEndEvent.set("date", v);
     
     return kTTErrNone;
 }
