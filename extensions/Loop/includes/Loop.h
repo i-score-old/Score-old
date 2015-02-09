@@ -54,6 +54,16 @@ private :
      @return                kTTErrNone */
 	TTErr   getParameterNames(TTValue& value);
     
+    /** set start pattern event object
+     @param	value           an event object
+     @return                kTTErrNone */
+    TTErr   setPatternStartEvent(const TTValue& value);
+    
+    /** set end pattern event object
+     @param	value           an event object
+     @return                kTTErrNone */
+    TTErr   setPatternEndEvent(const TTValue& value);
+
     
     
     /** To be notified when the scheduler speed changed
