@@ -17,6 +17,8 @@ for full OSSIA project installation : https://github.com/OSSIA/OSSIA
 
 for installing Score only :
 
+0 : Clone the Score folder into JamomaCore folder : https://github.com/jamoma/JamomaCore
+
 1 : First of all you need to download the Gecode framework : http://www.gecode.org/download/Gecode-3.7.3.dmg
 
 2 : create a jamoma folder inside /usr/local/ and give you a full access (read+write) on this jamoma folder.

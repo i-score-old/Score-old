@@ -32,11 +32,11 @@ mMute(NO),
 mVerticalPosition(0),
 mVerticalSize(1),
 mRunning(NO),
+mSelfExecution(NO),
 mCompiled(NO),
-mExternalTick(NO)
+mExternalTick(NO),
+mDurationMinReached(NO)
 {
-    TT_ASSERT("Correct number of args to create TTTimeProcess", arguments.size() == 1);
-    
     if (arguments.size() == 1)
         mContainer = arguments[0];
     
@@ -125,6 +125,8 @@ mExternalTick(NO)
     // needed to be notified by events
     addMessageWithArguments(EventDateChanged);
     addMessageProperty(EventDateChanged, hidden, YES);
+    addMessageWithArguments(EventConditionChanged);
+    addMessageProperty(EventConditionChanged, hidden, YES);
     addMessageWithArguments(EventStatusChanged);
     addMessageProperty(EventStatusChanged, hidden, YES);
     
@@ -166,39 +168,44 @@ TTTimeProcess::~TTTimeProcess()
 
 TTErr TTTimeProcess::getRigid(TTValue& value)
 {
-    value = mDurationMin && mDurationMax && mDurationMin == mDurationMax;
+    value = mRigid;
     
     return kTTErrNone;
 }
 
 TTErr TTTimeProcess::setRigid(const TTValue& value)
 {
-    TTValue v, none, duration;
-    
-    if (value.size()) {
-        
-        if (value[0].type() == kTypeBoolean) {
+    if (value.size())
+    {
+        if (value[0].type() == kTypeBoolean)
+        {
+            TTBoolean rigid = value[0];
             
-            v = TTObject(this);
-            
-            // rigid means Limit(duration, duration)
-            if (TTBoolean(value[0])) {
+            // rigidity implies mDurationMin equals mDurationMax
+            if (rigid)
+            {
+                TTValue duration;
                 
-                if (!getDuration(duration)) {
-                    
-                    v.append(duration[0]);
-                    v.append(duration[0]);
+                if (!getDuration(duration))
+                {
+                    mDurationMin = duration[0];
+                    mDurationMax = duration[0];
                 }
             }
-            // non rigid means Limit(durationMin, durationMax)
-            else {
-                v.append(mDurationMin);
-                v.append(mDurationMax);
+            // else reset duration bounds if they are equal
+            else if (mDurationMin == mDurationMax)
+            {
+                mDurationMin = 0;
+                mDurationMax = 0;
             }
             
             // if the time process is handled by a scenario
             if (mContainer.valid())
-                return mContainer.send("TimeProcessLimit", v, none);
+            {
+                TTObject thisObject(this);
+                TTValue none, v(thisObject, mDurationMin, mDurationMax);
+                return mContainer.send("TimeProcessLimit", v, none); // théo : it is bad because we suppose it is a Scenario
+            }
         }
     }
     
@@ -207,20 +214,20 @@ TTErr TTTimeProcess::setRigid(const TTValue& value)
 
 TTErr TTTimeProcess::setDurationMin(const TTValue& value)
 {
-    if (value.size()) {
-        
-        if (value[0].type() == kTypeUInt32) {
-            
+    if (value.size())
+    {
+        if (value[0].type() == kTypeUInt32)
+        {
             // set minimal duration
             mDurationMin = TTUInt32(value[0]);
             
             // tell to the container the limit changes
-            if (mContainer.valid()) {
-                
+            if (mContainer.valid())
+            {
                 TTValue none, v = TTObject(this);
                 v.append(mDurationMin);
                 v.append(mDurationMax);
-                return mContainer.send("TimeProcessLimit", v, none);
+                return mContainer.send("TimeProcessLimit", v, none); // théo : it is bad because we suppose it is a Scenario
             }
         }
     }
@@ -230,20 +237,20 @@ TTErr TTTimeProcess::setDurationMin(const TTValue& value)
 
 TTErr TTTimeProcess::setDurationMax(const TTValue& value)
 {
-    if (value.size()) {
-        
-        if (value[0].type() == kTypeUInt32) {
-            
+    if (value.size())
+    {
+        if (value[0].type() == kTypeUInt32)
+        {
             // set maximal duration
             mDurationMax = TTUInt32(value[0]);
             
             // tell to the container the limit changes
-            if (mContainer.valid()) {
-                
+            if (mContainer.valid())
+            {
                 TTValue none, v = TTObject(this);
                 v.append(mDurationMin);
                 v.append(mDurationMax);
-                return mContainer.send("TimeProcessLimit", v, none);
+                return mContainer.send("TimeProcessLimit", v, none); // théo : it is bad because we suppose it is a Scenario
             }
         }
     }
@@ -259,17 +266,17 @@ TTErr TTTimeProcess::getStartDate(TTValue& value)
 
 TTErr TTTimeProcess::setStartDate(const TTValue& value)
 {
-    if (value.size()) {
-            
-        if (value[0].type() == kTypeUInt32) {
-                
+    if (value.size())
+    {
+        if (value[0].type() == kTypeUInt32)
+        {
             // tell to the container the process date changes
-            if (mContainer.valid()) {
-                
+            if (mContainer.valid())
+            {
                 TTValue none, v = TTObject(this);
                 v.append(TTUInt32(value[0]));
                 v.append(mStartDate);
-                return mContainer.send("TimeProcessMove", v, none);
+                return mContainer.send("TimeProcessMove", v, none); // théo : it is bad because we suppose it is a Scenario
             }
             
             // or set the start event date directly
@@ -289,10 +296,10 @@ TTErr TTTimeProcess::getStartCondition(TTValue& value)
 
 TTErr TTTimeProcess::setStartCondition(const TTValue& value)
 {
-    if (value.size() == 1) {
-        
-        if (value[0].type() == kTypeObject) {
-            
+    if (value.size() == 1)
+    {
+        if (value[0].type() == kTypeObject)
+        {
             mStartCondition = value[0];
         }
     }
@@ -308,17 +315,17 @@ TTErr TTTimeProcess::getEndDate(TTValue& value)
 
 TTErr TTTimeProcess::setEndDate(const TTValue& value)
 {
-    if (value.size()) {
-            
-        if (value[0].type() == kTypeUInt32) {
-                
+    if (value.size())
+    {
+        if (value[0].type() == kTypeUInt32)
+        {
             // tell to the container the process date changes
-            if (mContainer.valid()) {
-                
+            if (mContainer.valid())
+            {
                 TTValue none, v = TTObject(this);
                 v.append(mStartDate);
                 v.append(TTUInt32(value[0]));
-                return mContainer.send("TimeProcessMove", v, none);
+                return mContainer.send("TimeProcessMove", v, none); // théo : it is bad because we suppose it is a Scenario
             }
             
             // or set the end event date directly
@@ -338,10 +345,10 @@ TTErr TTTimeProcess::getEndCondition(TTValue& value)
 
 TTErr TTTimeProcess::setEndCondition(const TTValue& value)
 {
-    if (value.size() == 1) {
-        
-        if (value[0].type() == kTypeBoolean) {
-            
+    if (value.size() == 1)
+    {
+        if (value[0].type() == kTypeBoolean)
+        {
             mEndCondition = value[0];
         }
     }
@@ -352,8 +359,8 @@ TTErr TTTimeProcess::setEndCondition(const TTValue& value)
 TTErr TTTimeProcess::getDuration(TTValue& value)
 {
     // the end must be after the start
-    if (mEndDate >= mStartDate) {
-            
+    if (mEndDate >= mStartDate)
+	{            
         #ifndef TT_PLATFORM_WIN
         value = TTValue( TTUInt32( std::abs<int32_t>(mDuration) ) );
         #else
@@ -404,13 +411,6 @@ TTErr TTTimeProcess::getDate(TTValue& value)
     return kTTErrGeneric;
 }
 
-TTErr TTTimeProcess::getIntermediateEvents(TTValue& value)
-{
-    mIntermediateEvents.assignToValue(value);
-    
-    return kTTErrNone;
-}
-
 TTErr TTTimeProcess::Move(const TTValue& inputValue, TTValue& outputValue)
 {
     if (inputValue.size() == 2) {
@@ -425,7 +425,7 @@ TTErr TTTimeProcess::Move(const TTValue& inputValue, TTValue& outputValue)
                     TTValue none, v = TTObject(this);
                     v.append(TTUInt32(inputValue[0]));
                     v.append(TTUInt32(inputValue[1]));
-                    return mContainer.send("TimeProcessMove", v, none);
+                    return mContainer.send("TimeProcessMove", v, none); // théo : it is bad because we suppose it is a Scenario
                 }
             }
         }
@@ -436,17 +436,17 @@ TTErr TTTimeProcess::Move(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr TTTimeProcess::Limit(const TTValue& inputValue, TTValue& outputValue)
 {
-    if (inputValue.size() == 2) {
-        
-        if (inputValue[0].type() == kTypeUInt32 && inputValue[1].type() == kTypeUInt32) {
-            
+    if (inputValue.size() == 2)
+    {
+        if (inputValue[0].type() == kTypeUInt32 && inputValue[1].type() == kTypeUInt32)
+        {
             // set minimal and maximal duration
             mDurationMin = TTUInt32(inputValue[0]);
             mDurationMax = TTUInt32(inputValue[1]);
             
             // if the time process is handled by a scenario
-            if (mContainer.valid()) {
-                
+            if (mContainer.valid())
+            {
                 TTValue none, v = TTObject(this);
                 v.append(mDurationMin);
                 v.append(mDurationMax);
@@ -460,36 +460,102 @@ TTErr TTTimeProcess::Limit(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr TTTimeProcess::Start()
 {
-    return mStartEvent.send(kTTSym_Trigger);
+    // filter repetitions
+    if (!mRunning)
+    {
+        // push the start state relative to this process
+        // TODO : have a start state relative to this process stored inside the start event
+        mStartEvent.send("StatePush");
+        
+        // set execution mode
+        mSelfExecution = YES;
+        
+        // run scheduler
+        return Play();
+    }
+    else
+    {
+        // reset execution mode to not push end state (see in : TTTimeProcess::SchedulerRunningChanged)
+        mSelfExecution = NO;
+        
+        // stop scheduler
+        Stop();
+        
+        // restart
+        return Start();
+    }
 }
 
 TTErr TTTimeProcess::End()
 {
-    return mEndEvent.send(kTTSym_Trigger);
+    // filter repetitions
+    if (mRunning)
+    {
+        // stop scheduler
+        TTErr err = Stop();
+        
+        // reset execution mode
+        mSelfExecution = NO;
+        
+        // push the end state relative to this process
+        // TODO : have a end state relative to this process stored inside the end event
+        mEndEvent.send("StatePush");
+        
+        return err;
+    }
+    
+    return kTTErrNone;
 }
 
 TTErr TTTimeProcess::Play()
 {
-    TTValue    v;
-    TTUInt32   start, end;
-    
-    // set the running state of the process
-    mRunning = YES;
-    
-    // launch the scheduler
-    mStartEvent.get(kTTSym_date, v);
-    start = v[0];
-    
-    mEndEvent.get(kTTSym_date, v);
-    end = v[0];
-    
-    if (end > start) {
+    // filter repetitions
+    if (!mRunning)
+    {
+        // the duration min have not been reached yet
+        mDurationMinReached = NO;
         
-        v = TTFloat64(end - start);
-        mScheduler.set(kTTSym_duration, v);
-        
+        // prepare scheduler to go
         mScheduler.set("externalTick", mExternalTick);
         
+        // process duration
+        TTInt32 duration = mDuration;
+        
+        if (duration <= 0)
+        {
+            TTLogError("TTTimeProcess::Play %s : wrong duration\n", mName.c_str());
+            return kTTErrGeneric;
+        }
+        
+        // rigid : use events date
+        if (mRigid)
+        {
+            mScheduler.set("infinite", TTBoolean(NO));
+            mScheduler.set(kTTSym_duration, TTFloat64(duration));
+        }
+        
+        // none rigid : use duration bounds
+        else
+        {
+            // no duration max : scheduler runs indefinitively
+            if (mDurationMax == 0)
+            {
+                mScheduler.set("infinite", TTBoolean(YES));
+                
+                // set duration to get the progession back even if it will becomes greater than 1.
+                mScheduler.set(kTTSym_duration, TTFloat64(duration));
+            }
+            else
+            {
+                mScheduler.set("infinite", TTBoolean(NO));
+                mScheduler.set(kTTSym_duration, TTFloat64(mDurationMax));
+            }
+        }
+            
+#ifdef TTSCORE_DEBUG
+        TTLogMessage("TTTimeProcess::Play %s\n", mName.c_str());
+#endif
+        // launch the scheduler
         return mScheduler.send(kTTSym_Go);
     }
     
@@ -498,10 +564,14 @@ TTErr TTTimeProcess::Play()
 
 TTErr TTTimeProcess::Stop()
 {
-    // set the running state of the process
-    mRunning = NO;
-
-    return mScheduler.send(kTTSym_Stop);
+    // filter repetitions
+    if (mRunning)
+    {
+        // stop the scheduler
+        return mScheduler.send(kTTSym_Stop);
+    }
+    
+    return kTTErrGeneric;
 }
 
 TTErr TTTimeProcess::Pause()
@@ -535,31 +605,6 @@ TTErr TTTimeProcess::Tick()
 #pragma mark Notifications
 #endif
 
-TTErr TTTimeProcess::EventDateChanged(const TTValue& inputValue, TTValue& outputValue)
-{
-    TT_ASSERT("TTTimeProcess::EventDateChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeObject);
-    
-    TTObject aTimeEvent = inputValue[0];
-    
-    if (aTimeEvent == mStartEvent) {
-        
-        // if needed, the compile method should be called again now
-        mCompiled = NO;
-        
-        return kTTErrNone;
-    }
-    else if (aTimeEvent == mEndEvent) {
-        
-        // if needed, the compile method should be called again now
-        mCompiled = NO;
-        
-        return kTTErrNone;
-    }
-    
-    TTLogError("TTTimeProcess::EventDateChanged : wrong event\n");
-    return kTTErrGeneric;
-}
-
 TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outputValue)
 {
     TT_ASSERT("TTTimeProcess::EventStatusChanged : inputValue is correct", inputValue.size() == 3 && inputValue[0].type() == kTypeObject);
@@ -567,66 +612,74 @@ TTErr TTTimeProcess::EventStatusChanged(const TTValue& inputValue, TTValue& outp
     TTObject    aTimeEvent = inputValue[0];
     TTSymbol    newStatus = inputValue[1];
     //TTSymbol    oldStatus = inputValue[2];
-    TTValue     v;
     
-    TT_ASSERT("TTTimeProcess::EventStatusChanged : status effectively changed", newStatus != oldStatus);
+    // inside a container ignore event notifications if the container is not running
+    TTBoolean running = YES;
+    if (mContainer.valid())
+        mContainer.get("running", running);
     
-    // event wainting case :
-    if (newStatus == kTTSym_eventWaiting) {
+    if (!running)
+        return kTTErrGeneric;
+    
+    // event waiting case :
+    if (newStatus == kTTSym_eventWaiting)
+    {
+        // the start event waiting status implies waiting status for the end event
+        if (aTimeEvent == mStartEvent)
+        {
+            mEndEvent.send("Wait");
+        }
+        
         return kTTErrNone;
     }
     // event pending case :
-    else if (newStatus == kTTSym_eventPending) {
+    else if (newStatus == kTTSym_eventPending)
+    {
+        // the start event pending status implies waiting status for the end event
+        if (aTimeEvent == mStartEvent)
+        {
+            mEndEvent.send("Wait");
+        }
+        
         return kTTErrNone;
     }
     // event happened case :
-    else if (newStatus == kTTSym_eventHappened) {
-        
-        if (aTimeEvent == mStartEvent) {
+    else if (newStatus == kTTSym_eventHappened)
+    {
+        if (aTimeEvent == mStartEvent)
+        {
+            // play the time process
+            return Play();
             
-            // if the time process is muted
-            if (mMute)
-                return kTTErrNone;
-            
-            // use the specific compiled method of the time process
-            if (!mCompiled)
-                Compile();
-            
-            // use the specific start process method of the time process
-            if (!ProcessStart()) {
-
-                // notify start message observers
-				TTObject thisObject(this);
-                sendNotification(kTTSym_ProcessStarted, thisObject);
-                
-                // play the process
-                return Play();
-            }
-            
-            TTLogError("TTTimeProcess::EventStatusChanged : process failed to start\n");
-            return kTTErrGeneric;
+            // the Compile method is called in TTTimeProcess::SchedulerRunningChanged
+            // the ProcessStart method is called in TTTimeProcess::SchedulerRunningChanged
+            // the kTTSym_ProcessStarted notification is sent in TTTimeProcess::SchedulerRunningChanged
         }
-        else if (aTimeEvent == mEndEvent) {
-            
-            // if the time process is muted
-            if (mMute)
-                return kTTErrNone;
-            
-            // stop the process
+        else if (aTimeEvent == mEndEvent)
+        {
+            // stop the time process
             return Stop();
             
+            // the ProcessEnd method is called in TTTimeProcess::SchedulerRunningChanged
             // the kTTSym_ProcessEnded notification is sent in TTTimeProcess::SchedulerRunningChanged
         }
         
-        TTLogError("TTTimeProcess::EventStatusChanged : wrong event happened\n");
+        TTLogError("TTTimeProcess::EventStatusChanged %s : wrong event happened\n", mName.c_str());
         return kTTErrGeneric;
     }
     // event disposed case :
-    else if (newStatus == kTTSym_eventDisposed) {
+    else if (newStatus == kTTSym_eventDisposed)
+    {
+        if (aTimeEvent == mStartEvent)
+        {
+            // notify ProcessDisposed observers
+            sendStatusNotification(kTTSym_ProcessDisposed);
+        }
+        
         return kTTErrNone;
     }
     
-    TTLogError("TTTimeProcess::EventStatusChanged : wrong status\n");
+    TTLogError("TTTimeProcess::EventStatusChanged %s : wrong status\n", mName.c_str());
     return kTTErrGeneric;
 }
 
@@ -635,24 +688,70 @@ TTErr TTTimeProcess::SchedulerRunningChanged(const TTValue& inputValue, TTValue&
     TT_ASSERT("TTTimeProcess::SchedulerRunningChanged : inputValue is correct", inputValue.size() == 1 && inputValue[0].type() == kTypeBoolean);
     
     TTBoolean running = inputValue[0];
-    
-    if (running) {
-        
-        // the kTTSym_ProcessStarted is sent in TTTimeProcess::EventStatusChanged
-        ;
-    }
-    else {
-        
-        // use the specific process end method of the time process
-        if (!ProcessEnd()) {
+   
+    if (running)
+    {
+        if (!mMute)
+        {
+            // use the specific compiled method of the time process
+            if (!mCompiled)
+                Compile();
             
-            // notify observers
-			TTObject thisObject(this);
-            sendNotification(kTTSym_ProcessEnded, thisObject);
-            
-            return kTTErrNone;
+            // use the specific start process method of the time process
+            if (ProcessStart())
+            {
+                TTLogError("TTTimeProcess::SchedulerRunningChanged %s : ProcessStart failed\n", mName.c_str());
+                return kTTErrGeneric;
+            }
         }
+        
+        // set the running state of the process AFTER ProcessStart to avoid any event status propagation
+        // because, if this is a container, events propagate their status if their container is running
+        mRunning = YES;
+        
+        // notify ProcessStarted observers
+        sendStatusNotification(kTTSym_ProcessStarted);
+        
+        return kTTErrNone;
     }
+    else
+    {
+        // set the running state of the process BEFORE ProcessEnd to avoid any event status propagation
+        // because, if this is a container, events propagate their status if their container is running
+        mRunning = NO;
+        
+        if (!mMute)
+        {
+            // use the specific process end method of the time process
+            if (ProcessEnd())
+            {
+                TTLogError("TTTimeProcess::SchedulerRunningChanged %s : ProcessEnd failed\n", mName.c_str());
+                return kTTErrGeneric;
+            }
+        }
+        
+        // notify ProcessEnded observers
+        sendStatusNotification(kTTSym_ProcessEnded);
+        
+        // in self execution mode :
+        if (mSelfExecution)
+        {
+            // push the end state relative to this process
+            // TODO : have a end state relative to this process stored inside the end event
+            mEndEvent.send("StatePush");
+            
+            // reset execution mode
+            mSelfExecution = NO;
+        }
+        
+        return kTTErrNone;
+    }
+}
+
+TTErr TTTimeProcess::sendStatusNotification(TTSymbol& notification)
+{
+    TTObject thisObject(this);
+    return sendNotification(notification, thisObject);
 }
 
 #if 0
@@ -690,18 +789,25 @@ TTErr TTTimeProcess::setStartEvent(TTObject& aTimeEvent)
 
 TTErr TTTimeProcess::setEndEvent(TTObject&  aTimeEvent)
 {
-    TTObject thisObject(this);
+    TTObject    thisObject(this);
+    TTValue     none;
     
-    // Stop end event observation
+    // Stop end event observation and detach the process to it
     if (mEndEvent.valid())
+    {
         mEndEvent.unregisterObserverForNotifications(thisObject);
+        mEndEvent.send("ProcessDetach", thisObject, none);
+    }
     
     // Replace the end event by the new one
     mEndEvent = aTimeEvent;
     
-    // Observe end event
+    // Observe end event and attach the process to it
     if (mEndEvent.valid())
+    {
         mEndEvent.registerObserverForNotifications(thisObject);
+        mEndEvent.send("ProcessAttach", thisObject, none);
+    }
     
     return kTTErrNone;
 }
@@ -713,25 +819,41 @@ TTErr TTTimeProcess::setEndEvent(TTObject&  aTimeEvent)
 
 void TTTimeProcessSchedulerCallback(TTPtr object, TTFloat64 position, TTFloat64 date)
 {
-	TTTimeProcessPtr	aTimeProcess = (TTTimeProcessPtr)object;
-    TTValue             none;
+	TTTimeProcessPtr aTimeProcess = (TTTimeProcessPtr)object;
     
-    // use the specific process method
-    if (aTimeProcess->mRunning) {
+    if (aTimeProcess->mRunning)
+    {
+        // check if duration min is reached for the first time
+        if (!aTimeProcess->mDurationMinReached && date >= aTimeProcess->mDurationMin)
+        {
+            aTimeProcess->mDurationMinReached = YES;
+#ifdef TTSCORE_DEBUG
+            TTLogMessage("TTTimeProcessSchedulerCallback %s : reaches duration min (%d)\n", aTimeProcess->mName.c_str(), aTimeProcess->mDurationMin);
+#endif
+            // notify kTTSym_ProcessDurationMinReached observers
+            aTimeProcess->sendStatusNotification(kTTSym_ProcessDurationMinReached);
+        }
         
-        aTimeProcess->Process(TTValue(position, date), none);
-        
-        // the notifications below are useful for network observation purpose for exemple
-        // TODO : shouldn't we limit the sending of those observation to not overcrowed the network ?
+        if (!aTimeProcess->mMute)
+        {
+            TTValue none;
+            
+            // use the specific process method
+            aTimeProcess->Process(TTValue(position, date), none);
+        }
         
         // notify position observers
+        // this is useful for network observation (see in Modular)
         TTAttributePtr	positionAttribute;
         aTimeProcess->findAttribute("position", &positionAttribute);
         positionAttribute->sendNotification(kTTSym_notify, position);
         
         // notify date observers
+        // this is useful for network observation (see in Modular)
         TTAttributePtr	dateAttribute;
         aTimeProcess->findAttribute("date", &dateAttribute);
         dateAttribute->sendNotification(kTTSym_notify, date);
+        
+        // TODO : shouldn't we limit the sending of those observation to not overcrowed the network ?
     }
 }

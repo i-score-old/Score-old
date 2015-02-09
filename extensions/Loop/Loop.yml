@@ -2,8 +2,8 @@
 #  - TIME_PROCESS_DEBUG
 
 sources:
-  - ../TimePluginLib.cpp
-  - source/Automation.cpp
+  - ../TimePluginLib.cpp	
+  - source/Loop.cpp
   
 includes:
   - "."

@@ -70,19 +70,36 @@ TTErr TTCurve::getFunctionParameters(TTValue& value)
     TTUInt32        i, j;
     
     if (mRecorded)
-        return kTTErrGeneric;
-    
-    if (!mFunction.get("curveList", curveList)) {
+    {
+        // return parameters from samples
+        // curveList    : x1 y1 exponential base b1 x2 y2 exponential base b2 . . . . .
+        // value        : x1 y1 b1 x2 y2 b2 . . .
         
-        // edit function value
+        value.resize(mList.getSize() * 3);
+        
+        j = 0;
+        for (mList.begin(); mList.end(); mList.next())
+        {
+            value[j] = mList.current()[0];
+            value[j+1] = mList.current()[1];
+            value[j+2] = TTFloat64(1.);
+            j = j+3;
+        }
+        
+        return kTTErrNone;
+    }
+    
+    if (!mFunction.get("curveList", curveList))
+    {
+        // return parameters from function value
         // curveList    : x1 y1 exponential base b1 x2 y2 exponential base b2 . . . . .
         // value        : x1 y1 b1 x2 y2 b2 . . .
         
         value.resize((curveList.size() / 5) * 3);
         
         j = 0;
-        for (i = 0; i < curveList.size(); i = i+5) {
-            
+        for (i = 0; i < curveList.size(); i = i+5)
+        {
             value[j] = curveList[i];
             value[j+1] = curveList[i+1];
             value[j+2] = curveList[i+4];
@@ -101,9 +118,25 @@ TTErr TTCurve::setFunctionParameters(const TTValue& value)
     TTValue     curveList, none;
     TTUInt32    i, j, duration;
     
-    if (value.size() > 0) {
+    if (mRecorded)
+    {
+        // edit samples from parameters
+        // value        : x1 y1 b1 x2 y2 b2 . . .
+        // sample       : x1 y1 x2 y2 . .
         
-        // edit function curve list
+        mList.clear();
+        
+        for (i = 0; i < value.size(); i = i+3)
+        {
+            append(TTValue(value[i], value[i+1]));
+        }
+        
+        return kTTErrNone;
+    }
+    
+    if (value.size() > 0)
+    {
+        // edit function curve list from parameters
         // value        : x1 y1 b1 x2 y2 b2 . . .
         // curveList    : x1 y1 exponential base b1 x2 y2 exponential base b2 . . . . .
         
@@ -114,12 +147,12 @@ TTErr TTCurve::setFunctionParameters(const TTValue& value)
             return kTTErrGeneric;
         
         j = 0;
-        for (i = 0; i < value.size(); i = i+3) {
-            
+        for (i = 0; i < value.size(); i = i+3)
+        {
             if (value[i].type() == kTypeFloat64 &&
                 value[i+1].type() == kTypeFloat64 &&
-                value[i+2].type() == kTypeFloat64) {
-                
+                value[i+2].type() == kTypeFloat64)
+            {
                 curveList[j] = value[i];
                 curveList[j+1] = value[i+1];
                 curveList[j+2] = TTSymbol("exponential");
@@ -162,13 +195,13 @@ TTErr TTCurve::setSampleRate(const TTValue& value)
     
     if (value.size() == 1) {
         
-        if (value[0].type() == kTypeUInt32) {
-            
+        if (value[0].type() == kTypeUInt32)
+        {
             newSampleRate = value;
             
             // filter repetitions
-            if (newSampleRate != mSampleRate) {
-                
+            if (newSampleRate != mSampleRate)
+            {
                 // retreive the current duration from the old sample rate
                 duration = mList.getSize() * mSampleRate;
                 
@@ -202,8 +235,8 @@ TTErr TTCurve::Sample(const TTValue& inputValue, TTValue& outputValue)
             nbPoints = duration / mSampleRate;
             
             // for a same number of points and already sampled curve
-            if (nbPoints == mList.getSize() && mSampled) {
-                
+            if (nbPoints == mList.getSize() && mSampled) 
+			{
                 // return the samples
                 outputValue.clear();
                 for (mList.begin(); mList.end(); mList.next())
@@ -215,15 +248,15 @@ TTErr TTCurve::Sample(const TTValue& inputValue, TTValue& outputValue)
             }
             
             // for a record based curve
-            if (mRecorded) {
-                
+            if (mRecorded)
+            {
                 TTList newSamples;
                 
-                // get new samples from current samples
+                // get new samples from recorded samples
                 mList.begin();
                 outputValue.clear();
-                for (i = 0; i < nbPoints; i++) {
-                    
+                for (i = 0; i < nbPoints; i++)
+                {
                     x = TTFloat64(i) / TTFloat64(nbPoints);
                     TTCurveNextSampleAt(this, x, y);
                     
@@ -231,20 +264,22 @@ TTErr TTCurve::Sample(const TTValue& inputValue, TTValue& outputValue)
                     outputValue.append(y);
                 }
                 
-                // copy the new samples
+                // but don't resample the recorded curve
+                /*
                 mList.clear();
                 for (newSamples.begin(); newSamples.end(); newSamples.next())
                     mList.append(newSamples.current());
+                 */
             }
             
             // for a function based curve
-            else {
-                
+            else
+            {
                 // get new samples from function
                 mList.clear();
                 outputValue.clear();
-                for (i = 0; i < nbPoints; i++) {
-                    
+                for (i = 0; i < nbPoints; i++)
+                {
                     x = TTFloat64(i) / TTFloat64(nbPoints);
                     TTAudioObjectBasePtr(mFunction.instance())->calculate(x, y);
                     
@@ -319,16 +354,16 @@ TTErr TTCurve::WriteAsXml(const TTValue& inputValue, TTValue& outputValue)
     s = TTString(v[0]);
     xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "sampleRate", BAD_CAST s.data());
     
-    if (!mRecorded) {
-        
+    if (!mRecorded)
+    {
         // Write the function parameters
         getFunctionParameters(v);
         v.toString();
         s = TTString(v[0]);
         xmlTextWriterWriteAttribute((xmlTextWriterPtr)aXmlHandler->mWriter, BAD_CAST "function", BAD_CAST s.data());
     }
-    else {
-        
+    else
+    {
         // Write the samples
         v.clear();
         for (mList.begin(); mList.end(); mList.next()) {
@@ -446,26 +481,27 @@ TTErr TTCurve::ReadFromText(const TTValue& inputValue, TTValue& outputValue)
 
 TTErr TTCurveNextSampleAt(TTCurve* aCurve, TTFloat64& x, TTFloat64& y)
 {
-    if (aCurve->mActive) {
-        
+    if (aCurve->mActive)
+    {
         TTBoolean   found = NO;
         TTErr       err = kTTErrNone;
         
         // while the list doesn't reach the end
-        while (aCurve->mList.end()) {
-                
+        while (aCurve->mList.end()) 
+		{        
             if (TTFloat64(aCurve->mList.current()[0]) < x)
                 aCurve->mList.next();
             
-            else {
+            else
+			{
                 y = aCurve->mList.current()[1];
                 found = YES;
                 break;
             }
         }
         
-        if (found) {
-            
+        if (found)
+        {
             if (!aCurve->mRedundancy && y == aCurve->mLastSample)
                 err = kTTErrGeneric;
             
