@@ -2,9 +2,17 @@ defines:
 #  - TIME_PLUGIN_DEBUG
 
 sources:
-  - ../TimePluginLib.cpp
+  - ../TimePluginLib.cpp	
+  
+  - source/Gecode/customSpace.cpp
+  - source/Gecode/integerVariable.cpp
+  - source/Gecode/linearConstraint.cpp
+  - source/Gecode/searchEngine.cpp
+  - source/Gecode/solver_wrap.cpp
+  - source/Gecode/solver.cpp
   
   - source/Scenario.cpp
+  - source/ScenarioSolver.cpp
 
 includes:
   - "."
@@ -12,6 +20,8 @@ includes:
   - "includes"
   - "../../library/includes"
   - "../../library/tests"
+  
+  - "source/Gecode"
 
   - ../../../Foundation/library/includes
   - ../../../DSP/library/includes
@@ -19,6 +29,9 @@ includes:
   - ../../../Modular/library/PeerObject
   - ../../../Modular/library/ProtocolLib
   - ../../../Modular/library/SchedulerLib
+  
+  # to include gecode solver library
+  - /Library/Frameworks/gecode.framework/Headers
   
   # to use xml file format
   - /usr/include/libxml2
@@ -29,6 +42,12 @@ libraries:
   - MODULAR
   - SCORE
   
+  # to include gecode solver library
+  - /Library/Frameworks/gecode.framework/gecode
+  
   # to link with the xml library
   - mac /usr/lib/libxml2.dylib
-  #- win
+  #- win 
+
+# This project is not available for most architectures (cause of the Gecode 64-bit only dependency)
+arch: "x86_64"
