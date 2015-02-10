@@ -12,6 +12,3 @@ ENV['JAMOMAPROJECT'] = projectName
 
 Dir.chdir "#{glibdir}/../Shared"
 load "build.rb"
-
-Dir.chdir "#{glibdir}"
-load "install.rb"
