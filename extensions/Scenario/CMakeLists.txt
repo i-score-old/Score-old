@@ -10,6 +10,7 @@ endif()
 set(PROJECT_SRCS
 ${CMAKE_CURRENT_SOURCE_DIR}/source/Scenario.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/source/ScenarioSolver.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/../TimePluginLib.cpp
 )
 
 file(GLOB_RECURSE PROJECT_HDRS
@@ -47,12 +48,6 @@ if(NOT SCORE_WITHOUT_GECODE)
 	else()
 		set(EXTRA_LIBS ${GECODE_LIBRARIES})
 	endif()
-endif()
-	
-if(WIN32)
-	set(PROJECT_SRCS ${PROJECT_SRCS}
-		${CMAKE_CURRENT_SOURCE_DIR}/../TimePluginLib.cpp
-		)
 endif()
 
 include_directories("${PROJECT_SOURCE_DIR}/")
